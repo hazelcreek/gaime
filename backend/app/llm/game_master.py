@@ -51,6 +51,7 @@ NPCs Present: {npcs_here}
 7. If an action is impossible, explain why narratively
 8. When player examines an item, use the EXACT text from Item Details above
 9. When player moves, set location to the destination location_id (e.g., "dining_room", not the direction)
+10. NEVER use any special formatting in the narrative - no HTML/XML tags, no markdown (no **bold**, *italic*, etc.), no special syntax. Write plain prose only
 
 ## Response Format
 You MUST respond with valid JSON in this exact format:

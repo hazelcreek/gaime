@@ -43,7 +43,7 @@ async def get_completion(
     messages: list[dict[str, str]],
     model: str | None = None,
     temperature: float = 0.7,
-    max_tokens: int = 1000,
+    max_tokens: int = 2048,
     response_format: dict | None = None
 ) -> str:
     """
@@ -119,6 +119,8 @@ def parse_json_response(response: str) -> dict:
     Parse a JSON response from the LLM.
     Handles markdown code blocks and other formatting.
     """
+    import re
+    
     # Remove markdown code blocks if present
     response = response.strip()
     
@@ -136,13 +138,33 @@ def parse_json_response(response: str) -> dict:
         return json.loads(response)
     except json.JSONDecodeError as e:
         # Try to extract JSON from the response
-        import re
         json_match = re.search(r'\{[\s\S]*\}', response)
         if json_match:
             try:
                 return json.loads(json_match.group())
             except json.JSONDecodeError:
                 pass
+        
+        # Try to extract just the narrative from truncated JSON
+        # Match: "narrative": "..." (handles escaped quotes inside)
+        narrative_match = re.search(r'"narrative"\s*:\s*"((?:[^"\\]|\\.)*)(?:"|$)', response)
+        if narrative_match:
+            narrative = narrative_match.group(1)
+            # Unescape common JSON escapes
+            narrative = narrative.replace('\\n', '\n').replace('\\"', '"').replace('\\\\', '\\')
+            return {
+                "narrative": narrative,
+                "state_changes": {},
+                "hints": []
+            }
+        
+        # Last resort: return response without JSON wrapper if it looks like raw JSON
+        if response.startswith('{'):
+            return {
+                "narrative": "Something went wrong processing the response. Please try again.",
+                "state_changes": {},
+                "hints": []
+            }
         
         # Return a default structure if parsing fails
         return {
