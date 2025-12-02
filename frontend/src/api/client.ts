@@ -11,7 +11,6 @@ export interface GameState {
   inventory: string[];
   stats: {
     health: number;
-    sanity: number;
     [key: string]: number;
   };
   discovered_locations: string[];

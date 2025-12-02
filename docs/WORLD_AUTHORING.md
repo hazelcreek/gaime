@@ -50,13 +50,12 @@ player:
     - journal
   stats:
     health: 100
-    sanity: 100
 
 # Global rules the AI must follow
 constraints:
   - "The basement is locked until the player finds the iron key"
   - "Jenkins will only reveal the family secret after 3 trust-building interactions"
-  - "The ghost only appears when player sanity drops below 70"
+  - "The ghost only appears after examining the nursery"
   - "The curse cannot be broken without all three artifacts"
 
 # Optional: special commands
@@ -218,8 +217,6 @@ ghost_child:
   
   # Appearance conditions
   appears_when:
-    - condition: "sanity_below"
-      value: 70
     - condition: "has_flag"
       value: "examined_nursery"
   
@@ -290,9 +287,6 @@ ancient_amulet:
   # Special properties
   properties:
     artifact: true  # One of three needed to break curse
-    effect:
-      type: "sanity_protection"
-      value: 0.5  # Halves sanity loss when worn
   
   # Interactions
   use_actions:

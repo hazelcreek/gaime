@@ -106,7 +106,7 @@ Respond with JSON only:
   "state_changes": {{
     "inventory": {{ "add": [], "remove": [] }},
     "location": null or "new_location",
-    "stats": {{ "health": 0, "sanity": 0 }},
+    "stats": {{ "health": 0 }},
     "flags": {{ "flag_name": true }}
   }},
   "hints": []

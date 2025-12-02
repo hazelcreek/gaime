@@ -91,8 +91,6 @@ ghost_child:
     - "Remembers the night of the ritual"
   
   appears_when:
-    - condition: "sanity_below"
-      value: 70
     - condition: "has_flag"
       value: "examined_nursery"
   

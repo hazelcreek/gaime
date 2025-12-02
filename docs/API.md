@@ -97,8 +97,7 @@ POST /api/game/new
     "current_location": "entrance_hall",
     "inventory": ["pocket_watch", "journal"],
     "stats": {
-      "health": 100,
-      "sanity": 100
+      "health": 100
     },
     "discovered_locations": ["entrance_hall"],
     "flags": {},
@@ -144,8 +143,7 @@ POST /api/game/action
     "current_location": "entrance_hall",
     "inventory": ["pocket_watch", "journal"],
     "stats": {
-      "health": 100,
-      "sanity": 100
+      "health": 100
     },
     "discovered_locations": ["entrance_hall"],
     "flags": {},
@@ -178,8 +176,7 @@ GET /api/game/state/{session_id}
     "current_location": "entrance_hall",
     "inventory": ["pocket_watch", "journal"],
     "stats": {
-      "health": 100,
-      "sanity": 100
+      "health": 100
     },
     "discovered_locations": ["entrance_hall"],
     "flags": {},
@@ -277,7 +274,6 @@ interface GameState {
   inventory: string[];
   stats: {
     health: number;
-    sanity: number;
     [key: string]: number;
   };
   discovered_locations: string[];

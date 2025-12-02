@@ -230,7 +230,7 @@ class GameState:
     player_name: str
     current_location: str
     inventory: list[str]
-    stats: dict[str, int]  # health, sanity, etc.
+    stats: dict[str, int]  # health, etc.
     discovered_locations: list[str]
     flags: dict[str, bool]  # story progress
     turn_count: int

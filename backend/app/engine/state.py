@@ -76,10 +76,7 @@ class GameStateManager:
             return True
         
         for condition in npc.appears_when:
-            if condition.condition == "sanity_below":
-                if self._state.stats.sanity >= condition.value:
-                    return False
-            elif condition.condition == "has_flag":
+            if condition.condition == "has_flag":
                 if not self._state.flags.get(str(condition.value), False):
                     return False
             elif condition.condition == "trust_above":

@@ -24,6 +24,7 @@ interface GameContextValue {
   startNewGame: (worldId?: string, playerName?: string) => Promise<void>;
   sendAction: (action: string) => Promise<void>;
   clearError: () => void;
+  resetGame: () => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -129,6 +130,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setError(null);
   }, []);
 
+  // Reset game and return to start screen
+  const resetGame = useCallback(() => {
+    setSessionId(null);
+    setGameState(null);
+    setNarrative([]);
+    setError(null);
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
+
   return (
     <GameContext.Provider value={{
       sessionId,
@@ -139,6 +149,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       startNewGame,
       sendAction,
       clearError,
+      resetGame,
     }}>
       {children}
     </GameContext.Provider>

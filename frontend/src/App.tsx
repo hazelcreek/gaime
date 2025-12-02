@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { GameProvider } from './hooks/useGame'
+import { GameProvider, useGame } from './hooks/useGame'
 import Terminal from './components/Terminal'
 import Sidebar from './components/Sidebar'
 import CommandInput from './components/CommandInput'
@@ -27,38 +27,56 @@ function App() {
 
   return (
     <GameProvider>
-      <div className="min-h-screen bg-terminal-bg flex">
-        {/* Main game area */}
-        <div className="flex-1 flex flex-col max-w-4xl mx-auto p-4">
-          {/* Header */}
-          <header className="mb-4 text-center">
-            <h1 className="font-display text-3xl text-terminal-accent tracking-wider">
-              GAIME
-            </h1>
-            <p className="text-terminal-dim text-sm mt-1">
-              AI-Powered Text Adventure
-            </p>
+      <GameContent setView={setView} />
+    </GameProvider>
+  )
+}
+
+function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void }) {
+  const { sessionId, resetGame } = useGame();
+  
+  return (
+    <div className="min-h-screen bg-terminal-bg flex">
+      {/* Main game area */}
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto p-4">
+        {/* Header */}
+        <header className="mb-4 text-center">
+          <h1 className="font-display text-3xl text-terminal-accent tracking-wider">
+            GAIME
+          </h1>
+          <p className="text-terminal-dim text-sm mt-1">
+            AI-Powered Text Adventure
+          </p>
+          <div className="mt-2 flex justify-center gap-4">
+            {sessionId && (
+              <button
+                onClick={resetGame}
+                className="text-xs text-terminal-dim hover:text-terminal-error transition-colors"
+              >
+                ← Return to Start
+              </button>
+            )}
             <button
               onClick={() => setView('builder')}
-              className="mt-2 text-xs text-terminal-dim hover:text-terminal-accent transition-colors"
+              className="text-xs text-terminal-dim hover:text-terminal-accent transition-colors"
             >
               Open World Builder →
             </button>
-          </header>
-          
-          {/* Terminal display */}
-          <div className="flex-1 flex gap-4 min-h-0 items-start">
-            <div className="flex-1 flex flex-col min-w-0">
-              <Terminal />
-              <CommandInput />
-            </div>
-            
-            {/* Sidebar */}
-            <Sidebar />
           </div>
+        </header>
+        
+        {/* Terminal display */}
+        <div className="flex-1 flex gap-4 min-h-0 items-start">
+          <div className="flex-1 flex flex-col min-w-0">
+            <Terminal />
+            <CommandInput />
+          </div>
+          
+          {/* Sidebar */}
+          <Sidebar />
         </div>
       </div>
-    </GameProvider>
+    </div>
   )
 }
 
