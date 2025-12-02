@@ -114,12 +114,16 @@ def _configure_api_keys():
         os.environ["OLLAMA_API_BASE"] = base_url
 
 
-def parse_json_response(response: str) -> dict:
+def parse_json_response(response: str | None) -> dict:
     """
     Parse a JSON response from the LLM.
     Handles markdown code blocks and other formatting.
     """
     import re
+    
+    # Handle None or empty response
+    if response is None or not response.strip():
+        raise ValueError("LLM returned empty response. Please try again.")
     
     # Remove markdown code blocks if present
     response = response.strip()
