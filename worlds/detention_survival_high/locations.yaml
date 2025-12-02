@@ -1,0 +1,97 @@
+main_hallway:
+  name: "The Main Hallway"
+  atmosphere: |
+    The linoleum floor stretches out endlessly, reflecting the orange glow of the late afternoon sun streaming through the trophy case glass. It's unnervingly quiet, save for the hum of the vending machine. The lockers line the walls like silent metal soldiers.
+  exits:
+    north: principal_office
+    east: cafeteria
+    west: science_lab
+    south: gymnasium
+  items:
+    - hall_pass
+  npcs: []
+  details:
+    trophy_case: "Full of participation trophies from 1998."
+    lockers: "Most are locked, but one (number 404) is slightly ajar."
+
+principal_office:
+  name: "Principal Skinner's Office"
+  atmosphere: |
+    The air here smells of stale coffee and bureaucratic dread. A massive mahogany desk dominates the room. Behind it, a portrait of the school mascot (a confused badger) stares judgingly at you.
+  exits:
+    south: main_hallway
+  items:
+    - rubber_stamp
+  npcs:
+    - principal_skinner
+  details:
+    desk: "Covered in confiscation forms."
+    portrait: "The eyes seem to follow you."
+
+cafeteria:
+  name: "The Cafeteria"
+  atmosphere: |
+    Tables are folded up against the wall. The lingering scent of mystery meat and bleach hangs heavy. Dust motes dance in the light beams hitting the serving station.
+  exits:
+    west: main_hallway
+    north: kitchen
+  items:
+    - spatular_sword
+  npcs:
+    - lunch_lady_doris
+  details:
+    serving_station: "Currently serving nothing but disappointment."
+    floor: "Sticky. It's always sticky."
+
+science_lab:
+  name: "The Science Lab"
+  atmosphere: |
+    Bunsen burners sit cold on black countertops. A skeleton model in the corner is wearing a tie-dye t-shirt. The periodic table on the wall has several elements spelled wrong.
+  exits:
+    east: main_hallway
+  items:
+    - baking_soda
+  npcs:
+    - nerd_neil
+  details:
+    skeleton: "His name tag says 'Mr. Bones'."
+    blackboard: "Someone has drawn a complex diagram of a spitball trajectory."
+
+gymnasium:
+  name: "The Gymnasium"
+  atmosphere: |
+    The squeak of sneakers is ghosted into the hardwood floor. It smells of sweat and rubber. The bleachers are retracted, creating a cavernous echo whenever you move.
+  exits:
+    north: main_hallway
+    east: locker_room
+  items:
+    - dodgeball
+  npcs: []
+  details:
+    hoop: "Just out of reach for a slam dunk."
+    bleachers: "Graffiti underneath says 'School Rulez' ironically."
+
+locker_room:
+  name: "The Locker Room"
+  atmosphere: |
+    Damp, dark, and smelling of Axe body spray. A single shower head drips rhythmically: drip... drip... drip. It's the scariest place in the school.
+  exits:
+    west: gymnasium
+  items:
+    - janitor_keys
+  npcs: []
+  details:
+    shower: "It looks like it hasn't been cleaned since the 80s."
+    bench: "A forgotten towel lies here."
+
+kitchen:
+  name: "The Kitchen"
+  atmosphere: |
+    Behind the serving line. Industrial sized mixers and ovens loom like metal giants. It's surprisingly clean, except for a pile of unfinished tater tots.
+  exits:
+    south: cafeteria
+  items:
+    - vinegar
+  npcs: []
+  details:
+    freezer: "Locked tight. Probably full of ice cream sandwiches."

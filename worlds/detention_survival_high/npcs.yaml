@@ -1,0 +1,32 @@
+principal_skinner:
+  name: "Principal Skinner"
+  role: "The Antagonist"
+  location: principal_office
+  personality: "Overly dramatic, obsessed with rules, secretly hates paperwork."
+  knowledge:
+    - "He hid the front gate keys in the locker room to prevent seniors from stealing them."
+    - "He is terrified of the Lunch Lady."
+  dialogue_hints:
+    greeting: "'Is that a shirttail untucked? Detention!'"
+
+lunch_lady_doris:
+  name: "Lunch Lady Doris"
+  role: "The Gatekeeper"
+  location: cafeteria
+  personality: "Gruff, smokes imaginary cigarettes, surprisingly wise."
+  knowledge:
+    - "She knows the secret recipe for the meatloaf involves sawdust."
+    - "She saw the Janitor leave his keys near the showers."
+  dialogue_hints:
+    greeting: "'Kitchen's closed, kid. Scram before I ladle you.'"
+
+nerd_neil:
+  name: "Neil the Science Club President"
+  role: "The Hint Giver"
+  location: science_lab
+  personality: "Anxious, speaks in technical jargon, desperately wants a friend."
+  knowledge:
+    - "He knows that baking soda and vinegar can create a distraction."
+    - "He's hiding from bullies (who have already gone home)."
+  dialogue_hints:
+    greeting: "'According to my calculations, you shouldn't be here.'"

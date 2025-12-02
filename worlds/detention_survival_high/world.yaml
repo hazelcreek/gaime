@@ -1,0 +1,28 @@
+name: "Detention Survival High"
+theme: "High School Comedy"
+tone: "Awkward, Rebellious, Nostalgic"
+
+premise: |
+  It's 4:00 PM on a Friday. The final bell rang an hour ago, but you're still here. Why? Because Principal Skinner locked the front gates to keep skateboarders out, and you forgot your backpack in the gym. Now you need to navigate the uncanny silence of an empty high school, avoid the overzealous hall monitor who thinks school never ends, and find a way to escape before the janitor locks the building down for the weekend.
+
+player:
+  starting_location: main_hallway
+  starting_inventory:
+    - chewed_gum
+  stats:
+    morale: 100
+    detention_risk: 0
+
+constraints:
+  - "You cannot leave the school grounds until you find the exit key or a clever alternative route."
+  - "If your 'detention_risk' gets too high from getting caught doing mischief, you lose."
+  - "Running in the halls is strictly prohibited (unless no one is watching)."
+
+commands:
+  help: "Show available commands"
+  look: "Examine your surroundings"
+  inventory: "Check your backpack contents"
+  go: "Move (north, south, east, west, up, down)"
+  talk: "Speak to someone"
+  take: "Pick up an item"
+  use: "Use an item on something"
