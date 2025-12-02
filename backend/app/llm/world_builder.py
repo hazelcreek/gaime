@@ -23,30 +23,36 @@ Generate a cohesive world with interconnected locations, interesting NPCs, and m
 {prompt}
 
 ## Output Format
-Generate valid YAML for four files. Each section should be complete and self-consistent.
+You MUST respond with valid JSON containing four YAML strings. Follow this EXACT structure:
 
-1. WORLD: Overall world definition
-2. LOCATIONS: All game locations with exits, atmosphere, items
-3. NPCS: Characters with personalities and knowledge
-4. ITEMS: Objects with descriptions and uses
-
-Respond with JSON containing these four YAML strings:
+```json
 {{
   "world_id": "snake-case-world-name",
-  "world_yaml": "name: ...\\ntheme: ...\\n...",
-  "locations_yaml": "location_id:\\n  name: ...\\n...",
-  "npcs_yaml": "npc_id:\\n  name: ...\\n...",
-  "items_yaml": "item_id:\\n  name: ...\\n..."
+  "world_yaml": "name: \\"World Name\\"\\ntheme: \\"theme here\\"\\ntone: \\"tone here\\"\\n\\npremise: |\\n  Description of the world premise...\\n\\nplayer:\\n  starting_location: first_location_id\\n  starting_inventory:\\n    - item_id\\n  stats:\\n    health: 100\\n\\nconstraints:\\n  - \\"Constraint 1\\"\\n  - \\"Constraint 2\\"\\n\\ncommands:\\n  help: \\"Display available commands\\"\\n  look: \\"Examine surroundings\\"\\n  inventory: \\"Check inventory\\"\\n  go: \\"Move in a direction\\"",
+  "locations_yaml": "location_id:\\n  name: \\"Location Name\\"\\n  atmosphere: |\\n    Atmospheric description...\\n  exits:\\n    north: other_location_id\\n  items:\\n    - item_id\\n  npcs: []\\n  details:\\n    thing: \\"Description of thing\\"",
+  "npcs_yaml": "npc_id:\\n  name: \\"NPC Name\\"\\n  role: \\"Their role\\"\\n  location: location_id\\n  personality: \\"Their personality\\"\\n  knowledge:\\n    - \\"Something they know\\"\\n  dialogue_hints:\\n    greeting: \\"How they greet\\"",
+  "items_yaml": "item_id:\\n  name: \\"Item Name\\"\\n  portable: true\\n  examine: |\\n    Description when examined...\\n  found_description: \\"How it appears in the room\\"\\n  take_description: \\"Message when taken\\""
 }}
+```
+
+CRITICAL RULES FOR JSON OUTPUT:
+1. Use \\n for newlines inside YAML strings
+2. Escape all quotes inside YAML with backslash: \\"
+3. Use | for multi-line YAML text blocks
+4. Ensure all location exits reference valid location IDs
+5. Ensure player starting_location matches a defined location
+6. Ensure player starting_inventory items are defined in items_yaml
+7. Each YAML string must be valid YAML when newlines are unescaped
 
 ## Guidelines
-- Use snake_case for all IDs
-- Make locations interconnected (exits should match)
+- Use snake_case for all IDs (e.g., dark_forest, old_hermit, rusty_key)
+- Make locations interconnected (exits should match bidirectionally)
 - Give NPCs distinct personalities and useful knowledge
 - Include items that serve puzzle or narrative purposes
-- Add atmosphere descriptions for immersion
-- Define clear constraints for the game
+- Add rich atmosphere descriptions for immersion
+- Define 3-5 clear constraints/rules for the game
 - Include at least one hidden secret or puzzle
+- Create a compelling premise that hooks the player
 '''
 
 
@@ -78,7 +84,7 @@ class WorldBuilder:
         messages = [
             {
                 "role": "system",
-                "content": "You are an expert game world designer. Create detailed, immersive game worlds."
+                "content": "You are an expert game world designer. Create detailed, immersive game worlds. Always respond with valid JSON containing YAML strings as specified in the prompt."
             },
             {"role": "user", "content": user_prompt}
         ]
@@ -91,19 +97,35 @@ class WorldBuilder:
         
         parsed = parse_json_response(response)
         
-        # Validate the response has required fields
+        # Validate the response has required fields with actual content
         required_fields = ["world_id", "world_yaml", "locations_yaml", "npcs_yaml", "items_yaml"]
+        missing_fields = []
+        empty_fields = []
+        
         for field in required_fields:
             if field not in parsed:
-                parsed[field] = ""
+                missing_fields.append(field)
+            elif not parsed[field] or (isinstance(parsed[field], str) and not parsed[field].strip()):
+                empty_fields.append(field)
         
-        # Validate YAML is parseable
+        if missing_fields:
+            raise ValueError(f"World generation failed: Missing required fields: {', '.join(missing_fields)}. The AI did not return a valid world structure. Please try again.")
+        
+        if empty_fields:
+            raise ValueError(f"World generation failed: Empty content in fields: {', '.join(empty_fields)}. The AI returned incomplete content. Please try again with a more detailed description.")
+        
+        # Validate YAML is parseable and has content
+        yaml_errors = []
         for field in ["world_yaml", "locations_yaml", "npcs_yaml", "items_yaml"]:
             try:
-                yaml.safe_load(parsed[field])
-            except yaml.YAMLError:
-                # If invalid, wrap in a basic structure
-                parsed[field] = f"# Generated content (may need editing)\n{parsed[field]}"
+                content = yaml.safe_load(parsed[field])
+                if content is None:
+                    yaml_errors.append(f"{field} parsed to empty content")
+            except yaml.YAMLError as e:
+                yaml_errors.append(f"{field}: {str(e)[:100]}")
+        
+        if yaml_errors:
+            raise ValueError(f"World generation produced invalid YAML: {'; '.join(yaml_errors)}. Please try again.")
         
         parsed["message"] = "World generated successfully. Review and edit as needed."
         return parsed

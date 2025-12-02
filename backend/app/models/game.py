@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 class GameStats(BaseModel):
     """Player statistics"""
     health: int = 100
-    sanity: int = 100
     
     class Config:
         extra = "allow"  # Allow additional stats

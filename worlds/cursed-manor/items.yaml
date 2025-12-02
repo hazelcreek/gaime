@@ -160,9 +160,6 @@ thornwood_amulet:
     requires_flag: examined_drawings
   properties:
     artifact: true
-    effect:
-      type: "sanity_protection"
-      value: 0.5
   use_actions:
     wear:
       description: "You place the amulet around your neck. The humming grows stronger, and you feel a strange comfort"

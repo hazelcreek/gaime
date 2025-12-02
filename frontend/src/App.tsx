@@ -47,7 +47,7 @@ function App() {
           </header>
           
           {/* Terminal display */}
-          <div className="flex-1 flex gap-4 min-h-0">
+          <div className="flex-1 flex gap-4 min-h-0 items-start">
             <div className="flex-1 flex flex-col min-w-0">
               <Terminal />
               <CommandInput />

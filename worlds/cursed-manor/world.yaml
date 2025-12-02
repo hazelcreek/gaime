@@ -19,12 +19,10 @@ player:
     - journal
   stats:
     health: 100
-    sanity: 100
 
 constraints:
   - "The basement door is locked and requires the iron_key to open"
   - "Jenkins the butler will only reveal family secrets after the player has had 3 positive interactions with him"
-  - "The ghost_child only appears when player sanity is below 70"
   - "The curse cannot be broken without finding all three artifacts: the amulet, the dagger, and the grimoire"
   - "Secret passages can only be used after they are discovered"
   - "The player cannot leave the manor until the curse is broken or dawn arrives"

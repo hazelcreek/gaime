@@ -12,7 +12,7 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-64 flex-shrink-0 space-y-4">
+    <aside className="w-64 flex-shrink-0 space-y-4 sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto">
       {/* Location */}
       <div className="bg-terminal-surface border border-terminal-border rounded-lg p-4">
         <h3 className="text-terminal-dim text-xs uppercase tracking-wider mb-2">Location</h3>
@@ -30,12 +30,6 @@ export default function Sidebar() {
             value={gameState?.stats?.health ?? 100} 
             max={100} 
             color="terminal-success" 
-          />
-          <StatBar 
-            label="Sanity" 
-            value={gameState?.stats?.sanity ?? 100} 
-            max={100} 
-            color="terminal-highlight" 
           />
         </div>
       </div>

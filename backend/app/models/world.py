@@ -9,7 +9,7 @@ class PlayerSetup(BaseModel):
     """Initial player configuration"""
     starting_location: str
     starting_inventory: list[str] = Field(default_factory=list)
-    stats: dict[str, int] = Field(default_factory=lambda: {"health": 100, "sanity": 100})
+    stats: dict[str, int] = Field(default_factory=lambda: {"health": 100})
 
 
 class World(BaseModel):

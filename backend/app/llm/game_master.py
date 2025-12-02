@@ -22,7 +22,6 @@ Tone: {tone}
 - Location: {current_location} ({location_name})
 - Inventory: {inventory}
 - Health: {health}/100
-- Sanity: {sanity}/100
 - Discovered Areas: {discovered}
 - Story Progress: {flags}
 
@@ -32,6 +31,9 @@ Tone: {tone}
 Available Exits: {exits}
 Items Here: {items_here}
 NPCs Present: {npcs_here}
+
+## Item Details (USE THESE EXACT DESCRIPTIONS when player examines items)
+{item_details}
 
 ## World Constraints (MUST follow these rules)
 {constraints}
@@ -47,6 +49,8 @@ NPCs Present: {npcs_here}
 5. Track and update game state through your response
 6. Never break the fourth wall or mention game mechanics directly
 7. If an action is impossible, explain why narratively
+8. When player examines an item, use the EXACT text from Item Details above
+9. When player moves, set location to the destination location_id (e.g., "dining_room", not the direction)
 
 ## Response Format
 You MUST respond with valid JSON in this exact format:
@@ -55,7 +59,7 @@ You MUST respond with valid JSON in this exact format:
   "state_changes": {{
     "inventory": {{ "add": [], "remove": [] }},
     "location": null,
-    "stats": {{ "health": 0, "sanity": 0 }},
+    "stats": {{ "health": 0 }},
     "flags": {{}},
     "discovered_locations": []
   }},
@@ -99,11 +103,13 @@ class GameMaster:
         
         # Get items at location
         items_here = []
+        location_item_ids = []
         if location:
             for item_id in location.items:
                 item = self.world_data.get_item(item_id)
                 if item and not item.hidden:
                     items_here.append(item.name)
+                    location_item_ids.append(item_id)
         
         # Get NPCs present
         npcs_here = []
@@ -119,6 +125,22 @@ class GameMaster:
             item = self.world_data.get_item(item_id)
             inventory_names.append(item.name if item else item_id)
         
+        # Build item details with examine content for items in inventory and at location
+        item_details = []
+        all_item_ids = list(set(state.inventory + location_item_ids))
+        for item_id in all_item_ids:
+            item = self.world_data.get_item(item_id)
+            if item and item.examine:
+                item_details.append(f"- {item.name} ({item_id}):\n{item.examine.strip()}")
+        
+        # Format exits with destination location IDs
+        exits_formatted = []
+        if location:
+            for direction, dest_id in location.exits.items():
+                dest_loc = self.world_data.get_location(dest_id)
+                dest_name = dest_loc.name if dest_loc else dest_id
+                exits_formatted.append(f"{direction} -> {dest_id} ({dest_name})")
+        
         return SYSTEM_PROMPT.format(
             world_name=world.name,
             theme=world.theme,
@@ -126,14 +148,14 @@ class GameMaster:
             current_location=state.current_location,
             location_name=location.name if location else "Unknown",
             location_atmosphere=location.atmosphere if location else "",
-            exits=", ".join(location.exits.keys()) if location else "none",
+            exits=", ".join(exits_formatted) if exits_formatted else "none",
             inventory=", ".join(inventory_names) if inventory_names else "nothing",
             health=state.stats.health,
-            sanity=state.stats.sanity,
             discovered=", ".join(state.discovered_locations),
             flags=", ".join(f"{k}={v}" for k, v in state.flags.items()) if state.flags else "none",
             items_here=", ".join(items_here) if items_here else "nothing visible",
             npcs_here=", ".join(npcs_here) if npcs_here else "no one",
+            item_details="\n\n".join(item_details) if item_details else "No items available to examine",
             constraints="\n".join(f"- {c}" for c in world.constraints),
             npc_knowledge="\n".join(npc_knowledge) if npc_knowledge else "No NPCs present"
         )

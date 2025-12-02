@@ -40,8 +40,12 @@ async def generate_world(request: GenerateWorldRequest):
             num_npcs=request.num_npcs
         )
         return result
+    except ValueError as e:
+        # Validation errors from world builder
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # Unexpected errors
+        raise HTTPException(status_code=500, detail=f"World generation failed: {str(e)}. Please try again.")
 
 
 @router.post("/save/{world_id}")
