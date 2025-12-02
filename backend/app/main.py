@@ -2,10 +2,23 @@
 GAIME Backend - FastAPI Application Entry Point
 """
 
+import logging
+import sys
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import game, builder
+
+# Configure logging to show INFO level and above
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+
+# Enable DEBUG for our LLM modules to get detailed output
+logging.getLogger("app.llm").setLevel(logging.DEBUG)
 
 app = FastAPI(
     title="GAIME",

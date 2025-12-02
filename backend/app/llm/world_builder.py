@@ -2,12 +2,14 @@
 World Builder - AI-assisted world generation from prompts
 """
 
-import os
+import logging
 from pathlib import Path
 
 import yaml
 
 from app.llm.client import get_completion, parse_json_response
+
+logger = logging.getLogger(__name__)
 
 
 WORLD_BUILDER_PROMPT = '''You are a game world designer. Create a complete text adventure game world based on the user's description.
@@ -74,6 +76,9 @@ class WorldBuilder:
     ) -> dict:
         """Generate a new world from a prompt"""
         
+        logger.info(f"Generating world: theme={theme}, locations={num_locations}, npcs={num_npcs}")
+        logger.debug(f"User prompt: {prompt[:100]}..." if len(prompt) > 100 else f"User prompt: {prompt}")
+        
         user_prompt = WORLD_BUILDER_PROMPT.format(
             theme=theme or "to be determined from description",
             num_locations=num_locations,
@@ -89,13 +94,25 @@ class WorldBuilder:
             {"role": "user", "content": user_prompt}
         ]
         
+        logger.info("Calling LLM for world generation...")
+        # Use gemini-3-pro-preview for world building (has thinking/reasoning)
+        # Need higher max_tokens to account for both thinking + output tokens
         response = await get_completion(
             messages,
+            model="gemini/gemini-3-pro-preview",
             temperature=0.8,  # More creative for world building
-            max_tokens=4000   # Worlds need more tokens
+            max_tokens=16384  # High limit for thinking tokens + output
         )
         
-        parsed = parse_json_response(response)
+        logger.info(f"LLM response received, length: {len(response) if response else 0}")
+        if response:
+            logger.debug(f"Raw response preview: {response[:300]}..." if len(response) > 300 else f"Raw response: {response}")
+        else:
+            logger.error("LLM returned None or empty response")
+        
+        # Use strict mode to get clear errors instead of game-master fallbacks
+        parsed = parse_json_response(response, strict=True)
+        logger.info(f"JSON parsed successfully, keys: {list(parsed.keys())}")
         
         # Validate the response has required fields with actual content
         required_fields = ["world_id", "world_yaml", "locations_yaml", "npcs_yaml", "items_yaml"]
