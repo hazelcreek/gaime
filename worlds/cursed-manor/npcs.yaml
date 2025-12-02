@@ -1,0 +1,148 @@
+butler_jenkins:
+  name: "Jenkins"
+  role: "The elderly butler, last remaining servant of the manor"
+  location: dining_room
+  
+  appearance: |
+    An elderly man, perhaps seventy, impeccably dressed in formal butler's
+    attire that has seen better days. His face is gaunt and pale, with
+    dark circles under watchful, haunted eyes. His hands tremble slightly
+    when he thinks no one is looking. Despite his age, he moves with
+    practiced grace born of decades of service.
+  
+  personality:
+    traits:
+      - formal
+      - secretive
+      - guilt-ridden
+      - protective
+      - loyal to a fault
+    speech_style: |
+      Speaks in formal Victorian English, using proper titles and 
+      indirect language. Often deflects direct questions with tangents
+      about the manor's history or offers of tea. When pressed, speaks
+      in cryptic hints rather than direct answers.
+    quirks:
+      - "Glances nervously at shadows"
+      - "Straightens things that don't need straightening"
+      - "Becomes distant when the children are mentioned"
+      - "Checks his pocket watch obsessively"
+  
+  knowledge:
+    - "Knows the full truth about the curse and the family tragedy"
+    - "Was present the night of the ritual that killed the children"
+    - "Believes he failed to protect the children and carries immense guilt"
+    - "Knows where all three artifacts are hidden"
+    - "Knows the curse can only be broken by returning the artifacts to the ritual chamber"
+    - "Knows the master and mistress died trying to break the curse themselves"
+  
+  dialogue_rules:
+    - "Never directly answers questions about the curse or tragedy"
+    - "Refers to 'that terrible night' but won't elaborate initially"
+    - "Shows visible distress when the children are mentioned"
+    - "Warms to players who speak of helping or freeing the spirits"
+    - "Eventually reveals truth if player builds enough trust"
+  
+  trust:
+    initial: 0
+    threshold: 3
+    build_actions:
+      - "Show kindness or sympathy"
+      - "Mention wanting to help the spirits"
+      - "Find evidence of what happened"
+      - "Treat him with respect, not suspicion"
+
+ghost_child:
+  name: "The Whisper"
+  role: "Spirit of the youngest child, Emily"
+  
+  locations:
+    - nursery
+    - upper_landing
+    - library
+    - sitting_room
+  
+  appearance: |
+    A translucent figure of a young girl, perhaps eight years old,
+    dressed in a white nightgown. Her form flickers like candlelight,
+    fading in and out of visibility. Her face is sad but not frightening.
+    She points and gestures but cannot speak - her voice was taken
+    by the ritual.
+  
+  personality:
+    traits:
+      - innocent
+      - helpful
+      - sad
+      - lonely
+    speech_style: |
+      Cannot speak - communicates only through gestures, pointing,
+      and leading. Sometimes writes in the dust or frost on windows.
+    quirks:
+      - "Points insistently toward clues"
+      - "Disappears if approached too quickly"
+      - "Shows fear near the ritual chamber"
+      - "Seems to recognize kindness"
+  
+  knowledge:
+    - "Knows where the artifacts are hidden"
+    - "Knows her siblings' spirits are trapped"
+    - "Wants to be freed and to free her siblings"
+    - "Remembers the night of the ritual"
+  
+  appears_when:
+    - condition: "sanity_below"
+      value: 70
+    - condition: "has_flag"
+      value: "examined_nursery"
+  
+  behavior: |
+    Appears at the edge of vision, beckoning the player toward
+    important discoveries. Points to hidden items, leads to secret
+    passages, and warns of danger. Shows distress if player moves
+    toward the ritual chamber without all artifacts.
+
+lady_margaret:
+  name: "Lady Margaret"
+  role: "Ghost of the lady of the house"
+  
+  locations:
+    - master_bedroom
+  
+  appearance: |
+    A beautiful woman in her thirties, dressed in a flowing white
+    nightgown stained with what might be blood. Her expression shifts
+    between grief, rage, and desperate hope. Unlike the child, she
+    can speak, but her voice echoes strangely.
+  
+  personality:
+    traits:
+      - grieving
+      - desperate
+      - protective
+      - dangerous
+    speech_style: |
+      Speaks in fragmented sentences, mixing past and present.
+      Sometimes lucid and helpful, sometimes lost in memories
+      of the night everything went wrong.
+    quirks:
+      - "Reaches for children who aren't there"
+      - "Sometimes mistakes the player for her husband"
+      - "Alternates between gratitude and suspicion"
+  
+  knowledge:
+    - "Knows her husband performed the ritual"
+    - "Knows where she hid the dagger to prevent the ritual's completion"
+    - "Knows the curse can be broken but fears trying"
+    - "Remembers dying while trying to stop her husband"
+  
+  dialogue_rules:
+    - "Speaks cryptically about 'Edmund's folly'"
+    - "Begs the player to save her children"
+    - "Warns against completing the ritual"
+    - "May provide the dagger's location if convinced player means well"
+  
+  appears_when:
+    - condition: "has_flag"
+      value: "saw_ghost_in_mirror"
+

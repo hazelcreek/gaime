@@ -1,0 +1,292 @@
+entrance_hall:
+  name: "Entrance Hall"
+  atmosphere: |
+    A grand but decayed entrance hall greets you. A crystal chandelier
+    hangs dark and dusty overhead, its candles long since melted away.
+    Faded portraits line the wood-paneled walls, their subjects watching
+    with painted eyes that seem to follow your movement. The air smells
+    of old wood, dust, and something faintly metallic. Rain hammers
+    against the windows, and occasional lightning illuminates the decay.
+  exits:
+    north: library
+    east: dining_room
+    west: sitting_room
+    up: upper_landing
+  items:
+    - old_letter
+    - candlestick
+  npcs: []
+  details:
+    portraits: "Five family portraits hang on the walls - a stern father, a beautiful mother, and three children of varying ages"
+    chandelier: "The chandelier must have been magnificent once. Now it hangs crooked, crystals clouded with decades of dust"
+    floor: "Black and white marble tiles, cracked and worn by countless footsteps"
+    door: "The front door is heavy oak, reinforced with iron. The storm rages outside"
+  interactions:
+    examine_portraits:
+      triggers:
+        - "examine portraits"
+        - "look at portraits"
+        - "study paintings"
+        - "look at paintings"
+      narrative_hint: "Upon closer inspection, you notice one portrait - the youngest child - has been slashed across the face"
+      sets_flag: examined_portraits
+
+library:
+  name: "The Library"
+  atmosphere: |
+    Floor-to-ceiling bookshelves stuffed with ancient tomes line every wall.
+    The smell of aged paper and leather fills the air. A cold draft whispers
+    through the room, making the pages of an open book flutter. Moonlight
+    filters through a grimy window, illuminating dust motes that drift like
+    snow. A massive oak desk dominates the center, covered in papers.
+  exits:
+    south: entrance_hall
+  items:
+    - dusty_tome
+    - reading_glasses
+  npcs: []
+  details:
+    books: "Thousands of books on every subject - history, science, and disturbingly many on the occult"
+    desk: "The desk is covered in handwritten notes, many featuring strange symbols"
+    window: "The window looks out onto an overgrown garden, barely visible through rain and grime"
+    red_book: "One book on the middle shelf stands out - bound in red leather, it protrudes slightly"
+  interactions:
+    pull_red_book:
+      triggers:
+        - "pull red book"
+        - "take red book"
+        - "examine red book"
+        - "pull the red book"
+      narrative_hint: "As you pull the red book, you hear a mechanical click. A section of bookshelf swings inward, revealing a dark passage!"
+      reveals_exit: secret_passage
+      sets_flag: found_secret_passage
+    read_notes:
+      triggers:
+        - "read notes"
+        - "examine notes"
+        - "look at papers"
+        - "study papers"
+      narrative_hint: "The notes describe a ritual to 'bind what cannot die' - they mention three artifacts needed for the binding"
+      sets_flag: read_ritual_notes
+
+secret_passage:
+  name: "Secret Passage"
+  atmosphere: |
+    A narrow stone corridor stretches into darkness beyond the bookshelf.
+    Cobwebs hang like curtains, and the walls are cold, damp stone - far
+    older than the manor above. The air is stale and carries a faint
+    scent of earth and something else... incense, perhaps, or old blood.
+  exits:
+    back: library
+    down: ritual_chamber
+  items: []
+  npcs: []
+  requires:
+    flag: found_secret_passage
+  details:
+    walls: "The stones are ancient, covered in moss and strange carved symbols"
+    cobwebs: "Thick cobwebs suggest no one has passed this way in years"
+    symbols: "The carved symbols look like a language you don't recognize"
+
+ritual_chamber:
+  name: "Ritual Chamber"
+  atmosphere: |
+    A circular chamber carved from the living rock. Strange symbols are
+    painted on the floor in what looks disturbingly like dried blood.
+    Three pedestals stand at points around the circle, two of them empty.
+    Candles line the walls, unlit but leaving trails of ancient wax.
+    The air feels heavy, charged with something unnatural.
+  exits:
+    up: secret_passage
+  items:
+    - grimoire
+  npcs: []
+  details:
+    symbols: "The painted symbols match those from the notes - this is where the ritual was performed"
+    pedestals: "Three stone pedestals, clearly meant to hold something important"
+    circle: "The ritual circle is incomplete - something interrupted the ceremony"
+
+dining_room:
+  name: "Dining Room"
+  atmosphere: |
+    A long mahogany table dominates this room, set for a dinner that was
+    never eaten. Dust covers everything - the fine china, the silver
+    candlesticks, the crystal glasses. A grandfather clock ticks steadily
+    in the corner, impossibly still working. The east wall features a
+    large fireplace, cold and dark.
+  exits:
+    west: entrance_hall
+    north: kitchen
+  items:
+    - silver_key
+  npcs:
+    - butler_jenkins
+  details:
+    table: "The table is set for six, but the food has long since rotted away"
+    clock: "The grandfather clock keeps perfect time - 11:47 PM. How is it still running?"
+    fireplace: "The fireplace is cold, but there's a strange draft coming from it"
+    china: "Fine bone china with the family crest - a thorned tree"
+
+kitchen:
+  name: "Kitchen"
+  atmosphere: |
+    A large kitchen, once the heart of a busy household. Copper pots
+    hang from the ceiling, tarnished green with age. The large hearth
+    is cold, and the preparation tables are covered in dust. A door
+    leads to what must be a pantry. The smell of decay lingers.
+  exits:
+    south: dining_room
+    down: basement
+  items:
+    - kitchen_knife
+  npcs: []
+  details:
+    hearth: "The hearth is large enough to roast a whole pig"
+    pantry: "The pantry door hangs open, revealing bare shelves"
+    pots: "Beautiful copper pots, now green with verdigris"
+  interactions:
+    examine_basement_door:
+      triggers:
+        - "examine basement door"
+        - "look at basement door"
+        - "check basement"
+      narrative_hint: "The basement door is secured with a heavy iron lock"
+      sets_flag: found_basement_door
+
+basement:
+  name: "Basement"
+  atmosphere: |
+    Cold and dark, the basement stretches beyond the manor's foundation.
+    Wine racks line one wall, bottles covered in decades of dust and
+    cobwebs. Strange stains mark the floor, and the walls are rough-hewn
+    stone. In the far corner, something glints in the darkness.
+  exits:
+    up: kitchen
+  items:
+    - ancient_dagger
+  npcs: []
+  requires:
+    item: iron_key
+  details:
+    wine_racks: "Hundreds of bottles, some perhaps still drinkable"
+    stains: "Dark stains on the floor... best not to think about their origin"
+    glint: "Something metallic catches what little light there is"
+
+sitting_room:
+  name: "Sitting Room"
+  atmosphere: |
+    A comfortable sitting room, frozen in time. Velvet furniture is
+    arranged around a fireplace, moth-eaten but still elegant. A piano
+    sits in one corner, its keys yellowed. Family photographs crowd
+    the mantelpiece, showing happier times. Heavy curtains block the
+    windows, holding back the storm.
+  exits:
+    east: entrance_hall
+  items:
+    - family_photo
+  npcs: []
+  details:
+    piano: "A beautiful grand piano, covered in dust but potentially still playable"
+    photographs: "Photos of the family - the children smiling, the parents proud"
+    fireplace: "The fireplace is cold, but laid with fresh logs... strange"
+    curtains: "Heavy velvet curtains, faded from deep red to dusty pink"
+  interactions:
+    play_piano:
+      triggers:
+        - "play piano"
+        - "use piano"
+        - "touch piano"
+      narrative_hint: "As you press a key, a haunting melody seems to play itself, as if ghostly fingers remember the tune"
+      sets_flag: played_piano
+
+upper_landing:
+  name: "Upper Landing"
+  atmosphere: |
+    A long hallway on the upper floor, lit by flickering wall sconces
+    that shouldn't still be burning. Doors line both sides, most closed.
+    A window at the end shows the storm still raging. The floorboards
+    creak with every step, and sometimes you hear creaking when you
+    stand still...
+  exits:
+    down: entrance_hall
+    north: master_bedroom
+    south: nursery
+    east: guest_room
+  items: []
+  npcs: []
+  details:
+    sconces: "The wall sconces burn with an odd, bluish flame"
+    doors: "Several closed doors line the hallway"
+    window: "Lightning illuminates the grounds - is that a figure in the garden?"
+    carpet: "A threadbare carpet runs the length of the hall, its pattern worn away"
+
+master_bedroom:
+  name: "Master Bedroom"
+  atmosphere: |
+    The master bedroom is large and cold. A four-poster bed dominates
+    the room, its curtains torn and moth-eaten. A vanity mirror reflects
+    the room, but something about the reflection seems... wrong. A
+    wardrobe stands against one wall, its doors slightly ajar.
+  exits:
+    south: upper_landing
+  items:
+    - iron_key
+  npcs: []
+  details:
+    bed: "The bed is made, as if waiting for occupants who will never return"
+    mirror: "The mirror shows the room, but the shadows seem to move independently"
+    wardrobe: "The wardrobe door creaks when touched"
+    portrait: "A portrait of the lady of the house hangs above the bed"
+  interactions:
+    examine_mirror:
+      triggers:
+        - "examine mirror"
+        - "look in mirror"
+        - "look at mirror"
+      narrative_hint: "For a moment, you see not your reflection, but a woman in a white nightgown, her face twisted in terror"
+      sets_flag: saw_ghost_in_mirror
+
+nursery:
+  name: "Nursery"
+  atmosphere: |
+    A children's nursery, toys scattered across the floor as if play
+    was interrupted suddenly. A rocking horse sways gently, though
+    there's no breeze. Three small beds line one wall, their covers
+    thrown back. Childish drawings paper the walls, but some show
+    disturbing imagery - dark figures, flames, crying faces.
+  exits:
+    north: upper_landing
+  items:
+    - thornwood_amulet
+  npcs: []
+  details:
+    toys: "Toys scattered mid-play - a ball, wooden soldiers, a doll with no eyes"
+    beds: "Three beds for three children, none of whom sleep here anymore"
+    drawings: "Children's drawings, some happy, some nightmarish"
+    rocking_horse: "The rocking horse moves on its own, back and forth, back and forth"
+  interactions:
+    examine_drawings:
+      triggers:
+        - "examine drawings"
+        - "look at drawings"
+        - "study drawings"
+      narrative_hint: "One drawing shows three figures around a circle, with a fourth - smaller - figure in the center. Written in a child's hand: 'They said it would make us live forever'"
+      sets_flag: understood_sacrifice
+
+guest_room:
+  name: "Guest Room"
+  atmosphere: |
+    A modest guest room, less ornate than the master bedroom but
+    comfortable enough. The bed appears recently made - odd, in a
+    house this abandoned. A writing desk sits by the window, and
+    a wardrobe stands in the corner.
+  exits:
+    west: upper_landing
+  items:
+    - matches
+  npcs: []
+  details:
+    bed: "The bed is freshly made, as if expecting a guest"
+    desk: "A writing desk with paper and dried-up ink"
+    window: "The window rattles in the storm"
+

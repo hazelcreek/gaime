@@ -1,0 +1,41 @@
+name: "The Cursed Manor"
+theme: "Victorian gothic horror"
+tone: "atmospheric, mysterious, unsettling yet compelling"
+
+premise: |
+  A violent storm has driven you to seek shelter on this desolate road.
+  Through the rain, you spotted the silhouette of an old manor house.
+  The elderly butler who answered the door seemed troubled, his eyes
+  darting to shadows that weren't there. Something is deeply wrong
+  in this house, and now the storm has trapped you here for the night.
+  
+  Perhaps, in helping the restless spirits of this place, you might
+  find a way to survive until dawn.
+
+player:
+  starting_location: entrance_hall
+  starting_inventory:
+    - pocket_watch
+    - journal
+  stats:
+    health: 100
+    sanity: 100
+
+constraints:
+  - "The basement door is locked and requires the iron_key to open"
+  - "Jenkins the butler will only reveal family secrets after the player has had 3 positive interactions with him"
+  - "The ghost_child only appears when player sanity is below 70"
+  - "The curse cannot be broken without finding all three artifacts: the amulet, the dagger, and the grimoire"
+  - "Secret passages can only be used after they are discovered"
+  - "The player cannot leave the manor until the curse is broken or dawn arrives"
+  - "Items must be in the player's inventory to be used"
+
+commands:
+  help: "Display available commands and hints"
+  look: "Examine your surroundings in detail"
+  inventory: "Check what you're carrying"
+  talk: "Speak to someone present"
+  take: "Pick up an item"
+  use: "Use an item from your inventory"
+  go: "Move in a direction (north, south, east, west, up, down)"
+

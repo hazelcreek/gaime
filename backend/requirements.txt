@@ -1,0 +1,25 @@
+# GAIME Backend Dependencies
+
+# Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# LLM Integration
+litellm>=1.0.0
+
+# Data Validation
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# YAML Parsing
+pyyaml>=6.0.1
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# CORS
+# (included in fastapi)
+
+# Development
+httpx>=0.25.0  # For testing
+

@@ -1,0 +1,103 @@
+# GAIME - AI Text Adventure Engine
+
+## Project Overview
+
+GAIME is an AI-powered text adventure game engine that combines classic text-based gameplay with modern LLM capabilities. The AI acts as a dynamic game master, generating rich narrative responses while maintaining game state consistency.
+
+## Architecture
+
+### Tech Stack
+- **Backend**: Python 3.11+ with FastAPI
+- **Frontend**: Vite + React + TypeScript + Tailwind CSS
+- **LLM**: LiteLLM (provider-agnostic, default: Google Gemini)
+- **World Data**: YAML files for game content definition
+- **State**: In-memory with optional persistence
+
+### Project Structure
+```
+gaime/
+├── backend/          # Python FastAPI server
+│   └── app/
+│       ├── api/      # REST endpoints
+│       ├── engine/   # Game logic
+│       ├── llm/      # LLM integration
+│       └── models/   # Pydantic schemas
+├── frontend/         # React application
+│   └── src/
+│       ├── components/
+│       ├── hooks/
+│       └── api/
+├── worlds/           # YAML world definitions
+├── docs/             # Developer documentation
+└── PLAN.md           # Implementation roadmap
+```
+
+## Core Concepts
+
+### Hybrid World-Building
+We use a hybrid approach to world creation:
+1. **Authored Skeleton**: Key locations, major NPCs, plot constraints defined in YAML
+2. **AI Enhancement**: LLM generates narrative details, dialogue, atmosphere at runtime
+3. **AI-Assisted Authoring**: World builder tool helps create YAML content from prompts
+
+### Two AI Modes
+1. **Game Master (Runtime)**: Processes player actions, generates narrative, updates state
+2. **World Builder (Authoring)**: Generates world content from high-level descriptions
+
+### World Definition Schema
+- `world.yaml`: Theme, premise, player setup, global constraints
+- `locations.yaml`: Rooms with atmosphere hints, exits, items, interactions
+- `npcs.yaml`: Characters with personality, knowledge, behavior rules
+- `items.yaml`: Objects with descriptions, uses, puzzle connections
+
+## Coding Conventions
+
+### Python (Backend)
+- Use type hints everywhere
+- Pydantic models for all data structures
+- Async endpoints in FastAPI
+- Keep game logic in `engine/`, LLM logic in `llm/`
+
+### TypeScript (Frontend)
+- Functional components with hooks
+- Custom hooks for shared logic (e.g., `useGame`)
+- Tailwind for styling, no CSS files
+- Keep API calls in `api/client.ts`
+
+### YAML World Files
+- Use descriptive keys (e.g., `entrance_hall` not `room1`)
+- Include `atmosphere` hints for AI narrative generation
+- Define `constraints` for game rules the AI must follow
+
+## Key Design Decisions
+
+1. **Provider-Agnostic LLM**: LiteLLM abstracts provider differences; switch via env var
+2. **Structured AI Responses**: LLM returns JSON with narrative + state changes
+3. **State in System Prompt**: Each request includes current game state for consistency
+4. **YAML for Content**: Human-readable, version-controlled, easy to edit
+
+## Common Tasks
+
+### Adding a New World
+1. Create folder in `worlds/[world-name]/`
+2. Add `world.yaml`, `locations.yaml`, `npcs.yaml`, `items.yaml`
+3. Follow schema in `docs/WORLD_AUTHORING.md`
+
+### Switching LLM Provider
+Set environment variable: `LLM_PROVIDER=openai` or `anthropic` or `gemini`
+
+### Running the Project
+```bash
+# Backend
+cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload
+
+# Frontend
+cd frontend && npm install && npm run dev
+```
+
+## Documentation
+- `docs/ARCHITECTURE.md` - System design and data flow
+- `docs/WORLD_AUTHORING.md` - How to create game worlds
+- `docs/LLM_INTEGRATION.md` - AI prompts and provider setup
+- `docs/API.md` - Backend API reference
+
