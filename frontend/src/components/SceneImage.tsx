@@ -55,11 +55,11 @@ export default function SceneImage({ worldId = 'cursed-manor' }: SceneImageProps
 
   return (
     <>
-      {/* Scene Image Container - Fixed at top, always visible */}
+      {/* Scene Image Container - Prominent at top, always visible */}
       <div 
         className={`relative overflow-hidden rounded-lg border border-terminal-border 
-                    transition-all duration-500 ease-out mb-4 cursor-pointer
-                    ${isExpanded ? 'h-[50vh]' : 'h-48'}`}
+                    transition-all duration-500 ease-out mb-3 cursor-pointer
+                    ${isExpanded ? 'h-[60vh]' : 'h-72'}`}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {/* Gradient background for atmosphere when no image */}

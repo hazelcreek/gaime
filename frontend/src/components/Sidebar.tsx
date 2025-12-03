@@ -12,63 +12,59 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-64 flex-shrink-0 space-y-4 sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto">
+    <aside className="w-56 flex-shrink-0 space-y-3 self-start max-h-full overflow-y-auto">
       {/* Location */}
-      <div className="bg-terminal-surface border border-terminal-border rounded-lg p-4">
-        <h3 className="text-terminal-dim text-xs uppercase tracking-wider mb-2">Location</h3>
-        <p className="text-terminal-accent font-display">
+      <div className="bg-terminal-surface border border-terminal-border rounded-lg p-3">
+        <h3 className="text-terminal-dim text-xs uppercase tracking-wider mb-1">Location</h3>
+        <p className="text-terminal-accent font-display text-sm">
           {gameState?.current_location ? formatLocationName(gameState.current_location) : 'Unknown'}
         </p>
       </div>
 
       {/* Stats */}
-      <div className="bg-terminal-surface border border-terminal-border rounded-lg p-4">
-        <h3 className="text-terminal-dim text-xs uppercase tracking-wider mb-3">Status</h3>
-        <div className="space-y-2">
-          <StatBar 
-            label="Health" 
-            value={gameState?.stats?.health ?? 100} 
-            max={100} 
-            color="terminal-success" 
-          />
-        </div>
+      <div className="bg-terminal-surface border border-terminal-border rounded-lg p-3">
+        <h3 className="text-terminal-dim text-xs uppercase tracking-wider mb-2">Status</h3>
+        <StatBar 
+          label="Health" 
+          value={gameState?.stats?.health ?? 100} 
+          max={100} 
+          color="terminal-success" 
+        />
       </div>
 
       {/* Inventory */}
-      <div className="bg-terminal-surface border border-terminal-border rounded-lg p-4">
-        <h3 className="text-terminal-dim text-xs uppercase tracking-wider mb-2">Inventory</h3>
+      <div className="bg-terminal-surface border border-terminal-border rounded-lg p-3">
+        <h3 className="text-terminal-dim text-xs uppercase tracking-wider mb-1">Inventory</h3>
         {gameState?.inventory && gameState.inventory.length > 0 ? (
-          <ul className="space-y-1">
+          <ul className="space-y-0.5">
             {gameState.inventory.map((item, idx) => (
-              <li key={idx} className="text-terminal-text text-sm flex items-center gap-2">
+              <li key={idx} className="text-terminal-text text-xs flex items-center gap-1.5">
                 <span className="text-terminal-warning">•</span>
                 {formatItemName(item)}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-terminal-dim text-sm italic">Empty</p>
+          <p className="text-terminal-dim text-xs italic">Empty</p>
         )}
       </div>
 
-      {/* Turn counter */}
-      <div className="bg-terminal-surface border border-terminal-border rounded-lg p-4">
-        <div className="flex justify-between text-sm">
+      {/* Turn counter + New Game */}
+      <div className="bg-terminal-surface border border-terminal-border rounded-lg p-3">
+        <div className="flex justify-between text-xs mb-3">
           <span className="text-terminal-dim">Turn</span>
           <span className="text-terminal-text">{gameState?.turn_count ?? 0}</span>
         </div>
+        <button
+          onClick={() => startNewGame()}
+          disabled={isLoading}
+          className="w-full px-3 py-1.5 text-xs text-terminal-dim hover:text-terminal-error 
+                     border border-terminal-border rounded hover:border-terminal-error/50
+                     transition-colors disabled:opacity-50"
+        >
+          Start New Game
+        </button>
       </div>
-
-      {/* New Game button */}
-      <button
-        onClick={() => startNewGame()}
-        disabled={isLoading}
-        className="w-full px-4 py-2 text-sm text-terminal-dim hover:text-terminal-error 
-                   border border-terminal-border rounded-lg hover:border-terminal-error/50
-                   transition-colors disabled:opacity-50"
-      >
-        Start New Game
-      </button>
     </aside>
   );
 }

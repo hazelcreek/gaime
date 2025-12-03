@@ -37,58 +37,57 @@ function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void 
   const { sessionId, resetGame, worldId } = useGame();
   
   return (
-    <div className="min-h-screen bg-terminal-bg flex">
-      {/* Main game area - wider to accommodate image */}
-      <div className="flex-1 flex flex-col max-w-6xl mx-auto p-4">
-        {/* Header */}
-        <header className="mb-4 text-center flex-shrink-0">
-          <h1 className="font-display text-3xl text-terminal-accent tracking-wider">
+    <div className="h-screen bg-terminal-bg flex flex-col overflow-hidden">
+      {/* Minimal inline header */}
+      <header className="flex-shrink-0 flex items-center justify-between px-4 py-2 border-b border-terminal-border/30">
+        <div className="flex items-center gap-3">
+          <h1 className="font-display text-lg text-terminal-accent tracking-wider">
             GAIME
           </h1>
-          <p className="text-terminal-dim text-sm mt-1">
+          <span className="text-terminal-dim text-xs hidden sm:inline">
             AI-Powered Text Adventure
-          </p>
-          <div className="mt-2 flex justify-center gap-4">
-            {sessionId && (
-              <button
-                onClick={resetGame}
-                className="text-xs text-terminal-dim hover:text-terminal-error transition-colors"
-              >
-                ← Return to Start
-              </button>
-            )}
+          </span>
+        </div>
+        <nav className="flex items-center gap-4">
+          {sessionId && (
             <button
-              onClick={() => setView('builder')}
-              className="text-xs text-terminal-dim hover:text-terminal-accent transition-colors"
+              onClick={resetGame}
+              className="text-xs text-terminal-dim hover:text-terminal-error transition-colors"
             >
-              Open World Builder →
+              ← Reset
             </button>
-          </div>
-        </header>
-        
-        {/* Game content area */}
-        <div className="flex-1 flex gap-4 min-h-0">
-          {/* Left column: Scene image + Terminal + Input */}
-          <div className="flex-1 flex flex-col min-w-0 max-h-[calc(100vh-8rem)]">
-            {/* Scene image - sticky at top, clickable to expand */}
-            <div className="flex-shrink-0">
-              <SceneImage worldId={worldId || 'cursed-manor'} />
-            </div>
-            
-            {/* Terminal - scrollable */}
-            <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-              <Terminal />
-            </div>
-            
-            {/* Command input - fixed at bottom */}
-            <div className="flex-shrink-0">
-              <CommandInput />
-            </div>
+          )}
+          <button
+            onClick={() => setView('builder')}
+            className="text-xs text-terminal-dim hover:text-terminal-accent transition-colors"
+          >
+            World Builder →
+          </button>
+        </nav>
+      </header>
+      
+      {/* Main game area - takes all remaining height */}
+      <div className="flex-1 flex gap-4 p-4 min-h-0 max-w-7xl mx-auto w-full">
+        {/* Left column: Scene image + Terminal + Input */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Scene image - prominent, taller */}
+          <div className="flex-shrink-0">
+            <SceneImage worldId={worldId || 'cursed-manor'} />
           </div>
           
-          {/* Right column: Sidebar */}
-          <Sidebar />
+          {/* Terminal - scrollable */}
+          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+            <Terminal />
+          </div>
+          
+          {/* Command input - fixed at bottom */}
+          <div className="flex-shrink-0">
+            <CommandInput />
+          </div>
         </div>
+        
+        {/* Right column: Sidebar */}
+        <Sidebar />
       </div>
     </div>
   )

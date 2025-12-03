@@ -3,7 +3,7 @@ Image Generator - Uses Google Gemini's native image generation capabilities
 for creating scene images for game locations.
 
 Based on: https://ai.google.dev/gemini-api/docs/image-generation
-Uses Gemini 2.0 Flash with native image generation (Imagen 3 backbone)
+Uses the google-genai SDK for native image generation.
 """
 
 import os
@@ -17,8 +17,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-# Image generation model - Gemini 2.0 Flash with native image output
-IMAGE_MODEL = "gemini-2.0-flash-exp"
+# Image generation model - Gemini with image output capability
+# See: https://ai.google.dev/gemini-api/docs/image-generation
+# Options: "gemini-2.5-flash-image" (fast) or "gemini-3-pro-image-preview" (advanced)
+IMAGE_MODEL = "gemini-3-pro-image-preview"
 
 
 def get_image_prompt(location_name: str, atmosphere: str, theme: str, tone: str) -> str:
@@ -69,6 +71,9 @@ async def generate_location_image(
     """
     Generate an image for a single location using Gemini's native image generation.
     
+    Uses the google-genai SDK as per:
+    https://ai.google.dev/gemini-api/docs/image-generation
+    
     Args:
         location_id: Unique ID of the location
         location_name: Display name of the location
@@ -80,14 +85,15 @@ async def generate_location_image(
     Returns:
         Path to the generated image, or None if generation failed
     """
-    import google.generativeai as genai
+    from google import genai
     
     # Configure the API
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise ValueError("GEMINI_API_KEY environment variable is required for image generation")
     
-    genai.configure(api_key=api_key)
+    # Create client with API key
+    client = genai.Client(api_key=api_key)
     
     # Create the prompt
     prompt = get_image_prompt(location_name, atmosphere, theme, tone)
@@ -96,90 +102,98 @@ async def generate_location_image(
     output_dir.mkdir(parents=True, exist_ok=True)
     
     try:
-        # Use Gemini 2.0 Flash with image generation
-        model = genai.GenerativeModel(IMAGE_MODEL)
-        
+        # Use the new google-genai SDK for image generation
         response = await asyncio.to_thread(
-            model.generate_content,
-            prompt,
-            generation_config=genai.GenerationConfig(
-                response_mime_type="image/png"
-            )
+            client.models.generate_content,
+            model=IMAGE_MODEL,
+            contents=[prompt]
         )
         
-        # Extract image data from response
-        if response.candidates and response.candidates[0].content.parts:
-            for part in response.candidates[0].content.parts:
-                if hasattr(part, 'inline_data') and part.inline_data:
-                    # Decode and save the image
+        # Extract image data from response parts
+        for part in response.parts:
+            if part.inline_data is not None:
+                # Save the image using PIL if available, otherwise raw bytes
+                image_path = output_dir / f"{location_id}.png"
+                
+                try:
+                    # Try using the as_image() method (returns PIL Image)
+                    image = part.as_image()
+                    await asyncio.to_thread(image.save, str(image_path))
+                except Exception:
+                    # Fallback: save raw bytes
                     image_data = part.inline_data.data
-                    image_path = output_dir / f"{location_id}.png"
-                    
+                    if isinstance(image_data, str):
+                        image_data = base64.b64decode(image_data)
                     with open(image_path, 'wb') as f:
                         f.write(image_data)
-                    
-                    return str(image_path)
-        
-        # Fallback: Try alternative response format
-        if hasattr(response, 'result') and response.result:
-            image_data = base64.b64decode(response.result)
-            image_path = output_dir / f"{location_id}.png"
-            
-            with open(image_path, 'wb') as f:
-                f.write(image_data)
-            
-            return str(image_path)
+                
+                return str(image_path)
         
         print(f"No image data in response for {location_id}")
         return None
         
     except Exception as e:
         print(f"Error generating image for {location_id}: {e}")
-        # Try with Imagen 3 if Flash fails
-        return await _generate_with_imagen(
-            location_id, prompt, output_dir
+        # Try alternative model if primary fails
+        return await _generate_with_alternative_model(
+            location_id, prompt, output_dir, client
         )
 
 
-async def _generate_with_imagen(
+async def _generate_with_alternative_model(
     location_id: str,
     prompt: str,
-    output_dir: Path
+    output_dir: Path,
+    client
 ) -> Optional[str]:
     """
-    Fallback image generation using Imagen 3 model.
-    """
-    import google.generativeai as genai
+    Fallback image generation using alternative Gemini image models.
     
-    try:
-        # Try Imagen 3 model
-        imagen = genai.ImageGenerationModel("imagen-3.0-generate-002")
-        
-        result = await asyncio.to_thread(
-            imagen.generate_images,
-            prompt=prompt,
-            number_of_images=1,
-            aspect_ratio="16:9",
-            safety_filter_level="block_only_high",
-            person_generation="dont_allow"
-        )
-        
-        if result.images:
-            image_path = output_dir / f"{location_id}.png"
+    Uses the google-genai SDK.
+    """
+    # Alternative model names to try
+    # See: https://ai.google.dev/gemini-api/docs/image-generation
+    alternative_models = [
+        "gemini-2.5-flash-image",  # Fast model
+        "gemini-2.0-flash-exp",
+    ]
+    
+    for alt_model in alternative_models:
+        try:
+            print(f"Trying alternative model: {alt_model}")
             
-            # Save the image
-            await asyncio.to_thread(
-                result.images[0].save,
-                str(image_path)
+            response = await asyncio.to_thread(
+                client.models.generate_content,
+                model=alt_model,
+                contents=[prompt]
             )
             
-            return str(image_path)
-        
-        return None
-        
-    except Exception as e:
-        print(f"Imagen fallback failed for {location_id}: {e}")
-        return None
+            # Extract image data from response parts
+            for part in response.parts:
+                if part.inline_data is not None:
+                    image_path = output_dir / f"{location_id}.png"
+                    
+                    try:
+                        # Try using the as_image() method
+                        image = part.as_image()
+                        await asyncio.to_thread(image.save, str(image_path))
+                    except Exception:
+                        # Fallback: save raw bytes
+                        image_data = part.inline_data.data
+                        if isinstance(image_data, str):
+                            image_data = base64.b64decode(image_data)
+                        with open(image_path, 'wb') as f:
+                            f.write(image_data)
+                    
+                    print(f"Successfully generated image with {alt_model}")
+                    return str(image_path)
+            
+        except Exception as e:
+            print(f"Alternative model {alt_model} failed for {location_id}: {e}")
+            continue
+    
+    print(f"All image generation attempts failed for {location_id}")
+    return None
 
 
 async def generate_world_images(
