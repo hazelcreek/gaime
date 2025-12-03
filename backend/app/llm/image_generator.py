@@ -278,6 +278,27 @@ Style Requirements:
     return prompt
 
 
+def _save_prompt_markdown(
+    output_dir: Path,
+    location_id: str,
+    location_name: str,
+    prompt: str
+) -> None:
+    """
+    Save the image generation prompt as a markdown file for debugging.
+    
+    Args:
+        output_dir: Directory to save the markdown file
+        location_id: ID of the location (used for filename)
+        location_name: Display name of the location (used in header)
+        prompt: The full prompt text that was sent to the model
+    """
+    prompt_path = output_dir / f"{location_id}_prompt.md"
+    prompt_content = f"# Image Prompt: {location_name}\n\n{prompt}"
+    with open(prompt_path, 'w') as f:
+        f.write(prompt_content)
+
+
 async def generate_location_image(
     location_id: str,
     location_name: str,
@@ -440,12 +461,14 @@ async def generate_location_image(
                         if hasattr(img.image, 'save'):
                             await asyncio.to_thread(img.image.save, str(image_path))
                             logger.info(f"[ImageGen] Saved generated image to {image_path}")
+                            _save_prompt_markdown(output_dir, location_id, location_name, prompt)
                             return str(image_path)
                         else:
                             # Fallback to writing bytes directly
                             with open(image_path, 'wb') as f:
                                 f.write(img.image.image_bytes)
                             logger.info(f"[ImageGen] Saved generated image bytes to {image_path}")
+                            _save_prompt_markdown(output_dir, location_id, location_name, prompt)
                             return str(image_path)
                     except Exception as save_err:
                         logger.error(f"[ImageGen] Failed to save image: {save_err}")
@@ -492,6 +515,7 @@ async def generate_location_image(
                             f.write(image_data)
                         logger.info(f"[ImageGen] Saved image via raw bytes to {image_path}")
                     
+                    _save_prompt_markdown(output_dir, location_id, location_name, prompt)
                     return str(image_path)
         
         logger.warning(f"[ImageGen] No image data in response for {location_id}")
