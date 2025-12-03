@@ -72,8 +72,8 @@ NPCs Present: {npcs_here}
 You MUST respond with valid JSON in this exact format:
 {{
   "narrative": "Your narrative text here, describing what happens...",
-  "state_changes": {{
-    "inventory": {{ "add": [], "remove": [] }},
+    "state_changes": {{
+    "inventory": {{ "add": ["item_id_1"], "remove": ["item_id_2"] }},
     "location": null,
     "stats": {{ "health": 0 }},
     "flags": {{}},
@@ -84,6 +84,7 @@ You MUST respond with valid JSON in this exact format:
 
 Notes on state_changes:
 - location: Set to new location ID if player moves, null otherwise
+- inventory: Use item IDs (not names) for add/remove lists. Only add items that are visible/present.
 - stats: Use DELTAS (e.g., -5 for damage, +10 for healing)
 - flags: Set flags that should be remembered (e.g., "found_key": true)
 - hints: Optional subtle hints for the player
@@ -241,7 +242,7 @@ class GameMaster:
             {"role": "user", "content": user_prompt}
         ]
         
-        response = await get_completion(messages)
+        response = await get_completion(messages, response_format={"type": "json_object"})
         parsed = parse_json_response(response)
         
         # Apply any initial state changes
@@ -274,14 +275,15 @@ class GameMaster:
 {details_context}
 {interaction_context}
 
-Process this action and respond with the narrative result and any state changes.'''
+Process this action and respond with the narrative result and any state changes.
+Ensure you respond with a valid JSON object as specified in the system instructions.'''
         
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ]
         
-        response = await get_completion(messages)
+        response = await get_completion(messages, response_format={"type": "json_object"})
         parsed = parse_json_response(response)
         
         # Check for interactions that should trigger

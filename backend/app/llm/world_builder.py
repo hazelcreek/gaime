@@ -112,7 +112,8 @@ class WorldBuilder:
             messages,
             model="gemini/gemini-3-pro-preview",
             temperature=0.8,  # More creative for world building
-            max_tokens=16384  # High limit for thinking tokens + output
+            max_tokens=16384,  # High limit for thinking tokens + output
+            response_format={"type": "json_object"}
         )
         
         logger.info(f"LLM response received, length: {len(response) if response else 0}")
