@@ -19,6 +19,11 @@ http://localhost:8000/api
 | GET | `/game/state/{session_id}` | Get current state |
 | POST | `/builder/generate` | Generate world from prompt |
 | POST | `/builder/save/{world_id}` | Save generated world |
+| GET | `/builder/{world_id}/locations` | List world locations |
+| POST | `/builder/{world_id}/images/generate` | Generate all scene images |
+| POST | `/builder/{world_id}/images/{location_id}/generate` | Generate single image |
+| GET | `/builder/{world_id}/images` | List available images |
+| GET | `/builder/{world_id}/images/{location_id}` | Get location image |
 
 ---
 
@@ -262,6 +267,143 @@ POST /api/builder/save/{world_id}
 
 ---
 
+## List World Locations
+
+Get all locations in a world with their metadata.
+
+```
+GET /api/builder/{world_id}/locations
+```
+
+**Response**
+```json
+{
+  "world_id": "cursed-manor",
+  "locations": [
+    {
+      "id": "entrance_hall",
+      "name": "Entrance Hall",
+      "has_image": true,
+      "atmosphere": "A grand but decayed entrance hall greets you..."
+    }
+  ],
+  "count": 12
+}
+```
+
+**Errors**
+- `404`: World not found
+
+---
+
+## Generate Scene Images
+
+Generate scene images for all or selected locations in a world.
+
+```
+POST /api/builder/{world_id}/images/generate
+```
+
+**Request Body**
+```json
+{
+  "location_ids": ["entrance_hall", "library"]
+}
+```
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| location_ids | string[] | No | null | Specific locations (null = all) |
+
+**Response**
+```json
+{
+  "world_id": "cursed-manor",
+  "results": [
+    {
+      "location_id": "entrance_hall",
+      "success": true,
+      "image_url": "/api/builder/cursed-manor/images/entrance_hall"
+    },
+    {
+      "location_id": "library",
+      "success": false,
+      "error": "Image generation failed"
+    }
+  ],
+  "message": "Generated 1/2 images successfully"
+}
+```
+
+**Errors**
+- `404`: World not found
+- `500`: Generation failed
+
+---
+
+## Generate Single Image
+
+Generate or regenerate the image for a single location.
+
+```
+POST /api/builder/{world_id}/images/{location_id}/generate
+```
+
+**Response**
+```json
+{
+  "success": true,
+  "location_id": "entrance_hall",
+  "image_url": "/api/builder/cursed-manor/images/entrance_hall",
+  "message": "Image generated for Entrance Hall"
+}
+```
+
+**Errors**
+- `404`: World or location not found
+- `500`: Generation failed
+
+---
+
+## List World Images
+
+List all available images for a world.
+
+```
+GET /api/builder/{world_id}/images
+```
+
+**Response**
+```json
+{
+  "world_id": "cursed-manor",
+  "images": {
+    "entrance_hall": "/api/builder/cursed-manor/images/entrance_hall",
+    "library": "/api/builder/cursed-manor/images/library"
+  },
+  "count": 2
+}
+```
+
+---
+
+## Get Location Image
+
+Retrieve the generated image for a location.
+
+```
+GET /api/builder/{world_id}/images/{location_id}
+```
+
+**Response**
+- Content-Type: `image/png`
+- Returns the PNG image file
+
+**Errors**
+- `404`: Image not found
+
+---
+
 ## Data Models
 
 ### GameState
@@ -300,6 +442,38 @@ interface WorldInfo {
   name: string;
   theme: string;
   description?: string;
+}
+```
+
+### ImageGenerationResult
+
+```typescript
+interface ImageGenerationResult {
+  location_id: string;
+  success: boolean;
+  image_url?: string;
+  error?: string;
+}
+```
+
+### GenerateImagesResponse
+
+```typescript
+interface GenerateImagesResponse {
+  world_id: string;
+  results: ImageGenerationResult[];
+  message: string;
+}
+```
+
+### LocationInfo
+
+```typescript
+interface LocationInfo {
+  id: string;
+  name: string;
+  has_image: boolean;
+  atmosphere: string;
 }
 ```
 
