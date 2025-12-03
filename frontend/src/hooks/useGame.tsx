@@ -75,15 +75,19 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, [sessionId]);
 
   // Start a new game
-  const startNewGame = useCallback(async (selectedWorldId = 'cursed-manor', playerName = 'Traveler') => {
+  const startNewGame = useCallback(async (selectedWorldId?: string, playerName?: string) => {
+    // Use provided worldId, or fall back to current world, or default to 'cursed-manor'
+    const effectiveWorldId = selectedWorldId ?? worldId ?? 'cursed-manor';
+    const effectivePlayerName = playerName ?? gameState?.player_name ?? 'Traveler';
+    
     setIsLoading(true);
     setError(null);
     setNarrative([]);
     
     try {
-      const response = await gameAPI.newGame(selectedWorldId, playerName);
+      const response = await gameAPI.newGame(effectiveWorldId, effectivePlayerName);
       setSessionId(response.session_id);
-      setWorldId(selectedWorldId);
+      setWorldId(effectiveWorldId);
       setGameState(response.state);
       addNarrative('narrative', response.narrative);
       addNarrative('system', 'Type your commands below. Try "look around" or "help" to get started.');
@@ -94,7 +98,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [addNarrative]);
+  }, [addNarrative, worldId, gameState?.player_name]);
 
   // Send a player action
   const sendAction = useCallback(async (action: string) => {
@@ -168,4 +172,3 @@ export function useGame() {
   }
   return context;
 }
-
