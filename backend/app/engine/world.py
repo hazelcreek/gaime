@@ -159,13 +159,21 @@ class WorldLoader:
         
         npcs = {}
         for npc_id, npc_data in data.items():
-            # Parse personality
+            # Parse personality - handle both string and dict formats
             pers_data = npc_data.get("personality", {})
-            personality = NPCPersonality(
-                traits=pers_data.get("traits", []),
-                speech_style=pers_data.get("speech_style", ""),
-                quirks=pers_data.get("quirks", [])
-            )
+            if isinstance(pers_data, str):
+                # Simple string format - use as traits description
+                personality = NPCPersonality(
+                    traits=[pers_data],
+                    speech_style="",
+                    quirks=[]
+                )
+            else:
+                personality = NPCPersonality(
+                    traits=pers_data.get("traits", []),
+                    speech_style=pers_data.get("speech_style", ""),
+                    quirks=pers_data.get("quirks", [])
+                )
             
             # Parse trust
             trust = None
