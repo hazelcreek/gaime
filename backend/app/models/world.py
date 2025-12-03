@@ -83,6 +83,12 @@ class AppearanceCondition(BaseModel):
     value: int | str | bool
 
 
+class NPCLocationChange(BaseModel):
+    """Trigger-based NPC location change"""
+    when_flag: str  # Flag that triggers this move
+    move_to: str | None = None  # New location ID, or None to remove NPC from game entirely
+
+
 class NPC(BaseModel):
     """NPC definition from npcs.yaml"""
     name: str
@@ -96,6 +102,7 @@ class NPC(BaseModel):
     trust: NPCTrust | None = None
     appears_when: list[AppearanceCondition] = Field(default_factory=list)
     behavior: str = ""
+    location_changes: list[NPCLocationChange] = Field(default_factory=list)  # Trigger-based location changes
 
 
 class ItemProperty(BaseModel):

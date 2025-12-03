@@ -39,6 +39,7 @@ class GameState(BaseModel):
     flags: dict[str, bool] = Field(default_factory=dict)
     turn_count: int = 0
     npc_trust: dict[str, int] = Field(default_factory=dict)
+    npc_locations: dict[str, str] = Field(default_factory=dict)  # Current NPC locations (npc_id -> location_id)
     status: str = "playing"  # "playing", "won", "lost"
     
     def apply_changes(self, changes: StateChanges) -> None:

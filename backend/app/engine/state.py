@@ -37,10 +37,13 @@ class GameStateManager:
             npc_trust={}
         )
         
-        # Initialize NPC trust levels
+        # Initialize NPC trust levels and default locations
         for npc_id, npc in self.world_data.npcs.items():
             if npc.trust:
                 self._state.npc_trust[npc_id] = npc.trust.initial
+            # Store initial NPC location (single location takes precedence over locations list)
+            if npc.location:
+                self._state.npc_locations[npc_id] = npc.location
     
     def get_state(self) -> GameState:
         """Get current game state"""
@@ -59,16 +62,111 @@ class GameStateManager:
         return self.world_data.get_items_at_location(self._state.current_location)
     
     def get_present_npcs(self) -> list:
-        """Get NPCs present in current location"""
-        npcs = self.world_data.get_npcs_at_location(self._state.current_location)
-        
-        # Filter by appearance conditions
+        """Get NPCs present in current location, considering dynamic location changes"""
+        current_location = self._state.current_location
         visible_npcs = []
-        for npc in npcs:
-            if self._check_npc_appears(npc):
+        
+        for npc_id, npc in self.world_data.npcs.items():
+            # Get the NPC's current location (may have changed due to triggers)
+            # Returns None if NPC has been removed from the game
+            npc_current_loc = self.get_npc_current_location(npc_id)
+            
+            # If NPC location is None, they've left the game entirely
+            if npc_current_loc is None:
+                continue
+            
+            # Check if NPC is at current location
+            # Either via dynamic single location or via multi-location (roaming NPCs)
+            # Note: roaming NPCs (with locations list) only roam if they haven't been
+            # moved by location_changes - once moved, they're at the specific location
+            has_location_override = self._has_active_location_change(npc)
+            
+            if has_location_override:
+                # NPC was moved by a trigger - they're only at that specific location
+                is_here = (npc_current_loc == current_location)
+            else:
+                # Normal behavior - check both single location and roaming locations
+                is_here = (
+                    npc_current_loc == current_location or
+                    current_location in npc.locations
+                )
+            
+            if is_here and self._check_npc_appears(npc):
                 visible_npcs.append(npc)
         
         return visible_npcs
+    
+    def _has_active_location_change(self, npc) -> bool:
+        """Check if any location_change trigger is currently active for this NPC."""
+        for change in npc.location_changes:
+            if self._state.flags.get(change.when_flag, False):
+                return True
+        return False
+    
+    def get_npc_current_location(self, npc_id: str) -> str | None:
+        """
+        Get the current location of an NPC, considering location_changes triggers.
+        
+        Location changes are checked in order; the last matching trigger wins.
+        """
+        npc = self.world_data.get_npc(npc_id)
+        if not npc:
+            return None
+        
+        # Start with the base location
+        current_loc = npc.location
+        
+        # Check location_changes triggers (in order, last match wins)
+        for change in npc.location_changes:
+            if self._state.flags.get(change.when_flag, False):
+                current_loc = change.move_to
+        
+        # Also check if there's an override in npc_locations state
+        if npc_id in self._state.npc_locations:
+            # State override only applies if no location_changes triggered
+            if not any(self._state.flags.get(c.when_flag, False) for c in npc.location_changes):
+                current_loc = self._state.npc_locations[npc_id]
+        
+        return current_loc
+    
+    def get_visible_npcs_at_location(self, location_id: str) -> list[tuple[str, "NPC"]]:
+        """
+        Get visible NPCs at a specific location with their IDs.
+        
+        Returns list of (npc_id, NPC) tuples for NPCs that are:
+        1. Currently at the location (via location or locations field, considering triggers)
+        2. Have their appears_when conditions met
+        3. Haven't been removed from the game (location_changes with move_to: null)
+        
+        Used for image variant selection.
+        """
+        from app.models.world import NPC
+        visible = []
+        
+        for npc_id, npc in self.world_data.npcs.items():
+            npc_current_loc = self.get_npc_current_location(npc_id)
+            
+            # NPC has left the game entirely
+            if npc_current_loc is None:
+                continue
+            
+            # Check if NPC has an active location override
+            has_location_override = self._has_active_location_change(npc)
+            
+            if has_location_override:
+                # NPC was moved by a trigger - they're only at that specific location
+                is_here = (npc_current_loc == location_id)
+            else:
+                # Normal behavior - check both single location and roaming locations
+                is_here = (
+                    npc_current_loc == location_id or
+                    location_id in npc.locations
+                )
+            
+            if is_here and self._check_npc_appears(npc):
+                visible.append((npc_id, npc))
+        
+        return visible
     
     def _check_npc_appears(self, npc) -> bool:
         """Check if NPC appearance conditions are met"""

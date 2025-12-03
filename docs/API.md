@@ -17,13 +17,17 @@ http://localhost:8000/api
 | POST | `/game/new` | Start new game |
 | POST | `/game/action` | Process player action |
 | GET | `/game/state/{session_id}` | Get current state |
+| GET | `/game/image/{session_id}` | Get current location image (state-aware) |
+| GET | `/game/image/{session_id}/{location_id}` | Get location image (state-aware) |
 | POST | `/builder/generate` | Generate world from prompt |
 | POST | `/builder/save/{world_id}` | Save generated world |
 | GET | `/builder/{world_id}/locations` | List world locations |
 | POST | `/builder/{world_id}/images/generate` | Generate all scene images |
 | POST | `/builder/{world_id}/images/{location_id}/generate` | Generate single image |
+| POST | `/builder/{world_id}/images/{location_id}/generate-variants` | Generate image variants |
+| GET | `/builder/{world_id}/images/{location_id}/variants` | Get variant info |
 | GET | `/builder/{world_id}/images` | List available images |
-| GET | `/builder/{world_id}/images/{location_id}` | Get location image |
+| GET | `/builder/{world_id}/images/{location_id}` | Get location image (static) |
 
 ---
 
@@ -193,6 +197,53 @@ GET /api/game/state/{session_id}
   }
 }
 ```
+
+**Errors**
+- `404`: Session not found
+
+---
+
+## Get Location Image (State-Aware)
+
+Get the appropriate location image based on current game state.
+
+This returns the correct image variant if the location has conditional NPCs.
+
+```
+GET /api/game/image/{session_id}/{location_id}
+```
+
+**Response**
+- Content-Type: `image/png`
+- Returns the appropriate PNG image based on which NPCs are visible
+
+**Example**
+```
+# Before examining nursery (ghost not visible)
+GET /api/game/image/abc123/upper_landing
+# Returns: upper_landing.png (base image, no ghost)
+
+# After examining nursery (ghost appears)
+GET /api/game/image/abc123/upper_landing
+# Returns: upper_landing__with__ghost_child.png (variant with ghost)
+```
+
+**Errors**
+- `404`: Session or image not found
+
+---
+
+## Get Current Location Image
+
+Convenience endpoint to get the image for the player's current location.
+
+```
+GET /api/game/image/{session_id}
+```
+
+**Response**
+- Content-Type: `image/png`
+- Returns the image for the session's current location
 
 **Errors**
 - `404`: Session not found
@@ -369,6 +420,72 @@ POST /api/builder/{world_id}/images/{location_id}/generate
 
 ---
 
+## Generate Image Variants
+
+Generate all image variants for a location with conditional NPCs.
+
+```
+POST /api/builder/{world_id}/images/{location_id}/generate-variants
+```
+
+**Response**
+```json
+{
+  "success": true,
+  "location_id": "upper_landing",
+  "base_image": "/api/builder/cursed-manor/images/upper_landing",
+  "variants": [
+    {
+      "npcs": ["ghost_child"],
+      "image_url": "/api/builder/cursed-manor/images/upper_landing__with__ghost_child"
+    }
+  ],
+  "manifest_path": "upper_landing_variants.json",
+  "images_generated": 2,
+  "message": "Generated 2 image variants"
+}
+```
+
+**Errors**
+- `404`: World or location not found
+- `500`: Generation failed
+
+---
+
+## Get Variant Info
+
+Check which image variants exist for a location.
+
+```
+GET /api/builder/{world_id}/images/{location_id}/variants
+```
+
+**Response (with variants)**
+```json
+{
+  "has_variants": true,
+  "location_id": "upper_landing",
+  "base_image": "upper_landing.png",
+  "variants": [
+    {"npcs": ["ghost_child"], "image": "upper_landing__with__ghost_child.png"}
+  ],
+  "conditional_npcs": ["ghost_child"],
+  "variant_count": 1
+}
+```
+
+**Response (without variants)**
+```json
+{
+  "has_variants": false,
+  "location_id": "entrance_hall",
+  "conditional_npcs": [],
+  "message": "No variants generated yet. Use POST /generate-variants to create them."
+}
+```
+
+---
+
 ## List World Images
 
 List all available images for a world.
@@ -425,7 +542,9 @@ interface GameState {
   discovered_locations: string[];
   flags: Record<string, boolean>;
   turn_count: number;
-  status: "playing" | "won" | "lost";  // Game completion status
+  npc_trust: Record<string, number>;    // Trust levels with NPCs
+  npc_locations: Record<string, string>; // Current NPC locations
+  status: "playing" | "won" | "lost";   // Game completion status
 }
 ```
 

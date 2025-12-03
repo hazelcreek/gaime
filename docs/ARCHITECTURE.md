@@ -241,6 +241,8 @@ class GameState:
     discovered_locations: list[str]
     flags: dict[str, bool]  # story progress
     turn_count: int
+    npc_trust: dict[str, int]  # trust levels with NPCs
+    npc_locations: dict[str, str]  # current NPC locations (for dynamic movement)
     status: str  # "playing", "won", or "lost"
 ```
 
@@ -276,10 +278,101 @@ After each action, the engine checks if victory conditions are met. If so:
 - LLM calls are the bottleneck (~1-3s)
 - Frontend shows loading state during LLM calls
 
+## NPC System
+
+### Dynamic NPC Locations
+
+NPCs can move between locations based on game state:
+
+```
+1. NPC Definition:
+   butler_jenkins:
+     location: dining_room
+     location_changes:
+       - when_flag: alarm_triggered
+         move_to: entrance_hall
+       - when_flag: escaped
+         move_to: null  # NPC leaves the game entirely
+
+2. Runtime Resolution (state.py):
+   get_npc_current_location(npc_id):
+     - Start with NPC's default location
+     - Check each location_change trigger
+     - Last matching trigger wins
+     - Return current location (or None if NPC has left)
+   
+   get_present_npcs():
+     - Skip NPCs with location = None (they've left the game)
+     - For triggered NPCs, only check the specific move_to location
+     - For roaming NPCs without triggers, check all locations in list
+```
+
+### Conditional NPC Appearances
+
+NPCs with `appears_when` conditions only appear when ALL conditions are met:
+
+```python
+# NPC appears only if player has examined_nursery flag
+appears_when:
+  - condition: "has_flag"
+    value: "examined_nursery"
+
+# Runtime check in state.py _check_npc_appears()
+```
+
+## Image Variant System
+
+### Problem
+
+Static pre-generated images may show NPCs that shouldn't be visible yet (e.g., ghost appears in image before player triggers its appearance).
+
+### Solution: Variant Images
+
+For locations with conditional NPCs, generate multiple image variants:
+
+```
+worlds/cursed-manor/images/
+├── upper_landing.png              # Base (no ghost)
+├── upper_landing__with__ghost_child.png   # With ghost
+└── upper_landing_variants.json    # Manifest
+```
+
+### Manifest Format
+
+```json
+{
+  "location_id": "upper_landing",
+  "base": "upper_landing.png",
+  "variants": [
+    {"npcs": ["ghost_child"], "image": "upper_landing__with__ghost_child.png"}
+  ]
+}
+```
+
+### Runtime Image Selection
+
+```
+1. Player enters location
+2. API endpoint: GET /api/game/image/{session_id}/{location_id}
+3. State Manager determines visible NPCs at location
+4. Image generator loads variant manifest
+5. Returns appropriate variant (or base image)
+```
+
+### Generating Variants
+
+```bash
+# Generate all variants for a location
+POST /api/builder/{world_id}/images/{location_id}/generate-variants
+
+# Check variant status
+GET /api/builder/{world_id}/images/{location_id}/variants
+```
+
 ## Future Considerations
 
 - Multiplayer sessions
 - Save/load game files
 - Voice input/output
-- Image generation for scenes
+- Multi-NPC variant combinations (currently single-NPC only)
 

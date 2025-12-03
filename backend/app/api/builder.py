@@ -12,13 +12,16 @@ from app.llm.world_builder import WorldBuilder
 from app.llm.image_generator import (
     generate_location_image,
     generate_world_images,
+    generate_location_variants,
     get_location_image_path,
     list_location_images,
+    load_variant_manifest,
     LocationContext,
     ExitInfo,
     ItemInfo,
     NPCInfo,
     _build_location_context,
+    _get_conditional_npcs_at_location,
     ImageGenerationError,
 )
 
@@ -298,6 +301,115 @@ async def get_location_image(world_id: str, location_id: str):
         media_type="image/png",
         headers={"Cache-Control": "no-cache, no-store, must-revalidate"}
     )
+
+
+@router.post("/{world_id}/images/{location_id}/generate-variants")
+async def generate_location_image_variants(world_id: str, location_id: str):
+    """
+    Generate all image variants for a location with conditional NPCs.
+    
+    This creates:
+    - Base image (no conditional NPCs visible)
+    - Variant images for each conditional NPC
+    - A manifest JSON file mapping conditions to images
+    
+    Use this for locations where NPCs appear conditionally (with appears_when).
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"Generating variants for {world_id}/{location_id}")
+    
+    try:
+        manifest = await generate_location_variants(
+            world_id=world_id,
+            worlds_dir=WORLDS_DIR,
+            location_id=location_id
+        )
+        
+        if manifest:
+            # Build response with image URLs
+            images_generated = [manifest.base] + [v["image"] for v in manifest.variants]
+            
+            return {
+                "success": True,
+                "location_id": location_id,
+                "base_image": f"/api/builder/{world_id}/images/{location_id}",
+                "variants": [
+                    {
+                        "npcs": v["npcs"],
+                        "image_url": f"/api/builder/{world_id}/images/{v['image'].replace('.png', '')}"
+                    }
+                    for v in manifest.variants
+                ],
+                "manifest_path": f"{location_id}_variants.json",
+                "images_generated": len(images_generated),
+                "message": f"Generated {len(images_generated)} image variants"
+            }
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail="Variant generation failed"
+            )
+    
+    except HTTPException:
+        raise
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except ImageGenerationError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{world_id}/images/{location_id}/variants")
+async def get_location_variants_info(world_id: str, location_id: str):
+    """
+    Get information about available image variants for a location.
+    
+    Returns the variant manifest if it exists, showing which NPCs
+    have variant images and what conditions trigger them.
+    """
+    import yaml
+    
+    images_dir = WORLDS_DIR / world_id / "images"
+    manifest = load_variant_manifest(location_id, images_dir)
+    
+    # Also check for conditional NPCs at this location
+    locations_yaml = WORLDS_DIR / world_id / "locations.yaml"
+    npcs_yaml = WORLDS_DIR / world_id / "npcs.yaml"
+    
+    conditional_npcs = []
+    if locations_yaml.exists() and npcs_yaml.exists():
+        with open(locations_yaml) as f:
+            locations = yaml.safe_load(f) or {}
+        with open(npcs_yaml) as f:
+            npcs_data = yaml.safe_load(f) or {}
+        
+        if location_id in locations:
+            conditional_npcs = _get_conditional_npcs_at_location(
+                location_id, locations[location_id], npcs_data
+            )
+    
+    if manifest:
+        return {
+            "has_variants": True,
+            "location_id": location_id,
+            "base_image": manifest.base,
+            "variants": manifest.variants,
+            "conditional_npcs": conditional_npcs,
+            "variant_count": len(manifest.variants)
+        }
+    else:
+        return {
+            "has_variants": False,
+            "location_id": location_id,
+            "conditional_npcs": conditional_npcs,
+            "message": "No variants generated yet. Use POST /generate-variants to create them."
+        }
 
 
 @router.get("/{world_id}/images")

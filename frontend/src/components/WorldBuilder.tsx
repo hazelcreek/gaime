@@ -3,7 +3,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { gameAPI, ImageGenerationResult, WorldImagesInfo } from '../api/client';
+import { gameAPI, ImageGenerationResult, WorldImagesInfo, VariantInfo } from '../api/client';
 
 interface GeneratedWorld {
   world_id: string;
@@ -18,6 +18,9 @@ interface LocationInfo {
   id: string;
   name: string;
   hasImage: boolean;
+  conditionalNpcs: string[];  // NPCs with appears_when conditions
+  hasVariants: boolean;       // Whether variants have been generated
+  variantCount: number;       // Number of variants available
 }
 
 export default function WorldBuilder() {
@@ -37,6 +40,7 @@ export default function WorldBuilder() {
   const [locations, setLocations] = useState<LocationInfo[]>([]);
   const [isGeneratingImages, setIsGeneratingImages] = useState(false);
   const [generatingLocation, setGeneratingLocation] = useState<string | null>(null);
+  const [generatingVariants, setGeneratingVariants] = useState<string | null>(null);
   const [imageGenProgress, setImageGenProgress] = useState<string>('');
   const selectedImageModel = 'gemini-3-pro-image-preview';
 
@@ -84,11 +88,32 @@ export default function WorldBuilder() {
       const response = await fetch(`/api/builder/${worldId}/locations`);
       if (response.ok) {
         const data = await response.json();
-        setLocations(data.locations.map((loc: any) => ({
+        const locationsList = data.locations.map((loc: any) => ({
           id: loc.id,
           name: loc.name,
-          hasImage: loc.has_image || !!existingImages[loc.id]
-        })));
+          hasImage: loc.has_image || !!existingImages[loc.id],
+          conditionalNpcs: [] as string[],
+          hasVariants: false,
+          variantCount: 0
+        }));
+        
+        // Fetch variant info for each location (in parallel)
+        const variantPromises = locationsList.map(async (loc: LocationInfo) => {
+          try {
+            const variantInfo = await gameAPI.getLocationVariantInfo(worldId, loc.id);
+            return {
+              ...loc,
+              conditionalNpcs: variantInfo.conditional_npcs || [],
+              hasVariants: variantInfo.has_variants,
+              variantCount: variantInfo.variant_count || 0
+            };
+          } catch {
+            return loc;
+          }
+        });
+        
+        const locationsWithVariants = await Promise.all(variantPromises);
+        setLocations(locationsWithVariants);
       } else {
         // Fallback: just use image keys as locations if world not found
         const imageKeys = Object.keys(existingImages);
@@ -96,7 +121,10 @@ export default function WorldBuilder() {
           setLocations(imageKeys.map(id => ({
             id,
             name: formatLocationName(id),
-            hasImage: true
+            hasImage: true,
+            conditionalNpcs: [],
+            hasVariants: false,
+            variantCount: 0
           })));
         } else {
           setLocations([]);
@@ -110,7 +138,10 @@ export default function WorldBuilder() {
         setLocations(imageKeys.map(id => ({
           id,
           name: formatLocationName(id),
-          hasImage: true
+          hasImage: true,
+          conditionalNpcs: [],
+          hasVariants: false,
+          variantCount: 0
         })));
       } else {
         setLocations([]);
@@ -266,6 +297,73 @@ export default function WorldBuilder() {
     } finally {
       setGeneratingLocation(null);
     }
+  };
+
+  const handleGenerateVariants = async (locationId: string) => {
+    if (!selectedWorld) return;
+    
+    setGeneratingVariants(locationId);
+    setError(null);
+
+    try {
+      const response = await gameAPI.generateLocationVariants(selectedWorld, locationId);
+      
+      if (response.success) {
+        setImageGenProgress(`✓ Generated ${response.images_generated} variants for ${formatLocationName(locationId)}`);
+        // Refresh to get updated variant info
+        await loadWorldImages(selectedWorld);
+        setTimeout(() => setImageGenProgress(''), 5000);
+      } else {
+        setError(`Failed to generate variants for ${locationId}`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate variants');
+    } finally {
+      setGeneratingVariants(null);
+    }
+  };
+
+  const handleGenerateAllVariants = async () => {
+    if (!selectedWorld) return;
+    
+    const locationsNeedingVariants = locations.filter(
+      loc => loc.conditionalNpcs.length > 0 && !loc.hasVariants
+    );
+    
+    if (locationsNeedingVariants.length === 0) {
+      setImageGenProgress('All variants already generated!');
+      setTimeout(() => setImageGenProgress(''), 3000);
+      return;
+    }
+    
+    setIsGeneratingImages(true);
+    let successful = 0;
+    
+    for (let i = 0; i < locationsNeedingVariants.length; i++) {
+      const loc = locationsNeedingVariants[i];
+      setGeneratingVariants(loc.id);
+      setImageGenProgress(`Generating variants ${i + 1}/${locationsNeedingVariants.length}: ${loc.name}...`);
+      
+      try {
+        const response = await gameAPI.generateLocationVariants(selectedWorld, loc.id);
+        if (response.success) {
+          successful++;
+          // Update local state
+          setLocations(prev => prev.map(l => 
+            l.id === loc.id ? { ...l, hasVariants: true, variantCount: response.images_generated - 1 } : l
+          ));
+        }
+      } catch (err) {
+        console.error(`Failed to generate variants for ${loc.id}:`, err);
+      }
+    }
+    
+    setGeneratingVariants(null);
+    setIsGeneratingImages(false);
+    setImageGenProgress(`✓ Generated variants for ${successful}/${locationsNeedingVariants.length} locations`);
+    
+    await loadWorldImages(selectedWorld);
+    setTimeout(() => setImageGenProgress(''), 5000);
   };
 
   const getTabContent = () => {
@@ -463,6 +561,22 @@ export default function WorldBuilder() {
                   : `Generate Missing Images (${locations.filter(l => !worldImages[l.id]).length})`}
               </button>
 
+              {/* Variant generation button */}
+              {locations.some(l => l.conditionalNpcs.length > 0 && !l.hasVariants) && (
+                <button
+                  onClick={handleGenerateAllVariants}
+                  disabled={isGeneratingImages || generatingVariants !== null}
+                  className="w-full py-3 bg-terminal-accent/20 border border-terminal-accent 
+                           text-terminal-accent rounded font-display tracking-wider text-sm
+                           hover:bg-terminal-accent/30 transition-colors
+                           disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {generatingVariants 
+                    ? 'Generating Variants...' 
+                    : `Generate NPC Variants (${locations.filter(l => l.conditionalNpcs.length > 0 && !l.hasVariants).length} locations)`}
+                </button>
+              )}
+
               {imageGenProgress && (
                 <div className={`p-3 rounded border text-center ${
                   isGeneratingImages 
@@ -487,21 +601,23 @@ export default function WorldBuilder() {
               
               <div className="bg-terminal-bg border border-terminal-border rounded p-4 max-h-64 overflow-y-auto">
                 {locations.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2">
                     {locations.map(loc => {
                       const isGenerating = generatingLocation === loc.id;
+                      const isGeneratingVar = generatingVariants === loc.id;
                       const hasImage = !!worldImages[loc.id];
+                      const needsVariants = loc.conditionalNpcs.length > 0;
                       
                       return (
                         <div 
                           key={loc.id}
                           className={`flex items-center justify-between p-2 rounded transition-colors ${
-                            isGenerating 
+                            isGenerating || isGeneratingVar
                               ? 'bg-terminal-highlight/20 border border-terminal-highlight' 
                               : 'bg-terminal-surface/50'
                           }`}
                         >
-                          <div className="flex items-center gap-2 min-w-0">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
                             <span className={`${
                               isGenerating 
                                 ? 'text-terminal-highlight animate-pulse' 
@@ -511,23 +627,61 @@ export default function WorldBuilder() {
                             }`}>
                               {isGenerating ? '◐' : hasImage ? '●' : '○'}
                             </span>
-                            <span className={`text-sm truncate ${
-                              isGenerating ? 'text-terminal-highlight' : 'text-terminal-text'
-                            }`}>
-                              {loc.name}
-                            </span>
+                            <div className="min-w-0 flex-1">
+                              <span className={`text-sm truncate block ${
+                                isGenerating ? 'text-terminal-highlight' : 'text-terminal-text'
+                              }`}>
+                                {loc.name}
+                              </span>
+                              {needsVariants && (
+                                <span className={`text-xs ${
+                                  loc.hasVariants ? 'text-terminal-success' : 'text-terminal-warning'
+                                }`}>
+                                  {loc.hasVariants 
+                                    ? `✓ ${loc.variantCount} variant${loc.variantCount !== 1 ? 's' : ''}`
+                                    : `⚠ Has conditional NPC: ${loc.conditionalNpcs.join(', ')}`
+                                  }
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <button
-                            onClick={() => handleGenerateSingleImage(loc.id)}
-                            disabled={isGenerating || isGeneratingImages}
-                            className={`px-2 py-1 text-xs border rounded transition-colors flex-shrink-0 ${
-                              isGenerating
-                                ? 'border-terminal-highlight text-terminal-highlight animate-pulse'
-                                : 'border-terminal-border text-terminal-dim hover:text-terminal-accent hover:border-terminal-accent disabled:opacity-50'
-                            }`}
-                          >
-                            {isGenerating ? '⟳' : hasImage ? '↻' : '+'}
-                          </button>
+                          <div className="flex gap-1 flex-shrink-0">
+                            {needsVariants ? (
+                              // For locations with conditional NPCs, show a single button that regenerates all variants
+                              <button
+                                onClick={() => handleGenerateVariants(loc.id)}
+                                disabled={isGeneratingVar || isGeneratingImages}
+                                title={loc.hasVariants 
+                                  ? 'Regenerate base image + all NPC variants' 
+                                  : 'Generate base image + NPC variants'
+                                }
+                                className={`px-2 py-1 text-xs border rounded transition-colors ${
+                                  isGeneratingVar
+                                    ? 'border-terminal-accent text-terminal-accent animate-pulse'
+                                    : loc.hasVariants
+                                      ? 'border-terminal-success/50 text-terminal-success/50 hover:text-terminal-success hover:border-terminal-success'
+                                      : hasImage
+                                        ? 'border-terminal-warning text-terminal-warning hover:bg-terminal-warning/10'
+                                        : 'border-terminal-accent text-terminal-accent hover:bg-terminal-accent/10'
+                                }`}
+                              >
+                                {isGeneratingVar ? '⟳' : loc.hasVariants ? '↻ All' : hasImage ? '+V' : '+ All'}
+                              </button>
+                            ) : (
+                              // For simple locations (no variants), show regular generate/regenerate button
+                              <button
+                                onClick={() => handleGenerateSingleImage(loc.id)}
+                                disabled={isGenerating || isGeneratingImages}
+                                className={`px-2 py-1 text-xs border rounded transition-colors ${
+                                  isGenerating
+                                    ? 'border-terminal-highlight text-terminal-highlight animate-pulse'
+                                    : 'border-terminal-border text-terminal-dim hover:text-terminal-accent hover:border-terminal-accent disabled:opacity-50'
+                                }`}
+                              >
+                                {isGenerating ? '⟳' : hasImage ? '↻' : '+'}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
@@ -546,39 +700,71 @@ export default function WorldBuilder() {
             <div className="mt-6">
               <label className="block text-terminal-dim text-sm mb-2">Generated Images</label>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {Object.entries(worldImages).map(([locId, url]) => (
-                  <div 
-                    key={locId}
-                    className="relative aspect-video rounded-lg overflow-hidden border border-terminal-border
-                             group cursor-pointer hover:border-terminal-accent transition-colors"
-                    onClick={() => window.open(url, '_blank')}
-                  >
-                    <img
-                      src={url}
-                      alt={formatLocationName(locId)}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-terminal-bg via-transparent to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-2">
-                      <p className="text-terminal-text text-xs font-display truncate">
-                        {formatLocationName(locId)}
-                      </p>
-                    </div>
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleGenerateSingleImage(locId);
-                        }}
-                        disabled={generatingLocation === locId}
-                        className="px-2 py-1 text-xs bg-terminal-surface/80 border border-terminal-border
-                                 text-terminal-dim hover:text-terminal-accent rounded transition-colors"
+                {Object.entries(worldImages)
+                  // Filter out variant images (they contain __with__) - only show base images
+                  .filter(([locId]) => !locId.includes('__with__'))
+                  .map(([locId, url]) => {
+                    const location = locations.find(l => l.id === locId);
+                    const hasVariants = location?.hasVariants || false;
+                    const needsVariants = (location?.conditionalNpcs.length || 0) > 0;
+                    const isGeneratingThis = generatingLocation === locId || generatingVariants === locId;
+                    
+                    return (
+                      <div 
+                        key={locId}
+                        className="relative aspect-video rounded-lg overflow-hidden border border-terminal-border
+                                 group cursor-pointer hover:border-terminal-accent transition-colors"
+                        onClick={() => window.open(url, '_blank')}
                       >
-                        {generatingLocation === locId ? '...' : '↻ Regenerate'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                        <img
+                          src={url}
+                          alt={formatLocationName(locId)}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-terminal-bg via-transparent to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 p-2">
+                          <p className="text-terminal-text text-xs font-display truncate">
+                            {formatLocationName(locId)}
+                          </p>
+                          {hasVariants && (
+                            <p className="text-terminal-success text-[10px] truncate">
+                              ✓ {location?.variantCount} variant{location?.variantCount !== 1 ? 's' : ''}
+                            </p>
+                          )}
+                        </div>
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {needsVariants ? (
+                            // For locations with conditional NPCs, regenerating means regenerating all variants
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleGenerateVariants(locId);
+                              }}
+                              disabled={isGeneratingThis}
+                              title="Regenerate base + all variants"
+                              className="px-2 py-1 text-xs bg-terminal-surface/80 border border-terminal-border
+                                       text-terminal-dim hover:text-terminal-accent rounded transition-colors"
+                            >
+                              {isGeneratingThis ? '...' : '↻ Regen All'}
+                            </button>
+                          ) : (
+                            // Simple location - just regenerate the single image
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleGenerateSingleImage(locId);
+                              }}
+                              disabled={isGeneratingThis}
+                              className="px-2 py-1 text-xs bg-terminal-surface/80 border border-terminal-border
+                                       text-terminal-dim hover:text-terminal-accent rounded transition-colors"
+                            >
+                              {isGeneratingThis ? '...' : '↻ Regenerate'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           )}

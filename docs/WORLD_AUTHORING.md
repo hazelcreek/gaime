@@ -267,6 +267,21 @@ ghost_child:
     Points toward clues, leads to hidden areas.
     Disappears when approached too quickly.
     Shows fear near the ritual chamber.
+
+# Example NPC that moves based on story progress
+mansion_guard:
+  name: "The Guard"
+  role: "Security patrol"
+  
+  # Default location
+  location: front_gate
+  
+  # Location changes based on flags (checked in order, last match wins)
+  location_changes:
+    - when_flag: alarm_triggered
+      move_to: main_hallway
+    - when_flag: player_discovered
+      move_to: player_last_location
 ```
 
 ### items.yaml
@@ -515,6 +530,107 @@ This generates YAML files you can then edit and refine.
 4. Check constraints are respected
 5. Verify NPC dialogue feels consistent
 
+## NPC Dynamic Behavior
+
+### Conditional Appearances
+
+NPCs can appear only when certain conditions are met using `appears_when`:
+
+```yaml
+ghost_child:
+  appears_when:
+    - condition: "has_flag"
+      value: "examined_nursery"
+    - condition: "trust_above"
+      value: 3
+```
+
+Conditions are checked at runtime - the NPC only appears if ALL conditions are satisfied.
+
+### Dynamic Location Changes
+
+NPCs can move between locations based on story flags using `location_changes`:
+
+```yaml
+butler_jenkins:
+  location: dining_room  # Default location
+  
+  location_changes:
+    - when_flag: heard_noise_upstairs
+      move_to: upper_landing
+    - when_flag: curse_broken
+      move_to: entrance_hall
+```
+
+**Rules:**
+- Location changes are checked in order
+- The **last matching trigger wins**
+- If no triggers match, the NPC stays at their default `location`
+- Use this for story-driven movement (guard patrols, NPC reactions to events)
+- Once triggered, roaming NPCs (with `locations` list) will ONLY be at the new location
+
+### Removing NPCs from the Game
+
+To make an NPC leave the game entirely after an event, use `move_to: null`:
+
+```yaml
+ghost_child:
+  locations:
+    - nursery
+    - upper_landing
+    - library
+  
+  location_changes:
+    - when_flag: curse_broken
+      move_to: null  # Ghost is freed - disappears from all locations
+```
+
+When `move_to` is `null`:
+- The NPC will not appear in ANY location
+- They are effectively "gone" from the game
+- This works for both single-location and roaming NPCs
+
+## Image Variants for Conditional NPCs
+
+When NPCs have `appears_when` conditions, their visibility depends on game state. To ensure images match the narrative, use **image variants**.
+
+### The Problem
+
+If a ghost appears only after examining the nursery, but the location image always shows the ghost, players see a visual/narrative mismatch.
+
+### The Solution: Variant Images
+
+Generate multiple image versions for locations with conditional NPCs:
+
+```bash
+# Generate variants for a location
+POST /api/builder/{world_id}/images/{location_id}/generate-variants
+```
+
+This creates:
+- **Base image**: `upper_landing.png` (no conditional NPCs)
+- **Variant images**: `upper_landing__with__ghost_child.png`
+- **Manifest**: `upper_landing_variants.json`
+
+The game automatically serves the correct variant based on current game state.
+
+### Naming Convention
+
+| File | Contents |
+|------|----------|
+| `{location}.png` | Base image (unconditional NPCs only) |
+| `{location}__with__{npc_id}.png` | Variant with specific NPC visible |
+| `{location}_variants.json` | Manifest mapping NPCs to images |
+
+### Checking Variant Status
+
+```bash
+# See which locations need variants
+GET /api/builder/{world_id}/images/{location_id}/variants
+```
+
+Returns information about conditional NPCs and existing variants.
+
 ## Common Pitfalls
 
 | Issue | Solution |
@@ -531,4 +647,7 @@ This generates YAML files you can then edit and refine.
 | Exits seem unrealistic | Add narrative justification in `details` for each exit direction |
 | Items placed unrealistically in images | Add `item_placements` for every item at each location |
 | NPCs floating in scene | Add `npc_placements` for every NPC at each location |
+| Conditional NPC visible in image before appearing | Generate image variants with `/generate-variants` |
+| NPC doesn't move when expected | Check `location_changes` triggers and flag names match exactly |
+| NPC won't leave the game | Use `move_to: null` in `location_changes` to remove NPC entirely |
 
