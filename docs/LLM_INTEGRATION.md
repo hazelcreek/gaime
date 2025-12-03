@@ -304,7 +304,7 @@ Output valid YAML for each file.
 
 ## Image Generation
 
-GAIME uses Google's Gemini native image generation capabilities to create immersive scene images for game locations.
+GAIME uses Google's Gemini native image generation capabilities to create immersive scene images for game locations. Images include visual hints for exits, items, and NPCs to give players natural indications for interaction.
 
 ### Configuration
 
@@ -314,20 +314,39 @@ Image generation uses the same `GEMINI_API_KEY` as text generation. No additiona
 
 | Model | Description | Use Case |
 |-------|-------------|----------|
-| `gemini-2.0-flash-exp` | Native image generation | Primary image generator |
-| `imagen-3.0-generate-002` | Dedicated image model | Fallback for complex scenes |
+| `gemini-3-pro-image-preview` | Advanced image generation | Primary image generator |
+| `gemini-2.5-flash-image` | Fast image generation | Fallback model |
+| `gemini-2.0-flash-exp` | Experimental fast model | Secondary fallback |
 
 ### How It Works
 
-1. **Prompt Generation**: The system creates a detailed art prompt from:
-   - Location name
-   - Atmospheric description from YAML
-   - World theme and tone
+1. **Context Building**: The system gathers interactive elements from the world data:
+   - **Exits**: Visible doorways/passages based on direction
+   - **Items**: Objects present at the location (regular, hidden, or artifacts)
+   - **NPCs**: Characters at the location with their appearance
+
+2. **Prompt Generation**: Creates a detailed art prompt from:
+   - Location name, atmosphere, theme, and tone
+   - Interactive elements with appropriate visibility levels
    - Style requirements (painterly, first-person, 16:9)
 
-2. **Image Generation**: Calls Gemini's native image generation API
+3. **Image Generation**: Calls Gemini's native image generation API
 
-3. **Storage**: Images are saved to `worlds/{world_id}/images/{location_id}.png`
+4. **Storage**: Images are saved to `worlds/{world_id}/images/{location_id}.png`
+
+### Interactive Elements in Images
+
+The image generator includes visual hints for interactive elements:
+
+| Element Type | Visibility | Visual Representation |
+|--------------|------------|----------------------|
+| **Normal Exits** | Clearly visible | Doorways, passages, stairs based on direction |
+| **Locked Exits** | Visible but blocked | Doors with locks or barriers |
+| **Secret Exits** | Subtle hints | Faint drafts, wall irregularities, shadows |
+| **Regular Items** | Naturally placed | Objects in logical locations |
+| **Hidden Items** | Barely perceptible | Faint glints, partial obscuring |
+| **Artifacts** | Notable presence | Subtle glow, prominent placement |
+| **NPCs** | Present in scene | Figures with described appearance |
 
 ### API Endpoints
 
@@ -341,28 +360,52 @@ Image generation uses the same `GEMINI_API_KEY` as text generation. No additiona
 ### Usage Example
 
 ```python
-# Generate all images for a world
+# Generate all images for a world (with context)
 from app.llm.image_generator import generate_world_images
 
 results = await generate_world_images(
     world_id="cursed-manor",
     worlds_dir=Path("worlds")
 )
+# Images include visual hints for all exits, items, and NPCs
 
-# Generate single image
-from app.llm.image_generator import generate_location_image
+# Generate single image with custom context
+from app.llm.image_generator import (
+    generate_location_image,
+    LocationContext,
+    ExitInfo,
+    ItemInfo,
+    NPCInfo
+)
+
+context = LocationContext(
+    exits=[
+        ExitInfo(direction="north", destination_name="Kitchen"),
+        ExitInfo(direction="down", destination_name="Basement", requires_key=True),
+    ],
+    items=[
+        ItemInfo(name="Silver Key", is_hidden=False),
+        ItemInfo(name="Ancient Amulet", is_artifact=True),
+    ],
+    npcs=[
+        NPCInfo(name="Jenkins", role="Butler", appearance="An elderly man..."),
+    ]
+)
 
 image_path = await generate_location_image(
-    location_id="entrance_hall",
-    location_name="Entrance Hall",
-    atmosphere="A grand but decayed entrance hall...",
+    location_id="dining_room",
+    location_name="Dining Room",
+    atmosphere="A long mahogany table dominates this room...",
     theme="Victorian gothic horror",
     tone="atmospheric, mysterious",
-    output_dir=Path("worlds/cursed-manor/images")
+    output_dir=Path("worlds/cursed-manor/images"),
+    context=context
 )
 ```
 
 ### Image Prompt Template
+
+The prompt now includes interactive elements:
 
 ```python
 prompt = f"""Create a dramatic, atmospheric scene illustration for a text adventure game.
@@ -374,14 +417,26 @@ Tone: {tone}
 Scene Description:
 {atmosphere}
 
+Interactive Elements to Include:
+Visible pathways: doorway to the left; passage ahead; stairs descending, secured with lock
+Objects in the scene: Silver Key placed naturally within the scene
+Significant objects: Ancient Amulet that draws the eye with subtle presence
+Characters visible in the scene: A figure - Jenkins (Butler): An elderly man...
+
+Important: These elements should be integrated naturally into the scene, not highlighted 
+or labelled. They should reward careful observation - exits should look like real 
+architectural features, items should be placed where they would naturally be found, 
+and any characters should be positioned authentically within the space.
+
 Style Requirements:
 - Digital painting style with rich colors and dramatic lighting
 - Painterly, evocative atmosphere suitable for a text adventure game
 - First-person perspective as if the player is viewing the scene
 - Moody, immersive lighting that matches the tone
-- No text, UI elements, or characters in frame
 - 16:9 widescreen composition
 - Detailed environment with depth and atmospheric effects
+- Natural integration of doorways, passages, and architectural features
+- Subtle visual storytelling through object placement and environmental details
 """
 ```
 
@@ -389,6 +444,11 @@ Style Requirements:
 
 1. **Rich Atmosphere**: More detailed atmosphere text = better images
 2. **Consistent Theme**: Theme and tone affect image style
-3. **Regenerate As Needed**: Use the single-image endpoint to refine specific locations
-4. **Rate Limiting**: Generation includes delays to avoid API rate limits
+3. **Interactive Elements**: Items and NPCs should be defined in YAML for visual inclusion
+4. **Hidden Items**: Mark items as `hidden: true` for subtle representation
+5. **Artifacts**: Mark items as `artifact: true` for mysterious prominence
+6. **Secret Passages**: Exits to locations with `requires: flag:` are shown subtly
+7. **Locked Exits**: Exits to locations with `requires: item:` show as locked
+8. **Regenerate As Needed**: Use the single-image endpoint to refine specific locations
+9. **Rate Limiting**: Generation includes delays to avoid API rate limits
 
