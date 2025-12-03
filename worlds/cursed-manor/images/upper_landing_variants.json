@@ -1,0 +1,12 @@
+{
+  "location_id": "upper_landing",
+  "base": "upper_landing.png",
+  "variants": [
+    {
+      "npcs": [
+        "ghost_child"
+      ],
+      "image": "upper_landing__with__ghost_child.png"
+    }
+  ]
+}

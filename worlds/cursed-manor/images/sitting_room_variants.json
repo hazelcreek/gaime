@@ -1,0 +1,12 @@
+{
+  "location_id": "sitting_room",
+  "base": "sitting_room.png",
+  "variants": [
+    {
+      "npcs": [
+        "ghost_child"
+      ],
+      "image": "sitting_room__with__ghost_child.png"
+    }
+  ]
+}

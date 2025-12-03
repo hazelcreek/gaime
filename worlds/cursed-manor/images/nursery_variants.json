@@ -1,0 +1,12 @@
+{
+  "location_id": "nursery",
+  "base": "nursery.png",
+  "variants": [
+    {
+      "npcs": [
+        "ghost_child"
+      ],
+      "image": "nursery__with__ghost_child.png"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "location_id": "library",
+  "base": "library.png",
+  "variants": [
+    {
+      "npcs": [
+        "ghost_child"
+      ],
+      "image": "library__with__ghost_child.png"
+    }
+  ]
+}
