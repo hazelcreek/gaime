@@ -121,7 +121,7 @@ class GameMaster:
         world = self.world_data.world
         location = self.state_manager.get_current_location()
         
-        # Get items at location with their found_descriptions
+        # Get items at location with their placement descriptions
         items_here_detailed = []
         location_item_ids = []
         if location:
@@ -129,15 +129,32 @@ class GameMaster:
                 item = self.world_data.get_item(item_id)
                 if item and not item.hidden:
                     location_item_ids.append(item_id)
-                    # Include found_description for scene description
-                    found_desc = item.found_description or f"A {item.name} is here."
-                    items_here_detailed.append(f"- {item.name} ({item_id}): {found_desc}")
+                    # Use location-specific placement if available, otherwise fall back to found_description
+                    placement = location.item_placements.get(item_id)
+                    if placement:
+                        items_here_detailed.append(f"- {item.name} ({item_id}): {placement}")
+                    else:
+                        found_desc = item.found_description or f"A {item.name} is here."
+                        items_here_detailed.append(f"- {item.name} ({item_id}): {found_desc}")
         
-        # Get NPCs present
+        # Get NPCs present with their placement descriptions
         npcs_here = []
         npc_knowledge = []
         for npc in self.state_manager.get_present_npcs():
-            npcs_here.append(f"{npc.name} - {npc.role}")
+            # Find the NPC ID by matching name
+            npc_id = None
+            for nid, n in self.world_data.npcs.items():
+                if n.name == npc.name:
+                    npc_id = nid
+                    break
+            
+            # Use location-specific placement if available
+            placement = location.npc_placements.get(npc_id) if location and npc_id else None
+            if placement:
+                npcs_here.append(f"{npc.name} - {npc.role} ({placement})")
+            else:
+                npcs_here.append(f"{npc.name} - {npc.role}")
+            
             if npc.knowledge:
                 npc_knowledge.append(f"{npc.name}: {', '.join(npc.knowledge[:3])}")
         

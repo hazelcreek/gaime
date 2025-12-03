@@ -15,6 +15,9 @@ entrance_hall:
   items:
     - old_letter
     - candlestick
+  item_placements:
+    old_letter: "lies crumpled on the dusty side table beside the front door, as if dropped in haste"
+    candlestick: "sits on the narrow console table beneath the portraits, its candle melted to a stub"
   npcs: []
   details:
     portraits: "Five family portraits hang on the walls - a stern father, a beautiful mother, and three children of varying ages"
@@ -44,6 +47,9 @@ library:
   items:
     - dusty_tome
     - reading_glasses
+  item_placements:
+    dusty_tome: "lies open on the massive oak desk, its yellowed pages stirring in the draft"
+    reading_glasses: "rest beside the open book on the desk, as if their owner just stepped away"
   npcs: []
   details:
     books: "Thousands of books on every subject - history, science, and disturbingly many on the occult"
@@ -100,6 +106,8 @@ ritual_chamber:
     up: secret_passage
   items:
     - grimoire
+  item_placements:
+    grimoire: "rests upon the central pedestal, its pale leather binding seeming to glow faintly in the darkness"
   npcs: []
   details:
     symbols: "The painted symbols match those from the notes - this is where the ritual was performed"
@@ -134,8 +142,12 @@ dining_room:
     north: kitchen
   items:
     - silver_key
+  item_placements:
+    silver_key: "glints beneath the dining table, half-hidden among the dusty chair legs"
   npcs:
     - butler_jenkins
+  npc_placements:
+    butler_jenkins: "stands rigidly beside the grandfather clock, his pale hands clasped before him, watching you with hollow eyes"
   details:
     table: "The table is set for six, but the food has long since rotted away"
     clock: "The grandfather clock keeps perfect time - 11:47 PM. How is it still running?"
@@ -154,6 +166,8 @@ kitchen:
     down: basement
   items:
     - kitchen_knife
+  item_placements:
+    kitchen_knife: "lies on the stone preparation counter near the hearth, its blade stained dark"
   npcs: []
   details:
     hearth: "The hearth is large enough to roast a whole pig"
@@ -179,6 +193,8 @@ basement:
     up: kitchen
   items:
     - ancient_dagger
+  item_placements:
+    ancient_dagger: "lies half-buried in debris in the far corner, its black iron blade catching what little light filters down"
   npcs: []
   requires:
     item: iron_key
@@ -199,6 +215,8 @@ sitting_room:
     east: entrance_hall
   items:
     - family_photo
+  item_placements:
+    family_photo: "sits in a tarnished silver frame on the mantelpiece, the family frozen in a moment of happiness"
   npcs: []
   details:
     piano: "A beautiful grand piano, covered in dust but potentially still playable"
@@ -246,6 +264,8 @@ master_bedroom:
     south: upper_landing
   items:
     - iron_key
+  item_placements:
+    iron_key: "hangs from a hook inside the wardrobe, cold and heavy, as if deliberately hidden away"
   npcs: []
   details:
     bed: "The bed is made, as if waiting for occupants who will never return"
@@ -273,6 +293,8 @@ nursery:
     north: upper_landing
   items:
     - thornwood_amulet
+  item_placements:
+    thornwood_amulet: "glints beneath a loose floorboard near the smallest bed, hidden in the children's secret place"
   npcs: []
   details:
     toys: "Toys scattered mid-play - a ball, wooden soldiers, a doll with no eyes"
@@ -299,6 +321,8 @@ guest_room:
     west: upper_landing
   items:
     - matches
+  item_placements:
+    matches: "rest on the writing desk beside a dried-out inkwell, as if left for a late-night letter"
   npcs: []
   details:
     bed: "The bed is freshly made, as if expecting a guest"

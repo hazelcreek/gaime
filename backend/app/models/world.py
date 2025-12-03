@@ -59,6 +59,8 @@ class Location(BaseModel):
     details: dict[str, str] = Field(default_factory=dict)
     interactions: dict[str, InteractionEffect] = Field(default_factory=dict)
     requires: LocationRequirement | None = None
+    item_placements: dict[str, str] = Field(default_factory=dict)  # Maps item_id to placement description
+    npc_placements: dict[str, str] = Field(default_factory=dict)   # Maps npc_id to position description
 
 
 class NPCPersonality(BaseModel):

@@ -10,6 +10,8 @@ main_hallway:
     outside: front_gate
   items:
     - hall_pass
+  item_placements:
+    hall_pass: "sits forgotten on a wooden bench beneath the trophy case, its laminated surface catching the afternoon light"
   npcs: []
   details:
     trophy_case: "Full of participation trophies from 1998."
@@ -23,8 +25,12 @@ principal_office:
     south: main_hallway
   items:
     - rubber_stamp
+  item_placements:
+    rubber_stamp: "sits on the mahogany desk beside a towering stack of confiscation forms, its red ink pad still fresh"
   npcs:
     - principal_skinner
+  npc_placements:
+    principal_skinner: "sits behind the massive desk, fingers steepled, peering at you over his reading glasses with barely contained suspicion"
   details:
     desk: "Covered in confiscation forms."
     portrait: "The eyes seem to follow you."
@@ -38,8 +44,12 @@ cafeteria:
     north: kitchen
   items:
     - spatular_sword
+  item_placements:
+    spatular_sword: "leans against the stainless steel serving counter, its industrial size suggesting it has flipped a thousand mystery meat patties"
   npcs:
     - lunch_lady_doris
+  npc_placements:
+    lunch_lady_doris: "stands behind the serving counter with arms crossed, hairnet askew, guarding the kitchen entrance like a gruff sentinel"
   details:
     serving_station: "Currently serving nothing but disappointment."
     floor: "Sticky. It's always sticky."
@@ -52,8 +62,12 @@ science_lab:
     east: main_hallway
   items:
     - baking_soda
+  item_placements:
+    baking_soda: "sits on the black countertop next to a collection of beakers, its orange box faded from years of science fair volcanoes"
   npcs:
     - nerd_neil
+  npc_placements:
+    nerd_neil: "crouches behind the teacher's desk, peeking out nervously, his thick glasses catching the fluorescent light"
   details:
     skeleton: "His name tag says 'Mr. Bones'."
     blackboard: "Someone has drawn a complex diagram of a spitball trajectory."
@@ -67,6 +81,8 @@ gymnasium:
     east: locker_room
   items:
     - dodgeball
+  item_placements:
+    dodgeball: "sits dead center on the half-court line, as if waiting to deliver childhood trauma to its next victim"
   npcs: []
   details:
     hoop: "Just out of reach for a slam dunk."
@@ -80,6 +96,8 @@ locker_room:
     west: gymnasium
   items:
     - janitor_keys
+  item_placements:
+    janitor_keys: "dangle from a hook on locker 13, their massive key ring jangling softly with the building's vibrations"
   npcs: []
   details:
     shower: "It looks like it hasn't been cleaned since the 80s."
@@ -93,6 +111,8 @@ kitchen:
     south: cafeteria
   items:
     - vinegar
+  item_placements:
+    vinegar: "sits on the counter by the industrial sink, its plastic jug half-empty and smelling sharply acidic"
   npcs: []
   details:
     freezer: "Locked tight. Probably full of ice cream sandwiches."

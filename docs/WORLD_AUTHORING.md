@@ -118,8 +118,18 @@ entrance_hall:
     - old_letter
     - candlestick
   
+  # WHERE items are placed in this specific location (improves images and narration)
+  item_placements:
+    old_letter: "lies crumpled on the dusty side table near the door"
+    candlestick: "sits on the fireplace mantel, cold and unlit"
+  
   # NPCs present (reference npcs.yaml)
-  npcs: []
+  npcs:
+    - butler_jenkins
+  
+  # WHERE NPCs are positioned in this location
+  npc_placements:
+    butler_jenkins: "stands rigidly by the grandfather clock, pale hands clasped"
   
   # Interactive elements (things player can examine)
   details:
@@ -401,6 +411,31 @@ details:
   up: "A grand staircase climbs into shadow"
 ```
 
+### Item and NPC Placements
+
+**Every item and NPC should have a placement** describing WHERE in the room they are located. This improves both image generation and game master narratives:
+
+```yaml
+# Good - specific placement in room
+item_placements:
+  old_letter: "lies crumpled on the dusty side table near the door"
+  candlestick: "sits on the fireplace mantel, cold and unlit"
+
+npc_placements:
+  butler_jenkins: "stands rigidly by the grandfather clock, pale hands clasped"
+
+# Bad - missing placements (items/NPCs won't be positioned realistically)
+items:
+  - old_letter
+  - candlestick
+# No item_placements defined!
+```
+
+Placements should describe:
+- **Physical location**: "on the desk", "beneath the window", "by the fireplace"
+- **State/posture** (for NPCs): "standing", "crouching", "seated"
+- **Atmospheric details**: "half-hidden in shadow", "catching the moonlight"
+
 ### Defining Constraints
 
 Constraints prevent the AI from breaking game logic:
@@ -494,4 +529,6 @@ This generates YAML files you can then edit and refine.
 | Player confused why they can act | Add `starting_situation` explaining the enabling event |
 | Game has no ending | Add `victory` condition with location/flag/item requirements |
 | Exits seem unrealistic | Add narrative justification in `details` for each exit direction |
+| Items placed unrealistically in images | Add `item_placements` for every item at each location |
+| NPCs floating in scene | Add `npc_placements` for every NPC at each location |
 

@@ -40,6 +40,7 @@ class ItemInfo:
     description: str = ""
     is_hidden: bool = False
     is_artifact: bool = False
+    placement: str = ""  # Where the item is positioned in this specific location
 
 
 @dataclass
@@ -48,6 +49,7 @@ class NPCInfo:
     name: str
     appearance: str = ""
     role: str = ""
+    placement: str = ""  # Where the NPC is positioned in this specific location
 
 
 @dataclass
@@ -118,6 +120,9 @@ def _build_items_description(items: list[ItemInfo]) -> str:
     artifact_items = []
     
     for item in items:
+        # Use specific placement if available, otherwise use generic description
+        placement_desc = item.placement if item.placement else f"placed naturally within the scene"
+        
         if item.is_hidden:
             # Hidden items should be barely visible - a glint, shadow, or suggestion
             hidden_hints.append(
@@ -125,14 +130,19 @@ def _build_items_description(items: list[ItemInfo]) -> str:
                 "perhaps catching a sliver of light or partially obscured"
             )
         elif item.is_artifact:
-            # Artifacts should be present but mysterious
-            artifact_items.append(
-                f"a notable object ({item.name}) that draws the eye with subtle presence, "
-                "perhaps glowing faintly or positioned prominently"
-            )
+            # Artifacts should be present but mysterious, with specific placement if available
+            if item.placement:
+                artifact_items.append(
+                    f"a notable object ({item.name}) {item.placement}, drawing the eye with subtle presence"
+                )
+            else:
+                artifact_items.append(
+                    f"a notable object ({item.name}) that draws the eye with subtle presence, "
+                    "perhaps glowing faintly or positioned prominently"
+                )
         else:
-            # Regular items - naturally placed in the scene
-            visible_items.append(f"{item.name} placed naturally within the scene")
+            # Regular items - use specific placement description
+            visible_items.append(f"{item.name} {placement_desc}")
     
     parts = []
     if visible_items:
@@ -153,11 +163,19 @@ def _build_npcs_description(npcs: list[NPCInfo]) -> str:
     npc_descriptions = []
     
     for npc in npcs:
+        # Build description with placement if available
+        placement_part = f", {npc.placement}" if npc.placement else ""
+        
         if npc.appearance:
             # Clean up the appearance text
             appearance_clean = npc.appearance.strip().replace('\n', ' ')[:200]
             npc_descriptions.append(
-                f"A figure - {npc.name} ({npc.role}): {appearance_clean}"
+                f"A figure - {npc.name} ({npc.role}){placement_part}: {appearance_clean}"
+            )
+        elif npc.placement:
+            # Has placement but no detailed appearance
+            npc_descriptions.append(
+                f"A figure - {npc.name}, {npc.role}, {npc.placement}"
             )
         else:
             npc_descriptions.append(
@@ -429,35 +447,43 @@ def _build_location_context(
     
     # Build items info - items listed in the location
     location_items = loc_data.get("items", [])
+    item_placements = loc_data.get("item_placements", {})
     for item_id in location_items:
         item_data = items_data.get(item_id, {})
         if item_data:
+            # Use location-specific placement if available, otherwise fall back to found_description
+            placement = item_placements.get(item_id, item_data.get("found_description", ""))
             context.items.append(ItemInfo(
                 name=item_data.get("name", item_id),
                 description=item_data.get("found_description", ""),
                 is_hidden=item_data.get("hidden", False),
-                is_artifact=item_data.get("properties", {}).get("artifact", False)
+                is_artifact=item_data.get("properties", {}).get("artifact", False),
+                placement=placement
             ))
     
     # Also check for items that have this location set
     for item_id, item_data in items_data.items():
         if item_data.get("location") == location_id and item_id not in location_items:
+            placement = item_placements.get(item_id, item_data.get("found_description", ""))
             context.items.append(ItemInfo(
                 name=item_data.get("name", item_id),
                 description=item_data.get("found_description", ""),
                 is_hidden=item_data.get("hidden", False),
-                is_artifact=item_data.get("properties", {}).get("artifact", False)
+                is_artifact=item_data.get("properties", {}).get("artifact", False),
+                placement=placement
             ))
     
     # Build NPCs info - NPCs at this location
     location_npcs = loc_data.get("npcs", [])
+    npc_placements = loc_data.get("npc_placements", {})
     for npc_id in location_npcs:
         npc_data = npcs_data.get(npc_id, {})
         if npc_data:
             context.npcs.append(NPCInfo(
                 name=npc_data.get("name", npc_id),
                 appearance=npc_data.get("appearance", ""),
-                role=npc_data.get("role", "")
+                role=npc_data.get("role", ""),
+                placement=npc_placements.get(npc_id, "")
             ))
     
     # Also check for NPCs that have this location set or in their locations list
@@ -473,7 +499,8 @@ def _build_location_context(
                 context.npcs.append(NPCInfo(
                     name=npc_data.get("name", npc_id),
                     appearance=npc_data.get("appearance", ""),
-                    role=npc_data.get("role", "")
+                    role=npc_data.get("role", ""),
+                    placement=npc_placements.get(npc_id, "")
                 ))
     
     return context

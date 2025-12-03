@@ -31,7 +31,7 @@ You MUST respond with valid JSON containing four YAML strings. Follow this EXACT
 {{
   "world_id": "snake-case-world-name",
   "world_yaml": "name: \\"World Name\\"\\ntheme: \\"theme here\\"\\ntone: \\"tone here\\"\\n\\npremise: |\\n  Description of the world premise...\\n\\nstarting_situation: |\\n  Describe WHY the player can act NOW. What event, opportunity, or change has occurred that enables the adventure to begin? This is crucial for immersion.\\n\\nvictory:\\n  location: final_location_id\\n  item: optional_required_item\\n  flag: optional_required_flag\\n  narrative: |\\n    The ending narrative when the player wins...\\n\\nplayer:\\n  starting_location: first_location_id\\n  starting_inventory:\\n    - item_id\\n  stats:\\n    health: 100\\n\\nconstraints:\\n  - \\"Constraint 1\\"\\n  - \\"Constraint 2\\"\\n\\ncommands:\\n  help: \\"Display available commands\\"\\n  look: \\"Examine surroundings\\"\\n  inventory: \\"Check inventory\\"\\n  go: \\"Move in a direction\\"",
-  "locations_yaml": "location_id:\\n  name: \\"Location Name\\"\\n  atmosphere: |\\n    Atmospheric description that establishes WHERE the player is...\\n  exits:\\n    north: other_location_id\\n  items:\\n    - item_id\\n  npcs: []\\n  details:\\n    thing: \\"Description of examinable thing\\"\\n    north: \\"Narrative description of what the north exit looks like (e.g., 'A flickering barrier blocks the passage north')\\"",
+  "locations_yaml": "location_id:\\n  name: \\"Location Name\\"\\n  atmosphere: |\\n    Atmospheric description that establishes WHERE the player is...\\n  exits:\\n    north: other_location_id\\n  items:\\n    - item_id\\n  item_placements:\\n    item_id: \\"WHERE in this room the item is located (e.g., 'lies crumpled on the dusty side table near the door')\\"\\n  npcs:\\n    - npc_id\\n  npc_placements:\\n    npc_id: \\"WHERE in this room the NPC is positioned (e.g., 'stands rigidly by the grandfather clock, pale hands clasped')\\"\\n  details:\\n    thing: \\"Description of examinable thing\\"\\n    north: \\"Narrative description of what the north exit looks like (e.g., 'A flickering barrier blocks the passage north')\\"",
   "npcs_yaml": "npc_id:\\n  name: \\"NPC Name\\"\\n  role: \\"Their role\\"\\n  location: location_id\\n  personality: \\"Their personality\\"\\n  knowledge:\\n    - \\"Something they know\\"\\n  dialogue_hints:\\n    greeting: \\"How they greet\\"",
   "items_yaml": "item_id:\\n  name: \\"Item Name\\"\\n  portable: true\\n  examine: |\\n    Description when examined...\\n  found_description: \\"REQUIRED: How the item appears naturally in the room scene. This MUST be provided for every item so it can be mentioned when the player looks around.\\"\\n  take_description: \\"Message when taken\\""
 }}
@@ -53,6 +53,8 @@ CRITICAL RULES FOR JSON OUTPUT:
 4. Include a victory condition with at least a target location, and optionally a required item or flag
 5. The starting location must make narrative sense - if the player is imprisoned, explain why they can leave their cell
 6. Exits should feel realistic - don't have open passages where there should be locked doors
+7. Every item in a location MUST have an item_placements entry describing WHERE in the room it is (e.g., "lies on the dusty mantelpiece", "rests beneath the window sill")
+8. Every NPC in a location MUST have an npc_placements entry describing WHERE they are positioned (e.g., "stands by the fireplace, warming his hands", "sits hunched at the desk")
 
 ## Guidelines
 - Use snake_case for all IDs (e.g., dark_forest, old_hermit, rusty_key)
@@ -244,6 +246,20 @@ class WorldBuilder:
                     for direction in exits.keys():
                         if direction not in details:
                             warnings.append(f"Location '{loc_id}' exit '{direction}' has no detail description")
+                    
+                    # Check item placements
+                    items = loc_data.get("items", [])
+                    item_placements = loc_data.get("item_placements", {})
+                    for item_id in items:
+                        if item_id not in item_placements:
+                            warnings.append(f"Location '{loc_id}' item '{item_id}' has no placement description")
+                    
+                    # Check NPC placements
+                    npcs = loc_data.get("npcs", [])
+                    npc_placements = loc_data.get("npc_placements", {})
+                    for npc_id in npcs:
+                        if npc_id not in npc_placements:
+                            warnings.append(f"Location '{loc_id}' NPC '{npc_id}' has no placement description")
         
         # Log warnings but don't fail validation
         for warning in warnings:

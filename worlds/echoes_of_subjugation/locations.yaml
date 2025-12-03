@@ -6,8 +6,12 @@ cell_block_c:
     north: mess_hall
   items:
     - stale_ration
+  item_placements:
+    stale_ration: "sits half-eaten on a metal tray beside your bed slab, the grey cube barely touched"
   npcs:
     - old_marcus
+  npc_placements:
+    old_marcus: "lies on the bed slab in the adjacent cell, his weathered face pressed against the flickering barrier, whispering urgently"
   details:
     barrier: "Your cell's energy barrier has failed! The violet shimmer flickers weakly before dying completely. The way north to the mess hall is now open."
     north: "The corridor north leads to the Nutrient Dispensary. With your barrier down, nothing stops you from walking out."
@@ -25,6 +29,8 @@ mess_hall:
   items: []
   npcs:
     - unit_88
+  npc_placements:
+    unit_88: "stands at the dispensing station with an unsettling smile, mechanically distributing grey paste to a queue of hollow-eyed inmates"
   details:
     screen: "A Protector with elongated limbs speaks soothingly about obedience."
     dispenser: "It oozes a grey paste labeled 'Sustenance'."
@@ -41,6 +47,8 @@ kitchen_scullery:
     down: waste_processing
   items:
     - rusty_pipe
+  item_placements:
+    rusty_pipe: "lies loose beside the rumbling dishwasher, its corroded length rattling with each machine cycle"
   npcs: []
   details:
     chute: "A dark hole smelling of rot. It leads down to Waste Processing."
@@ -71,8 +79,12 @@ security_kiosk:
     south: courtyard_access
   items:
     - access_card_blue
+  item_placements:
+    access_card_blue: "lies carelessly on the main console desk, left behind by whoever last manned this station"
   npcs:
     - tech_scavenger_rin
+  npc_placements:
+    tech_scavenger_rin: "crouches beneath the monitor bank, fingers flying over exposed circuitry, glancing nervously at the door every few seconds"
   details:
     monitors: "You see yourself on one of the screens. It's unnerving."
     south: "The door south leads back to the Courtyard Access airlock."
@@ -86,8 +98,12 @@ exercise_yard:
     north: maintenance_shed
   items:
     - wire_cutters
+  item_placements:
+    wire_cutters: "lie half-buried in the churned mud near the fence line, their insulated handles just visible"
   npcs:
     - smuggler_jax
+  npc_placements:
+    smuggler_jax: "leans against the fence in a shadow between searchlight sweeps, watching the yard with calculating eyes"
   details:
     fence: "It buzzes angrily. Climbing is suicide."
     sky: "You can't remember the last time you saw a star."
@@ -103,6 +119,8 @@ maintenance_shed:
     down: old_sewers
   items:
     - flashlight
+  item_placements:
+    flashlight: "has rolled beneath a dusty workbench, its military-grade casing barely visible in the gloom"
   npcs: []
   details:
     hatch: "Scratched into the metal is a symbol: a broken chain. This leads down to the old sewers."
@@ -132,6 +150,8 @@ old_sewers:
     south: waste_processing
   items:
     - resistance_map
+  item_placements:
+    resistance_map: "is wedged into a crack in the crumbling brick wall, folded tight and stained with damp"
   npcs: []
   details:
     graffiti: "'THEY BLEED LIKE US' is spray-painted in red. The mark of the Resistance."
