@@ -13,6 +13,11 @@ from app.llm.image_generator import (
     generate_world_images,
     get_location_image_path,
     list_location_images,
+    LocationContext,
+    ExitInfo,
+    ItemInfo,
+    NPCInfo,
+    _build_location_context,
 )
 
 router = APIRouter()
@@ -145,13 +150,19 @@ async def generate_images(world_id: str, request: GenerateImagesRequest):
 
 @router.post("/{world_id}/images/{location_id}/generate")
 async def generate_single_image(world_id: str, location_id: str):
-    """Generate or regenerate image for a single location"""
+    """Generate or regenerate image for a single location.
+    
+    The generated image includes visual hints for exits, items, and NPCs
+    present at the location to give players indication for interaction.
+    """
     import yaml
     
     try:
         world_path = WORLDS_DIR / world_id
         locations_yaml = world_path / "locations.yaml"
         world_yaml = world_path / "world.yaml"
+        npcs_yaml = world_path / "npcs.yaml"
+        items_yaml = world_path / "items.yaml"
         images_dir = world_path / "images"
         
         if not locations_yaml.exists():
@@ -177,9 +188,30 @@ async def generate_single_image(world_id: str, location_id: str):
                 detail=f"Location '{location_id}' not found in world '{world_id}'"
             )
         
+        # Load NPCs (optional)
+        npcs_data = {}
+        if npcs_yaml.exists():
+            with open(npcs_yaml) as f:
+                npcs_data = yaml.safe_load(f) or {}
+        
+        # Load items (optional)
+        items_data = {}
+        if items_yaml.exists():
+            with open(items_yaml) as f:
+                items_data = yaml.safe_load(f) or {}
+        
         loc_data = locations[location_id]
         loc_name = loc_data.get("name", location_id)
         atmosphere = loc_data.get("atmosphere", "")
+        
+        # Build context with exits, items, and NPCs for visual hints
+        context = _build_location_context(
+            location_id=location_id,
+            loc_data=loc_data,
+            locations=locations,
+            npcs_data=npcs_data,
+            items_data=items_data
+        )
         
         image_path = await generate_location_image(
             location_id=location_id,
@@ -187,7 +219,8 @@ async def generate_single_image(world_id: str, location_id: str):
             atmosphere=atmosphere,
             theme=theme,
             tone=tone,
-            output_dir=images_dir
+            output_dir=images_dir,
+            context=context
         )
         
         if image_path:
