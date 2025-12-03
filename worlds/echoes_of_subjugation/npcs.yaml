@@ -1,0 +1,43 @@
+old_marcus:
+  name: "Old Marcus"
+  role: "Prison Elder"
+  location: cell_block_c
+  personality: "Weary but wise, speaks in riddles."
+  knowledge:
+    - "The power grid cycles every hour. That's when the barriers are weakest."
+    - "The kitchen waste chute is big enough for a human, if you don't mind the smell."
+  dialogue_hints:
+    greeting: "Keep your head down, 734. The eyes in the sky are hungry today."
+
+unit_88:
+  name: "Unit 88"
+  role: "Collaborator Android"
+  location: mess_hall
+  personality: "Overly cheerful, bureaucratic, menacingly polite."
+  knowledge:
+    - "Access to the courtyard is restricted to those with blue clearance or higher."
+    - "Protector drones are currently undergoing firmware updates in the security sector."
+  dialogue_hints:
+    greeting: "Greetings, citizen! Have you consumed your daily caloric allocation?"
+
+tech_scavenger_rin:
+  name: "Rin"
+  role: "Hacker"
+  location: security_kiosk
+  personality: "Jumpy, paranoid, speaks fast."
+  knowledge:
+    - "I disabled the camera in the kiosk, but only for five minutes."
+    - "This blue card will get you past the airlock, but the yard is full of sniffers."
+  dialogue_hints:
+    greeting: "Shh! Don't look at the cameras. What do you want?"
+
+smuggler_jax:
+  name: "Jax"
+  role: "Contraband Dealer"
+  location: exercise_yard
+  personality: "Cool, detached, transactional."
+  knowledge:
+    - "There's a maintenance hatch in the shed. The lock is rusty."
+    - "I need something to cut this wire before I can help you."
+  dialogue_hints:
+    greeting: "Got any credits? No? Then keep walking, pal."

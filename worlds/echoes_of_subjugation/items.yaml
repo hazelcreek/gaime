@@ -1,0 +1,55 @@
+hidden_shiv:
+  name: "Sharpened Toothbrush"
+  portable: true
+  examine: |
+    A plastic toothbrush handle melted and honed to a razor point. Primitive, but lethal.
+  found_description: "You feel the weight of the shiv hidden in your boot."
+  take_description: "You secure the weapon."
+
+stale_ration:
+  name: "Nutrient Block"
+  portable: true
+  examine: |
+    A dry, tasteless cube of compressed algae and protein. It's hard as a brick.
+  found_description: "A half-eaten nutrient block sits on a tray."
+  take_description: "You pocket the ration. Better than starving."
+
+rusty_pipe:
+  name: "Iron Pipe"
+  portable: true
+  examine: |
+    A heavy length of corroded piping. Good for leverage or blunt force trauma.
+  found_description: "A loose pipe rattles near the dishwasher."
+  take_description: "You grab the pipe. It feels solid."
+
+access_card_blue:
+  name: "Blue Security Card"
+  portable: true
+  examine: |
+    A plastic keycard with a magnetic strip. Stamped with 'LEVEL 2 CLEARANCE'.
+  found_description: "A blue keycard has been left on the desk."
+  take_description: "You swipe the card quickly."
+
+wire_cutters:
+  name: "Industrial Cutters"
+  portable: true
+  examine: |
+    Heavy-duty cutters capable of snapping thick steel cables. The handles are insulated.
+  found_description: "A pair of wire cutters lies half-buried in the mud."
+  take_description: "You pick up the cutters."
+
+flashlight:
+  name: "UV Flashlight"
+  portable: true
+  examine: |
+    A military-grade torch. It has a setting for ultraviolet light, revealing hidden markings.
+  found_description: "A flashlight rolls on the floor."
+  take_description: "You grab the flashlight."
+
+resistance_map:
+  name: "Hand-drawn Map"
+  portable: true
+  examine: |
+    A crumpled paper showing the sewer tunnels leading to 'Sector 4' - the Resistance HQ.
+  found_description: "A piece of paper is stuck in a crack in the wall."
+  take_description: "You carefully unfold and take the map."

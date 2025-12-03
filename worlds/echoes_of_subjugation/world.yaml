@@ -1,0 +1,29 @@
+name: "Echoes of Subjugation"
+theme: "Sci-Fi Dystopia"
+tone: "Oppressive, Desperate, Synthetic"
+
+premise: |
+  Earth has been under the benevolent iron fist of the "Protectors" for thirty years. They claim to save humanity from itself, but their methods involve mass incarceration and neurological reprogramming. You are Prisoner 734, currently held in Detention Camp Omega-9, a facility built into the ruins of an old subway station. Rumors of a resistance cell operating near the surface have reached you. Tonight, the power grid is fluctuating. It is time to run.
+
+player:
+  starting_location: cell_block_c
+  starting_inventory:
+    - hidden_shiv
+  stats:
+    health: 100
+    compliance: 15
+
+constraints:
+  - "Protector drones scan for unauthorized movement every 10 turns."
+  - "You cannot carry weapons openly in patrolled areas."
+  - "Biometric locks require specific DNA or hacked clearance cards."
+  - "Speaking against the Protectors near listening devices raises alert levels."
+
+commands:
+  help: "Display available commands"
+  look: "Examine surroundings"
+  inventory: "Check inventory"
+  go: "Move (north, south, east, west, up, down)"
+  talk: "Talk to [NPC]"
+  take: "Take [item]"
+  use: "Use [item] on [target]"

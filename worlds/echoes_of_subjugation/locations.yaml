@@ -1,0 +1,120 @@
+cell_block_c:
+  name: "Cell Block C"
+  atmosphere: |
+    The air smells of ozone and unwashed bodies. Hexagonal energy barriers hum with a headache-inducing frequency, serving as cell doors. The concrete floor is cold and stained with decades of grime.
+  exits:
+    north: mess_hall
+  items:
+    - stale_ration
+  npcs:
+    - old_marcus
+  details:
+    barrier: "A shimmering wall of violet energy. Touching it burns."
+    bed: "A slab of metal bolted to the wall."
+
+mess_hall:
+  name: "Nutrient Dispensary"
+  atmosphere: |
+    A cavernous room lit by flickering halogen strips. Rows of metal tables are bolted to the floor. A large screen on the wall plays endless propaganda about the Protectors' mercy. The dispensing machines grind loudly.
+  exits:
+    south: cell_block_c
+    east: kitchen_scullery
+    west: courtyard_access
+  items: []
+  npcs:
+    - unit_88
+  details:
+    screen: "A Protector with elongated limbs speaks soothingly about obedience."
+    dispenser: "It oozes a grey paste labeled 'Sustenance'."
+
+kitchen_scullery:
+  name: "Scullery"
+  atmosphere: |
+    Steaming vents hiss constantly. The room is filled with industrial dishwashers and waste chutes. It's surprisingly unguarded, considered too filthy for the Protectors to patrol often.
+  exits:
+    west: mess_hall
+    down: waste_processing
+  items:
+    - rusty_pipe
+  npcs: []
+  details:
+    chute: "A dark hole smelling of rot. It leads down."
+
+courtyard_access:
+  name: "Courtyard Airlock"
+  atmosphere: |
+    A heavy blast door separates the interior from the exercise yard. A security kiosk sits behind reinforced glass. The scanner light blinks rhythmically red.
+  exits:
+    east: mess_hall
+    north: security_kiosk
+    west: exercise_yard
+  items: []
+  npcs: []
+  details:
+    scanner: "Retinal scanner. It looks for compliance chips."
+
+security_kiosk:
+  name: "Guard Station Alpha"
+  atmosphere: |
+    Sterile and white. Monitors cover every wall, showing feeds from across the camp. A dead Protector drone lies sparked out on a workbench, half-disassembled.
+  exits:
+    south: courtyard_access
+  items:
+    - access_card_blue
+  npcs:
+    - tech_scavenger_rin
+  details:
+    monitors: "You see yourself on one of the screens. It's unnerving."
+
+exercise_yard:
+  name: "The Cage"
+  atmosphere: |
+    An open-air section surrounded by thirty-foot high electrified fences. The sky above is choked with smog and Protector surveillance ships. Searchlights sweep the mud.
+  exits:
+    east: courtyard_access
+    north: maintenance_shed
+  items:
+    - wire_cutters
+  npcs:
+    - smuggler_jax
+  details:
+    fence: "It buzzes angrily. Climbing is suicide."
+    sky: "You can't remember the last time you saw a star."
+
+maintenance_shed:
+  name: "Maintenance Shed"
+  atmosphere: |
+    A cramped structure filled with old tools and cleaning supplies. A hidden hatch is barely visible under a pile of oily rags.
+  exits:
+    south: exercise_yard
+    down: old_sewers
+  items:
+    - flashlight
+  npcs: []
+  details:
+    hatch: "Scratched into the metal is a symbol: a broken chain."
+
+waste_processing:
+  name: "Waste Processing"
+  atmosphere: |
+    The bowels of the facility. Sludge moves slowly along conveyor belts toward an incinerator. The heat is intense, and the noise is deafening.
+  exits:
+    up: kitchen_scullery
+    north: old_sewers
+  items: []
+  npcs: []
+  details:
+    incinerator: "A roaring furnace. Don't fall in."
+
+old_sewers:
+  name: "Forgotten Tunnels"
+  atmosphere: |
+    These tunnels predate the invasion. The brickwork is crumbling, and water trickles down the walls. It's dark, damp, and smells of freedom.
+  exits:
+    up: maintenance_shed
+    south: waste_processing
+  items:
+    - resistance_map
+  npcs: []
+  details:
+    graffiti: "'THEY BLEED LIKE US' is spray-painted in red."
