@@ -20,8 +20,8 @@ load_dotenv()
 
 # Image generation model - Gemini with image output capability
 # See: https://ai.google.dev/gemini-api/docs/image-generation
-# Options: "gemini-2.5-flash-image" (fast) or "gemini-3-pro-image-preview" (advanced)
-IMAGE_MODEL = "gemini-3-pro-image-preview"
+# Options: "gemini-2.5-flash-image" (fast, reliable) or "gemini-3-pro-image-preview" (advanced, but can timeout)
+IMAGE_MODEL = "gemini-2.5-flash-image"
 
 
 @dataclass
@@ -270,7 +270,8 @@ async def generate_location_image(
     theme: str,
     tone: str,
     output_dir: Path,
-    context: Optional[LocationContext] = None
+    context: Optional[LocationContext] = None,
+    model_override: Optional[str] = None
 ) -> Optional[str]:
     """
     Generate an image for a single location using Gemini's native image generation.
@@ -286,36 +287,83 @@ async def generate_location_image(
         tone: World tone
         output_dir: Directory to save the generated image
         context: Optional LocationContext with exits, items, and NPCs for visual hints
+        model_override: Optional model name to use instead of the default
     
     Returns:
         Path to the generated image, or None if generation failed
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     from google import genai
+    
+    # Use override model if provided, otherwise use default
+    model_to_use = model_override or IMAGE_MODEL
+    
+    logger.info(f"[ImageGen] Starting generation for: {location_name} ({location_id}) using {model_to_use}")
     
     # Configure the API
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
+        logger.error("[ImageGen] GEMINI_API_KEY not set!")
         raise ValueError("GEMINI_API_KEY environment variable is required for image generation")
+    
+    logger.info(f"[ImageGen] API key configured (length: {len(api_key)})")
     
     # Create client with API key
     client = genai.Client(api_key=api_key)
     
     # Create the prompt with context
     prompt = get_image_prompt(location_name, atmosphere, theme, tone, context)
+    logger.info(f"[ImageGen] Prompt created (length: {len(prompt)} chars)")
     
     # Ensure output directory exists
     output_dir.mkdir(parents=True, exist_ok=True)
     
     try:
-        # Use the new google-genai SDK for image generation
-        response = await asyncio.to_thread(
-            client.models.generate_content,
-            model=IMAGE_MODEL,
-            contents=[prompt]
-        )
+        logger.info(f"[ImageGen] Calling {model_to_use}...")
+        # Use the new google-genai SDK for image generation with a timeout
+        try:
+            response = await asyncio.wait_for(
+                asyncio.to_thread(
+                    client.models.generate_content,
+                    model=model_to_use,
+                    contents=[prompt]
+                ),
+                timeout=120.0  # 2 minute timeout
+            )
+        except asyncio.TimeoutError:
+            logger.error(f"[ImageGen] API call timed out after 120 seconds for {location_id}")
+            # Try alternative models on timeout
+            return await _generate_with_alternative_model(
+                location_id, prompt, output_dir, client, logger
+            )
+        
+        # Log response details for debugging
+        logger.info(f"[ImageGen] Got response from API")
+        if hasattr(response, 'candidates') and response.candidates:
+            for i, candidate in enumerate(response.candidates):
+                logger.info(f"[ImageGen] Candidate {i}: finish_reason={getattr(candidate, 'finish_reason', 'N/A')}")
+                safety_ratings = getattr(candidate, 'safety_ratings', None)
+                if safety_ratings:
+                    for rating in safety_ratings:
+                        if hasattr(rating, 'probability') and rating.probability and rating.probability.name != 'NEGLIGIBLE':
+                            logger.warning(f"[ImageGen] Safety rating: {rating.category.name}={rating.probability.name}")
+        
+        # Check for blocking
+        if hasattr(response, 'prompt_feedback'):
+            feedback = response.prompt_feedback
+            if hasattr(feedback, 'block_reason') and feedback.block_reason:
+                logger.error(f"[ImageGen] BLOCKED: {feedback.block_reason}")
+                return await _generate_with_alternative_model(
+                    location_id, prompt, output_dir, client, logger
+                )
         
         # Extract image data from response parts
-        for part in response.parts:
+        logger.info(f"[ImageGen] Response has {len(response.parts) if response.parts else 0} parts")
+        
+        for i, part in enumerate(response.parts):
+            logger.info(f"[ImageGen] Part {i}: inline_data={part.inline_data is not None}")
             if part.inline_data is not None:
                 # Save the image using PIL if available, otherwise raw bytes
                 image_path = output_dir / f"{location_id}.png"
@@ -324,24 +372,27 @@ async def generate_location_image(
                     # Try using the as_image() method (returns PIL Image)
                     image = part.as_image()
                     await asyncio.to_thread(image.save, str(image_path))
-                except Exception:
+                    logger.info(f"[ImageGen] Saved image via PIL to {image_path}")
+                except Exception as pil_err:
+                    logger.warning(f"[ImageGen] PIL save failed ({pil_err}), trying raw bytes")
                     # Fallback: save raw bytes
                     image_data = part.inline_data.data
                     if isinstance(image_data, str):
                         image_data = base64.b64decode(image_data)
                     with open(image_path, 'wb') as f:
                         f.write(image_data)
+                    logger.info(f"[ImageGen] Saved image via raw bytes to {image_path}")
                 
                 return str(image_path)
         
-        print(f"No image data in response for {location_id}")
+        logger.warning(f"[ImageGen] No image data in response for {location_id}")
         return None
         
     except Exception as e:
-        print(f"Error generating image for {location_id}: {e}")
+        logger.error(f"[ImageGen] Error generating image for {location_id}: {e}", exc_info=True)
         # Try alternative model if primary fails
         return await _generate_with_alternative_model(
-            location_id, prompt, output_dir, client
+            location_id, prompt, output_dir, client, logger
         )
 
 
@@ -349,55 +400,69 @@ async def _generate_with_alternative_model(
     location_id: str,
     prompt: str,
     output_dir: Path,
-    client
+    client,
+    logger=None
 ) -> Optional[str]:
     """
     Fallback image generation using alternative Gemini image models.
     
     Uses the google-genai SDK.
     """
+    import logging
+    if logger is None:
+        logger = logging.getLogger(__name__)
+    
     # Alternative model names to try
-    # See: https://ai.google.dev/gemini-api/docs/image-generation
+    # Note: Imagen models use a different API (not generateContent), so we prioritize Gemini models
     alternative_models = [
-        "gemini-2.5-flash-image",  # Fast model
-        "gemini-2.0-flash-exp",
+        "gemini-2.5-flash-image-preview",  # Gemini 2.5 flash preview
+        "gemini-3-pro-image-preview",  # Gemini 3 pro (advanced but slower)
     ]
     
     for alt_model in alternative_models:
         try:
-            print(f"Trying alternative model: {alt_model}")
+            logger.info(f"[ImageGen] Trying alternative model: {alt_model}")
             
-            response = await asyncio.to_thread(
-                client.models.generate_content,
-                model=alt_model,
-                contents=[prompt]
+            response = await asyncio.wait_for(
+                asyncio.to_thread(
+                    client.models.generate_content,
+                    model=alt_model,
+                    contents=[prompt]
+                ),
+                timeout=90.0  # 90 second timeout for alternative models
             )
             
             # Extract image data from response parts
-            for part in response.parts:
-                if part.inline_data is not None:
-                    image_path = output_dir / f"{location_id}.png"
-                    
-                    try:
-                        # Try using the as_image() method
-                        image = part.as_image()
-                        await asyncio.to_thread(image.save, str(image_path))
-                    except Exception:
-                        # Fallback: save raw bytes
-                        image_data = part.inline_data.data
-                        if isinstance(image_data, str):
-                            image_data = base64.b64decode(image_data)
-                        with open(image_path, 'wb') as f:
-                            f.write(image_data)
-                    
-                    print(f"Successfully generated image with {alt_model}")
-                    return str(image_path)
+            if response.parts:
+                for part in response.parts:
+                    if part.inline_data is not None:
+                        image_path = output_dir / f"{location_id}.png"
+                        
+                        try:
+                            # Try using the as_image() method
+                            image = part.as_image()
+                            await asyncio.to_thread(image.save, str(image_path))
+                        except Exception:
+                            # Fallback: save raw bytes
+                            image_data = part.inline_data.data
+                            if isinstance(image_data, str):
+                                image_data = base64.b64decode(image_data)
+                            with open(image_path, 'wb') as f:
+                                f.write(image_data)
+                        
+                        logger.info(f"[ImageGen] Successfully generated image with {alt_model}")
+                        return str(image_path)
             
+            logger.warning(f"[ImageGen] No image data in response from {alt_model}")
+            
+        except asyncio.TimeoutError:
+            logger.warning(f"[ImageGen] Alternative model {alt_model} timed out after 90 seconds")
+            continue
         except Exception as e:
-            print(f"Alternative model {alt_model} failed for {location_id}: {e}")
+            logger.warning(f"[ImageGen] Alternative model {alt_model} failed for {location_id}: {e}")
             continue
     
-    print(f"All image generation attempts failed for {location_id}")
+    logger.error(f"[ImageGen] All image generation attempts failed for {location_id}")
     return None
 
 

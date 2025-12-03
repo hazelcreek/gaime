@@ -38,6 +38,14 @@ export default function WorldBuilder() {
   const [isGeneratingImages, setIsGeneratingImages] = useState(false);
   const [generatingLocation, setGeneratingLocation] = useState<string | null>(null);
   const [imageGenProgress, setImageGenProgress] = useState<string>('');
+  const [selectedImageModel, setSelectedImageModel] = useState<string>('gemini-2.5-flash-image');
+  
+  // Available image models
+  const imageModels = [
+    { id: 'gemini-2.5-flash-image', name: 'Gemini 2.5 Flash', description: 'Fast & reliable' },
+    { id: 'gemini-2.5-flash-image-preview', name: 'Gemini 2.5 Flash Preview', description: 'Fast, preview' },
+    { id: 'gemini-3-pro-image-preview', name: 'Gemini 3 Pro', description: 'Best quality (may be overloaded)' },
+  ];
 
   // Load existing worlds on mount
   useEffect(() => {
@@ -186,34 +194,63 @@ export default function WorldBuilder() {
   };
 
   const handleGenerateAllImages = async () => {
-    if (!selectedWorld) return;
+    if (!selectedWorld || locations.length === 0) return;
     
     setIsGeneratingImages(true);
-    setImageGenProgress('Starting image generation...');
     setError(null);
-
-    try {
-      const response = await gameAPI.generateImages(selectedWorld);
-      
-      const successful = response.results.filter(r => r.success).length;
-      const total = response.results.length;
-      
-      setImageGenProgress(`Generated ${successful}/${total} images`);
-      
-      // Refresh the images list
-      await loadWorldImages(selectedWorld);
-      
-      // Show any errors
-      const errors = response.results.filter(r => !r.success);
-      if (errors.length > 0) {
-        setError(`Some images failed: ${errors.map(e => e.location_id).join(', ')}`);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate images');
-    } finally {
+    
+    // Generate images one at a time for better progress feedback
+    const locationsToGenerate = locations.filter(loc => !worldImages[loc.id]);
+    const total = locationsToGenerate.length;
+    
+    if (total === 0) {
+      setImageGenProgress('All images already generated!');
       setIsGeneratingImages(false);
       setTimeout(() => setImageGenProgress(''), 3000);
+      return;
     }
+    
+    let successful = 0;
+    const errors: string[] = [];
+    
+    for (let i = 0; i < locationsToGenerate.length; i++) {
+      const loc = locationsToGenerate[i];
+      setImageGenProgress(`Generating ${i + 1}/${total}: ${loc.name}...`);
+      setGeneratingLocation(loc.id);
+      
+      try {
+        const response = await gameAPI.generateSingleImage(selectedWorld, loc.id, selectedImageModel);
+        if (response.success) {
+          successful++;
+          // Update the images list incrementally
+          setWorldImages(prev => ({
+            ...prev,
+            [loc.id]: response.image_url || `/api/builder/${selectedWorld}/images/${loc.id}`
+          }));
+          setLocations(prev => prev.map(l => 
+            l.id === loc.id ? { ...l, hasImage: true } : l
+          ));
+        } else {
+          errors.push(loc.name);
+        }
+      } catch (err) {
+        console.error(`Failed to generate image for ${loc.id}:`, err);
+        errors.push(loc.name);
+      }
+    }
+    
+    setGeneratingLocation(null);
+    setIsGeneratingImages(false);
+    setImageGenProgress(`✓ Generated ${successful}/${total} images`);
+    
+    if (errors.length > 0) {
+      setError(`Some images failed: ${errors.join(', ')}`);
+    }
+    
+    // Refresh to ensure we have accurate data
+    await loadWorldImages(selectedWorld);
+    
+    setTimeout(() => setImageGenProgress(''), 5000);
   };
 
   const handleGenerateSingleImage = async (locationId: string) => {
@@ -223,7 +260,7 @@ export default function WorldBuilder() {
     setError(null);
 
     try {
-      const response = await gameAPI.generateSingleImage(selectedWorld, locationId);
+      const response = await gameAPI.generateSingleImage(selectedWorld, locationId, selectedImageModel);
       
       if (response.success) {
         // Refresh the images list
@@ -413,19 +450,48 @@ export default function WorldBuilder() {
                 </select>
               </div>
 
+              <div>
+                <label className="block text-terminal-dim text-sm mb-2">Image Model</label>
+                <select
+                  value={selectedImageModel}
+                  onChange={(e) => setSelectedImageModel(e.target.value)}
+                  className="w-full bg-terminal-bg border border-terminal-border rounded p-3 
+                           text-terminal-text focus:border-terminal-accent focus:outline-none"
+                >
+                  {imageModels.map(model => (
+                    <option key={model.id} value={model.id}>
+                      {model.name} - {model.description}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <button
                 onClick={handleGenerateAllImages}
-                disabled={isGeneratingImages || !selectedWorld}
+                disabled={isGeneratingImages || !selectedWorld || locations.length === 0}
                 className="w-full py-3 bg-terminal-highlight/20 border border-terminal-highlight 
                          text-terminal-highlight rounded font-display tracking-wider
                          hover:bg-terminal-highlight/30 transition-colors
                          disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isGeneratingImages ? 'Generating All Images...' : 'Generate All Scene Images'}
+                {isGeneratingImages 
+                  ? 'Generating...' 
+                  : `Generate Missing Images (${locations.filter(l => !worldImages[l.id]).length})`}
               </button>
 
               {imageGenProgress && (
-                <p className="text-terminal-success text-sm text-center">{imageGenProgress}</p>
+                <div className={`p-3 rounded border text-center ${
+                  isGeneratingImages 
+                    ? 'bg-terminal-highlight/10 border-terminal-highlight text-terminal-highlight animate-pulse' 
+                    : 'bg-terminal-success/10 border-terminal-success text-terminal-success'
+                }`}>
+                  <p className="text-sm font-medium">{imageGenProgress}</p>
+                  {isGeneratingImages && (
+                    <p className="text-xs mt-1 opacity-70">
+                      This may take 20-30 seconds per image...
+                    </p>
+                  )}
+                </div>
               )}
             </div>
 
@@ -438,30 +504,49 @@ export default function WorldBuilder() {
               <div className="bg-terminal-bg border border-terminal-border rounded p-4 max-h-64 overflow-y-auto">
                 {locations.length > 0 ? (
                   <div className="grid grid-cols-2 gap-2">
-                    {locations.map(loc => (
-                      <div 
-                        key={loc.id}
-                        className="flex items-center justify-between p-2 rounded bg-terminal-surface/50"
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className={worldImages[loc.id] ? 'text-terminal-success' : 'text-terminal-dim'}>
-                            {worldImages[loc.id] ? '●' : '○'}
-                          </span>
-                          <span className="text-terminal-text text-sm truncate">
-                            {loc.name}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => handleGenerateSingleImage(loc.id)}
-                          disabled={generatingLocation === loc.id}
-                          className="px-2 py-1 text-xs border border-terminal-border text-terminal-dim
-                                   hover:text-terminal-accent hover:border-terminal-accent
-                                   rounded transition-colors disabled:opacity-50 flex-shrink-0"
+                    {locations.map(loc => {
+                      const isGenerating = generatingLocation === loc.id;
+                      const hasImage = !!worldImages[loc.id];
+                      
+                      return (
+                        <div 
+                          key={loc.id}
+                          className={`flex items-center justify-between p-2 rounded transition-colors ${
+                            isGenerating 
+                              ? 'bg-terminal-highlight/20 border border-terminal-highlight' 
+                              : 'bg-terminal-surface/50'
+                          }`}
                         >
-                          {generatingLocation === loc.id ? '...' : worldImages[loc.id] ? '↻' : '+'}
-                        </button>
-                      </div>
-                    ))}
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className={`${
+                              isGenerating 
+                                ? 'text-terminal-highlight animate-pulse' 
+                                : hasImage 
+                                  ? 'text-terminal-success' 
+                                  : 'text-terminal-dim'
+                            }`}>
+                              {isGenerating ? '◐' : hasImage ? '●' : '○'}
+                            </span>
+                            <span className={`text-sm truncate ${
+                              isGenerating ? 'text-terminal-highlight' : 'text-terminal-text'
+                            }`}>
+                              {loc.name}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => handleGenerateSingleImage(loc.id)}
+                            disabled={isGenerating || isGeneratingImages}
+                            className={`px-2 py-1 text-xs border rounded transition-colors flex-shrink-0 ${
+                              isGenerating
+                                ? 'border-terminal-highlight text-terminal-highlight animate-pulse'
+                                : 'border-terminal-border text-terminal-dim hover:text-terminal-accent hover:border-terminal-accent disabled:opacity-50'
+                            }`}
+                          >
+                            {isGenerating ? '⟳' : hasImage ? '↻' : '+'}
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-terminal-dim text-sm text-center py-4">

@@ -144,16 +144,18 @@ class GameAPIClient {
   /**
    * Generate or regenerate image for a single location
    */
-  async generateSingleImage(worldId: string, locationId: string): Promise<{
+  async generateSingleImage(worldId: string, locationId: string, model?: string): Promise<{
     success: boolean;
     location_id: string;
     image_url?: string;
     message: string;
   }> {
-    const response = await fetch(
-      `${API_BASE}/builder/${worldId}/images/${locationId}/generate`,
-      { method: 'POST' }
-    );
+    const url = new URL(`${window.location.origin}${API_BASE}/builder/${worldId}/images/${locationId}/generate`);
+    if (model) {
+      url.searchParams.set('model', model);
+    }
+    
+    const response = await fetch(url.toString(), { method: 'POST' });
     
     if (!response.ok) {
       const error = await response.json();

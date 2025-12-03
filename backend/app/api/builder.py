@@ -149,13 +149,20 @@ async def generate_images(world_id: str, request: GenerateImagesRequest):
 
 
 @router.post("/{world_id}/images/{location_id}/generate")
-async def generate_single_image(world_id: str, location_id: str):
+async def generate_single_image(world_id: str, location_id: str, model: str | None = None):
     """Generate or regenerate image for a single location.
     
     The generated image includes visual hints for exits, items, and NPCs
     present at the location to give players indication for interaction.
+    
+    Args:
+        model: Optional model override. If not provided, uses the default model.
     """
     import yaml
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    logger.info(f"Starting image generation for {world_id}/{location_id} with model={model or 'default'}")
     
     try:
         world_path = WORLDS_DIR / world_id
@@ -213,6 +220,8 @@ async def generate_single_image(world_id: str, location_id: str):
             items_data=items_data
         )
         
+        logger.info(f"Calling generate_location_image for {loc_name} with model={model or 'default'}")
+        
         image_path = await generate_location_image(
             location_id=location_id,
             location_name=loc_name,
@@ -220,8 +229,11 @@ async def generate_single_image(world_id: str, location_id: str):
             theme=theme,
             tone=tone,
             output_dir=images_dir,
-            context=context
+            context=context,
+            model_override=model
         )
+        
+        logger.info(f"Image generation completed for {loc_name}: {image_path}")
         
         if image_path:
             return {
@@ -282,6 +294,131 @@ async def list_images(world_id: str):
             status_code=500,
             detail=f"Failed to list images: {str(e)}"
         )
+
+
+@router.get("/debug/image-api")
+async def debug_image_api():
+    """
+    Debug endpoint to test the Google image generation API.
+    Returns detailed information about API connectivity and configuration.
+    """
+    import os
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    result = {
+        "api_key_configured": False,
+        "api_key_length": 0,
+        "models_to_try": [],
+        "test_results": [],
+        "notes": []
+    }
+    
+    # Check API key
+    api_key = os.getenv("GEMINI_API_KEY")
+    if api_key:
+        result["api_key_configured"] = True
+        result["api_key_length"] = len(api_key)
+    else:
+        return result
+    
+    # List models we'll try
+    from app.llm.image_generator import IMAGE_MODEL
+    result["models_to_try"] = [
+        IMAGE_MODEL,
+        "gemini-2.5-flash-image-preview",
+        "gemini-3-pro-image-preview",
+    ]
+    
+    # Try a simple API call to check connectivity
+    try:
+        from google import genai
+        import asyncio
+        
+        client = genai.Client(api_key=api_key)
+        
+        # Test with a simple text prompt first (faster)
+        simple_prompt = "Generate a test image of a blue square"
+        
+        for model in result["models_to_try"]:
+            test_result = {
+                "model": model,
+                "status": "unknown",
+                "error": None,
+                "error_details": None,
+                "response_info": None
+            }
+            
+            try:
+                logger.info(f"[Debug] Testing model: {model}")
+                response = await asyncio.wait_for(
+                    asyncio.to_thread(
+                        client.models.generate_content,
+                        model=model,
+                        contents=[simple_prompt]
+                    ),
+                    timeout=60.0  # 60 second timeout for pro model
+                )
+                
+                test_result["status"] = "responded"
+                
+                # Check response content
+                if response.parts:
+                    has_image = any(p.inline_data is not None for p in response.parts)
+                    has_text = any(p.text is not None for p in response.parts if hasattr(p, 'text'))
+                    test_result["response_info"] = {
+                        "has_parts": True,
+                        "num_parts": len(response.parts),
+                        "has_image_data": has_image,
+                        "has_text": has_text
+                    }
+                else:
+                    test_result["response_info"] = {"has_parts": False}
+                
+                # Check for blocks
+                if hasattr(response, 'prompt_feedback'):
+                    feedback = response.prompt_feedback
+                    if hasattr(feedback, 'block_reason') and feedback.block_reason:
+                        test_result["status"] = "blocked"
+                        test_result["error"] = str(feedback.block_reason)
+                
+            except asyncio.TimeoutError:
+                test_result["status"] = "timeout"
+                test_result["error"] = "API call timed out after 60 seconds"
+                if "3-pro" in model:
+                    test_result["error_details"] = "Gemini 3 Pro may have rate limits (2 images/day for free tier). Check: https://ai.google.dev/pricing"
+            except Exception as e:
+                test_result["status"] = "error"
+                error_str = str(e)
+                test_result["error"] = f"{type(e).__name__}: {error_str}"
+                
+                # Parse common errors
+                if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
+                    test_result["error_details"] = "RATE LIMITED - You've hit your quota. Check usage at: https://aistudio.google.com/app/plan"
+                elif "403" in error_str or "PERMISSION_DENIED" in error_str:
+                    test_result["error_details"] = "PERMISSION DENIED - API key may not have access to this model"
+                elif "404" in error_str:
+                    test_result["error_details"] = "MODEL NOT FOUND - This model may not be available in your region or plan"
+            
+            result["test_results"].append(test_result)
+            logger.info(f"[Debug] Model {model}: {test_result['status']}")
+    
+    except Exception as e:
+        result["test_results"].append({
+            "model": "initialization",
+            "status": "error",
+            "error": f"Failed to initialize API client: {type(e).__name__}: {str(e)}"
+        })
+    
+    # Add helpful notes
+    result["notes"] = [
+        "Check your quota: https://aistudio.google.com/app/plan",
+        "API pricing: https://ai.google.dev/pricing",
+        "Gemini 3 Pro may have stricter rate limits than Flash models",
+        "If timeout persists, the model may be overloaded - try again later"
+    ]
+    
+    return result
 
 
 @router.get("/{world_id}/locations")
