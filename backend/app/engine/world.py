@@ -22,6 +22,7 @@ from app.models.world import (
     LocationRequirement,
     PlayerSetup,
     AppearanceCondition,
+    VictoryCondition,
 )
 
 
@@ -94,6 +95,17 @@ class WorldLoader:
             stats=player_data.get("stats", {"health": 100})
         )
         
+        # Parse victory condition
+        victory = None
+        victory_data = data.get("victory")
+        if victory_data and isinstance(victory_data, dict):
+            victory = VictoryCondition(
+                location=victory_data.get("location"),
+                flag=victory_data.get("flag"),
+                item=victory_data.get("item"),
+                narrative=victory_data.get("narrative", "")
+            )
+        
         return World(
             name=data.get("name", "Unnamed World"),
             theme=data.get("theme", ""),
@@ -101,7 +113,9 @@ class WorldLoader:
             premise=data.get("premise", ""),
             player=player,
             constraints=data.get("constraints", []),
-            commands=data.get("commands", {})
+            commands=data.get("commands", {}),
+            starting_situation=data.get("starting_situation", ""),
+            victory=victory
         )
     
     def _load_locations_yaml(self, path: Path) -> dict[str, Location]:

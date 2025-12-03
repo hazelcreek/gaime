@@ -12,6 +12,23 @@ premise: |
   Perhaps, in helping the restless spirits of this place, you might
   find a way to survive until dawn.
 
+starting_situation: |
+  The heavy front door has just slammed shut behind you, pushed by a gust of howling wind. Lightning flashes through the grimy windows, briefly illuminating the grandeur and decay of the entrance hall. The elderly butler, Jenkins, has retreated into the shadows, muttering about "the master" and "the children." The storm rages outside - there's no leaving tonight. You have until dawn to uncover the manor's secrets... or become another of its victims.
+
+victory:
+  location: ritual_chamber
+  flag: has_all_artifacts
+  narrative: |
+    With trembling hands, you place the final artifact upon its pedestal. The Thornwood Amulet, the Ritual Dagger, and the Grimoire - reunited at last in the ritual chamber.
+    
+    The symbols on the floor blaze with ethereal light. You feel them before you see them - the spirits of the Thornwood children, finally released from their eternal torment. A young girl's voice whispers in your ear: "Thank you. We can rest now."
+    
+    The oppressive weight that hung over the manor lifts. Through the high window, you see the first pale light of dawn breaking through the storm clouds.
+    
+    Jenkins finds you in the morning, tears streaming down his weathered face. "You've done it," he says. "After all these years... they're free. WE'RE free."
+    
+    CONGRATULATIONS - You have broken the Thornwood Curse!
+
 player:
   starting_location: entrance_hall
   starting_inventory:
@@ -27,6 +44,7 @@ constraints:
   - "Secret passages can only be used after they are discovered"
   - "The player cannot leave the manor until the curse is broken or dawn arrives"
   - "Items must be in the player's inventory to be used"
+  - "When all three artifacts are collected, the 'has_all_artifacts' flag should be set"
 
 commands:
   help: "Display available commands and hints"

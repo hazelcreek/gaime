@@ -103,8 +103,23 @@ ritual_chamber:
   npcs: []
   details:
     symbols: "The painted symbols match those from the notes - this is where the ritual was performed"
-    pedestals: "Three stone pedestals, clearly meant to hold something important"
+    pedestals: "Three stone pedestals, clearly meant to hold something important. They seem to be waiting for the artifacts."
     circle: "The ritual circle is incomplete - something interrupted the ceremony"
+    up: "A narrow stone passage leads back up to the library's secret entrance."
+  interactions:
+    place_artifacts:
+      triggers:
+        - "place artifacts"
+        - "use artifacts"
+        - "use amulet"
+        - "use dagger"
+        - "use grimoire"
+        - "break curse"
+        - "perform ritual"
+        - "complete ritual"
+        - "put artifacts on pedestals"
+      narrative_hint: "If you have all three artifacts (the amulet, the dagger, and the grimoire), you can place them on the pedestals to break the curse"
+      sets_flag: has_all_artifacts
 
 dining_room:
   name: "Dining Room"

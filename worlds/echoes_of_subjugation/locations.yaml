@@ -1,7 +1,7 @@
 cell_block_c:
   name: "Cell Block C"
   atmosphere: |
-    The air smells of ozone and unwashed bodies. Hexagonal energy barriers hum with a headache-inducing frequency, serving as cell doors. The concrete floor is cold and stained with decades of grime.
+    You stand in your cramped cell in Cell Block C. The air smells of ozone and unwashed bodies. Rows of hexagonal energy barriers normally seal each cell, humming with a headache-inducing frequency. But right now, YOUR barrier has failed - the violet shimmer that kept you caged flickers weakly, then dies completely. The power fluctuation has created your window of escape. The concrete floor is cold and stained with decades of grime.
   exits:
     north: mess_hall
   items:
@@ -9,8 +9,10 @@ cell_block_c:
   npcs:
     - old_marcus
   details:
-    barrier: "A shimmering wall of violet energy. Touching it burns."
-    bed: "A slab of metal bolted to the wall."
+    barrier: "Your cell's energy barrier has failed! The violet shimmer flickers weakly before dying completely. The way north to the mess hall is now open."
+    north: "The corridor north leads to the Nutrient Dispensary. With your barrier down, nothing stops you from walking out."
+    bed: "A slab of metal bolted to the wall where you've slept for months."
+    cell: "Your cramped cell - four concrete walls, a metal bed slab, and normally an impassable energy barrier. Tonight, the barrier is down."
 
 mess_hall:
   name: "Nutrient Dispensary"
@@ -26,6 +28,9 @@ mess_hall:
   details:
     screen: "A Protector with elongated limbs speaks soothingly about obedience."
     dispenser: "It oozes a grey paste labeled 'Sustenance'."
+    south: "The corridor south leads back to Cell Block C and the flickering barriers."
+    east: "Steam billows from the Scullery to the east, where industrial machinery hums."
+    west: "Heavy blast doors to the west lead to the Courtyard Access airlock."
 
 kitchen_scullery:
   name: "Scullery"
@@ -38,7 +43,9 @@ kitchen_scullery:
     - rusty_pipe
   npcs: []
   details:
-    chute: "A dark hole smelling of rot. It leads down."
+    chute: "A dark hole smelling of rot. It leads down to Waste Processing."
+    west: "The doorway west leads back to the Nutrient Dispensary's flickering lights."
+    down: "A waste chute drops down into darkness - the smell of rot rises from below."
 
 courtyard_access:
   name: "Courtyard Airlock"
@@ -52,6 +59,9 @@ courtyard_access:
   npcs: []
   details:
     scanner: "Retinal scanner. It looks for compliance chips."
+    east: "The corridor east leads back to the Nutrient Dispensary."
+    north: "A reinforced glass window reveals Guard Station Alpha to the north. The door beside it is ajar."
+    west: "The heavy blast door to the west stands partially open, leading to the Exercise Yard outside."
 
 security_kiosk:
   name: "Guard Station Alpha"
@@ -65,6 +75,7 @@ security_kiosk:
     - tech_scavenger_rin
   details:
     monitors: "You see yourself on one of the screens. It's unnerving."
+    south: "The door south leads back to the Courtyard Access airlock."
 
 exercise_yard:
   name: "The Cage"
@@ -80,6 +91,8 @@ exercise_yard:
   details:
     fence: "It buzzes angrily. Climbing is suicide."
     sky: "You can't remember the last time you saw a star."
+    east: "The blast door east leads back into the Courtyard Access airlock."
+    north: "A small maintenance shed sits at the north edge of the yard, barely visible in the sweeping searchlights."
 
 maintenance_shed:
   name: "Maintenance Shed"
@@ -92,7 +105,9 @@ maintenance_shed:
     - flashlight
   npcs: []
   details:
-    hatch: "Scratched into the metal is a symbol: a broken chain."
+    hatch: "Scratched into the metal is a symbol: a broken chain. This leads down to the old sewers."
+    south: "The shed door opens south to the Exercise Yard and its sweeping searchlights."
+    down: "A rusted hatch beneath oily rags leads down into darkness - the old sewer tunnels."
 
 waste_processing:
   name: "Waste Processing"
@@ -105,11 +120,13 @@ waste_processing:
   npcs: []
   details:
     incinerator: "A roaring furnace. Don't fall in."
+    up: "The waste chute leads back up to the Scullery above."
+    north: "A crumbling passage north leads into old pre-invasion tunnels - the forgotten sewers."
 
 old_sewers:
   name: "Forgotten Tunnels"
   atmosphere: |
-    These tunnels predate the invasion. The brickwork is crumbling, and water trickles down the walls. It's dark, damp, and smells of freedom.
+    These tunnels predate the invasion. The brickwork is crumbling, and water trickles down the walls. It's dark, damp, and smells of freedom. This is it - the path out of Omega-9.
   exits:
     up: maintenance_shed
     south: waste_processing
@@ -117,4 +134,6 @@ old_sewers:
     - resistance_map
   npcs: []
   details:
-    graffiti: "'THEY BLEED LIKE US' is spray-painted in red."
+    graffiti: "'THEY BLEED LIKE US' is spray-painted in red. The mark of the Resistance."
+    up: "A ladder leads up to the maintenance shed hatch above."
+    south: "The passage south connects to the prison's Waste Processing facility."

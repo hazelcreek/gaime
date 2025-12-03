@@ -30,10 +30,10 @@ You MUST respond with valid JSON containing four YAML strings. Follow this EXACT
 ```json
 {{
   "world_id": "snake-case-world-name",
-  "world_yaml": "name: \\"World Name\\"\\ntheme: \\"theme here\\"\\ntone: \\"tone here\\"\\n\\npremise: |\\n  Description of the world premise...\\n\\nplayer:\\n  starting_location: first_location_id\\n  starting_inventory:\\n    - item_id\\n  stats:\\n    health: 100\\n\\nconstraints:\\n  - \\"Constraint 1\\"\\n  - \\"Constraint 2\\"\\n\\ncommands:\\n  help: \\"Display available commands\\"\\n  look: \\"Examine surroundings\\"\\n  inventory: \\"Check inventory\\"\\n  go: \\"Move in a direction\\"",
-  "locations_yaml": "location_id:\\n  name: \\"Location Name\\"\\n  atmosphere: |\\n    Atmospheric description...\\n  exits:\\n    north: other_location_id\\n  items:\\n    - item_id\\n  npcs: []\\n  details:\\n    thing: \\"Description of thing\\"",
+  "world_yaml": "name: \\"World Name\\"\\ntheme: \\"theme here\\"\\ntone: \\"tone here\\"\\n\\npremise: |\\n  Description of the world premise...\\n\\nstarting_situation: |\\n  Describe WHY the player can act NOW. What event, opportunity, or change has occurred that enables the adventure to begin? This is crucial for immersion.\\n\\nvictory:\\n  location: final_location_id\\n  item: optional_required_item\\n  flag: optional_required_flag\\n  narrative: |\\n    The ending narrative when the player wins...\\n\\nplayer:\\n  starting_location: first_location_id\\n  starting_inventory:\\n    - item_id\\n  stats:\\n    health: 100\\n\\nconstraints:\\n  - \\"Constraint 1\\"\\n  - \\"Constraint 2\\"\\n\\ncommands:\\n  help: \\"Display available commands\\"\\n  look: \\"Examine surroundings\\"\\n  inventory: \\"Check inventory\\"\\n  go: \\"Move in a direction\\"",
+  "locations_yaml": "location_id:\\n  name: \\"Location Name\\"\\n  atmosphere: |\\n    Atmospheric description that establishes WHERE the player is...\\n  exits:\\n    north: other_location_id\\n  items:\\n    - item_id\\n  npcs: []\\n  details:\\n    thing: \\"Description of examinable thing\\"\\n    north: \\"Narrative description of what the north exit looks like (e.g., 'A flickering barrier blocks the passage north')\\"",
   "npcs_yaml": "npc_id:\\n  name: \\"NPC Name\\"\\n  role: \\"Their role\\"\\n  location: location_id\\n  personality: \\"Their personality\\"\\n  knowledge:\\n    - \\"Something they know\\"\\n  dialogue_hints:\\n    greeting: \\"How they greet\\"",
-  "items_yaml": "item_id:\\n  name: \\"Item Name\\"\\n  portable: true\\n  examine: |\\n    Description when examined...\\n  found_description: \\"How it appears in the room\\"\\n  take_description: \\"Message when taken\\""
+  "items_yaml": "item_id:\\n  name: \\"Item Name\\"\\n  portable: true\\n  examine: |\\n    Description when examined...\\n  found_description: \\"REQUIRED: How the item appears naturally in the room scene. This MUST be provided for every item so it can be mentioned when the player looks around.\\"\\n  take_description: \\"Message when taken\\""
 }}
 ```
 
@@ -46,6 +46,14 @@ CRITICAL RULES FOR JSON OUTPUT:
 6. Ensure player starting_inventory items are defined in items_yaml
 7. Each YAML string must be valid YAML when newlines are unescaped
 
+## CRITICAL CONSISTENCY RULES (MUST FOLLOW):
+1. Every exit MUST have narrative justification in the atmosphere or details. Add a detail entry for each exit direction explaining what it looks like (e.g., details.north: "A heavy wooden door leads north")
+2. The starting_situation MUST explain WHY the player can begin acting NOW (e.g., "The guard fell asleep", "The storm knocked out the power", "You just discovered a hidden key")
+3. Every item MUST have a found_description that naturally integrates into scene description. This is how items become discoverable!
+4. Include a victory condition with at least a target location, and optionally a required item or flag
+5. The starting location must make narrative sense - if the player is imprisoned, explain why they can leave their cell
+6. Exits should feel realistic - don't have open passages where there should be locked doors
+
 ## Guidelines
 - Use snake_case for all IDs (e.g., dark_forest, old_hermit, rusty_key)
 - Make locations interconnected (exits should match bidirectionally)
@@ -55,6 +63,7 @@ CRITICAL RULES FOR JSON OUTPUT:
 - Define 3-5 clear constraints/rules for the game
 - Include at least one hidden secret or puzzle
 - Create a compelling premise that hooks the player
+- Every location should clearly establish WHERE the player is
 '''
 
 
@@ -168,8 +177,10 @@ class WorldBuilder:
         """Validate a world's YAML files"""
         world_path = self.worlds_dir / world_id
         errors = []
+        warnings = []
         
         required_files = ["world.yaml", "locations.yaml", "npcs.yaml", "items.yaml"]
+        loaded_data = {}
         
         for filename in required_files:
             file_path = world_path / filename
@@ -186,15 +197,57 @@ class WorldBuilder:
                     errors.append(f"Empty file: {filename}")
                     continue
                 
+                loaded_data[filename] = data
+                
                 # Basic validation
                 if filename == "world.yaml":
                     if "name" not in data:
                         errors.append("world.yaml missing 'name'")
                     if "player" not in data:
                         errors.append("world.yaml missing 'player' setup")
+                    if "starting_situation" not in data or not data.get("starting_situation"):
+                        warnings.append("world.yaml missing 'starting_situation' - players may be confused about why they can act")
+                    if "victory" not in data:
+                        warnings.append("world.yaml missing 'victory' condition - game has no ending")
                 
             except yaml.YAMLError as e:
                 errors.append(f"Invalid YAML in {filename}: {e}")
         
-        return len(errors) == 0, errors
+        # Cross-file validation
+        if "items.yaml" in loaded_data:
+            items = loaded_data["items.yaml"]
+            for item_id, item_data in items.items():
+                if isinstance(item_data, dict):
+                    if not item_data.get("found_description"):
+                        warnings.append(f"Item '{item_id}' missing 'found_description' - item may not be discoverable")
+        
+        if "locations.yaml" in loaded_data and "world.yaml" in loaded_data:
+            locations = loaded_data["locations.yaml"]
+            world = loaded_data["world.yaml"]
+            
+            # Check starting location exists
+            starting_loc = world.get("player", {}).get("starting_location")
+            if starting_loc and starting_loc not in locations:
+                errors.append(f"Starting location '{starting_loc}' not found in locations.yaml")
+            
+            # Check victory location exists
+            victory = world.get("victory", {})
+            if victory and victory.get("location"):
+                if victory["location"] not in locations:
+                    errors.append(f"Victory location '{victory['location']}' not found in locations.yaml")
+            
+            # Check exits have narrative context
+            for loc_id, loc_data in locations.items():
+                if isinstance(loc_data, dict):
+                    exits = loc_data.get("exits", {})
+                    details = loc_data.get("details", {})
+                    for direction in exits.keys():
+                        if direction not in details:
+                            warnings.append(f"Location '{loc_id}' exit '{direction}' has no detail description")
+        
+        # Log warnings but don't fail validation
+        for warning in warnings:
+            logger.warning(f"World '{world_id}': {warning}")
+        
+        return len(errors) == 0, errors + [f"WARNING: {w}" for w in warnings]
 

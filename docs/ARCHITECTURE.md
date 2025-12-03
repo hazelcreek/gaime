@@ -136,14 +136,21 @@ This document describes the system architecture of GAIME, including component de
 6. State Manager applies changes
          │
          ▼
-7. Response returned to frontend:
+7. Victory Check - did player win?
+   - Check location, flags, inventory against victory conditions
+   - If won: set status="won", append victory narrative
+         │
+         ▼
+8. Response returned to frontend:
    {
      "narrative": "The painting depicts...",
-     "state": { ... updated state ... }
+     "state": { ... updated state ... },
+     "game_complete": false,
+     "ending_narrative": null
    }
          │
          ▼
-8. Frontend updates display
+9. Frontend updates display
 ```
 
 ### New Game Flow
@@ -234,7 +241,26 @@ class GameState:
     discovered_locations: list[str]
     flags: dict[str, bool]  # story progress
     turn_count: int
+    status: str  # "playing", "won", or "lost"
 ```
+
+## Victory Conditions
+
+Games can define win conditions in `world.yaml`:
+
+```yaml
+victory:
+  location: final_room     # Player must be here
+  flag: quest_complete     # This flag must be set
+  item: magic_key          # Player must have this item
+  narrative: |
+    Congratulations! You have completed the adventure...
+```
+
+After each action, the engine checks if victory conditions are met. If so:
+1. The game status changes to "won"
+2. The victory narrative is appended to the response
+3. Further actions are blocked
 
 ## Security Considerations
 

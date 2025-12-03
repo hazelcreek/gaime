@@ -17,6 +17,7 @@ You create immersive, atmospheric narrative responses to player actions.
 ## World Setting
 Theme: {theme}
 Tone: {tone}
+{starting_situation}
 
 ## Current Game State
 - Location: {current_location} ({location_name})
@@ -28,12 +29,17 @@ Tone: {tone}
 ## Current Location Details
 {location_atmosphere}
 
-Available Exits: {exits}
-Items Here: {items_here}
+Exits (with narrative context): {exits}
 NPCs Present: {npcs_here}
+
+## Visible Items at Location
+{items_here_detailed}
 
 ## Item Details (USE THESE EXACT DESCRIPTIONS when player examines items)
 {item_details}
+
+## Location Details (examinable features)
+{location_details}
 
 ## World Constraints (MUST follow these rules)
 {constraints}
@@ -52,6 +58,15 @@ NPCs Present: {npcs_here}
 8. When player examines an item, use the EXACT text from Item Details above
 9. When player moves, set location to the destination location_id (e.g., "dining_room", not the direction)
 10. NEVER use any special formatting in the narrative - no HTML/XML tags, no markdown (no **bold**, *italic*, etc.), no special syntax. Write plain prose only
+
+## Scene Description Rules (CRITICAL)
+11. When describing ANY scene (look, look around, entering a new location), ALWAYS:
+    - State the location name and physical context clearly
+    - Describe ALL visible items using their found_description text
+    - Describe exits narratively with context (e.g., "a flickering barrier to the north" not just "north")
+12. If an exit seems implausible for the setting, explain WHY it's accessible in the narrative
+13. Only mention items that are listed in "Visible Items at Location" - never invent items
+14. Maintain physical reality constraints consistent with the world's theme
 
 ## Response Format
 You MUST respond with valid JSON in this exact format:
@@ -76,15 +91,19 @@ Notes on state_changes:
 '''
 
 OPENING_PROMPT = '''Generate the opening narrative for this adventure.
-The player has just arrived at: {location_name}
+The player is at: {location_name}
 
 Premise: {premise}
 
+Starting Situation: {starting_situation}
+
 Create an atmospheric introduction that:
-1. Sets the mood and scene
-2. Establishes the player's situation
-3. Hints at the mystery ahead
-4. Ends with a sense of possibility
+1. Sets the mood and scene, clearly establishing WHERE the player is
+2. Establishes the player's situation and WHY they can act now (use the starting situation)
+3. Describes ALL visible items naturally using their found_description
+4. Describes exits with narrative context (not just directions)
+5. Hints at the goal ahead
+6. Ends with a sense of possibility and urgency
 
 Remember to respond in the JSON format specified.'''
 
@@ -102,15 +121,17 @@ class GameMaster:
         world = self.world_data.world
         location = self.state_manager.get_current_location()
         
-        # Get items at location
-        items_here = []
+        # Get items at location with their found_descriptions
+        items_here_detailed = []
         location_item_ids = []
         if location:
             for item_id in location.items:
                 item = self.world_data.get_item(item_id)
                 if item and not item.hidden:
-                    items_here.append(item.name)
                     location_item_ids.append(item_id)
+                    # Include found_description for scene description
+                    found_desc = item.found_description or f"A {item.name} is here."
+                    items_here_detailed.append(f"- {item.name} ({item_id}): {found_desc}")
         
         # Get NPCs present
         npcs_here = []
@@ -134,29 +155,47 @@ class GameMaster:
             if item and item.examine:
                 item_details.append(f"- {item.name} ({item_id}):\n{item.examine.strip()}")
         
-        # Format exits with destination location IDs
+        # Format exits with destination location IDs and narrative context
         exits_formatted = []
         if location:
             for direction, dest_id in location.exits.items():
                 dest_loc = self.world_data.get_location(dest_id)
                 dest_name = dest_loc.name if dest_loc else dest_id
-                exits_formatted.append(f"{direction} -> {dest_id} ({dest_name})")
+                # Check if there's a detail about this exit
+                exit_detail = location.details.get(direction, "") if location.details else ""
+                if exit_detail:
+                    exits_formatted.append(f"{direction} -> {dest_id} ({dest_name}): {exit_detail}")
+                else:
+                    exits_formatted.append(f"{direction} -> {dest_id} ({dest_name})")
+        
+        # Format location details (examinable features)
+        location_details = []
+        if location and location.details:
+            for key, desc in location.details.items():
+                location_details.append(f"- {key}: {desc}")
+        
+        # Get starting situation if defined
+        starting_situation = ""
+        if hasattr(world, 'starting_situation') and world.starting_situation:
+            starting_situation = f"Starting Situation: {world.starting_situation}"
         
         return SYSTEM_PROMPT.format(
             world_name=world.name,
             theme=world.theme,
             tone=world.tone,
+            starting_situation=starting_situation,
             current_location=state.current_location,
             location_name=location.name if location else "Unknown",
             location_atmosphere=location.atmosphere if location else "",
-            exits=", ".join(exits_formatted) if exits_formatted else "none",
+            exits="\n".join(exits_formatted) if exits_formatted else "none",
             inventory=", ".join(inventory_names) if inventory_names else "nothing",
             health=state.stats.health,
             discovered=", ".join(state.discovered_locations),
             flags=", ".join(f"{k}={v}" for k, v in state.flags.items()) if state.flags else "none",
-            items_here=", ".join(items_here) if items_here else "nothing visible",
+            items_here_detailed="\n".join(items_here_detailed) if items_here_detailed else "Nothing visible",
             npcs_here=", ".join(npcs_here) if npcs_here else "no one",
             item_details="\n\n".join(item_details) if item_details else "No items available to examine",
+            location_details="\n".join(location_details) if location_details else "No special features",
             constraints="\n".join(f"- {c}" for c in world.constraints),
             npc_knowledge="\n".join(npc_knowledge) if npc_knowledge else "No NPCs present"
         )
@@ -166,10 +205,18 @@ class GameMaster:
         world = self.world_data.world
         location = self.state_manager.get_current_location()
         
+        # Get starting situation if defined
+        starting_situation = ""
+        if hasattr(world, 'starting_situation') and world.starting_situation:
+            starting_situation = world.starting_situation
+        else:
+            starting_situation = "The adventure begins now."
+        
         system_prompt = self._build_system_prompt()
         user_prompt = OPENING_PROMPT.format(
             location_name=location.name if location else "the starting area",
-            premise=world.premise
+            premise=world.premise,
+            starting_situation=starting_situation
         )
         
         messages = [
@@ -236,8 +283,32 @@ Process this action and respond with the narrative result and any state changes.
                             parsed.setdefault("state_changes", {})["discovered_locations"] = []
                         # The exit is now accessible
         
+        # Validate state changes for consistency
+        state_changes_dict = parsed.get("state_changes", {})
+        
+        # Validate location change is a valid exit
+        new_location = state_changes_dict.get("location")
+        if new_location and location:
+            valid_destinations = list(location.exits.values())
+            if new_location not in valid_destinations:
+                # LLM tried to move to invalid location - reject the move
+                state_changes_dict["location"] = None
+                parsed["narrative"] = parsed.get("narrative", "") + " (You can't go that way.)"
+        
+        # Validate inventory additions exist
+        inventory_changes = state_changes_dict.get("inventory", {})
+        items_to_add = inventory_changes.get("add", [])
+        valid_items = []
+        for item_id in items_to_add:
+            item = self.world_data.get_item(item_id)
+            # Item must exist and either be at location or already validated by game logic
+            if item and (item_id in (location.items if location else []) or item.location == self.state_manager.get_state().current_location):
+                valid_items.append(item_id)
+        if items_to_add:
+            inventory_changes["add"] = valid_items
+        
         # Parse into structured response
-        state_changes = self._parse_state_changes(parsed.get("state_changes", {}))
+        state_changes = self._parse_state_changes(state_changes_dict)
         
         return LLMResponse(
             narrative=parsed.get("narrative", "Nothing happens."),

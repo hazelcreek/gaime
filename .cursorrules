@@ -46,9 +46,13 @@ We use a hybrid approach to world creation:
 
 ### World Definition Schema
 - `world.yaml`: Theme, premise, player setup, global constraints
+  - **`starting_situation`**: Explains WHY the player can act now (critical for immersion)
+  - **`victory`**: Win condition with `location`, `flag`, `item`, and `narrative` fields
 - `locations.yaml`: Rooms with atmosphere hints, exits, items, interactions
+  - **Exit details**: Add details for each exit direction (e.g., `north: "A door leads north"`)
 - `npcs.yaml`: Characters with personality, knowledge, behavior rules
 - `items.yaml`: Objects with descriptions, uses, puzzle connections
+  - **`found_description`**: REQUIRED - How item appears in scene (makes items discoverable)
 
 ## Coding Conventions
 
@@ -100,4 +104,37 @@ cd frontend && npm install && npm run dev
 - `docs/WORLD_AUTHORING.md` - How to create game worlds
 - `docs/LLM_INTEGRATION.md` - AI prompts and provider setup
 - `docs/API.md` - Backend API reference
+
+## Documentation Maintenance (IMPORTANT)
+
+When making code changes, **always check if documentation needs updating**:
+
+| Change Type | Docs to Update |
+|-------------|----------------|
+| New/changed API endpoints | `docs/API.md` |
+| New/changed Pydantic models | `docs/API.md` (Data Models section) |
+| Changes to game state schema | `docs/ARCHITECTURE.md`, `docs/API.md` |
+| New world.yaml fields | `docs/WORLD_AUTHORING.md` |
+| New locations.yaml fields | `docs/WORLD_AUTHORING.md` |
+| New items.yaml fields | `docs/WORLD_AUTHORING.md` |
+| New npcs.yaml fields | `docs/WORLD_AUTHORING.md` |
+| Changes to LLM prompts | `docs/LLM_INTEGRATION.md` |
+| New game mechanics (victory, etc.) | `docs/ARCHITECTURE.md`, `docs/WORLD_AUTHORING.md` |
+| World builder changes | `docs/LLM_INTEGRATION.md` |
+
+### Key Documentation Locations
+
+**World Schema Fields** (when adding to world.yaml):
+- `docs/WORLD_AUTHORING.md` → "world.yaml" section
+- Key fields: `starting_situation`, `victory`, `constraints`
+
+**Game State Fields** (when adding to GameState):
+- `docs/ARCHITECTURE.md` → "State Schema" section
+- `docs/API.md` → "GameState" interface
+
+**API Response Fields** (when changing ActionResponse, etc.):
+- `docs/API.md` → relevant endpoint section and "Data Models" section
+
+**LLM Prompts** (when changing SYSTEM_PROMPT, OPENING_PROMPT, etc.):
+- `docs/LLM_INTEGRATION.md` → "Prompt Architecture" section
 

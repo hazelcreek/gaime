@@ -5,6 +5,23 @@ tone: "Awkward, Rebellious, Nostalgic"
 premise: |
   It's 4:00 PM on a Friday. The final bell rang an hour ago, but you're still here. Why? Because Principal Skinner locked the front gates to keep skateboarders out, and you forgot your backpack in the gym. Now you need to navigate the uncanny silence of an empty high school, avoid the overzealous hall monitor who thinks school never ends, and find a way to escape before the janitor locks the building down for the weekend.
 
+starting_situation: |
+  The final bell rang exactly one hour ago. You can still hear its echo in your soul. You were about to leave when you realized - your backpack, with your phone, your keys, your everything - is still in the gym locker room. You went back for it, and that's when you heard the terrible sound: the CLANK of Principal Skinner locking the front gates. Now you're trapped. The clock on the wall reads 4:00 PM. The janitor does his final lockdown at 5:00 PM. You have one hour to find a way out, or you're spending the weekend in academic purgatory.
+
+victory:
+  location: front_gate
+  flag: escaped
+  narrative: |
+    The key slides into the padlock with a satisfying click. You turn it, and the chain falls away with a musical jingle. The gate swings open, and the late afternoon sun hits your face like a blessing from the gods of freedom.
+    
+    You step through, your feet touching the parking lot asphalt. Behind you, the school looms like a bad memory. In front of you: FREEDOM. The whole weekend stretches out before you - no homework, no detention, no Principal Skinner's disappointed sighs.
+    
+    You take a deep breath of non-institutional air and start walking home. Somewhere in the distance, you swear you can hear the faint sound of a victory guitar riff.
+    
+    CONGRATULATIONS - You have escaped Detention Survival High!
+    
+    Final Status: TOTALLY RAD 🤘
+
 player:
   starting_location: main_hallway
   starting_inventory:

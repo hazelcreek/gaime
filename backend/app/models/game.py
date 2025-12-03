@@ -39,6 +39,7 @@ class GameState(BaseModel):
     flags: dict[str, bool] = Field(default_factory=dict)
     turn_count: int = 0
     npc_trust: dict[str, int] = Field(default_factory=dict)
+    status: str = "playing"  # "playing", "won", "lost"
     
     def apply_changes(self, changes: StateChanges) -> None:
         """Apply state changes from an action"""
@@ -84,6 +85,8 @@ class ActionResponse(BaseModel):
     narrative: str
     state: GameState
     hints: list[str] = Field(default_factory=list)
+    game_complete: bool = False  # True if game has ended (won or lost)
+    ending_narrative: str | None = None  # Final narrative if game completed
 
 
 class LLMResponse(BaseModel):

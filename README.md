@@ -72,6 +72,8 @@ gaime/
 - **Hybrid World Building**: Define key elements in YAML, AI fills in details
 - **Provider Agnostic**: Switch between Gemini, OpenAI, Anthropic, or local models
 - **Light Game Mechanics**: Track inventory, location, and player stats
+- **Victory Conditions**: Define win states with location, flag, and item requirements
+- **AI World Builder**: Generate complete game worlds from text descriptions
 
 ## License
 

@@ -12,6 +12,14 @@ class PlayerSetup(BaseModel):
     stats: dict[str, int] = Field(default_factory=lambda: {"health": 100})
 
 
+class VictoryCondition(BaseModel):
+    """Win condition for the game"""
+    location: str | None = None  # Must be at this location to win
+    flag: str | None = None      # Must have this flag set to win
+    item: str | None = None      # Must have this item in inventory to win
+    narrative: str = ""          # Ending narrative when player wins
+
+
 class World(BaseModel):
     """Main world definition from world.yaml"""
     name: str
@@ -21,6 +29,8 @@ class World(BaseModel):
     player: PlayerSetup
     constraints: list[str] = Field(default_factory=list)
     commands: dict[str, str] = Field(default_factory=dict)
+    starting_situation: str = ""  # Initial narrative context explaining why player can act
+    victory: VictoryCondition | None = None  # Win condition for the game
 
 
 class InteractionEffect(BaseModel):

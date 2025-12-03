@@ -73,9 +73,11 @@ LiteLLM uses prefixed model strings:
 The game master system prompt includes:
 
 1. **Role Definition**: Who the AI is
-2. **World Context**: Theme, setting, constraints
+2. **World Context**: Theme, setting, constraints, starting situation
 3. **Current State**: Location, inventory, flags
-4. **Response Format**: Expected JSON structure
+4. **Location Details**: Atmosphere, exit descriptions, visible items with found_descriptions
+5. **Scene Description Rules**: How to describe scenes, items, and exits narratively
+6. **Response Format**: Expected JSON structure
 
 ```python
 SYSTEM_PROMPT = """You are the Game Master for a text adventure game.
@@ -144,6 +146,33 @@ def parse_response(response: str) -> ActionResult:
 ```
 
 ## Prompt Engineering Tips
+
+### Scene Description Rules
+
+The system prompt now includes explicit rules for scene descriptions:
+
+```
+## Scene Description Rules (CRITICAL)
+11. When describing ANY scene (look, look around, entering a new location), ALWAYS:
+    - State the location name and physical context clearly
+    - Describe ALL visible items using their found_description text
+    - Describe exits narratively with context (e.g., "a flickering barrier to the north")
+12. If an exit seems implausible for the setting, explain WHY it's accessible
+13. Only mention items that are listed in "Visible Items at Location"
+14. Maintain physical reality constraints consistent with the world's theme
+```
+
+### Starting Situation Context
+
+The `starting_situation` field from world.yaml is included in both the system prompt and opening prompt, explaining why the player can begin acting:
+
+```python
+# In system prompt
+Starting Situation: {starting_situation}
+
+# Example
+Starting Situation: The power grid has failed. Your cell's energy barrier is down.
+```
 
 ### Maintaining Consistency
 
@@ -281,7 +310,7 @@ This logs:
 
 ## World Builder Prompts
 
-The world builder uses a different prompt style:
+The world builder uses a different prompt style with critical consistency rules:
 
 ```python
 WORLD_BUILDER_PROMPT = """Generate a text adventure game world.
@@ -292,15 +321,29 @@ Number of locations: {num_locations}
 Number of NPCs: {num_npcs}
 
 Generate complete YAML content for:
-1. world.yaml - Theme, premise, constraints
-2. locations.yaml - All locations with connections
+1. world.yaml - Theme, premise, starting_situation, victory condition, constraints
+2. locations.yaml - All locations with connections and exit details
 3. npcs.yaml - Characters with personalities
-4. items.yaml - Key items and puzzles
+4. items.yaml - Key items with found_descriptions
+
+## CRITICAL CONSISTENCY RULES:
+1. Every exit MUST have narrative justification in details (e.g., details.north: "A door leads north")
+2. starting_situation MUST explain WHY the player can act NOW
+3. Every item MUST have a found_description for discoverability
+4. Include a victory condition with target location and optional flag/item
+5. Starting location must make narrative sense
 
 Ensure all references between files are consistent.
 Output valid YAML for each file.
 """
 ```
+
+The world builder validation also checks for:
+- Missing `found_description` on items (warning)
+- Missing `starting_situation` (warning)
+- Missing `victory` condition (warning)
+- Victory location that doesn't exist (error)
+- Exit details for narrative context (warning)
 
 ## Image Generation
 

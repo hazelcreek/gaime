@@ -42,6 +42,24 @@ premise: |
   The elderly butler who answered the door seems... troubled.
   Something is wrong in this house.
 
+# IMPORTANT: Explain WHY the player can act NOW
+starting_situation: |
+  The heavy front door has just slammed shut behind you. Lightning flashes 
+  through the grimy windows. The storm rages outside - there's no leaving 
+  tonight. The butler, Jenkins, has retreated into the shadows. You have 
+  until dawn to uncover the manor's secrets.
+
+# Victory condition - defines how to win/end the game
+victory:
+  location: ritual_chamber    # Must be at this location
+  flag: has_all_artifacts     # Must have this flag set
+  # item: some_item           # Optional: must have this item
+  narrative: |
+    With trembling hands, you place the final artifact upon its pedestal.
+    The symbols on the floor blaze with ethereal light. The curse is broken.
+    
+    CONGRATULATIONS - You have completed the adventure!
+
 # Player starting state
 player:
   starting_location: entrance_hall
@@ -64,6 +82,17 @@ commands:
   inventory: "List carried items"
   look: "Describe current location"
 ```
+
+**Key Fields:**
+
+| Field | Required | Purpose |
+|-------|----------|---------|
+| `starting_situation` | Recommended | Explains WHY the player can act now (prevents confusion) |
+| `victory` | Recommended | Defines win condition and ending narrative |
+| `victory.location` | Optional | Player must be at this location to win |
+| `victory.flag` | Optional | This flag must be set to win |
+| `victory.item` | Optional | Player must have this item to win |
+| `victory.narrative` | Optional | Ending text shown when player wins |
 
 ### locations.yaml
 
@@ -92,11 +121,15 @@ entrance_hall:
   # NPCs present (reference npcs.yaml)
   npcs: []
   
-  # Interactive elements
+  # Interactive elements (things player can examine)
   details:
     portraits: "Five family portraits: parents and three children"
     chandelier: "Once magnificent, now dark and cobwebbed"
     floor: "Marble tiles, cracked and dusty"
+    # IMPORTANT: Add details for exits to provide narrative context
+    north: "An archway leads north to the library, its darkness beckoning"
+    east: "Double doors to the east open into what appears to be a dining room"
+    up: "A grand staircase climbs upward into shadow"
   
   # Special interactions
   interactions:
@@ -250,8 +283,10 @@ old_letter:
     Forgive me.
     - Edmund"
   
-  # Narrative hints
+  # CRITICAL: How the item appears in the room scene
+  # This is used when player "looks around" - without it, items are invisible!
   found_description: "A crumpled letter lies on the side table"
+  
   take_description: "You pocket the fragile letter carefully"
   
   # Puzzle connections
@@ -309,6 +344,20 @@ candlestick:
 
 ## Best Practices
 
+### Writing Starting Situations
+
+The `starting_situation` explains why the player can begin acting. This prevents confusion about context:
+
+```yaml
+# Good - explains the enabling event
+starting_situation: |
+  The power grid has failed. For a few precious seconds, the energy 
+  barrier sealing your cell flickers and dies. This is your chance.
+
+# Bad - doesn't explain why player can act
+starting_situation: "You are in a prison cell."
+```
+
 ### Writing Atmosphere Hints
 
 The `atmosphere` field guides AI narrative generation. Good atmosphere:
@@ -322,6 +371,34 @@ atmosphere: |
 
 # Bad - too literal, no mood
 atmosphere: "A room with books"
+```
+
+### Item Found Descriptions
+
+**Every item MUST have a `found_description`** - this is how items become discoverable when the player looks around:
+
+```yaml
+# Good - naturally integrates into scene
+found_description: "A crumpled letter lies forgotten on the side table"
+
+# Bad - too generic or missing
+found_description: "There is a letter here"
+found_description: ""  # Item will be invisible!
+```
+
+### Exit Details
+
+Add details for each exit direction to help the AI describe them narratively:
+
+```yaml
+details:
+  # Scene elements
+  portraits: "Five family portraits line the walls"
+  
+  # Exit descriptions (match your exits keys)
+  north: "An archway leads north into darkness"
+  east: "Heavy oak doors stand closed to the east"
+  up: "A grand staircase climbs into shadow"
 ```
 
 ### Defining Constraints
@@ -412,4 +489,9 @@ This generates YAML files you can then edit and refine.
 | Puzzles too obscure | Add multiple trigger phrases, provide hints |
 | World feels empty | Add more `details` and `interactions` |
 | Atmosphere is generic | Use specific sensory details, not abstractions |
+| Items not discoverable | Add `found_description` to every item |
+| Player confused about location | Add exit details describing what each direction looks like |
+| Player confused why they can act | Add `starting_situation` explaining the enabling event |
+| Game has no ending | Add `victory` condition with location/flag/item requirements |
+| Exits seem unrealistic | Add narrative justification in `details` for each exit direction |
 

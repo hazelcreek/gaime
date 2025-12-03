@@ -28,6 +28,17 @@ class ActionProcessor:
         """Process a player action and return the response"""
         action = action.strip()
         
+        # Check if game is already over
+        state = self.state_manager.get_state()
+        if state.status != "playing":
+            return ActionResponse(
+                narrative="The game has ended. Start a new game to play again.",
+                state=state,
+                hints=[],
+                game_complete=True,
+                ending_narrative=None
+            )
+        
         # Check for built-in commands first
         builtin_response = self._handle_builtin(action)
         if builtin_response:
@@ -42,10 +53,26 @@ class ActionProcessor:
         # Increment turn
         self.state_manager.increment_turn()
         
+        # Check for victory conditions
+        is_victory, ending_narrative = self.state_manager.check_victory()
+        
+        if is_victory:
+            # Append victory narrative to the action response
+            full_narrative = llm_response.narrative + "\n\n---\n\n" + ending_narrative
+            return ActionResponse(
+                narrative=full_narrative,
+                state=self.state_manager.get_state(),
+                hints=[],
+                game_complete=True,
+                ending_narrative=ending_narrative
+            )
+        
         return ActionResponse(
             narrative=llm_response.narrative,
             state=self.state_manager.get_state(),
-            hints=llm_response.hints
+            hints=llm_response.hints,
+            game_complete=False,
+            ending_narrative=None
         )
     
     def _handle_builtin(self, action: str) -> ActionResponse | None:
@@ -83,7 +110,9 @@ class ActionProcessor:
         return ActionResponse(
             narrative=help_text,
             state=self.state_manager.get_state(),
-            hints=[]
+            hints=[],
+            game_complete=False,
+            ending_narrative=None
         )
     
     def _inventory_response(self) -> ActionResponse:
@@ -105,7 +134,9 @@ class ActionProcessor:
         return ActionResponse(
             narrative=narrative,
             state=state,
-            hints=[]
+            hints=[],
+            game_complete=False,
+            ending_narrative=None
         )
     
     def _apply_state_changes(self, changes: StateChanges):

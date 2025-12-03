@@ -152,9 +152,12 @@ POST /api/game/action
     },
     "discovered_locations": ["entrance_hall"],
     "flags": {},
-    "turn_count": 1
+    "turn_count": 1,
+    "status": "playing"
   },
-  "hints": ["The portraits seem to be watching you..."]
+  "hints": ["The portraits seem to be watching you..."],
+  "game_complete": false,
+  "ending_narrative": null
 }
 ```
 
@@ -185,7 +188,8 @@ GET /api/game/state/{session_id}
     },
     "discovered_locations": ["entrance_hall"],
     "flags": {},
-    "turn_count": 5
+    "turn_count": 5,
+    "status": "playing"
   }
 }
 ```
@@ -421,6 +425,7 @@ interface GameState {
   discovered_locations: string[];
   flags: Record<string, boolean>;
   turn_count: number;
+  status: "playing" | "won" | "lost";  // Game completion status
 }
 ```
 
@@ -431,6 +436,8 @@ interface ActionResponse {
   narrative: string;
   state: GameState;
   hints?: string[];
+  game_complete: boolean;        // True if game has ended
+  ending_narrative?: string;     // Victory/defeat narrative if game ended
 }
 ```
 

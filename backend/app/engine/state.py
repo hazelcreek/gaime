@@ -222,4 +222,38 @@ class GameStateManager:
     def increment_turn(self):
         """Increment the turn counter"""
         self._state.turn_count += 1
+    
+    def check_victory(self) -> tuple[bool, str]:
+        """
+        Check if victory conditions are met.
+        
+        Returns:
+            tuple[bool, str]: (is_victory, ending_narrative)
+        """
+        world = self.world_data.world
+        
+        # No victory conditions defined
+        if not world.victory:
+            return False, ""
+        
+        victory = world.victory
+        
+        # Check location requirement
+        if victory.location:
+            if self._state.current_location != victory.location:
+                return False, ""
+        
+        # Check flag requirement
+        if victory.flag:
+            if not self._state.flags.get(victory.flag, False):
+                return False, ""
+        
+        # Check item requirement
+        if victory.item:
+            if victory.item not in self._state.inventory:
+                return False, ""
+        
+        # All conditions met - player wins!
+        self._state.status = "won"
+        return True, victory.narrative or "Congratulations! You have completed the adventure."
 
