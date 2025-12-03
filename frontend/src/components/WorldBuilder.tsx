@@ -38,14 +38,7 @@ export default function WorldBuilder() {
   const [isGeneratingImages, setIsGeneratingImages] = useState(false);
   const [generatingLocation, setGeneratingLocation] = useState<string | null>(null);
   const [imageGenProgress, setImageGenProgress] = useState<string>('');
-  const [selectedImageModel, setSelectedImageModel] = useState<string>('gemini-2.5-flash-image');
-  
-  // Available image models
-  const imageModels = [
-    { id: 'gemini-2.5-flash-image', name: 'Gemini 2.5 Flash', description: 'Fast & reliable' },
-    { id: 'gemini-2.5-flash-image-preview', name: 'Gemini 2.5 Flash Preview', description: 'Fast, preview' },
-    { id: 'gemini-3-pro-image-preview', name: 'Gemini 3 Pro', description: 'Best quality (may be overloaded)' },
-  ];
+  const selectedImageModel = 'gemini-3-pro-image-preview';
 
   // Load existing worlds on mount
   useEffect(() => {
@@ -452,18 +445,9 @@ export default function WorldBuilder() {
 
               <div>
                 <label className="block text-terminal-dim text-sm mb-2">Image Model</label>
-                <select
-                  value={selectedImageModel}
-                  onChange={(e) => setSelectedImageModel(e.target.value)}
-                  className="w-full bg-terminal-bg border border-terminal-border rounded p-3 
-                           text-terminal-text focus:border-terminal-accent focus:outline-none"
-                >
-                  {imageModels.map(model => (
-                    <option key={model.id} value={model.id}>
-                      {model.name} - {model.description}
-                    </option>
-                  ))}
-                </select>
+                <div className="w-full bg-terminal-bg border border-terminal-border rounded p-3 text-terminal-text opacity-70">
+                  Gemini 3 Pro Image Preview (Best Quality)
+                </div>
               </div>
 
               <button

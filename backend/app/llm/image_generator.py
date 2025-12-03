@@ -9,6 +9,7 @@ Uses the google-genai SDK for native image generation.
 import os
 import base64
 import asyncio
+import random
 from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass, field
@@ -20,8 +21,22 @@ load_dotenv()
 
 # Image generation model - Gemini with image output capability
 # See: https://ai.google.dev/gemini-api/docs/image-generation
-# Options: "gemini-2.5-flash-image" (fast, reliable) or "gemini-3-pro-image-preview" (advanced, but can timeout)
-IMAGE_MODEL = "gemini-2.5-flash-image"
+# We exclusively use Gemini 3 Pro Image Preview for high quality 16:9 4K images
+IMAGE_MODEL = "gemini-3-pro-image-preview"
+
+# Retry configuration for transient errors
+MAX_RETRIES = 3
+INITIAL_RETRY_DELAY = 2.0  # seconds
+MAX_RETRY_DELAY = 30.0  # seconds
+
+
+class ImageGenerationError(Exception):
+    """Custom exception for image generation failures with detailed info"""
+    def __init__(self, message: str, is_retryable: bool = False, status_code: int = 500):
+        super().__init__(message)
+        self.message = message
+        self.is_retryable = is_retryable
+        self.status_code = status_code
 
 
 @dataclass
@@ -296,6 +311,7 @@ async def generate_location_image(
     logger = logging.getLogger(__name__)
     
     from google import genai
+    from google.genai import types
     
     # Use override model if provided, otherwise use default
     model_to_use = model_override or IMAGE_MODEL
@@ -322,25 +338,119 @@ async def generate_location_image(
     
     try:
         logger.info(f"[ImageGen] Calling {model_to_use}...")
-        # Use the new google-genai SDK for image generation with a timeout
-        try:
-            response = await asyncio.wait_for(
-                asyncio.to_thread(
-                    client.models.generate_content,
-                    model=model_to_use,
-                    contents=[prompt]
-                ),
-                timeout=120.0  # 2 minute timeout
+        
+        # Configure for Gemini 3 Pro Image Preview via generate_content
+        # This model uses generate_content but supports image_config for resolution control
+        config = types.GenerateContentConfig(
+            image_config=types.ImageConfig(
+                aspect_ratio="16:9"
             )
-        except asyncio.TimeoutError:
-            logger.error(f"[ImageGen] API call timed out after 120 seconds for {location_id}")
-            # Try alternative models on timeout
-            return await _generate_with_alternative_model(
-                location_id, prompt, output_dir, client, logger
-            )
+        )
+        
+        # Retry loop for transient errors
+        last_error = None
+        for attempt in range(MAX_RETRIES):
+            try:
+                response = await asyncio.wait_for(
+                    asyncio.to_thread(
+                        client.models.generate_content,
+                        model=model_to_use,
+                        contents=[prompt],
+                        config=config
+                    ),
+                    timeout=120.0  # 2 minute timeout
+                )
+                break  # Success, exit retry loop
+            except asyncio.TimeoutError:
+                logger.error(f"[ImageGen] API call timed out after 120 seconds for {location_id} (attempt {attempt + 1}/{MAX_RETRIES})")
+                last_error = ImageGenerationError(
+                    "API call timed out after 120 seconds. The model may be overloaded.",
+                    is_retryable=True,
+                    status_code=504
+                )
+                if attempt < MAX_RETRIES - 1:
+                    delay = min(INITIAL_RETRY_DELAY * (2 ** attempt) + random.uniform(0, 1), MAX_RETRY_DELAY)
+                    logger.info(f"[ImageGen] Retrying in {delay:.1f}s...")
+                    await asyncio.sleep(delay)
+                    continue
+                raise last_error
+            except Exception as api_error:
+                error_str = str(api_error)
+                logger.warning(f"[ImageGen] API error on attempt {attempt + 1}/{MAX_RETRIES}: {error_str}")
+                
+                # Check if it's a retryable error (503, 429, etc.)
+                is_retryable = any(code in error_str for code in ["503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED", "overloaded"])
+                
+                if is_retryable and attempt < MAX_RETRIES - 1:
+                    delay = min(INITIAL_RETRY_DELAY * (2 ** attempt) + random.uniform(0, 1), MAX_RETRY_DELAY)
+                    logger.info(f"[ImageGen] Retryable error, waiting {delay:.1f}s before retry...")
+                    await asyncio.sleep(delay)
+                    last_error = api_error
+                    continue
+                
+                # Parse error for better messaging
+                if "503" in error_str or "UNAVAILABLE" in error_str or "overloaded" in error_str:
+                    raise ImageGenerationError(
+                        "The model is overloaded. Please try again in a few minutes.",
+                        is_retryable=True,
+                        status_code=503
+                    )
+                elif "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
+                    raise ImageGenerationError(
+                        "Rate limit exceeded. Please wait before generating more images.",
+                        is_retryable=True,
+                        status_code=429
+                    )
+                elif "403" in error_str or "PERMISSION_DENIED" in error_str:
+                    raise ImageGenerationError(
+                        "Permission denied. Check your API key permissions.",
+                        is_retryable=False,
+                        status_code=403
+                    )
+                elif "404" in error_str:
+                    raise ImageGenerationError(
+                        f"Model '{model_to_use}' not found or not available.",
+                        is_retryable=False,
+                        status_code=404
+                    )
+                else:
+                    raise ImageGenerationError(
+                        f"API error: {error_str}",
+                        is_retryable=False,
+                        status_code=500
+                    )
+        else:
+            # All retries exhausted
+            if last_error:
+                raise last_error
+            raise ImageGenerationError("All retry attempts failed", is_retryable=True, status_code=503)
         
         # Log response details for debugging
         logger.info(f"[ImageGen] Got response from API")
+        
+        # Handle GenerateImagesResponse
+        if hasattr(response, 'generated_images') and response.generated_images:
+            for i, img in enumerate(response.generated_images):
+                if hasattr(img, 'image') and img.image:
+                    image_path = output_dir / f"{location_id}.png"
+                    
+                    try:
+                        # Save using the image object's save method
+                        # The Image object in google-genai has a save method
+                        if hasattr(img.image, 'save'):
+                            await asyncio.to_thread(img.image.save, str(image_path))
+                            logger.info(f"[ImageGen] Saved generated image to {image_path}")
+                            return str(image_path)
+                        else:
+                            # Fallback to writing bytes directly
+                            with open(image_path, 'wb') as f:
+                                f.write(img.image.image_bytes)
+                            logger.info(f"[ImageGen] Saved generated image bytes to {image_path}")
+                            return str(image_path)
+                    except Exception as save_err:
+                        logger.error(f"[ImageGen] Failed to save image: {save_err}")
+        
+        # Fallback for generate_content response (legacy path or if mixed response)
         if hasattr(response, 'candidates') and response.candidates:
             for i, candidate in enumerate(response.candidates):
                 logger.info(f"[ImageGen] Candidate {i}: finish_reason={getattr(candidate, 'finish_reason', 'N/A')}")
@@ -355,115 +465,52 @@ async def generate_location_image(
             feedback = response.prompt_feedback
             if hasattr(feedback, 'block_reason') and feedback.block_reason:
                 logger.error(f"[ImageGen] BLOCKED: {feedback.block_reason}")
-                return await _generate_with_alternative_model(
-                    location_id, prompt, output_dir, client, logger
-                )
+                return None
         
-        # Extract image data from response parts
-        logger.info(f"[ImageGen] Response has {len(response.parts) if response.parts else 0} parts")
-        
-        for i, part in enumerate(response.parts):
-            logger.info(f"[ImageGen] Part {i}: inline_data={part.inline_data is not None}")
-            if part.inline_data is not None:
-                # Save the image using PIL if available, otherwise raw bytes
-                image_path = output_dir / f"{location_id}.png"
-                
-                try:
-                    # Try using the as_image() method (returns PIL Image)
-                    image = part.as_image()
-                    await asyncio.to_thread(image.save, str(image_path))
-                    logger.info(f"[ImageGen] Saved image via PIL to {image_path}")
-                except Exception as pil_err:
-                    logger.warning(f"[ImageGen] PIL save failed ({pil_err}), trying raw bytes")
-                    # Fallback: save raw bytes
-                    image_data = part.inline_data.data
-                    if isinstance(image_data, str):
-                        image_data = base64.b64decode(image_data)
-                    with open(image_path, 'wb') as f:
-                        f.write(image_data)
-                    logger.info(f"[ImageGen] Saved image via raw bytes to {image_path}")
-                
-                return str(image_path)
+        # Extract image data from response parts (generate_content style)
+        if hasattr(response, 'parts'):
+            logger.info(f"[ImageGen] Response has {len(response.parts) if response.parts else 0} parts")
+            
+            for i, part in enumerate(response.parts):
+                logger.info(f"[ImageGen] Part {i}: inline_data={part.inline_data is not None}")
+                if part.inline_data is not None:
+                    # Save the image using PIL if available, otherwise raw bytes
+                    image_path = output_dir / f"{location_id}.png"
+                    
+                    try:
+                        # Try using the as_image() method (returns PIL Image)
+                        image = part.as_image()
+                        await asyncio.to_thread(image.save, str(image_path))
+                        logger.info(f"[ImageGen] Saved image via PIL to {image_path}")
+                    except Exception as pil_err:
+                        logger.warning(f"[ImageGen] PIL save failed ({pil_err}), trying raw bytes")
+                        # Fallback: save raw bytes
+                        image_data = part.inline_data.data
+                        if isinstance(image_data, str):
+                            image_data = base64.b64decode(image_data)
+                        with open(image_path, 'wb') as f:
+                            f.write(image_data)
+                        logger.info(f"[ImageGen] Saved image via raw bytes to {image_path}")
+                    
+                    return str(image_path)
         
         logger.warning(f"[ImageGen] No image data in response for {location_id}")
-        return None
+        raise ImageGenerationError(
+            "No image data in API response. The model may have rejected the prompt or returned only text.",
+            is_retryable=False,
+            status_code=500
+        )
         
+    except ImageGenerationError:
+        # Re-raise our custom errors as-is
+        raise
     except Exception as e:
         logger.error(f"[ImageGen] Error generating image for {location_id}: {e}", exc_info=True)
-        # Try alternative model if primary fails
-        return await _generate_with_alternative_model(
-            location_id, prompt, output_dir, client, logger
+        raise ImageGenerationError(
+            f"Unexpected error: {str(e)}",
+            is_retryable=False,
+            status_code=500
         )
-
-
-async def _generate_with_alternative_model(
-    location_id: str,
-    prompt: str,
-    output_dir: Path,
-    client,
-    logger=None
-) -> Optional[str]:
-    """
-    Fallback image generation using alternative Gemini image models.
-    
-    Uses the google-genai SDK.
-    """
-    import logging
-    if logger is None:
-        logger = logging.getLogger(__name__)
-    
-    # Alternative model names to try
-    # Note: Imagen models use a different API (not generateContent), so we prioritize Gemini models
-    alternative_models = [
-        "gemini-2.5-flash-image-preview",  # Gemini 2.5 flash preview
-        "gemini-3-pro-image-preview",  # Gemini 3 pro (advanced but slower)
-    ]
-    
-    for alt_model in alternative_models:
-        try:
-            logger.info(f"[ImageGen] Trying alternative model: {alt_model}")
-            
-            response = await asyncio.wait_for(
-                asyncio.to_thread(
-                    client.models.generate_content,
-                    model=alt_model,
-                    contents=[prompt]
-                ),
-                timeout=90.0  # 90 second timeout for alternative models
-            )
-            
-            # Extract image data from response parts
-            if response.parts:
-                for part in response.parts:
-                    if part.inline_data is not None:
-                        image_path = output_dir / f"{location_id}.png"
-                        
-                        try:
-                            # Try using the as_image() method
-                            image = part.as_image()
-                            await asyncio.to_thread(image.save, str(image_path))
-                        except Exception:
-                            # Fallback: save raw bytes
-                            image_data = part.inline_data.data
-                            if isinstance(image_data, str):
-                                image_data = base64.b64decode(image_data)
-                            with open(image_path, 'wb') as f:
-                                f.write(image_data)
-                        
-                        logger.info(f"[ImageGen] Successfully generated image with {alt_model}")
-                        return str(image_path)
-            
-            logger.warning(f"[ImageGen] No image data in response from {alt_model}")
-            
-        except asyncio.TimeoutError:
-            logger.warning(f"[ImageGen] Alternative model {alt_model} timed out after 90 seconds")
-            continue
-        except Exception as e:
-            logger.warning(f"[ImageGen] Alternative model {alt_model} failed for {location_id}: {e}")
-            continue
-    
-    logger.error(f"[ImageGen] All image generation attempts failed for {location_id}")
-    return None
 
 
 def _build_location_context(
@@ -654,17 +701,23 @@ async def generate_world_images(
         print(f"  - Items: {[i.name for i in context.items]}")
         print(f"  - NPCs: {[n.name for n in context.npcs]}")
         
-        image_path = await generate_location_image(
-            location_id=loc_id,
-            location_name=loc_name,
-            atmosphere=atmosphere,
-            theme=theme,
-            tone=tone,
-            output_dir=images_dir,
-            context=context
-        )
-        
-        results[loc_id] = image_path
+        try:
+            image_path = await generate_location_image(
+                location_id=loc_id,
+                location_name=loc_name,
+                atmosphere=atmosphere,
+                theme=theme,
+                tone=tone,
+                output_dir=images_dir,
+                context=context
+            )
+            results[loc_id] = image_path
+        except ImageGenerationError as e:
+            print(f"  - Failed: {e.message}")
+            results[loc_id] = None
+        except Exception as e:
+            print(f"  - Unexpected error: {e}")
+            results[loc_id] = None
         
         # Small delay between generations to avoid rate limiting
         await asyncio.sleep(0.5)

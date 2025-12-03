@@ -2,6 +2,7 @@
 World Builder API endpoints - AI-assisted world generation and image generation
 """
 
+import os
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
@@ -18,6 +19,7 @@ from app.llm.image_generator import (
     ItemInfo,
     NPCInfo,
     _build_location_context,
+    ImageGenerationError,
 )
 
 router = APIRouter()
@@ -118,10 +120,17 @@ async def generate_images(world_id: str, request: GenerateImagesRequest):
         response_results = []
         for loc_id, image_path in results.items():
             if image_path:
+                # Add timestamp to force cache refresh
+                try:
+                    mtime = int(os.path.getmtime(image_path))
+                    image_url = f"/api/builder/{world_id}/images/{loc_id}?t={mtime}"
+                except OSError:
+                    image_url = f"/api/builder/{world_id}/images/{loc_id}"
+                
                 response_results.append(ImageGenerationResult(
                     location_id=loc_id,
                     success=True,
-                    image_url=f"/api/builder/{world_id}/images/{loc_id}"
+                    image_url=image_url
                 ))
             else:
                 response_results.append(ImageGenerationResult(
@@ -236,13 +245,21 @@ async def generate_single_image(world_id: str, location_id: str, model: str | No
         logger.info(f"Image generation completed for {loc_name}: {image_path}")
         
         if image_path:
+            # Add timestamp to force cache refresh
+            try:
+                mtime = int(os.path.getmtime(image_path))
+                image_url = f"/api/builder/{world_id}/images/{location_id}?t={mtime}"
+            except OSError:
+                image_url = f"/api/builder/{world_id}/images/{location_id}"
+                
             return {
                 "success": True,
                 "location_id": location_id,
-                "image_url": f"/api/builder/{world_id}/images/{location_id}",
+                "image_url": image_url,
                 "message": f"Image generated for {loc_name}"
             }
         else:
+            # This shouldn't happen anymore since we raise exceptions now
             raise HTTPException(
                 status_code=500,
                 detail="Image generation failed - no image data returned"
@@ -250,7 +267,15 @@ async def generate_single_image(world_id: str, location_id: str, model: str | No
     
     except HTTPException:
         raise
+    except ImageGenerationError as e:
+        # Handle our custom image generation errors with appropriate status codes
+        logger.warning(f"Image generation failed for {location_id}: {e.message} (retryable: {e.is_retryable})")
+        raise HTTPException(
+            status_code=e.status_code,
+            detail=e.message
+        )
     except Exception as e:
+        logger.error(f"Unexpected error generating image for {location_id}: {e}", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail=f"Image generation failed: {str(e)}"
@@ -271,7 +296,7 @@ async def get_location_image(world_id: str, location_id: str):
     return FileResponse(
         image_path,
         media_type="image/png",
-        headers={"Cache-Control": "max-age=3600"}
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate"}
     )
 
 
@@ -279,15 +304,20 @@ async def get_location_image(world_id: str, location_id: str):
 async def list_images(world_id: str):
     """List all available images for a world"""
     try:
-        images = list_location_images(world_id, WORLDS_DIR)
+        images_map = list_location_images(world_id, WORLDS_DIR)
+        
+        result_images = {}
+        for loc_id, path in images_map.items():
+            try:
+                mtime = int(os.path.getmtime(path))
+                result_images[loc_id] = f"/api/builder/{world_id}/images/{loc_id}?t={mtime}"
+            except OSError:
+                result_images[loc_id] = f"/api/builder/{world_id}/images/{loc_id}"
         
         return {
             "world_id": world_id,
-            "images": {
-                loc_id: f"/api/builder/{world_id}/images/{loc_id}"
-                for loc_id in images.keys()
-            },
-            "count": len(images)
+            "images": result_images,
+            "count": len(result_images)
         }
     except Exception as e:
         raise HTTPException(
