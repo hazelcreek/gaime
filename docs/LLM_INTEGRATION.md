@@ -302,3 +302,93 @@ Output valid YAML for each file.
 """
 ```
 
+## Image Generation
+
+GAIME uses Google's Gemini native image generation capabilities to create immersive scene images for game locations.
+
+### Configuration
+
+Image generation uses the same `GEMINI_API_KEY` as text generation. No additional configuration is required.
+
+### Supported Models
+
+| Model | Description | Use Case |
+|-------|-------------|----------|
+| `gemini-2.0-flash-exp` | Native image generation | Primary image generator |
+| `imagen-3.0-generate-002` | Dedicated image model | Fallback for complex scenes |
+
+### How It Works
+
+1. **Prompt Generation**: The system creates a detailed art prompt from:
+   - Location name
+   - Atmospheric description from YAML
+   - World theme and tone
+   - Style requirements (painterly, first-person, 16:9)
+
+2. **Image Generation**: Calls Gemini's native image generation API
+
+3. **Storage**: Images are saved to `worlds/{world_id}/images/{location_id}.png`
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/builder/{world_id}/images/generate` | POST | Generate images for all/selected locations |
+| `/api/builder/{world_id}/images/{location_id}/generate` | POST | Generate/regenerate single image |
+| `/api/builder/{world_id}/images/{location_id}` | GET | Retrieve generated image |
+| `/api/builder/{world_id}/images` | GET | List all available images |
+
+### Usage Example
+
+```python
+# Generate all images for a world
+from app.llm.image_generator import generate_world_images
+
+results = await generate_world_images(
+    world_id="cursed-manor",
+    worlds_dir=Path("worlds")
+)
+
+# Generate single image
+from app.llm.image_generator import generate_location_image
+
+image_path = await generate_location_image(
+    location_id="entrance_hall",
+    location_name="Entrance Hall",
+    atmosphere="A grand but decayed entrance hall...",
+    theme="Victorian gothic horror",
+    tone="atmospheric, mysterious",
+    output_dir=Path("worlds/cursed-manor/images")
+)
+```
+
+### Image Prompt Template
+
+```python
+prompt = f"""Create a dramatic, atmospheric scene illustration for a text adventure game.
+
+Location: {location_name}
+Theme: {theme}
+Tone: {tone}
+
+Scene Description:
+{atmosphere}
+
+Style Requirements:
+- Digital painting style with rich colors and dramatic lighting
+- Painterly, evocative atmosphere suitable for a text adventure game
+- First-person perspective as if the player is viewing the scene
+- Moody, immersive lighting that matches the tone
+- No text, UI elements, or characters in frame
+- 16:9 widescreen composition
+- Detailed environment with depth and atmospheric effects
+"""
+```
+
+### Best Practices
+
+1. **Rich Atmosphere**: More detailed atmosphere text = better images
+2. **Consistent Theme**: Theme and tone affect image style
+3. **Regenerate As Needed**: Use the single-image endpoint to refine specific locations
+4. **Rate Limiting**: Generation includes delays to avoid API rate limits
+

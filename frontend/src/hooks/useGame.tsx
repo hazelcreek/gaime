@@ -15,6 +15,7 @@ interface NarrativeEntry {
 interface GameContextValue {
   // State
   sessionId: string | null;
+  worldId: string | null;
   gameState: GameState | null;
   narrative: NarrativeEntry[];
   isLoading: boolean;
@@ -33,6 +34,7 @@ const STORAGE_KEY = 'gaime_session';
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [worldId, setWorldId] = useState<string | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [narrative, setNarrative] = useState<NarrativeEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,14 +75,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, [sessionId]);
 
   // Start a new game
-  const startNewGame = useCallback(async (worldId = 'cursed-manor', playerName = 'Traveler') => {
+  const startNewGame = useCallback(async (selectedWorldId = 'cursed-manor', playerName = 'Traveler') => {
     setIsLoading(true);
     setError(null);
     setNarrative([]);
     
     try {
-      const response = await gameAPI.newGame(worldId, playerName);
+      const response = await gameAPI.newGame(selectedWorldId, playerName);
       setSessionId(response.session_id);
+      setWorldId(selectedWorldId);
       setGameState(response.state);
       addNarrative('narrative', response.narrative);
       addNarrative('system', 'Type your commands below. Try "look around" or "help" to get started.');
@@ -133,6 +136,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   // Reset game and return to start screen
   const resetGame = useCallback(() => {
     setSessionId(null);
+    setWorldId(null);
     setGameState(null);
     setNarrative([]);
     setError(null);
@@ -142,6 +146,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   return (
     <GameContext.Provider value={{
       sessionId,
+      worldId,
       gameState,
       narrative,
       isLoading,

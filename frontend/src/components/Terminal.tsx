@@ -134,7 +134,7 @@ export default function Terminal() {
     <div 
       ref={scrollRef}
       className="flex-1 bg-terminal-surface border border-terminal-border rounded-lg p-4 
-                 overflow-y-auto space-y-4 min-h-[400px]"
+                 overflow-y-auto space-y-4 min-h-[200px]"
     >
       {narrative.map((entry) => (
         <div 
