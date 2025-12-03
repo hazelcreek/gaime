@@ -86,7 +86,7 @@ Notes on state_changes:
 - location: Set to new location ID if player moves, null otherwise
 - inventory: Use item IDs (not names) for add/remove lists. Only add items that are visible/present.
 - stats: Use DELTAS (e.g., -5 for damage, +10 for healing)
-- flags: Set flags that should be remembered (e.g., "found_key": true)
+- flags: BOOLEAN ONLY - use true/false for story progress (e.g., "met_jenkins": true, "received_warning": true). Do NOT use numbers or counters.
 - hints: Optional subtle hints for the player
 - Only include changes that actually happen
 '''
@@ -127,6 +127,9 @@ class GameMaster:
         location_item_ids = []
         if location:
             for item_id in location.items:
+                # Skip items already in player's inventory
+                if item_id in state.inventory:
+                    continue
                 item = self.world_data.get_item(item_id)
                 if item and not item.hidden:
                     location_item_ids.append(item_id)
@@ -339,6 +342,11 @@ Ensure you respond with a valid JSON object as specified in the system instructi
         """Parse state changes from LLM response"""
         inventory = changes.get("inventory", {})
         
+        # Sanitize flags to ensure they're all booleans
+        # LLM sometimes returns integers (e.g., counting interactions) but flags must be bool
+        raw_flags = changes.get("flags", {})
+        sanitized_flags = {k: bool(v) for k, v in raw_flags.items()}
+        
         return StateChanges(
             inventory=InventoryChange(
                 add=inventory.get("add", []),
@@ -346,7 +354,7 @@ Ensure you respond with a valid JSON object as specified in the system instructi
             ),
             location=changes.get("location"),
             stats=changes.get("stats", {}),
-            flags=changes.get("flags", {}),
+            flags=sanitized_flags,
             discovered_locations=changes.get("discovered_locations", [])
         )
     
@@ -369,5 +377,6 @@ Ensure you respond with a valid JSON object as specified in the system instructi
             self.state_manager.modify_stat(stat, delta)
         
         for flag, value in changes.get("flags", {}).items():
-            self.state_manager.set_flag(flag, value)
+            # Ensure flags are boolean (LLM may return integers)
+            self.state_manager.set_flag(flag, bool(value))
 
