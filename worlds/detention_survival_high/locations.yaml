@@ -7,6 +7,7 @@ main_hallway:
     east: cafeteria
     west: science_lab
     south: gymnasium
+    outside: front_gate
   items:
     - hall_pass
   npcs: []
@@ -95,3 +96,27 @@ kitchen:
   npcs: []
   details:
     freezer: "Locked tight. Probably full of ice cream sandwiches."
+
+front_gate:
+  name: "The Front Gate"
+  atmosphere: |
+    The massive chain-link fence stretches tall, topped with rusty barbed wire that's more for show than security. Beyond it, freedom beckons - the empty parking lot, the distant sound of traffic, the sweet promise of a weekend waiting for you. The padlock on the gate glints in the late afternoon sun.
+  exits:
+    inside: main_hallway
+  items: []
+  npcs: []
+  details:
+    gate: "A heavy padlock secures the gate. It looks like it needs a specific key from the janitor's keyring."
+    fence: "Too high to climb, especially with that barbed wire. You'd need to be Spider-Man."
+    parking_lot: "Empty except for Principal Skinner's beige sedan and a lone shopping cart."
+  interactions:
+    unlock_gate:
+      triggers:
+        - "use janitor_keys"
+        - "unlock gate"
+        - "use keys"
+        - "open gate"
+        - "unlock"
+      requires_item: janitor_keys
+      narrative_hint: "The gate is locked but one of those keys might fit..."
+      sets_flag: escaped
