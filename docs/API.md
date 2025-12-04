@@ -111,7 +111,11 @@ POST /api/game/new
     },
     "discovered_locations": ["entrance_hall"],
     "flags": {},
-    "turn_count": 0
+    "llm_flags": {},
+    "turn_count": 0,
+    "npc_trust": {},
+    "npc_locations": {},
+    "status": "playing"
   }
 }
 ```
@@ -193,7 +197,10 @@ GET /api/game/state/{session_id}
     },
     "discovered_locations": ["entrance_hall"],
     "flags": {},
+    "llm_flags": {},
     "turn_count": 5,
+    "npc_trust": {},
+    "npc_locations": {},
     "status": "playing"
   }
 }
@@ -224,6 +231,10 @@ GET /api/game/debug/{session_id}
   "flags": {
     "examined_portraits": true,
     "read_ritual_notes": true
+  },
+  "llm_flags": {
+    "talked_about_family": true,
+    "expressed_sympathy_to_jenkins": true
   },
   "inventory": ["candlestick", "old_letter"],
   "discovered_locations": ["entrance_hall", "library", "upper_landing", "nursery"],
@@ -627,11 +638,12 @@ interface GameState {
     [key: string]: number;
   };
   discovered_locations: string[];
-  flags: Record<string, boolean>;
+  flags: Record<string, boolean>;         // World-defined flags (set by interactions)
+  llm_flags: Record<string, boolean>;     // AI-generated contextual flags
   turn_count: number;
-  npc_trust: Record<string, number>;    // Trust levels with NPCs
-  npc_locations: Record<string, string>; // Current NPC locations
-  status: "playing" | "won" | "lost";   // Game completion status
+  npc_trust: Record<string, number>;      // Trust levels with NPCs
+  npc_locations: Record<string, string>;  // Current NPC locations
+  status: "playing" | "won" | "lost";     // Game completion status
 }
 ```
 
