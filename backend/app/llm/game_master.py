@@ -9,7 +9,10 @@ from datetime import datetime
 
 from app.llm.client import get_completion, parse_json_response, get_model_string
 from app.llm.session_logger import log_llm_interaction
-from app.models.game import LLMResponse, StateChanges, InventoryChange, LLMDebugInfo
+from app.models.game import (
+    LLMResponse, StateChanges, InventoryChange, LLMDebugInfo,
+    MemoryUpdates, NPCInteractionUpdate
+)
 
 if TYPE_CHECKING:
     from app.engine.state import GameStateManager
@@ -82,6 +85,18 @@ Tone: {tone}
 - Discovered Areas: {discovered}
 - Story Progress: {flags}
 
+## Narrative Memory (use this to maintain continuity)
+### Recent Context
+{recent_context}
+
+### NPC Relationships
+{npc_relationships}
+
+### Already Discovered (mention briefly, do NOT describe in detail again)
+{discoveries}
+
+IMPORTANT: For items/features in "Already Discovered", only reference them briefly (e.g., "the crumpled letter on the table") - do NOT re-describe their full appearance. Focus narrative detail on things NOT yet discovered.
+
 ## Current Location Details
 {location_atmosphere}
 
@@ -121,27 +136,48 @@ NPCs Present: {npcs_here}
 9. When player moves, set location to the destination location_id (e.g., "dining_room", not the direction)
 10. NEVER use any special formatting in the narrative - no HTML/XML tags, no markdown (no **bold**, *italic*, etc.), no special syntax. Write plain prose only
 
+## Narrative Continuity Rules (CRITICAL)
+11. Check "Already Discovered" - items/features listed there should only be mentioned briefly, NOT described in full detail again
+12. Check "NPC Relationships" - reference previous conversations naturally, don't re-introduce NPCs you've met
+13. Check "Recent Context" - maintain emotional tone and acknowledge what just happened
+14. When an NPC is met for the first time, describe them fully; on subsequent meetings, acknowledge familiarity
+
 ## Scene Description Rules (CRITICAL)
-11. When describing ANY scene (look, look around, entering a new location), ALWAYS:
+15. When describing a scene for the FIRST TIME (nothing in "Already Discovered"):
     - State the location name and physical context clearly
-    - Describe ALL NPCs present using their appearance from "NPCs Present" - this is ESSENTIAL for immersion
+    - Describe ALL NPCs present fully using their appearance from "NPCs Present"
     - Describe ALL visible items using their found_description text
-    - Describe exits narratively with context (e.g., "a flickering barrier to the north" not just "north")
-12. If an exit seems implausible for the setting, explain WHY it's accessible in the narrative
-13. Only mention items that are listed in "Visible Items at Location" - never invent items
-14. NPCs listed in "NPCs Present" MUST be described when looking around - they are physically there!
-15. Maintain physical reality constraints consistent with the world's theme
+    - Describe exits narratively with context
+16. When RE-DESCRIBING a scene (player says "look around" again, things in "Already Discovered"):
+    - Give a BRIEF atmospheric summary, not a full repeat
+    - Only MENTION already-discovered items/features in passing (e.g., "the letter still sits on the table")
+    - Focus detail on anything NEW or CHANGED since last time
+    - Vary your language - don't repeat the same descriptions verbatim
+17. If an exit seems implausible for the setting, explain WHY it's accessible in the narrative
+18. Only mention items that are listed in "Visible Items at Location" - never invent items
+19. NPCs listed in "NPCs Present" MUST be described when looking around - they are physically there!
+20. Maintain physical reality constraints consistent with the world's theme
 
 ## Response Format
 You MUST respond with valid JSON in this exact format:
 {{
   "narrative": "Your narrative text here, describing what happens...",
-    "state_changes": {{
+  "state_changes": {{
     "inventory": {{ "add": ["item_id_1"], "remove": ["item_id_2"] }},
     "location": null,
     "stats": {{ "health": 0 }},
-    "llm_flags": {{}},
     "discovered_locations": []
+  }},
+  "memory_updates": {{
+    "npc_interactions": {{
+      "npc_id": {{
+        "topic_discussed": "optional - key topic from this exchange",
+        "player_disposition": "optional - how player is acting toward NPC",
+        "npc_disposition": "optional - how NPC now feels toward player",
+        "notable_moment": "optional - 1 sentence memorable exchange"
+      }}
+    }},
+    "new_discoveries": ["type:id", "type:id"]
   }},
   "hints": []
 }}
@@ -150,9 +186,19 @@ Notes on state_changes:
 - location: Set to new location ID if player moves, null otherwise
 - inventory: Use item IDs (not names) for add/remove lists. Only add items that are visible/present.
 - stats: Use DELTAS (e.g., -5 for damage, +10 for healing)
-- llm_flags: BOOLEAN ONLY - use true/false for contextual story tracking (e.g., "talked_about_dagger": true). These are for AI-generated narrative state, separate from world-defined game flags.
 - hints: Optional subtle hints for the player
 - Only include changes that actually happen
+
+Notes on memory_updates:
+- npc_interactions: Track meaningful NPC exchanges. Use npc_id as key. Only include fields that changed.
+  - topic_discussed: Key topic (e.g., "the dagger", "her death")
+  - player_disposition: Freeform (e.g., "sympathetic", "aggressive", "curious")
+  - npc_disposition: How NPC feels (e.g., "warming up", "suspicious", "trusting")
+  - notable_moment: Brief memorable quote or event
+- new_discoveries: Items/features/NPCs first described. Use typed format:
+  - "item:rusty_key" - first time examining/finding an item
+  - "npc:ghost_child" - first time meeting an NPC
+  - "feature:slash_marks" - first time noticing a location feature
 '''
 
 OPENING_PROMPT = '''Generate the opening narrative for this adventure.
@@ -274,6 +320,13 @@ class GameMaster:
         if hasattr(world, 'starting_situation') and world.starting_situation:
             starting_situation = f"Starting Situation: {world.starting_situation}"
         
+        # Get narrative memory context
+        memory_context = self.state_manager.get_memory_context()
+        
+        # Format discoveries list
+        discoveries_list = memory_context["discoveries"]
+        discoveries_formatted = ", ".join(discoveries_list) if discoveries_list else "(nothing yet)"
+        
         return SYSTEM_PROMPT.format(
             world_name=world.name,
             theme=world.theme,
@@ -292,7 +345,10 @@ class GameMaster:
             item_details="\n\n".join(item_details) if item_details else "No items available to examine",
             location_details="\n".join(location_details) if location_details else "No special features",
             constraints="\n".join(f"- {c}" for c in world.constraints),
-            npc_knowledge="\n".join(npc_knowledge) if npc_knowledge else "No NPCs present"
+            npc_knowledge="\n".join(npc_knowledge) if npc_knowledge else "No NPCs present",
+            recent_context=memory_context["recent_context"],
+            npc_relationships=memory_context["npc_relationships"],
+            discoveries=discoveries_formatted
         )
     
     async def generate_opening(self) -> tuple[str, LLMDebugInfo | None]:
@@ -354,7 +410,7 @@ class GameMaster:
         
         # Apply any initial state changes
         if parsed.get("state_changes"):
-            self._apply_changes(parsed["state_changes"])
+            self._apply_changes(parsed["state_changes"], parsed.get("memory_updates"))
         
         return parsed.get("narrative", "You find yourself in a mysterious place..."), debug_info
     
@@ -433,8 +489,11 @@ Ensure you respond with a valid JSON object as specified in the system instructi
         if items_to_add:
             inventory_changes["add"] = valid_items
         
+        # Get memory updates from parsed response
+        memory_updates_raw = parsed.get("memory_updates", {})
+        
         # Parse into structured response
-        state_changes = self._parse_state_changes(state_changes_dict)
+        state_changes = self._parse_state_changes(state_changes_dict, memory_updates_raw)
         
         model = get_model_string()
         
@@ -469,18 +528,31 @@ Ensure you respond with a valid JSON object as specified in the system instructi
             debug_info=debug_info
         )
     
-    def _parse_state_changes(self, changes: dict) -> StateChanges:
+    def _parse_state_changes(self, changes: dict, memory_updates_raw: dict | None = None) -> StateChanges:
         """Parse state changes from LLM response"""
         inventory = changes.get("inventory", {})
-        
-        # Sanitize llm_flags to ensure they're all booleans
-        # LLM sometimes returns integers (e.g., counting interactions) but flags must be bool
-        raw_llm_flags = changes.get("llm_flags", {})
-        sanitized_llm_flags = {k: bool(v) for k, v in raw_llm_flags.items()}
         
         # Parse world-defined flags (set by interactions)
         raw_flags = changes.get("flags", {})
         sanitized_flags = {k: bool(v) for k, v in raw_flags.items()}
+        
+        # Parse memory updates
+        memory_updates = MemoryUpdates()
+        if memory_updates_raw:
+            # Parse NPC interactions
+            npc_interactions = {}
+            for npc_id, update_data in memory_updates_raw.get("npc_interactions", {}).items():
+                if isinstance(update_data, dict):
+                    npc_interactions[npc_id] = NPCInteractionUpdate(
+                        topic_discussed=update_data.get("topic_discussed"),
+                        player_disposition=update_data.get("player_disposition"),
+                        npc_disposition=update_data.get("npc_disposition"),
+                        notable_moment=update_data.get("notable_moment")
+                    )
+            memory_updates = MemoryUpdates(
+                npc_interactions=npc_interactions,
+                new_discoveries=memory_updates_raw.get("new_discoveries", [])
+            )
         
         return StateChanges(
             inventory=InventoryChange(
@@ -490,11 +562,11 @@ Ensure you respond with a valid JSON object as specified in the system instructi
             location=changes.get("location"),
             stats=changes.get("stats", {}),
             flags=sanitized_flags,
-            llm_flags=sanitized_llm_flags,
-            discovered_locations=changes.get("discovered_locations", [])
+            discovered_locations=changes.get("discovered_locations", []),
+            memory_updates=memory_updates
         )
     
-    def _apply_changes(self, changes: dict):
+    def _apply_changes(self, changes: dict, memory_updates_raw: dict | None = None):
         """Apply state changes directly"""
         state = self.state_manager.get_state()
         
@@ -512,7 +584,15 @@ Ensure you respond with a valid JSON object as specified in the system instructi
         for stat, delta in changes.get("stats", {}).items():
             self.state_manager.modify_stat(stat, delta)
         
-        for flag, value in changes.get("llm_flags", {}).items():
-            # Ensure llm_flags are boolean (LLM may return integers)
-            self.state_manager.set_llm_flag(flag, bool(value))
+        # Apply memory updates if provided
+        if memory_updates_raw:
+            memory_updates = MemoryUpdates(
+                npc_interactions={
+                    npc_id: NPCInteractionUpdate(**update_data)
+                    for npc_id, update_data in memory_updates_raw.get("npc_interactions", {}).items()
+                    if isinstance(update_data, dict)
+                },
+                new_discoveries=memory_updates_raw.get("new_discoveries", [])
+            )
+            self.state_manager.apply_memory_updates(memory_updates)
 

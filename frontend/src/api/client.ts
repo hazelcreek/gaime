@@ -4,6 +4,29 @@
 
 const API_BASE = '/api';
 
+export interface NarrativeExchange {
+  turn: number;
+  player_action: string;
+  narrative_summary: string;
+}
+
+export interface NPCInteractionMemory {
+  encounter_count: number;
+  first_met_location: string | null;
+  first_met_turn: number | null;
+  topics_discussed: string[];
+  player_disposition: string;
+  npc_disposition: string;
+  notable_moments: string[];
+  last_interaction_turn: number;
+}
+
+export interface NarrativeMemory {
+  recent_exchanges: NarrativeExchange[];
+  npc_memory: Record<string, NPCInteractionMemory>;
+  discoveries: string[];
+}
+
 export interface GameState {
   session_id: string;
   player_name: string;
@@ -16,6 +39,7 @@ export interface GameState {
   discovered_locations: string[];
   flags: Record<string, boolean>;
   turn_count: number;
+  narrative_memory: NarrativeMemory;
 }
 
 export interface LLMDebugInfo {

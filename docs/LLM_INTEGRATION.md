@@ -92,11 +92,21 @@ SYSTEM_PROMPT = """You are the Game Master for a text adventure game.
 - Discovered: {discovered}
 - Story Flags: {flags}
 
+## Narrative Memory (use this to maintain continuity)
+### Recent Context
+{recent_context}
+
+### NPC Relationships
+{npc_relationships}
+
+### Already Discovered (do NOT describe as new revelations)
+{discoveries}
+
 ## Your Role
 - Narrate the world in second person ("You see...")
 - Respond to player actions appropriately
 - Maintain consistency with world rules
-- Track state changes from actions
+- Track state changes and memory updates
 
 ## Constraints
 {constraints}
@@ -109,7 +119,18 @@ Respond with JSON only:
     "inventory": {{ "add": [], "remove": [] }},
     "location": null or "new_location",
     "stats": {{ "health": 0 }},
-    "llm_flags": {{ "flag_name": true }}
+    "discovered_locations": []
+  }},
+  "memory_updates": {{
+    "npc_interactions": {{
+      "npc_id": {{
+        "topic_discussed": "key topic from exchange",
+        "player_disposition": "how player is acting",
+        "npc_disposition": "how NPC now feels",
+        "notable_moment": "memorable exchange (1 sentence)"
+      }}
+    }},
+    "new_discoveries": ["type:id", "type:id"]
   }},
   "hints": []
 }}
@@ -139,17 +160,41 @@ def parse_response(response: str) -> ActionResult:
             inventory=data["state_changes"].get("inventory", {}),
             location=data["state_changes"].get("location"),
             stats=data["state_changes"].get("stats", {}),
-            llm_flags=data["state_changes"].get("llm_flags", {})
+            memory_updates=MemoryUpdates(
+                npc_interactions=data.get("memory_updates", {}).get("npc_interactions", {}),
+                new_discoveries=data.get("memory_updates", {}).get("new_discoveries", [])
+            )
         ),
         hints=data.get("hints", [])
     )
 ```
 
-**Note on Flag Types**: The game uses two separate flag namespaces:
-- `flags`: World-defined flags set by location interactions and item use actions
-- `llm_flags`: AI-generated contextual flags for narrative tracking
+**Note on Flags vs Memory**: The game uses separate systems:
+- `flags`: World-defined flags set by location interactions and item use actions (for game mechanics)
+- `memory_updates`: Narrative memory for immersion and continuity (does not affect game mechanics)
 
-The LLM should only set `llm_flags` - world-defined `flags` are set automatically when matching interactions are triggered.
+The LLM should only provide `memory_updates` - world-defined `flags` are set automatically when matching interactions are triggered.
+
+### Narrative Memory Guidelines
+
+The `memory_updates` field helps the LLM track context:
+
+**npc_interactions**: Track meaningful NPC exchanges
+- `topic_discussed`: Key topic (e.g., "the dagger", "her death")
+- `player_disposition`: How player is acting (e.g., "sympathetic", "aggressive")
+- `npc_disposition`: How NPC feels (e.g., "warming up", "suspicious")
+- `notable_moment`: Brief memorable quote or event
+
+**new_discoveries**: Mark first descriptions using typed format
+- `item:rusty_key` - first time examining/finding an item
+- `npc:ghost_child` - first time meeting an NPC  
+- `feature:slash_marks` - first time noticing a location feature
+
+The system prompt includes previous memory so the LLM can:
+1. **Avoid repetitive descriptions**: Items/features in "Already Discovered" are mentioned briefly, not fully described again
+2. **Vary repeated actions**: When player says "look around" multiple times, give abbreviated descriptions focusing on atmosphere, not repeating full details
+3. **Reference previous conversations**: Acknowledge past NPC interactions naturally
+4. **Maintain emotional continuity**: Use "Recent Context" to keep tone consistent
 
 ## Prompt Engineering Tips
 

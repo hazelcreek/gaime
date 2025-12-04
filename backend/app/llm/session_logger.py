@@ -91,6 +91,38 @@ class SessionLogger:
             except (TypeError, ValueError):
                 f.write(str(parsed_response))
             f.write("\n\n")
+            
+            # Memory updates (if present)
+            memory_updates = parsed_response.get("memory_updates", {})
+            if memory_updates:
+                f.write("─── MEMORY UPDATES ───\n")
+                
+                # NPC interactions
+                npc_interactions = memory_updates.get("npc_interactions", {})
+                if npc_interactions:
+                    f.write("NPC Interactions:\n")
+                    for npc_id, update in npc_interactions.items():
+                        parts = [f"  {npc_id}:"]
+                        if isinstance(update, dict):
+                            if update.get("topic_discussed"):
+                                parts.append(f"topic=\"{update['topic_discussed']}\"")
+                            if update.get("player_disposition"):
+                                parts.append(f"player={update['player_disposition']}")
+                            if update.get("npc_disposition"):
+                                parts.append(f"npc={update['npc_disposition']}")
+                            if update.get("notable_moment"):
+                                moment = update['notable_moment'][:50] + "..." if len(update.get('notable_moment', '')) > 50 else update.get('notable_moment', '')
+                                parts.append(f"notable=\"{moment}\"")
+                        f.write(" ".join(parts) + "\n")
+                
+                # New discoveries
+                new_discoveries = memory_updates.get("new_discoveries", [])
+                if new_discoveries:
+                    f.write("New Discoveries:\n")
+                    for discovery in new_discoveries:
+                        f.write(f"  - {discovery}\n")
+                
+                f.write("\n")
 
 
 # Store active loggers per session

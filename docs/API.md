@@ -114,11 +114,15 @@ POST /api/game/new
     },
     "discovered_locations": ["entrance_hall"],
     "flags": {},
-    "llm_flags": {},
     "turn_count": 0,
     "npc_trust": {},
     "npc_locations": {},
-    "status": "playing"
+    "status": "playing",
+    "narrative_memory": {
+      "recent_exchanges": [],
+      "npc_memory": {},
+      "discoveries": []
+    }
   }
 }
 ```
@@ -203,11 +207,15 @@ GET /api/game/state/{session_id}
     },
     "discovered_locations": ["entrance_hall"],
     "flags": {},
-    "llm_flags": {},
     "turn_count": 5,
     "npc_trust": {},
     "npc_locations": {},
-    "status": "playing"
+    "status": "playing",
+    "narrative_memory": {
+      "recent_exchanges": [...],
+      "npc_memory": {...},
+      "discoveries": [...]
+    }
   }
 }
 ```
@@ -238,9 +246,21 @@ GET /api/game/debug/{session_id}
     "examined_portraits": true,
     "read_ritual_notes": true
   },
-  "llm_flags": {
-    "talked_about_family": true,
-    "expressed_sympathy_to_jenkins": true
+  "narrative_memory": {
+    "recent_exchanges": [
+      {"turn": 4, "player_action": "talk to jenkins", "narrative_summary": "Jenkins seemed hesitant..."}
+    ],
+    "npc_memory": {
+      "butler_jenkins": {
+        "encounter_count": 2,
+        "first_met_location": "entrance_hall",
+        "topics_discussed": ["the family", "the fire"],
+        "player_disposition": "sympathetic",
+        "npc_disposition": "warming up",
+        "notable_moments": ["He mentioned Lady Margaret with sadness"]
+      }
+    },
+    "discoveries": ["item:candlestick", "feature:slash_marks", "npc:butler_jenkins"]
   },
   "inventory": ["candlestick", "old_letter"],
   "discovered_locations": ["entrance_hall", "library", "upper_landing", "nursery"],
@@ -644,12 +664,35 @@ interface GameState {
     [key: string]: number;
   };
   discovered_locations: string[];
-  flags: Record<string, boolean>;         // World-defined flags (set by interactions)
-  llm_flags: Record<string, boolean>;     // AI-generated contextual flags
+  flags: Record<string, boolean>;           // World-defined flags (set by interactions)
   turn_count: number;
-  npc_trust: Record<string, number>;      // Trust levels with NPCs
-  npc_locations: Record<string, string>;  // Current NPC locations
-  status: "playing" | "won" | "lost";     // Game completion status
+  npc_trust: Record<string, number>;        // Trust levels with NPCs
+  npc_locations: Record<string, string>;    // Current NPC locations
+  status: "playing" | "won" | "lost";       // Game completion status
+  narrative_memory: NarrativeMemory;        // Narrative context tracking
+}
+
+interface NarrativeMemory {
+  recent_exchanges: NarrativeExchange[];    // Last 2-3 turns for continuity
+  npc_memory: Record<string, NPCInteractionMemory>;  // Per-NPC interaction history
+  discoveries: string[];                    // Typed IDs: "item:key", "npc:ghost"
+}
+
+interface NarrativeExchange {
+  turn: number;
+  player_action: string;
+  narrative_summary: string;                // Truncated to ~100 words
+}
+
+interface NPCInteractionMemory {
+  encounter_count: number;
+  first_met_location: string | null;
+  first_met_turn: number | null;
+  topics_discussed: string[];               // Max 10 topics
+  player_disposition: string;               // Freeform: "sympathetic", "hostile"
+  npc_disposition: string;                  // How NPC feels toward player
+  notable_moments: string[];                // Max 3 moments
+  last_interaction_turn: number;
 }
 ```
 

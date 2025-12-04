@@ -5,9 +5,18 @@ Game state management - Handles game sessions and state transitions
 import uuid
 from datetime import datetime
 
-from app.models.game import GameState, GameStats
+from app.models.game import (
+    GameState, GameStats, NarrativeMemory, NarrativeExchange,
+    NPCInteractionMemory, MemoryUpdates
+)
 from app.models.world import WorldData
 from app.engine.world import WorldLoader
+
+# Constants for memory limits
+MAX_RECENT_EXCHANGES = 3
+MAX_NPC_TOPICS = 10
+MAX_NPC_NOTABLE_MOMENTS = 3
+NARRATIVE_WORD_LIMIT = 100
 
 
 class GameStateManager:
@@ -323,10 +332,6 @@ class GameStateManager:
         """Set a world-defined game flag"""
         self._state.flags[flag] = value
     
-    def set_llm_flag(self, flag: str, value: bool = True):
-        """Set an LLM-generated contextual flag"""
-        self._state.llm_flags[flag] = value
-    
     def modify_stat(self, stat: str, delta: int):
         """Modify a player stat"""
         current = getattr(self._state.stats, stat, 0)
@@ -374,4 +379,161 @@ class GameStateManager:
         # All conditions met - player wins!
         self._state.status = "won"
         return True, victory.narrative or "Congratulations! You have completed the adventure."
+    
+    # =========================================================================
+    # Narrative Memory Management
+    # =========================================================================
+    
+    def add_exchange(self, player_action: str, narrative: str) -> None:
+        """
+        Add a narrative exchange to recent memory.
+        
+        Truncates narrative to ~100 words and maintains a rolling window of
+        MAX_RECENT_EXCHANGES turns.
+        """
+        memory = self._state.narrative_memory
+        
+        # Truncate narrative to word limit
+        words = narrative.split()
+        if len(words) > NARRATIVE_WORD_LIMIT:
+            truncated = " ".join(words[:NARRATIVE_WORD_LIMIT]) + "..."
+        else:
+            truncated = narrative
+        
+        # Create exchange
+        exchange = NarrativeExchange(
+            turn=self._state.turn_count,
+            player_action=player_action,
+            narrative_summary=truncated
+        )
+        
+        # Add to recent exchanges, maintaining limit
+        memory.recent_exchanges.append(exchange)
+        if len(memory.recent_exchanges) > MAX_RECENT_EXCHANGES:
+            memory.recent_exchanges = memory.recent_exchanges[-MAX_RECENT_EXCHANGES:]
+    
+    def update_npc_memory(self, npc_id: str, topic: str | None = None,
+                          player_disposition: str | None = None,
+                          npc_disposition: str | None = None,
+                          notable_moment: str | None = None) -> None:
+        """
+        Update interaction memory for an NPC.
+        
+        Creates the memory entry if this is the first encounter.
+        Maintains limits on topics (10) and notable moments (3).
+        """
+        memory = self._state.narrative_memory
+        
+        # Get or create NPC memory
+        if npc_id not in memory.npc_memory:
+            memory.npc_memory[npc_id] = NPCInteractionMemory(
+                encounter_count=1,
+                first_met_location=self._state.current_location,
+                first_met_turn=self._state.turn_count,
+                last_interaction_turn=self._state.turn_count
+            )
+        else:
+            npc_mem = memory.npc_memory[npc_id]
+            npc_mem.encounter_count += 1
+            npc_mem.last_interaction_turn = self._state.turn_count
+        
+        npc_mem = memory.npc_memory[npc_id]
+        
+        # Update topic
+        if topic and topic not in npc_mem.topics_discussed:
+            npc_mem.topics_discussed.append(topic)
+            if len(npc_mem.topics_discussed) > MAX_NPC_TOPICS:
+                npc_mem.topics_discussed = npc_mem.topics_discussed[-MAX_NPC_TOPICS:]
+        
+        # Update dispositions (freeform strings)
+        if player_disposition:
+            npc_mem.player_disposition = player_disposition
+        if npc_disposition:
+            npc_mem.npc_disposition = npc_disposition
+        
+        # Add notable moment
+        if notable_moment and notable_moment not in npc_mem.notable_moments:
+            npc_mem.notable_moments.append(notable_moment)
+            if len(npc_mem.notable_moments) > MAX_NPC_NOTABLE_MOMENTS:
+                npc_mem.notable_moments = npc_mem.notable_moments[-MAX_NPC_NOTABLE_MOMENTS:]
+    
+    def mark_discovered(self, entity_type: str, entity_id: str) -> None:
+        """
+        Mark an entity as discovered (described to player).
+        
+        Uses typed format: "item:rusty_key", "npc:ghost_child", "feature:slash_marks"
+        """
+        typed_id = f"{entity_type}:{entity_id}"
+        if typed_id not in self._state.narrative_memory.discoveries:
+            self._state.narrative_memory.discoveries.append(typed_id)
+    
+    def has_discovered(self, entity_type: str, entity_id: str) -> bool:
+        """Check if an entity has already been described to the player."""
+        typed_id = f"{entity_type}:{entity_id}"
+        return typed_id in self._state.narrative_memory.discoveries
+    
+    def apply_memory_updates(self, updates: MemoryUpdates) -> None:
+        """
+        Apply memory updates from LLM response.
+        
+        Processes NPC interaction updates and new discoveries.
+        """
+        # Apply NPC interaction updates
+        for npc_id, update in updates.npc_interactions.items():
+            self.update_npc_memory(
+                npc_id=npc_id,
+                topic=update.topic_discussed,
+                player_disposition=update.player_disposition,
+                npc_disposition=update.npc_disposition,
+                notable_moment=update.notable_moment
+            )
+        
+        # Apply discoveries (parse typed format)
+        for typed_id in updates.new_discoveries:
+            if ":" in typed_id:
+                entity_type, entity_id = typed_id.split(":", 1)
+                self.mark_discovered(entity_type, entity_id)
+            else:
+                # Fallback for untyped IDs - assume "feature"
+                self.mark_discovered("feature", typed_id)
+    
+    def get_memory_context(self) -> dict:
+        """
+        Get narrative memory formatted for system prompt inclusion.
+        
+        Returns a dict with formatted strings for:
+        - recent_context: Last 2-3 turns
+        - npc_relationships: Per-NPC summaries
+        - discoveries: List of already-described entities
+        """
+        memory = self._state.narrative_memory
+        
+        # Format recent exchanges
+        recent_lines = []
+        for exchange in memory.recent_exchanges:
+            # Truncate action if too long
+            action = exchange.player_action[:50] + "..." if len(exchange.player_action) > 50 else exchange.player_action
+            summary = exchange.narrative_summary[:150] + "..." if len(exchange.narrative_summary) > 150 else exchange.narrative_summary
+            recent_lines.append(f"[Turn {exchange.turn}] Player: \"{action}\" -> {summary}")
+        
+        # Format NPC relationships
+        npc_lines = []
+        for npc_id, npc_mem in memory.npc_memory.items():
+            parts = [f"{npc_id}: Met {npc_mem.encounter_count}x"]
+            if npc_mem.topics_discussed:
+                topics = ", ".join(npc_mem.topics_discussed[-3:])  # Last 3 topics
+                parts.append(f"discussed: {topics}")
+            if npc_mem.player_disposition != "neutral":
+                parts.append(f"player is {npc_mem.player_disposition}")
+            if npc_mem.npc_disposition != "neutral":
+                parts.append(f"NPC is {npc_mem.npc_disposition}")
+            if npc_mem.notable_moments:
+                parts.append(f"notable: \"{npc_mem.notable_moments[-1]}\"")
+            npc_lines.append(". ".join(parts))
+        
+        return {
+            "recent_context": "\n".join(recent_lines) if recent_lines else "(no recent interactions)",
+            "npc_relationships": "\n".join(npc_lines) if npc_lines else "(no NPC interactions yet)",
+            "discoveries": memory.discoveries
+        }
 

@@ -58,8 +58,12 @@ class ActionProcessor:
         # Store debug info
         self.last_debug_info = llm_response.debug_info
         
-        # Apply state changes
-        self._apply_state_changes(llm_response.state_changes)
+        # Apply state changes (including memory updates and exchange recording)
+        self._apply_state_changes(
+            llm_response.state_changes,
+            player_action=action,
+            narrative=llm_response.narrative
+        )
         
         # Increment turn
         self.state_manager.increment_turn()
@@ -157,10 +161,11 @@ class ActionProcessor:
         )
     
     def _debug_response(self) -> ActionResponse:
-        """Generate debug info showing game state, flags, and NPC visibility"""
+        """Generate debug info showing game state, flags, narrative memory, and NPC visibility"""
         state = self.state_manager.get_state()
         world_data = self.state_manager.world_data
         current_location = self.state_manager.get_current_location()
+        memory = state.narrative_memory
         
         lines = ["=== DEBUG INFO ===\n"]
         
@@ -176,6 +181,41 @@ class ActionProcessor:
                 lines.append(f"  {flag}: {value}")
         else:
             lines.append("  (no flags set)")
+        lines.append("")
+        
+        # Narrative Memory
+        lines.append("--- NARRATIVE MEMORY ---")
+        
+        # Recent exchanges
+        lines.append("  Recent Exchanges:")
+        if memory.recent_exchanges:
+            for exchange in memory.recent_exchanges:
+                action_short = exchange.player_action[:40] + "..." if len(exchange.player_action) > 40 else exchange.player_action
+                lines.append(f"    [Turn {exchange.turn}] \"{action_short}\"")
+        else:
+            lines.append("    (none)")
+        
+        # NPC memory
+        lines.append("  NPC Memory:")
+        if memory.npc_memory:
+            for npc_id, npc_mem in memory.npc_memory.items():
+                lines.append(f"    {npc_id}:")
+                lines.append(f"      Encounters: {npc_mem.encounter_count}, First met: {npc_mem.first_met_location}")
+                if npc_mem.topics_discussed:
+                    lines.append(f"      Topics: {', '.join(npc_mem.topics_discussed[-3:])}")
+                lines.append(f"      Player: {npc_mem.player_disposition}, NPC: {npc_mem.npc_disposition}")
+                if npc_mem.notable_moments:
+                    lines.append(f"      Notable: \"{npc_mem.notable_moments[-1]}\"")
+        else:
+            lines.append("    (no NPC interactions)")
+        
+        # Discoveries
+        lines.append("  Discoveries:")
+        if memory.discoveries:
+            for discovery in memory.discoveries:
+                lines.append(f"    - {discovery}")
+        else:
+            lines.append("    (none)")
         lines.append("")
         
         # NPC Trust
@@ -268,7 +308,7 @@ class ActionProcessor:
             ending_narrative=None
         )
     
-    def _apply_state_changes(self, changes: StateChanges):
+    def _apply_state_changes(self, changes: StateChanges, player_action: str = "", narrative: str = ""):
         """Apply state changes from LLM response"""
         state = self.state_manager.get_state()
         
@@ -300,6 +340,14 @@ class ActionProcessor:
         for loc in changes.discovered_locations:
             if loc not in state.discovered_locations:
                 state.discovered_locations.append(loc)
+        
+        # Apply memory updates
+        if changes.memory_updates:
+            self.state_manager.apply_memory_updates(changes.memory_updates)
+        
+        # Add this exchange to recent memory (if we have action and narrative)
+        if player_action and narrative:
+            self.state_manager.add_exchange(player_action, narrative)
 
 
 def parse_movement(action: str) -> str | None:

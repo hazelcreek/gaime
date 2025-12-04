@@ -5,6 +5,54 @@ Game state models - Pydantic models for game session state
 from pydantic import BaseModel, Field
 
 
+# =============================================================================
+# Narrative Memory Models
+# =============================================================================
+
+class NarrativeExchange(BaseModel):
+    """Single turn exchange for short-term memory"""
+    turn: int
+    player_action: str
+    narrative_summary: str  # Truncated to ~100 words
+
+
+class NPCInteractionMemory(BaseModel):
+    """Memory of interactions with a specific NPC"""
+    encounter_count: int = 0
+    first_met_location: str | None = None
+    first_met_turn: int | None = None
+    topics_discussed: list[str] = Field(default_factory=list)  # Max 10 topics
+    player_disposition: str = "neutral"  # Freeform: "friendly", "suspicious", etc.
+    npc_disposition: str = "neutral"  # How NPC feels toward player
+    notable_moments: list[str] = Field(default_factory=list)  # Max 3 moments
+    last_interaction_turn: int = 0
+
+
+class NarrativeMemory(BaseModel):
+    """Session narrative memory - tracks context for immersive storytelling"""
+    recent_exchanges: list[NarrativeExchange] = Field(default_factory=list)  # Max 3
+    npc_memory: dict[str, NPCInteractionMemory] = Field(default_factory=dict)
+    discoveries: list[str] = Field(default_factory=list)  # Typed IDs: "item:key", "npc:ghost", "feature:marks"
+
+
+class NPCInteractionUpdate(BaseModel):
+    """Update to NPC interaction from LLM response"""
+    topic_discussed: str | None = None
+    player_disposition: str | None = None
+    npc_disposition: str | None = None
+    notable_moment: str | None = None
+
+
+class MemoryUpdates(BaseModel):
+    """Memory updates from LLM response"""
+    npc_interactions: dict[str, NPCInteractionUpdate] = Field(default_factory=dict)
+    new_discoveries: list[str] = Field(default_factory=list)
+
+
+# =============================================================================
+# Game State Models
+# =============================================================================
+
 class GameStats(BaseModel):
     """Player statistics"""
     health: int = 100
@@ -25,8 +73,8 @@ class StateChanges(BaseModel):
     location: str | None = None
     stats: dict[str, int] = Field(default_factory=dict)
     flags: dict[str, bool] = Field(default_factory=dict)  # World-defined flags (set by interactions)
-    llm_flags: dict[str, bool] = Field(default_factory=dict)  # AI-generated contextual flags
     discovered_locations: list[str] = Field(default_factory=list)
+    memory_updates: MemoryUpdates = Field(default_factory=MemoryUpdates)  # Narrative memory updates
 
 
 class GameState(BaseModel):
@@ -38,11 +86,11 @@ class GameState(BaseModel):
     stats: GameStats = Field(default_factory=GameStats)
     discovered_locations: list[str] = Field(default_factory=list)
     flags: dict[str, bool] = Field(default_factory=dict)  # World-defined flags (set by interactions)
-    llm_flags: dict[str, bool] = Field(default_factory=dict)  # AI-generated contextual flags
     turn_count: int = 0
     npc_trust: dict[str, int] = Field(default_factory=dict)
     npc_locations: dict[str, str] = Field(default_factory=dict)  # Current NPC locations (npc_id -> location_id)
     status: str = "playing"  # "playing", "won", "lost"
+    narrative_memory: NarrativeMemory = Field(default_factory=NarrativeMemory)  # Narrative context tracking
     
     def apply_changes(self, changes: StateChanges) -> None:
         """Apply state changes from an action"""
@@ -67,9 +115,6 @@ class GameState(BaseModel):
         
         # Update world-defined flags
         self.flags.update(changes.flags)
-        
-        # Update LLM-generated contextual flags
-        self.llm_flags.update(changes.llm_flags)
         
         # Update discovered locations
         for loc in changes.discovered_locations:

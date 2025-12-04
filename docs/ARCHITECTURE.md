@@ -136,7 +136,8 @@ This document describes the system architecture of GAIME, including component de
 5. LLM generates response:
    {
      "narrative": "The painting depicts...",
-     "state_changes": { "llm_flags": { "noticed_slash_marks": true } }
+     "state_changes": { ... },
+     "memory_updates": { "new_discoveries": ["feature:slash_marks"] }
    }
    Note: World-defined flags (like "examined_portraits") are set by
    interaction triggers, not by the LLM directly.
@@ -201,14 +202,16 @@ This document describes the system architecture of GAIME, including component de
   "narrative": "The door creaks open, revealing...",
   "state_changes": {
     "inventory": { "add": ["rusty_key"], "remove": [] },
-    "location": "secret_passage",
-    "llm_flags": { "discovered_hidden_room": true }
+    "location": "secret_passage"
+  },
+  "memory_updates": {
+    "new_discoveries": ["feature:hidden_room"]
   },
   "hints": ["The air feels colder here..."]
 }
 ```
 
-**Note**: World-defined `flags` (like `door_opened`) are set automatically by interaction triggers, not by the LLM. The LLM uses `llm_flags` for contextual narrative tracking.
+**Note**: World-defined `flags` (like `door_opened`) are set automatically by interaction triggers, not by the LLM. The LLM uses `memory_updates` for narrative context tracking.
 
 ### 2. State in System Prompt
 
@@ -251,32 +254,112 @@ class GameState:
     stats: dict[str, int]  # health, etc.
     discovered_locations: list[str]
     flags: dict[str, bool]  # World-defined flags (set by interactions)
-    llm_flags: dict[str, bool]  # AI-generated contextual flags
     turn_count: int
     npc_trust: dict[str, int]  # trust levels with NPCs
     npc_locations: dict[str, str]  # current NPC locations (for dynamic movement)
     status: str  # "playing", "won", or "lost"
+    narrative_memory: NarrativeMemory  # Narrative context tracking
 ```
 
-### Flag Types
+### World-Defined Flags
 
-GAIME uses two separate flag namespaces:
-
-| Type | Source | Purpose | Example |
-|------|--------|---------|---------|
-| `flags` | World interactions | Game mechanics, triggers, victory conditions | `found_secret_passage`, `examined_nursery` |
-| `llm_flags` | AI-generated | Contextual narrative tracking | `talked_about_dagger`, `expressed_sympathy` |
-
-**World-defined flags** (`flags`) are set by:
+World-defined `flags` are set by:
 - Location interactions (`sets_flag` in interactions)
 - Item use actions (`sets_flag` in use_actions)
 
-**LLM-generated flags** (`llm_flags`) are set by the AI during narrative generation to track contextual details that don't affect game mechanics but help maintain narrative consistency.
+These control game mechanics like unlocking doors, triggering NPC appearances, and victory conditions.
 
-This separation ensures:
-- Game mechanics remain predictable and testable
-- The AI can track narrative state without affecting core gameplay
-- Debugging is easier (you can see what the AI "decided" vs. what the game logic set)
+## Narrative Memory System
+
+The narrative memory system provides the LLM with context about previous interactions to maintain immersion and prevent repetition.
+
+### Three-Layer Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Layer 1: Recent Exchanges (last 2-3 turns)             │
+│  - Full player action + truncated narrative (~100 words)│
+│  - Provides immediate conversational continuity         │
+├─────────────────────────────────────────────────────────┤
+│  Layer 2: NPC Memory (per-character)                    │
+│  - Encounter count, topics discussed                    │
+│  - Player/NPC disposition tracking                      │
+│  - Notable moments (max 3 per NPC)                      │
+├─────────────────────────────────────────────────────────┤
+│  Layer 3: Discovery Log                                 │
+│  - Items/features already examined (don't re-discover)  │
+│  - NPCs already introduced                              │
+│  - Typed IDs: "item:key", "npc:ghost", "feature:marks"  │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Memory Models
+
+```python
+class NarrativeExchange:
+    turn: int
+    player_action: str
+    narrative_summary: str  # Truncated to ~100 words
+
+class NPCInteractionMemory:
+    encounter_count: int
+    first_met_location: str | None
+    first_met_turn: int | None
+    topics_discussed: list[str]  # Max 10 topics
+    player_disposition: str  # Freeform: "friendly", "suspicious"
+    npc_disposition: str  # How NPC feels toward player
+    notable_moments: list[str]  # Max 3 moments
+    last_interaction_turn: int
+
+class NarrativeMemory:
+    recent_exchanges: list[NarrativeExchange]  # Max 3
+    npc_memory: dict[str, NPCInteractionMemory]
+    discoveries: list[str]  # Typed IDs
+```
+
+### LLM Memory Updates
+
+The LLM returns `memory_updates` in its response:
+
+```json
+{
+  "memory_updates": {
+    "npc_interactions": {
+      "ghost_child": {
+        "topic_discussed": "her father's dagger",
+        "player_disposition": "sympathetic",
+        "npc_disposition": "warming up",
+        "notable_moment": "She whispered about the fire"
+      }
+    },
+    "new_discoveries": ["item:rusty_key", "feature:slash_marks"]
+  }
+}
+```
+
+### Memory in System Prompt
+
+Memory context is included in the system prompt:
+
+```
+## Narrative Memory
+### Recent Context
+[Turn 5] Player: "ask ghost about dagger" -> She became emotional...
+[Turn 6] Player: "express sympathy" -> She began to trust you...
+
+### NPC Relationships
+ghost_child: Met 2x. discussed: dagger, her death. player is sympathetic. NPC is warming up.
+
+### Already Discovered (do NOT describe as new)
+item:rusty_key, feature:slash_marks, npc:ghost_child
+```
+
+### Design Principles
+
+1. **World model is authoritative**: Memory never overrides flags, inventory, or location
+2. **Graceful degradation**: If LLM doesn't return memory_updates, game continues normally
+3. **Bounded growth**: Hard limits prevent unbounded token usage
+4. **Token budget**: ~280 tokens total for memory context
 
 ## Victory Conditions
 

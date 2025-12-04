@@ -186,13 +186,40 @@ async def debug_state(session_id: str):
                 "reveals_exit": interaction.reveals_exit
             })
     
+    # Build narrative memory summary
+    memory = state.narrative_memory
+    narrative_memory_summary = {
+        "recent_exchanges": [
+            {
+                "turn": ex.turn,
+                "player_action": ex.player_action,
+                "narrative_summary": ex.narrative_summary[:100] + "..." if len(ex.narrative_summary) > 100 else ex.narrative_summary
+            }
+            for ex in memory.recent_exchanges
+        ],
+        "npc_memory": {
+            npc_id: {
+                "encounter_count": npc_mem.encounter_count,
+                "first_met_location": npc_mem.first_met_location,
+                "first_met_turn": npc_mem.first_met_turn,
+                "topics_discussed": npc_mem.topics_discussed,
+                "player_disposition": npc_mem.player_disposition,
+                "npc_disposition": npc_mem.npc_disposition,
+                "notable_moments": npc_mem.notable_moments,
+                "last_interaction_turn": npc_mem.last_interaction_turn
+            }
+            for npc_id, npc_mem in memory.npc_memory.items()
+        },
+        "discoveries": list(memory.discoveries)
+    }
+    
     return {
         "session_id": session_id,
         "current_location": state.current_location,
         "turn_count": state.turn_count,
         "status": state.status,
         "flags": state.flags,  # World-defined flags (set by interactions)
-        "llm_flags": state.llm_flags,  # AI-generated contextual flags
+        "narrative_memory": narrative_memory_summary,  # Narrative context tracking
         "inventory": state.inventory,
         "discovered_locations": state.discovered_locations,
         "npc_trust": state.npc_trust,
