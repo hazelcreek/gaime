@@ -136,8 +136,10 @@ This document describes the system architecture of GAIME, including component de
 5. LLM generates response:
    {
      "narrative": "The painting depicts...",
-     "state_changes": { "flags": { "examined_painting": true } }
+     "state_changes": { "llm_flags": { "noticed_slash_marks": true } }
    }
+   Note: World-defined flags (like "examined_portraits") are set by
+   interaction triggers, not by the LLM directly.
          │
          ▼
 6. State Manager applies changes
@@ -200,11 +202,13 @@ This document describes the system architecture of GAIME, including component de
   "state_changes": {
     "inventory": { "add": ["rusty_key"], "remove": [] },
     "location": "secret_passage",
-    "flags": { "door_opened": true }
+    "llm_flags": { "discovered_hidden_room": true }
   },
   "hints": ["The air feels colder here..."]
 }
 ```
+
+**Note**: World-defined `flags` (like `door_opened`) are set automatically by interaction triggers, not by the LLM. The LLM uses `llm_flags` for contextual narrative tracking.
 
 ### 2. State in System Prompt
 

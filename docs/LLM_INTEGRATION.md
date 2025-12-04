@@ -8,7 +8,7 @@ GAIME uses [LiteLLM](https://github.com/BerriAI/litellm) for provider-agnostic L
 
 | Provider | Models | Setup |
 |----------|--------|-------|
-| **Google Gemini** | gemini-1.5-flash, gemini-1.5-pro | API key from [aistudio.google.com](https://aistudio.google.com) |
+| **Google Gemini** | gemini-3-pro-preview (default), gemini-1.5-flash, gemini-1.5-pro | API key from [aistudio.google.com](https://aistudio.google.com) |
 | **OpenAI** | gpt-4o, gpt-4o-mini | API key from [platform.openai.com](https://platform.openai.com) |
 | **Anthropic** | claude-3-5-sonnet, claude-3-haiku | API key from [console.anthropic.com](https://console.anthropic.com) |
 | **Ollama** | llama3.1, mistral, etc. | Local install from [ollama.ai](https://ollama.ai) |
@@ -27,7 +27,7 @@ GEMINI_API_KEY=your_key_here
 # ANTHROPIC_API_KEY=your_key_here
 
 # Model selection
-LLM_MODEL=gemini-1.5-flash
+LLM_MODEL=gemini-3-pro-preview
 
 # For Ollama (local)
 # OLLAMA_BASE_URL=http://localhost:11434
@@ -61,7 +61,7 @@ LiteLLM uses prefixed model strings:
 
 | Provider | Format | Example |
 |----------|--------|---------|
-| Gemini | `gemini/model-name` | `gemini/gemini-1.5-flash` |
+| Gemini | `gemini/model-name` | `gemini/gemini-3-pro-preview` |
 | OpenAI | `model-name` | `gpt-4o` |
 | Anthropic | `anthropic/model-name` | `anthropic/claude-3-5-sonnet-20241022` |
 | Ollama | `ollama/model-name` | `ollama/llama3.1` |
@@ -109,7 +109,7 @@ Respond with JSON only:
     "inventory": {{ "add": [], "remove": [] }},
     "location": null or "new_location",
     "stats": {{ "health": 0 }},
-    "flags": {{ "flag_name": true }}
+    "llm_flags": {{ "flag_name": true }}
   }},
   "hints": []
 }}
@@ -139,11 +139,17 @@ def parse_response(response: str) -> ActionResult:
             inventory=data["state_changes"].get("inventory", {}),
             location=data["state_changes"].get("location"),
             stats=data["state_changes"].get("stats", {}),
-            flags=data["state_changes"].get("flags", {})
+            llm_flags=data["state_changes"].get("llm_flags", {})
         ),
         hints=data.get("hints", [])
     )
 ```
+
+**Note on Flag Types**: The game uses two separate flag namespaces:
+- `flags`: World-defined flags set by location interactions and item use actions
+- `llm_flags`: AI-generated contextual flags for narrative tracking
+
+The LLM should only set `llm_flags` - world-defined `flags` are set automatically when matching interactions are triggered.
 
 ## Prompt Engineering Tips
 
@@ -225,7 +231,7 @@ Write in this style: {world.tone}
 
 ### Cost Optimization
 
-1. **Use efficient models**: gemini-1.5-flash is cheap and fast
+1. **Use efficient models**: gemini-3-pro-preview (default) or gemini-1.5-flash for cost savings
 2. **Truncate history**: Don't include all narrative history
 3. **Cache world context**: Reuse compiled prompts
 4. **Set max_tokens**: Limit response length
@@ -287,8 +293,9 @@ For free, private development:
 
 | Provider | Speed | Quality | Cost | JSON Reliability |
 |----------|-------|---------|------|-----------------|
-| Gemini Flash | Fast | Good | Free tier | Good |
-| Gemini Pro | Medium | Excellent | Low | Excellent |
+| Gemini 3 Pro (default) | Medium | Excellent | Low | Excellent |
+| Gemini 1.5 Flash | Fast | Good | Free tier | Good |
+| Gemini 1.5 Pro | Medium | Excellent | Low | Excellent |
 | GPT-4o | Medium | Excellent | Medium | Excellent |
 | GPT-4o-mini | Fast | Good | Low | Good |
 | Claude 3.5 | Medium | Excellent | Medium | Excellent |
