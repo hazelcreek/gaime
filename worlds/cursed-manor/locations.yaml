@@ -308,7 +308,7 @@ nursery:
         - "look at drawings"
         - "study drawings"
       narrative_hint: "One drawing shows three figures around a circle, with a fourth - smaller - figure in the center. Written in a child's hand: 'They said it would make us live forever'"
-      sets_flag: understood_sacrifice
+      sets_flag: examined_drawings
     examine_nursery:
       triggers:
         - "examine nursery"

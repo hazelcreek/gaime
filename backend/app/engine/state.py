@@ -320,8 +320,12 @@ class GameStateManager:
         return True, action.description
     
     def set_flag(self, flag: str, value: bool = True):
-        """Set a game flag"""
+        """Set a world-defined game flag"""
         self._state.flags[flag] = value
+    
+    def set_llm_flag(self, flag: str, value: bool = True):
+        """Set an LLM-generated contextual flag"""
+        self._state.llm_flags[flag] = value
     
     def modify_stat(self, stat: str, delta: int):
         """Modify a player stat"""

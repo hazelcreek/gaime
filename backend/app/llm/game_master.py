@@ -100,6 +100,12 @@ NPCs Present: {npcs_here}
 ## NPCs Knowledge (for dialogue)
 {npc_knowledge}
 
+## Factual Accuracy (CRITICAL)
+- NEVER invent locations for items - only mention locations from the world data above
+- NEVER make up where items are hidden - use ONLY the knowledge provided in "NPCs Knowledge"
+- If you don't know where something is, the NPC should say they don't know - don't guess
+- All item locations MUST match what's defined in the world - check "Visible Items at Location" and item details
+
 ## Your Role
 1. Narrate in second person ("You see...", "You feel...")
 2. Be atmospheric and evocative, matching the tone
@@ -131,7 +137,7 @@ You MUST respond with valid JSON in this exact format:
     "inventory": {{ "add": ["item_id_1"], "remove": ["item_id_2"] }},
     "location": null,
     "stats": {{ "health": 0 }},
-    "flags": {{}},
+    "llm_flags": {{}},
     "discovered_locations": []
   }},
   "hints": []
@@ -141,7 +147,7 @@ Notes on state_changes:
 - location: Set to new location ID if player moves, null otherwise
 - inventory: Use item IDs (not names) for add/remove lists. Only add items that are visible/present.
 - stats: Use DELTAS (e.g., -5 for damage, +10 for healing)
-- flags: BOOLEAN ONLY - use true/false for story progress (e.g., "met_jenkins": true, "received_warning": true). Do NOT use numbers or counters.
+- llm_flags: BOOLEAN ONLY - use true/false for contextual story tracking (e.g., "talked_about_dagger": true). These are for AI-generated narrative state, separate from world-defined game flags.
 - hints: Optional subtle hints for the player
 - Only include changes that actually happen
 '''
@@ -405,10 +411,10 @@ Ensure you respond with a valid JSON object as specified in the system instructi
         """Parse state changes from LLM response"""
         inventory = changes.get("inventory", {})
         
-        # Sanitize flags to ensure they're all booleans
+        # Sanitize llm_flags to ensure they're all booleans
         # LLM sometimes returns integers (e.g., counting interactions) but flags must be bool
-        raw_flags = changes.get("flags", {})
-        sanitized_flags = {k: bool(v) for k, v in raw_flags.items()}
+        raw_llm_flags = changes.get("llm_flags", {})
+        sanitized_llm_flags = {k: bool(v) for k, v in raw_llm_flags.items()}
         
         return StateChanges(
             inventory=InventoryChange(
@@ -417,7 +423,7 @@ Ensure you respond with a valid JSON object as specified in the system instructi
             ),
             location=changes.get("location"),
             stats=changes.get("stats", {}),
-            flags=sanitized_flags,
+            llm_flags=sanitized_llm_flags,
             discovered_locations=changes.get("discovered_locations", [])
         )
     
@@ -439,7 +445,7 @@ Ensure you respond with a valid JSON object as specified in the system instructi
         for stat, delta in changes.get("stats", {}).items():
             self.state_manager.modify_stat(stat, delta)
         
-        for flag, value in changes.get("flags", {}).items():
-            # Ensure flags are boolean (LLM may return integers)
-            self.state_manager.set_flag(flag, bool(value))
+        for flag, value in changes.get("llm_flags", {}).items():
+            # Ensure llm_flags are boolean (LLM may return integers)
+            self.state_manager.set_llm_flag(flag, bool(value))
 

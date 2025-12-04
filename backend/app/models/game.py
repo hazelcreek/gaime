@@ -24,7 +24,8 @@ class StateChanges(BaseModel):
     inventory: InventoryChange = Field(default_factory=InventoryChange)
     location: str | None = None
     stats: dict[str, int] = Field(default_factory=dict)
-    flags: dict[str, bool] = Field(default_factory=dict)
+    flags: dict[str, bool] = Field(default_factory=dict)  # World-defined flags (set by interactions)
+    llm_flags: dict[str, bool] = Field(default_factory=dict)  # AI-generated contextual flags
     discovered_locations: list[str] = Field(default_factory=list)
 
 
@@ -36,7 +37,8 @@ class GameState(BaseModel):
     inventory: list[str] = Field(default_factory=list)
     stats: GameStats = Field(default_factory=GameStats)
     discovered_locations: list[str] = Field(default_factory=list)
-    flags: dict[str, bool] = Field(default_factory=dict)
+    flags: dict[str, bool] = Field(default_factory=dict)  # World-defined flags (set by interactions)
+    llm_flags: dict[str, bool] = Field(default_factory=dict)  # AI-generated contextual flags
     turn_count: int = 0
     npc_trust: dict[str, int] = Field(default_factory=dict)
     npc_locations: dict[str, str] = Field(default_factory=dict)  # Current NPC locations (npc_id -> location_id)
@@ -63,8 +65,11 @@ class GameState(BaseModel):
             current = getattr(self.stats, stat, 0)
             setattr(self.stats, stat, max(0, current + delta))
         
-        # Update flags
+        # Update world-defined flags
         self.flags.update(changes.flags)
+        
+        # Update LLM-generated contextual flags
+        self.llm_flags.update(changes.llm_flags)
         
         # Update discovered locations
         for loc in changes.discovered_locations:

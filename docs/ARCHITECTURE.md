@@ -91,8 +91,15 @@ This document describes the system architecture of GAIME, including component de
 
 **World Loader** (`engine/world.py`):
 - Loads YAML world files
-- Validates against schema
+- Validates world consistency on load
 - Provides world context to LLM
+
+**World Validator** (`engine/validator.py`):
+- Validates flag consistency (flags checked are set somewhere)
+- Validates location references (exits, item/NPC locations)
+- Validates item references (requires_item, unlocks)
+- Detects orphan flags (set but never checked)
+- CLI: `python -m app.engine.validator <world_id>`
 
 ### LLM Integration
 
@@ -239,12 +246,33 @@ class GameState:
     inventory: list[str]
     stats: dict[str, int]  # health, etc.
     discovered_locations: list[str]
-    flags: dict[str, bool]  # story progress
+    flags: dict[str, bool]  # World-defined flags (set by interactions)
+    llm_flags: dict[str, bool]  # AI-generated contextual flags
     turn_count: int
     npc_trust: dict[str, int]  # trust levels with NPCs
     npc_locations: dict[str, str]  # current NPC locations (for dynamic movement)
     status: str  # "playing", "won", or "lost"
 ```
+
+### Flag Types
+
+GAIME uses two separate flag namespaces:
+
+| Type | Source | Purpose | Example |
+|------|--------|---------|---------|
+| `flags` | World interactions | Game mechanics, triggers, victory conditions | `found_secret_passage`, `examined_nursery` |
+| `llm_flags` | AI-generated | Contextual narrative tracking | `talked_about_dagger`, `expressed_sympathy` |
+
+**World-defined flags** (`flags`) are set by:
+- Location interactions (`sets_flag` in interactions)
+- Item use actions (`sets_flag` in use_actions)
+
+**LLM-generated flags** (`llm_flags`) are set by the AI during narrative generation to track contextual details that don't affect game mechanics but help maintain narrative consistency.
+
+This separation ensures:
+- Game mechanics remain predictable and testable
+- The AI can track narrative state without affecting core gameplay
+- Debugging is easier (you can see what the AI "decided" vs. what the game logic set)
 
 ## Victory Conditions
 

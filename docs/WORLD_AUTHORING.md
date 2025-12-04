@@ -469,19 +469,28 @@ constraints:
 
 ### NPC Knowledge
 
-Be explicit about what NPCs know and will share:
+Be explicit about what NPCs know and will share. **Include specific locations and facts** to prevent the AI from hallucinating incorrect information:
 
 ```yaml
-# Good - clear boundaries
+# Good - explicit facts with actual locations
 knowledge:
   - "Knows the curse requires three artifacts to break"
-  - "Knows the artifacts are hidden in library, nursery, and basement"
+  - "The dagger is hidden in the basement, among debris in the corner"
+  - "The amulet is beneath a floorboard in the nursery"
+  - "The grimoire is in the ritual chamber on the central pedestal"
   - "Will NOT reveal artifact locations until trust is maxed"
   
 dialogue_rules:
   - "Speaks of 'dark days' but never names the curse directly"
   - "If asked about children, becomes visibly upset and changes subject"
+
+# Bad - vague knowledge leads to AI hallucination
+knowledge:
+  - "Knows where the dagger is hidden"  # AI might invent a wrong location!
+  - "Knows artifact locations"           # Too vague - be specific
 ```
+
+**Critical**: If an NPC "knows" where an item is, include the **actual location** in their knowledge. The AI cannot look up item locations - it will make something up if you don't tell it explicitly.
 
 ### Puzzle Design
 
@@ -522,13 +531,49 @@ POST /api/builder/generate
 
 This generates YAML files you can then edit and refine.
 
+## Validating Your World
+
+Before testing, validate your world for consistency issues:
+
+```bash
+cd backend
+python -m app.engine.validator your-world-name
+```
+
+The validator checks:
+
+| Check | What It Validates |
+|-------|------------------|
+| Flag consistency | Flags that are checked (in `requires`, `appears_when`, `find_condition`) are set somewhere |
+| Location references | All exits, item locations, NPC locations point to valid location IDs |
+| Item references | `requires_item`, `unlocks`, starting inventory reference valid items |
+| Orphan flags | Flags that are set but never checked (warnings only) |
+
+**Example output:**
+```
+============================================================
+World Validation: cursed-manor
+============================================================
+
+ERRORS (1):
+  ❌ Flag 'examined_drawings' is checked at item:thornwood_amulet/find_condition but never set anywhere
+
+WARNINGS (2):
+  ⚠️  Flag 'played_piano' is set at location:sitting_room/interaction:play_piano but never checked anywhere
+
+❌ World has 1 error(s)
+```
+
+Fix all errors before testing. Warnings are informational - orphan flags may be intentional for future use.
+
 ## Testing Your World
 
-1. Start the game with your world: `POST /api/game/new { "world_id": "your-world" }`
-2. Try expected paths - do puzzles work?
-3. Try unexpected inputs - does AI handle gracefully?
-4. Check constraints are respected
-5. Verify NPC dialogue feels consistent
+1. Validate your world: `python -m app.engine.validator your-world`
+2. Start the game with your world: `POST /api/game/new { "world_id": "your-world" }`
+3. Try expected paths - do puzzles work?
+4. Try unexpected inputs - does AI handle gracefully?
+5. Check constraints are respected
+6. Verify NPC dialogue feels consistent
 
 ## NPC Dynamic Behavior
 
@@ -637,6 +682,7 @@ Returns information about conditional NPCs and existing variants.
 |-------|----------|
 | AI ignores constraints | Make constraints specific and testable |
 | NPC feels inconsistent | Define clearer personality traits and speech style |
+| NPC gives wrong item locations | Include explicit locations in `knowledge` (e.g., "The dagger is in the basement") |
 | Puzzles too obscure | Add multiple trigger phrases, provide hints |
 | World feels empty | Add more `details` and `interactions` |
 | Atmosphere is generic | Use specific sensory details, not abstractions |
@@ -650,4 +696,6 @@ Returns information about conditional NPCs and existing variants.
 | Conditional NPC visible in image before appearing | Generate image variants with `/generate-variants` |
 | NPC doesn't move when expected | Check `location_changes` triggers and flag names match exactly |
 | NPC won't leave the game | Use `move_to: null` in `location_changes` to remove NPC entirely |
+| Flag mismatch errors | Run `python -m app.engine.validator` to find inconsistencies |
+| Item can't be found | Check `find_condition.requires_flag` matches a `sets_flag` somewhere |
 

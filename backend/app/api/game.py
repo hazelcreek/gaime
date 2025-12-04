@@ -188,7 +188,8 @@ async def debug_state(session_id: str):
         "current_location": state.current_location,
         "turn_count": state.turn_count,
         "status": state.status,
-        "flags": state.flags,
+        "flags": state.flags,  # World-defined flags (set by interactions)
+        "llm_flags": state.llm_flags,  # AI-generated contextual flags
         "inventory": state.inventory,
         "discovered_locations": state.discovered_locations,
         "npc_trust": state.npc_trust,

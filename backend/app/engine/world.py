@@ -62,8 +62,21 @@ class WorldLoader:
         
         return worlds
     
-    def load_world(self, world_id: str) -> WorldData:
-        """Load a complete world from YAML files"""
+    def load_world(self, world_id: str, validate: bool = True) -> WorldData:
+        """
+        Load a complete world from YAML files.
+        
+        Args:
+            world_id: The world identifier (folder name in worlds/)
+            validate: Whether to validate the world on load (default True)
+        
+        Returns:
+            WorldData with all world content
+        
+        Raises:
+            FileNotFoundError: If world doesn't exist
+            ValueError: If validation fails and validate=True
+        """
         world_path = self.worlds_dir / world_id
         
         if not world_path.exists():
@@ -75,12 +88,26 @@ class WorldLoader:
         npcs = self._load_npcs_yaml(world_path / "npcs.yaml")
         items = self._load_items_yaml(world_path / "items.yaml")
         
-        return WorldData(
+        world_data = WorldData(
             world=world,
             locations=locations,
             npcs=npcs,
             items=items
         )
+        
+        # Validate world if requested
+        if validate:
+            from app.engine.validator import WorldValidator
+            validator = WorldValidator(world_data, world_id)
+            result = validator.validate()
+            
+            if not result.is_valid:
+                error_list = "\n  - ".join(result.errors)
+                raise ValueError(
+                    f"World '{world_id}' validation failed with {len(result.errors)} error(s):\n  - {error_list}"
+                )
+        
+        return world_data
     
     def _load_world_yaml(self, path: Path) -> World:
         """Load world.yaml"""
