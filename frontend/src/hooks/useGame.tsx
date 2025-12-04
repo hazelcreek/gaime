@@ -62,26 +62,47 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }]);
   }, []);
 
-  // Load session from localStorage on mount
+  // Load session from localStorage on mount and restore game state
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        const { sessionId: storedId } = JSON.parse(stored);
-        // TODO: Validate session still exists on backend
-        setSessionId(storedId);
+        const { sessionId: storedId, worldId: storedWorldId } = JSON.parse(stored);
+        if (storedId) {
+          // Try to restore game state from backend
+          setIsLoading(true);
+          gameAPI.getState(storedId)
+            .then(({ state }) => {
+              // Session exists, restore state
+              setSessionId(storedId);
+              if (storedWorldId) {
+                setWorldId(storedWorldId);
+              }
+              setGameState(state);
+              addNarrative('system', 'Game restored. Continue your adventure!');
+            })
+            .catch(() => {
+              // Session doesn't exist on backend, clear localStorage
+              localStorage.removeItem(STORAGE_KEY);
+            })
+            .finally(() => {
+              setIsLoading(false);
+            });
+        }
       } catch {
         localStorage.removeItem(STORAGE_KEY);
       }
     }
-  }, []);
+  }, [addNarrative]);
 
   // Save session to localStorage
   useEffect(() => {
     if (sessionId) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ sessionId }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ sessionId, worldId }));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
     }
-  }, [sessionId]);
+  }, [sessionId, worldId]);
 
   // Save debug mode preference
   const setDebugMode = useCallback((enabled: boolean) => {
