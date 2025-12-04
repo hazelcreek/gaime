@@ -17,6 +17,7 @@ http://localhost:8000/api
 | POST | `/game/new` | Start new game |
 | POST | `/game/action` | Process player action |
 | GET | `/game/state/{session_id}` | Get current state |
+| GET | `/game/debug/{session_id}` | Get debug info (flags, NPC visibility) |
 | GET | `/game/image/{session_id}` | Get current location image (state-aware) |
 | GET | `/game/image/{session_id}/{location_id}` | Get location image (state-aware) |
 | POST | `/builder/generate` | Generate world from prompt |
@@ -197,6 +198,92 @@ GET /api/game/state/{session_id}
   }
 }
 ```
+
+**Errors**
+- `404`: Session not found
+
+---
+
+## Debug Game State
+
+Get detailed debug information about game state, flags, and NPC visibility.
+
+Useful for understanding why NPCs aren't appearing or which flags are set.
+
+```
+GET /api/game/debug/{session_id}
+```
+
+**Response**
+```json
+{
+  "session_id": "abc123-def456-...",
+  "current_location": "nursery",
+  "turn_count": 5,
+  "status": "playing",
+  "flags": {
+    "examined_portraits": true,
+    "read_ritual_notes": true
+  },
+  "inventory": ["candlestick", "old_letter"],
+  "discovered_locations": ["entrance_hall", "library", "upper_landing", "nursery"],
+  "npc_trust": {
+    "butler_jenkins": 1
+  },
+  "npc_analysis": [
+    {
+      "npc_id": "ghost_child",
+      "name": "The Whisper",
+      "role": "Spirit of the youngest child, Emily",
+      "base_location": null,
+      "roaming_locations": ["nursery", "upper_landing", "library", "sitting_room"],
+      "current_location": null,
+      "player_location": "nursery",
+      "is_at_player_location": true,
+      "has_appears_when": true,
+      "conditions": [
+        {
+          "type": "has_flag",
+          "flag": "examined_nursery",
+          "required": true,
+          "current_value": false,
+          "met": false
+        }
+      ],
+      "all_conditions_met": false,
+      "would_be_visible": false
+    }
+  ],
+  "interactions_at_location": [
+    {
+      "id": "examine_drawings",
+      "triggers": ["examine drawings", "look at drawings", "study drawings"],
+      "sets_flag": "understood_sacrifice",
+      "reveals_exit": null
+    },
+    {
+      "id": "examine_nursery",
+      "triggers": ["examine nursery", "look around", "search room"],
+      "sets_flag": "examined_nursery",
+      "reveals_exit": null
+    }
+  ]
+}
+```
+
+**NPC Analysis Fields**
+
+| Field | Description |
+|-------|-------------|
+| `is_at_player_location` | Whether NPC is at the player's current location |
+| `has_appears_when` | Whether NPC has appearance conditions |
+| `conditions` | Details of each condition and whether it's met |
+| `all_conditions_met` | True if all appearance conditions are satisfied |
+| `would_be_visible` | True if NPC would appear (at location AND conditions met) |
+
+**In-Game Debug Command**
+
+You can also type `debug` in the game to see formatted state info in the terminal.
 
 **Errors**
 - `404`: Session not found

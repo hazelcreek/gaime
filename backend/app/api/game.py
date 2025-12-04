@@ -84,6 +84,119 @@ async def get_state(session_id: str):
     return {"state": manager.get_state()}
 
 
+@router.get("/debug/{session_id}")
+async def debug_state(session_id: str):
+    """
+    Get detailed debug info about game state and NPC visibility.
+    
+    Useful for understanding why NPCs aren't appearing or what flags are set.
+    """
+    if session_id not in game_sessions:
+        raise HTTPException(status_code=404, detail="Game session not found")
+    
+    manager = game_sessions[session_id]
+    state = manager.get_state()
+    world_data = manager.get_world_data()
+    
+    # Build NPC visibility analysis
+    npc_analysis = []
+    for npc_id, npc in world_data.npcs.items():
+        # Get NPC's current location (considering location_changes)
+        npc_current_loc = manager.get_npc_current_location(npc_id)
+        
+        # Check each appears_when condition
+        conditions_analysis = []
+        all_conditions_met = True
+        
+        if npc.appears_when:
+            for condition in npc.appears_when:
+                if condition.condition == "has_flag":
+                    flag_name = str(condition.value)
+                    flag_value = state.flags.get(flag_name, False)
+                    is_met = flag_value
+                    conditions_analysis.append({
+                        "type": "has_flag",
+                        "flag": flag_name,
+                        "required": True,
+                        "current_value": flag_value,
+                        "met": is_met
+                    })
+                    if not is_met:
+                        all_conditions_met = False
+                elif condition.condition == "trust_above":
+                    npc_trust = state.npc_trust.get(npc_id, 0)
+                    required = condition.value
+                    is_met = npc_trust >= required
+                    conditions_analysis.append({
+                        "type": "trust_above",
+                        "required": required,
+                        "current_value": npc_trust,
+                        "met": is_met
+                    })
+                    if not is_met:
+                        all_conditions_met = False
+        
+        # Check if NPC was removed from game
+        was_removed = manager._was_removed_from_game(npc)
+        
+        # Check if NPC is at player's current location
+        has_location_override = manager._has_active_location_change(npc)
+        if was_removed:
+            is_at_current_location = False
+        elif has_location_override:
+            is_at_current_location = (npc_current_loc == state.current_location)
+        else:
+            # Normal behavior - check both single location and roaming locations
+            is_at_current_location = (
+                npc_current_loc == state.current_location or
+                state.current_location in npc.locations
+            )
+        
+        # Determine visibility
+        would_be_visible = all_conditions_met and is_at_current_location and not was_removed
+        
+        npc_analysis.append({
+            "npc_id": npc_id,
+            "name": npc.name,
+            "role": npc.role,
+            "base_location": npc.location,
+            "roaming_locations": npc.locations,
+            "current_location": npc_current_loc,
+            "player_location": state.current_location,
+            "is_at_player_location": is_at_current_location,
+            "was_removed_from_game": was_removed,
+            "has_appears_when": bool(npc.appears_when),
+            "conditions": conditions_analysis,
+            "all_conditions_met": all_conditions_met if npc.appears_when else True,
+            "would_be_visible": would_be_visible
+        })
+    
+    # Get available interactions at current location
+    current_location = manager.get_current_location()
+    interactions_available = []
+    if current_location and current_location.interactions:
+        for int_id, interaction in current_location.interactions.items():
+            interactions_available.append({
+                "id": int_id,
+                "triggers": interaction.triggers,
+                "sets_flag": interaction.sets_flag,
+                "reveals_exit": interaction.reveals_exit
+            })
+    
+    return {
+        "session_id": session_id,
+        "current_location": state.current_location,
+        "turn_count": state.turn_count,
+        "status": state.status,
+        "flags": state.flags,
+        "inventory": state.inventory,
+        "discovered_locations": state.discovered_locations,
+        "npc_trust": state.npc_trust,
+        "npc_analysis": npc_analysis,
+        "interactions_at_location": interactions_available
+    }
+
+
 @router.get("/image/{session_id}/{location_id}")
 async def get_location_image_for_session(session_id: str, location_id: str):
     """

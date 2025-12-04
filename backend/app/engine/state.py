@@ -68,11 +68,12 @@ class GameStateManager:
         
         for npc_id, npc in self.world_data.npcs.items():
             # Get the NPC's current location (may have changed due to triggers)
-            # Returns None if NPC has been removed from the game
+            # Returns None if NPC has no base location or was removed from the game
             npc_current_loc = self.get_npc_current_location(npc_id)
             
-            # If NPC location is None, they've left the game entirely
-            if npc_current_loc is None:
+            # Check if NPC was explicitly removed from game via location_changes
+            # (not just lacking a base location)
+            if npc_current_loc is None and self._was_removed_from_game(npc):
                 continue
             
             # Check if NPC is at current location
@@ -100,6 +101,21 @@ class GameStateManager:
         """Check if any location_change trigger is currently active for this NPC."""
         for change in npc.location_changes:
             if self._state.flags.get(change.when_flag, False):
+                return True
+        return False
+    
+    def _was_removed_from_game(self, npc) -> bool:
+        """
+        Check if NPC was explicitly removed from game via location_changes with move_to: null.
+        
+        An NPC with npc.location = None is NOT removed if they:
+        - Have roaming locations (locations list)
+        - Simply don't have a base location defined
+        
+        They ARE removed only if a location_change with move_to: null was triggered.
+        """
+        for change in npc.location_changes:
+            if change.move_to is None and self._state.flags.get(change.when_flag, False):
                 return True
         return False
     
@@ -146,8 +162,8 @@ class GameStateManager:
         for npc_id, npc in self.world_data.npcs.items():
             npc_current_loc = self.get_npc_current_location(npc_id)
             
-            # NPC has left the game entirely
-            if npc_current_loc is None:
+            # Check if NPC was explicitly removed from game via location_changes
+            if npc_current_loc is None and self._was_removed_from_game(npc):
                 continue
             
             # Check if NPC has an active location override

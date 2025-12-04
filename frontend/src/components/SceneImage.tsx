@@ -19,14 +19,21 @@ export default function SceneImage({ worldId = 'cursed-manor' }: SceneImageProps
 
   const currentLocation = gameState?.current_location;
 
+  // Get flag count to detect when NPCs might have appeared/disappeared
+  const flagCount = gameState?.flags ? Object.keys(gameState.flags).length : 0;
+  const turnCount = gameState?.turn_count ?? 0;
+  
   useEffect(() => {
     if (!currentLocation || !sessionId) {
       setImageUrl(null);
       return;
     }
 
-    // Construct the image URL for the current location
-    const url = `/api/builder/${worldId}/images/${currentLocation}`;
+    // Use the state-aware game endpoint to get the correct image variant
+    // based on which NPCs are currently visible (e.g., ghost after examining mirror)
+    // Add cache buster based on turn count to refresh when state changes
+    const cacheBuster = `t=${turnCount}&f=${flagCount}`;
+    const url = `/api/game/image/${sessionId}/${currentLocation}?${cacheBuster}`;
     
     // Check if image exists by attempting to load it
     setIsLoading(true);
@@ -38,12 +45,22 @@ export default function SceneImage({ worldId = 'cursed-manor' }: SceneImageProps
       setIsLoading(false);
     };
     img.onerror = () => {
-      setImageUrl(null);
-      setIsLoading(false);
-      // Don't show error - just gracefully hide the image area
+      // Fallback to static builder image if game endpoint fails
+      const fallbackUrl = `/api/builder/${worldId}/images/${currentLocation}`;
+      const fallbackImg = new Image();
+      fallbackImg.onload = () => {
+        setImageUrl(fallbackUrl);
+        setIsLoading(false);
+      };
+      fallbackImg.onerror = () => {
+        setImageUrl(null);
+        setIsLoading(false);
+        // Don't show error - just gracefully hide the image area
+      };
+      fallbackImg.src = fallbackUrl;
     };
     img.src = url;
-  }, [currentLocation, worldId, sessionId]);
+  }, [currentLocation, worldId, sessionId, turnCount, flagCount]);
 
   // Don't render if no session or no image available
   if (!sessionId) {

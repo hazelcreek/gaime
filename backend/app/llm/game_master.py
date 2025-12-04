@@ -2,6 +2,7 @@
 Game Master - LLM-powered narrative generation and action processing
 """
 
+import re
 from typing import TYPE_CHECKING
 
 from app.llm.client import get_completion, parse_json_response
@@ -9,6 +10,58 @@ from app.models.game import LLMResponse, StateChanges, InventoryChange
 
 if TYPE_CHECKING:
     from app.engine.state import GameStateManager
+
+
+def _normalize_action(text: str) -> str:
+    """
+    Normalize action text for more robust matching.
+    Handles common preposition variants and synonyms.
+    """
+    text = text.lower().strip()
+    
+    # Normalize preposition variants
+    text = re.sub(r'\binto\b', 'in', text)
+    text = re.sub(r'\bonto\b', 'on', text)
+    text = re.sub(r'\btoward[s]?\b', 'to', text)
+    text = re.sub(r'\binside\b', 'in', text)
+    
+    # Normalize verb synonyms for common actions
+    text = re.sub(r'\b(inspect|study|check|view|observe)\b', 'examine', text)
+    text = re.sub(r'\b(grab|pick up|take|get)\b', 'take', text)
+    text = re.sub(r'\b(speak|chat|converse)\b', 'talk', text)
+    
+    return text
+
+
+def _matches_interaction(action: str, triggers: list[str]) -> bool:
+    """
+    Check if an action matches any of the interaction triggers.
+    Uses normalized matching for robustness.
+    """
+    normalized_action = _normalize_action(action)
+    
+    for trigger in triggers:
+        normalized_trigger = _normalize_action(trigger)
+        
+        # Check if trigger is a substring of the action (original behavior)
+        if normalized_trigger in normalized_action:
+            return True
+        
+        # Also check if action is a substring of trigger (handles short commands)
+        if normalized_action in normalized_trigger:
+            return True
+        
+        # Check word-level overlap for flexibility
+        # (e.g., "mirror examine" should match "examine mirror")
+        trigger_words = set(normalized_trigger.split())
+        action_words = set(normalized_action.split())
+        
+        # If all significant trigger words (2+ chars) are in the action, it's a match
+        significant_trigger_words = {w for w in trigger_words if len(w) >= 3}
+        if significant_trigger_words and significant_trigger_words.issubset(action_words):
+            return True
+    
+    return False
 
 
 SYSTEM_PROMPT = '''You are the Game Master for a text adventure game called "{world_name}".
@@ -62,11 +115,13 @@ NPCs Present: {npcs_here}
 ## Scene Description Rules (CRITICAL)
 11. When describing ANY scene (look, look around, entering a new location), ALWAYS:
     - State the location name and physical context clearly
+    - Describe ALL NPCs present using their appearance from "NPCs Present" - this is ESSENTIAL for immersion
     - Describe ALL visible items using their found_description text
     - Describe exits narratively with context (e.g., "a flickering barrier to the north" not just "north")
 12. If an exit seems implausible for the setting, explain WHY it's accessible in the narrative
 13. Only mention items that are listed in "Visible Items at Location" - never invent items
-14. Maintain physical reality constraints consistent with the world's theme
+14. NPCs listed in "NPCs Present" MUST be described when looking around - they are physically there!
+15. Maintain physical reality constraints consistent with the world's theme
 
 ## Response Format
 You MUST respond with valid JSON in this exact format:
@@ -141,7 +196,7 @@ class GameMaster:
                         found_desc = item.found_description or f"A {item.name} is here."
                         items_here_detailed.append(f"- {item.name} ({item_id}): {found_desc}")
         
-        # Get NPCs present with their placement descriptions
+        # Get NPCs present with their appearance and placement descriptions
         npcs_here = []
         npc_knowledge = []
         for npc in self.state_manager.get_present_npcs():
@@ -152,12 +207,20 @@ class GameMaster:
                     npc_id = nid
                     break
             
+            # Build NPC description with appearance
+            npc_desc = f"{npc.name} - {npc.role}"
+            
             # Use location-specific placement if available
             placement = location.npc_placements.get(npc_id) if location and npc_id else None
             if placement:
-                npcs_here.append(f"{npc.name} - {npc.role} ({placement})")
-            else:
-                npcs_here.append(f"{npc.name} - {npc.role}")
+                npc_desc += f" ({placement})"
+            
+            # Include appearance description for narrative use
+            if npc.appearance:
+                appearance_short = npc.appearance.strip().replace('\n', ' ')
+                npc_desc += f"\n    Appearance: {appearance_short}"
+            
+            npcs_here.append(npc_desc)
             
             if npc.knowledge:
                 npc_knowledge.append(f"{npc.name}: {', '.join(npc.knowledge[:3])}")
@@ -292,7 +355,7 @@ Ensure you respond with a valid JSON object as specified in the system instructi
         # Check for interactions that should trigger
         if location and location.interactions:
             for int_id, interaction in location.interactions.items():
-                if any(trigger.lower() in action.lower() for trigger in interaction.triggers):
+                if _matches_interaction(action, interaction.triggers):
                     # Set associated flags
                     if interaction.sets_flag:
                         if "flags" not in parsed.get("state_changes", {}):

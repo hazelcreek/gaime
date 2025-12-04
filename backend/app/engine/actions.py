@@ -87,6 +87,10 @@ class ActionProcessor:
         if action_lower in ["inventory", "inv", "i"]:
             return self._inventory_response()
         
+        # Debug command
+        if action_lower == "debug":
+            return self._debug_response()
+        
         # Look command (still use LLM for rich description)
         # But we could have a simple version here
         
@@ -135,6 +139,118 @@ class ActionProcessor:
             narrative=narrative,
             state=state,
             hints=[],
+            game_complete=False,
+            ending_narrative=None
+        )
+    
+    def _debug_response(self) -> ActionResponse:
+        """Generate debug info showing game state, flags, and NPC visibility"""
+        state = self.state_manager.get_state()
+        world_data = self.state_manager.world_data
+        current_location = self.state_manager.get_current_location()
+        
+        lines = ["=== DEBUG INFO ===\n"]
+        
+        # Current location and turn
+        lines.append(f"Location: {state.current_location}")
+        lines.append(f"Turn: {state.turn_count}")
+        lines.append(f"Status: {state.status}\n")
+        
+        # Flags
+        lines.append("--- FLAGS ---")
+        if state.flags:
+            for flag, value in sorted(state.flags.items()):
+                lines.append(f"  {flag}: {value}")
+        else:
+            lines.append("  (no flags set)")
+        lines.append("")
+        
+        # NPC Trust
+        lines.append("--- NPC TRUST ---")
+        if state.npc_trust:
+            for npc_id, trust in state.npc_trust.items():
+                npc = world_data.get_npc(npc_id)
+                name = npc.name if npc else npc_id
+                lines.append(f"  {name}: {trust}")
+        else:
+            lines.append("  (no trust levels)")
+        lines.append("")
+        
+        # NPC Visibility Analysis
+        lines.append("--- NPC VISIBILITY ---")
+        for npc_id, npc in world_data.npcs.items():
+            npc_current_loc = self.state_manager.get_npc_current_location(npc_id)
+            was_removed = self.state_manager._was_removed_from_game(npc)
+            
+            # Check conditions
+            conditions_met = True
+            condition_details = []
+            
+            if npc.appears_when:
+                for condition in npc.appears_when:
+                    if condition.condition == "has_flag":
+                        flag_name = str(condition.value)
+                        flag_value = state.flags.get(flag_name, False)
+                        status = "OK" if flag_value else "MISSING"
+                        condition_details.append(f"    has_flag '{flag_name}': {status}")
+                        if not flag_value:
+                            conditions_met = False
+                    elif condition.condition == "trust_above":
+                        npc_trust = state.npc_trust.get(npc_id, 0)
+                        required = condition.value
+                        status = "OK" if npc_trust >= required else f"NEED {required}"
+                        condition_details.append(f"    trust_above {required}: {npc_trust} ({status})")
+                        if npc_trust < required:
+                            conditions_met = False
+            
+            # Check location
+            if was_removed:
+                is_here = False
+            else:
+                has_location_override = self.state_manager._has_active_location_change(npc)
+                if has_location_override:
+                    is_here = (npc_current_loc == state.current_location)
+                else:
+                    is_here = (
+                        npc_current_loc == state.current_location or
+                        state.current_location in npc.locations
+                    )
+            
+            visible = conditions_met and is_here and not was_removed
+            visibility_icon = "[VISIBLE]" if visible else "[HIDDEN]"
+            if was_removed:
+                visibility_icon = "[REMOVED]"
+            
+            lines.append(f"  {npc.name} ({npc_id}) {visibility_icon}")
+            lines.append(f"    Location: {npc_current_loc or 'roaming'} (roams: {npc.locations})")
+            lines.append(f"    At player location: {'YES' if is_here else 'NO'}")
+            
+            if condition_details:
+                lines.append("    Conditions:")
+                lines.extend(condition_details)
+            else:
+                lines.append("    Conditions: (none - always visible)")
+        lines.append("")
+        
+        # Interactions at current location
+        lines.append("--- INTERACTIONS AT LOCATION ---")
+        if current_location and current_location.interactions:
+            for int_id, interaction in current_location.interactions.items():
+                lines.append(f"  {int_id}:")
+                lines.append(f"    Triggers: {', '.join(interaction.triggers)}")
+                if interaction.sets_flag:
+                    lines.append(f"    Sets flag: {interaction.sets_flag}")
+                if interaction.reveals_exit:
+                    lines.append(f"    Reveals exit: {interaction.reveals_exit}")
+        else:
+            lines.append("  (no interactions)")
+        
+        narrative = "\n".join(lines)
+        
+        return ActionResponse(
+            narrative=narrative,
+            state=state,
+            hints=["Use the API endpoint /api/game/debug/{session_id} for JSON format"],
             game_complete=False,
             ending_narrative=None
         )

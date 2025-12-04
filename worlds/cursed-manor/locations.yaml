@@ -309,6 +309,17 @@ nursery:
         - "study drawings"
       narrative_hint: "One drawing shows three figures around a circle, with a fourth - smaller - figure in the center. Written in a child's hand: 'They said it would make us live forever'"
       sets_flag: understood_sacrifice
+    examine_nursery:
+      triggers:
+        - "examine nursery"
+        - "look around nursery"
+        - "search nursery"
+        - "examine room"
+        - "look around"
+        - "search room"
+        - "investigate nursery"
+      narrative_hint: "As you carefully examine the nursery, you notice the toys seem arranged in a pattern, pointing toward the smallest bed. The rocking horse creaks to a stop, as if watching you."
+      sets_flag: examined_nursery
 
 guest_room:
   name: "Guest Room"
