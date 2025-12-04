@@ -5,8 +5,11 @@ Game Master - LLM-powered narrative generation and action processing
 import re
 from typing import TYPE_CHECKING
 
-from app.llm.client import get_completion, parse_json_response
-from app.models.game import LLMResponse, StateChanges, InventoryChange
+from datetime import datetime
+
+from app.llm.client import get_completion, parse_json_response, get_model_string
+from app.llm.session_logger import log_llm_interaction
+from app.models.game import LLMResponse, StateChanges, InventoryChange, LLMDebugInfo
 
 if TYPE_CHECKING:
     from app.engine.state import GameStateManager
@@ -173,9 +176,11 @@ Remember to respond in the JSON format specified.'''
 class GameMaster:
     """LLM-powered game master for narrative generation"""
     
-    def __init__(self, state_manager: "GameStateManager"):
+    def __init__(self, state_manager: "GameStateManager", debug: bool = False):
         self.state_manager = state_manager
         self.world_data = state_manager.world_data
+        self.debug = debug
+        self.last_debug_info: LLMDebugInfo | None = None
     
     def _build_system_prompt(self) -> str:
         """Build the system prompt with current game context"""
@@ -290,8 +295,12 @@ class GameMaster:
             npc_knowledge="\n".join(npc_knowledge) if npc_knowledge else "No NPCs present"
         )
     
-    async def generate_opening(self) -> str:
-        """Generate the opening narrative for a new game"""
+    async def generate_opening(self) -> tuple[str, LLMDebugInfo | None]:
+        """Generate the opening narrative for a new game
+        
+        Returns:
+            Tuple of (narrative, debug_info) where debug_info is populated if debug mode is on
+        """
         world = self.world_data.world
         location = self.state_manager.get_current_location()
         
@@ -317,11 +326,37 @@ class GameMaster:
         response = await get_completion(messages, response_format={"type": "json_object"})
         parsed = parse_json_response(response)
         
+        model = get_model_string()
+        
+        # Always log to session file
+        log_llm_interaction(
+            session_id=self.state_manager.session_id,
+            world_id=self.state_manager.world_id,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            raw_response=response or "",
+            parsed_response=parsed,
+            model=model
+        )
+        
+        # Capture debug info if enabled (for API response)
+        debug_info = None
+        if self.debug:
+            debug_info = LLMDebugInfo(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                raw_response=response or "",
+                parsed_response=parsed,
+                model=model,
+                timestamp=datetime.now().isoformat()
+            )
+            self.last_debug_info = debug_info
+        
         # Apply any initial state changes
         if parsed.get("state_changes"):
             self._apply_changes(parsed["state_changes"])
         
-        return parsed.get("narrative", "You find yourself in a mysterious place...")
+        return parsed.get("narrative", "You find yourself in a mysterious place..."), debug_info
     
     async def process_action(self, action: str) -> LLMResponse:
         """Process a player action and generate response"""
@@ -401,10 +436,37 @@ Ensure you respond with a valid JSON object as specified in the system instructi
         # Parse into structured response
         state_changes = self._parse_state_changes(state_changes_dict)
         
+        model = get_model_string()
+        
+        # Always log to session file
+        log_llm_interaction(
+            session_id=self.state_manager.session_id,
+            world_id=self.state_manager.world_id,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            raw_response=response or "",
+            parsed_response=parsed,
+            model=model
+        )
+        
+        # Capture debug info if enabled (for API response)
+        debug_info = None
+        if self.debug:
+            debug_info = LLMDebugInfo(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                raw_response=response or "",
+                parsed_response=parsed,
+                model=model,
+                timestamp=datetime.now().isoformat()
+            )
+            self.last_debug_info = debug_info
+        
         return LLMResponse(
             narrative=parsed.get("narrative", "Nothing happens."),
             state_changes=state_changes,
-            hints=parsed.get("hints", [])
+            hints=parsed.get("hints", []),
+            debug_info=debug_info
         )
     
     def _parse_state_changes(self, changes: dict) -> StateChanges:
@@ -416,6 +478,10 @@ Ensure you respond with a valid JSON object as specified in the system instructi
         raw_llm_flags = changes.get("llm_flags", {})
         sanitized_llm_flags = {k: bool(v) for k, v in raw_llm_flags.items()}
         
+        # Parse world-defined flags (set by interactions)
+        raw_flags = changes.get("flags", {})
+        sanitized_flags = {k: bool(v) for k, v in raw_flags.items()}
+        
         return StateChanges(
             inventory=InventoryChange(
                 add=inventory.get("add", []),
@@ -423,6 +489,7 @@ Ensure you respond with a valid JSON object as specified in the system instructi
             ),
             location=changes.get("location"),
             stats=changes.get("stats", {}),
+            flags=sanitized_flags,
             llm_flags=sanitized_llm_flags,
             discovered_locations=changes.get("discovered_locations", [])
         )

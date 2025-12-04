@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar'
 import CommandInput from './components/CommandInput'
 import WorldBuilder from './components/WorldBuilder'
 import SceneImage from './components/SceneImage'
+import DebugPanel from './components/DebugPanel'
 
 function App() {
   const [view, setView] = useState<'game' | 'builder'>('game')
@@ -78,6 +79,11 @@ function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void 
           {/* Terminal - scrollable */}
           <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
             <Terminal />
+          </div>
+          
+          {/* Debug Panel - shows LLM interactions when enabled */}
+          <div className="flex-shrink-0">
+            <DebugPanel />
           </div>
           
           {/* Command input - fixed at bottom */}

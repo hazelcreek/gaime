@@ -87,7 +87,8 @@ POST /api/game/new
 ```json
 {
   "world_id": "cursed-manor",
-  "player_name": "Traveler"
+  "player_name": "Traveler",
+  "debug": false
 }
 ```
 
@@ -95,12 +96,14 @@ POST /api/game/new
 |-------|------|----------|---------|-------------|
 | world_id | string | No | "cursed-manor" | ID of world to load |
 | player_name | string | No | "Traveler" | Player's name |
+| debug | boolean | No | false | Enable LLM debug info in response |
 
 **Response**
 ```json
 {
   "session_id": "abc123-def456-...",
   "narrative": "A violent storm has driven you to seek shelter...",
+  "llm_debug": null,
   "state": {
     "session_id": "abc123-def456-...",
     "player_name": "Traveler",
@@ -138,7 +141,8 @@ POST /api/game/action
 ```json
 {
   "session_id": "abc123-def456-...",
-  "action": "look around the room"
+  "action": "look around the room",
+  "debug": false
 }
 ```
 
@@ -146,6 +150,7 @@ POST /api/game/action
 |-------|------|----------|-------------|
 | session_id | string | Yes | Game session ID |
 | action | string | Yes | Player's action text |
+| debug | boolean | No | Enable LLM debug info in response (default: false) |
 
 **Response**
 ```json
@@ -166,7 +171,8 @@ POST /api/game/action
   },
   "hints": ["The portraits seem to be watching you..."],
   "game_complete": false,
-  "ending_narrative": null
+  "ending_narrative": null,
+  "llm_debug": null
 }
 ```
 
@@ -647,6 +653,17 @@ interface GameState {
 }
 ```
 
+### NewGameResponse
+
+```typescript
+interface NewGameResponse {
+  session_id: string;
+  narrative: string;
+  state: GameState;
+  llm_debug?: LLMDebugInfo;      // Debug info when debug=true
+}
+```
+
 ### ActionResponse
 
 ```typescript
@@ -656,8 +673,26 @@ interface ActionResponse {
   hints?: string[];
   game_complete: boolean;        // True if game has ended
   ending_narrative?: string;     // Victory/defeat narrative if game ended
+  llm_debug?: LLMDebugInfo;      // Debug info when debug=true
 }
 ```
+
+### LLMDebugInfo
+
+Returned when `debug=true` is passed in the request.
+
+```typescript
+interface LLMDebugInfo {
+  system_prompt: string;         // Full system prompt sent to LLM
+  user_prompt: string;           // User prompt for this action
+  raw_response: string;          // Raw LLM response before parsing
+  parsed_response: object;       // Parsed JSON from LLM
+  model: string;                 // Model used (e.g., "gemini/gemini-3-pro")
+  timestamp: string;             // ISO timestamp of the interaction
+}
+```
+
+**Note:** When debug mode is enabled, LLM interactions are also logged to files in `logs/{world_id}/` with timestamps for later review.
 
 ### WorldInfo
 

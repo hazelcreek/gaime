@@ -18,16 +18,27 @@ export interface GameState {
   turn_count: number;
 }
 
+export interface LLMDebugInfo {
+  system_prompt: string;
+  user_prompt: string;
+  raw_response: string;
+  parsed_response: Record<string, unknown>;
+  model: string;
+  timestamp: string;
+}
+
 export interface ActionResponse {
   narrative: string;
   state: GameState;
   hints?: string[];
+  llm_debug?: LLMDebugInfo;
 }
 
 export interface NewGameResponse {
   session_id: string;
   narrative: string;
   state: GameState;
+  llm_debug?: LLMDebugInfo;
 }
 
 export interface WorldInfo {
@@ -80,11 +91,11 @@ class GameAPIClient {
   /**
    * Start a new game session
    */
-  async newGame(worldId: string = 'cursed-manor', playerName: string = 'Traveler'): Promise<NewGameResponse> {
+  async newGame(worldId: string = 'cursed-manor', playerName: string = 'Traveler', debug: boolean = false): Promise<NewGameResponse> {
     const response = await fetch(`${API_BASE}/game/new`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ world_id: worldId, player_name: playerName }),
+      body: JSON.stringify({ world_id: worldId, player_name: playerName, debug }),
     });
     
     if (!response.ok) {
@@ -98,11 +109,11 @@ class GameAPIClient {
   /**
    * Send a player action and get the narrative response
    */
-  async sendAction(sessionId: string, action: string): Promise<ActionResponse> {
+  async sendAction(sessionId: string, action: string, debug: boolean = false): Promise<ActionResponse> {
     const response = await fetch(`${API_BASE}/game/action`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_id: sessionId, action }),
+      body: JSON.stringify({ session_id: sessionId, action, debug }),
     });
     
     if (!response.ok) {

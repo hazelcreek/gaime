@@ -84,6 +84,17 @@ class ActionRequest(BaseModel):
     """Request to process a player action"""
     session_id: str
     action: str
+    debug: bool = False  # Enable LLM debug info in response
+
+
+class LLMDebugInfo(BaseModel):
+    """Debug info for LLM interactions"""
+    system_prompt: str
+    user_prompt: str
+    raw_response: str
+    parsed_response: dict
+    model: str
+    timestamp: str
 
 
 class ActionResponse(BaseModel):
@@ -93,6 +104,7 @@ class ActionResponse(BaseModel):
     hints: list[str] = Field(default_factory=list)
     game_complete: bool = False  # True if game has ended (won or lost)
     ending_narrative: str | None = None  # Final narrative if game completed
+    llm_debug: LLMDebugInfo | None = None  # Debug info when debug mode enabled
 
 
 class LLMResponse(BaseModel):
@@ -100,4 +112,5 @@ class LLMResponse(BaseModel):
     narrative: str
     state_changes: StateChanges = Field(default_factory=StateChanges)
     hints: list[str] = Field(default_factory=list)
+    debug_info: LLMDebugInfo | None = None  # Debug info when debug mode enabled
 

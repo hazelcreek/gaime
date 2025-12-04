@@ -6,7 +6,7 @@ import json
 import re
 from typing import TYPE_CHECKING
 
-from app.models.game import ActionResponse, StateChanges, LLMResponse
+from app.models.game import ActionResponse, StateChanges, LLMResponse, LLMDebugInfo
 from app.llm.game_master import GameMaster
 
 if TYPE_CHECKING:
@@ -16,13 +16,21 @@ if TYPE_CHECKING:
 class ActionProcessor:
     """Processes player actions and generates narrative responses"""
     
-    def __init__(self, state_manager: "GameStateManager"):
+    def __init__(self, state_manager: "GameStateManager", debug: bool = False):
         self.state_manager = state_manager
-        self.game_master = GameMaster(state_manager)
+        self.debug = debug
+        self.game_master = GameMaster(state_manager, debug=debug)
+        self.last_debug_info: LLMDebugInfo | None = None
     
-    async def get_initial_narrative(self) -> str:
-        """Generate the opening narrative for a new game"""
-        return await self.game_master.generate_opening()
+    async def get_initial_narrative(self) -> tuple[str, LLMDebugInfo | None]:
+        """Generate the opening narrative for a new game
+        
+        Returns:
+            Tuple of (narrative, debug_info) where debug_info is populated if debug mode is on
+        """
+        narrative, debug_info = await self.game_master.generate_opening()
+        self.last_debug_info = debug_info
+        return narrative, debug_info
     
     async def process(self, action: str) -> ActionResponse:
         """Process a player action and return the response"""
@@ -47,6 +55,9 @@ class ActionProcessor:
         # Process with LLM
         llm_response = await self.game_master.process_action(action)
         
+        # Store debug info
+        self.last_debug_info = llm_response.debug_info
+        
         # Apply state changes
         self._apply_state_changes(llm_response.state_changes)
         
@@ -64,7 +75,8 @@ class ActionProcessor:
                 state=self.state_manager.get_state(),
                 hints=[],
                 game_complete=True,
-                ending_narrative=ending_narrative
+                ending_narrative=ending_narrative,
+                llm_debug=llm_response.debug_info
             )
         
         return ActionResponse(
@@ -72,7 +84,8 @@ class ActionProcessor:
             state=self.state_manager.get_state(),
             hints=llm_response.hints,
             game_complete=False,
-            ending_narrative=None
+            ending_narrative=None,
+            llm_debug=llm_response.debug_info
         )
     
     def _handle_builtin(self, action: str) -> ActionResponse | None:

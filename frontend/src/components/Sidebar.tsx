@@ -5,7 +5,7 @@
 import { useGame } from '../hooks/useGame';
 
 export default function Sidebar() {
-  const { gameState, sessionId, startNewGame, isLoading } = useGame();
+  const { gameState, sessionId, startNewGame, isLoading, debugMode, setDebugMode } = useGame();
 
   if (!sessionId) {
     return null;
@@ -64,6 +64,30 @@ export default function Sidebar() {
         >
           Start New Game
         </button>
+      </div>
+
+      {/* Debug Mode Toggle */}
+      <div className="bg-terminal-surface border border-terminal-border rounded-lg p-3">
+        <label className="flex items-center justify-between cursor-pointer">
+          <span className="text-terminal-dim text-xs">Debug Mode</span>
+          <button
+            onClick={() => setDebugMode(!debugMode)}
+            className={`relative w-10 h-5 rounded-full transition-colors ${
+              debugMode ? 'bg-terminal-warning' : 'bg-terminal-border'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-terminal-text transition-transform ${
+                debugMode ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </label>
+        {debugMode && (
+          <p className="text-terminal-dim/60 text-xs mt-2 italic">
+            LLM interactions will be shown after each action
+          </p>
+        )}
       </div>
     </aside>
   );

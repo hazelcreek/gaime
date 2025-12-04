@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from app.engine.state import GameStateManager
 from app.engine.actions import ActionProcessor
-from app.models.game import GameState, ActionRequest, ActionResponse
+from app.models.game import GameState, ActionRequest, ActionResponse, LLMDebugInfo
 from app.llm.image_generator import get_location_image_path, load_variant_manifest
 
 router = APIRouter()
@@ -26,6 +26,7 @@ class NewGameRequest(BaseModel):
     """Request to start a new game"""
     world_id: str = "cursed-manor"
     player_name: str = "Traveler"
+    debug: bool = False  # Enable LLM debug info in responses
 
 
 class NewGameResponse(BaseModel):
@@ -33,6 +34,7 @@ class NewGameResponse(BaseModel):
     session_id: str
     narrative: str
     state: GameState
+    llm_debug: LLMDebugInfo | None = None  # Debug info when debug mode enabled
 
 
 @router.post("/new", response_model=NewGameResponse)
@@ -44,13 +46,14 @@ async def new_game(request: NewGameRequest):
         game_sessions[session_id] = manager
         
         # Generate initial narrative
-        processor = ActionProcessor(manager)
-        initial_narrative = await processor.get_initial_narrative()
+        processor = ActionProcessor(manager, debug=request.debug)
+        initial_narrative, debug_info = await processor.get_initial_narrative()
         
         return NewGameResponse(
             session_id=session_id,
             narrative=initial_narrative,
-            state=manager.get_state()
+            state=manager.get_state(),
+            llm_debug=debug_info
         )
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail=f"World '{request.world_id}' not found")
@@ -65,7 +68,7 @@ async def process_action(request: ActionRequest):
         raise HTTPException(status_code=404, detail="Game session not found")
     
     manager = game_sessions[request.session_id]
-    processor = ActionProcessor(manager)
+    processor = ActionProcessor(manager, debug=request.debug)
     
     try:
         response = await processor.process(request.action)
