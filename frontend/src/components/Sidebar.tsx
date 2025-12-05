@@ -1,5 +1,5 @@
 /**
- * Sidebar - Displays player stats, inventory, and location info
+ * Sidebar - Displays inventory, location, and game controls
  */
 
 import { useGame } from '../hooks/useGame';
@@ -19,17 +19,6 @@ export default function Sidebar() {
         <p className="text-terminal-accent font-display text-sm">
           {gameState?.current_location ? formatLocationName(gameState.current_location) : 'Unknown'}
         </p>
-      </div>
-
-      {/* Stats */}
-      <div className="bg-terminal-surface border border-terminal-border rounded-lg p-3">
-        <h3 className="text-terminal-dim text-xs uppercase tracking-wider mb-2">Status</h3>
-        <StatBar 
-          label="Health" 
-          value={gameState?.stats?.health ?? 100} 
-          max={100} 
-          color="terminal-success" 
-        />
       </div>
 
       {/* Inventory */}
@@ -90,35 +79,6 @@ export default function Sidebar() {
         )}
       </div>
     </aside>
-  );
-}
-
-function StatBar({ 
-  label, 
-  value, 
-  max, 
-  color 
-}: { 
-  label: string; 
-  value: number; 
-  max: number; 
-  color: string;
-}) {
-  const percentage = Math.min(100, Math.max(0, (value / max) * 100));
-  
-  return (
-    <div>
-      <div className="flex justify-between text-sm mb-1">
-        <span className="text-terminal-dim">{label}</span>
-        <span className="text-terminal-text">{value}/{max}</span>
-      </div>
-      <div className="h-2 bg-terminal-bg rounded-full overflow-hidden">
-        <div 
-          className={`h-full bg-${color} transition-all duration-300`}
-          style={{ width: `${percentage}%` }}
-        />
-      </div>
-    </div>
   );
 }
 

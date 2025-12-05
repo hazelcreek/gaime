@@ -81,7 +81,6 @@ Tone: {tone}
 ## Current Game State
 - Location: {current_location} ({location_name})
 - Inventory: {inventory}
-- Health: {health}/100
 - Discovered Areas: {discovered}
 - Story Progress: {flags}
 
@@ -165,7 +164,6 @@ You MUST respond with valid JSON in this exact format:
   "state_changes": {{
     "inventory": {{ "add": ["item_id_1"], "remove": ["item_id_2"] }},
     "location": null,
-    "stats": {{ "health": 0 }},
     "discovered_locations": []
   }},
   "memory_updates": {{
@@ -185,7 +183,6 @@ You MUST respond with valid JSON in this exact format:
 Notes on state_changes:
 - location: Set to new location ID if player moves, null otherwise
 - inventory: Use item IDs (not names) for add/remove lists. Only add items that are visible/present.
-- stats: Use DELTAS (e.g., -5 for damage, +10 for healing)
 - hints: Optional subtle hints for the player
 - Only include changes that actually happen
 
@@ -337,7 +334,6 @@ class GameMaster:
             location_atmosphere=location.atmosphere if location else "",
             exits="\n".join(exits_formatted) if exits_formatted else "none",
             inventory=", ".join(inventory_names) if inventory_names else "nothing",
-            health=state.stats.health,
             discovered=", ".join(state.discovered_locations),
             flags=", ".join(f"{k}={v}" for k, v in state.flags.items()) if state.flags else "none",
             items_here_detailed="\n".join(items_here_detailed) if items_here_detailed else "Nothing visible",
@@ -560,7 +556,6 @@ Ensure you respond with a valid JSON object as specified in the system instructi
                 remove=inventory.get("remove", [])
             ),
             location=changes.get("location"),
-            stats=changes.get("stats", {}),
             flags=sanitized_flags,
             discovered_locations=changes.get("discovered_locations", []),
             memory_updates=memory_updates
@@ -580,9 +575,6 @@ Ensure you respond with a valid JSON object as specified in the system instructi
         
         if changes.get("location"):
             state.current_location = changes["location"]
-        
-        for stat, delta in changes.get("stats", {}).items():
-            self.state_manager.modify_stat(stat, delta)
         
         # Apply memory updates if provided
         if memory_updates_raw:

@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 
 from app.models.game import (
-    GameState, GameStats, NarrativeMemory, NarrativeExchange,
+    GameState, NarrativeMemory, NarrativeExchange,
     NPCInteractionMemory, MemoryUpdates
 )
 from app.models.world import WorldData
@@ -39,7 +39,6 @@ class GameStateManager:
             player_name=player_name,
             current_location=world.player.starting_location,
             inventory=list(world.player.starting_inventory),
-            stats=GameStats(**world.player.stats),
             discovered_locations=[world.player.starting_location],
             flags={},
             turn_count=0,
@@ -331,11 +330,6 @@ class GameStateManager:
     def set_flag(self, flag: str, value: bool = True):
         """Set a world-defined game flag"""
         self._state.flags[flag] = value
-    
-    def modify_stat(self, stat: str, delta: int):
-        """Modify a player stat"""
-        current = getattr(self._state.stats, stat, 0)
-        setattr(self._state.stats, stat, max(0, min(100, current + delta)))
     
     def build_trust(self, npc_id: str, amount: int = 1):
         """Build trust with an NPC"""

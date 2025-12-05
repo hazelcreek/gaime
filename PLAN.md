@@ -2,7 +2,7 @@
 
 ## Vision
 
-Build a browser-based text adventure game where player input is processed by an LLM acting as a dynamic game master. The AI maintains game state (inventory, location, stats) while generating rich, immersive narrative responses.
+Build a browser-based text adventure game where player input is processed by an LLM acting as a dynamic game master. The AI maintains game state (inventory, location, flags) while generating rich, immersive narrative responses.
 
 ## Architecture
 
@@ -69,7 +69,7 @@ gaime/
 │   │   ├── components/
 │   │   │   ├── Terminal.tsx        # Narrative display
 │   │   │   ├── CommandInput.tsx    # Player input
-│   │   │   ├── Sidebar.tsx         # Inventory/stats
+│   │   │   ├── Sidebar.tsx         # Inventory/location
 │   │   │   └── WorldBuilder.tsx    # Builder UI
 │   │   ├── hooks/
 │   │   │   └── useGame.ts          # Game state hook
@@ -174,7 +174,7 @@ iron_key:
 ### Phase 5: Frontend
 - [ ] Build terminal-style UI component
 - [ ] Create command input with history
-- [ ] Add sidebar for inventory/stats
+- [x] Add sidebar for inventory/location
 - [ ] Connect to backend API
 
 ### Phase 6: World Builder
@@ -192,7 +192,7 @@ iron_key:
 
 1. Player can start a new game and explore the example world
 2. AI generates contextually appropriate narrative responses
-3. Inventory, location, and stats update correctly
+3. Inventory, location, and flags update correctly
 4. World builder can generate new worlds from prompts
 5. Documentation enables new developers to contribute
 

@@ -66,8 +66,6 @@ player:
   starting_inventory:
     - pocket_watch
     - journal
-  stats:
-    health: 100
 
 # Global rules the AI must follow
 constraints:

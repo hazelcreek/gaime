@@ -53,14 +53,6 @@ class MemoryUpdates(BaseModel):
 # Game State Models
 # =============================================================================
 
-class GameStats(BaseModel):
-    """Player statistics"""
-    health: int = 100
-    
-    class Config:
-        extra = "allow"  # Allow additional stats
-
-
 class InventoryChange(BaseModel):
     """Changes to inventory"""
     add: list[str] = Field(default_factory=list)
@@ -71,7 +63,6 @@ class StateChanges(BaseModel):
     """State changes from an action"""
     inventory: InventoryChange = Field(default_factory=InventoryChange)
     location: str | None = None
-    stats: dict[str, int] = Field(default_factory=dict)
     flags: dict[str, bool] = Field(default_factory=dict)  # World-defined flags (set by interactions)
     discovered_locations: list[str] = Field(default_factory=list)
     memory_updates: MemoryUpdates = Field(default_factory=MemoryUpdates)  # Narrative memory updates
@@ -83,7 +74,6 @@ class GameState(BaseModel):
     player_name: str = "Traveler"
     current_location: str
     inventory: list[str] = Field(default_factory=list)
-    stats: GameStats = Field(default_factory=GameStats)
     discovered_locations: list[str] = Field(default_factory=list)
     flags: dict[str, bool] = Field(default_factory=dict)  # World-defined flags (set by interactions)
     turn_count: int = 0
@@ -107,11 +97,6 @@ class GameState(BaseModel):
             self.current_location = changes.location
             if changes.location not in self.discovered_locations:
                 self.discovered_locations.append(changes.location)
-        
-        # Update stats
-        for stat, delta in changes.stats.items():
-            current = getattr(self.stats, stat, 0)
-            setattr(self.stats, stat, max(0, current + delta))
         
         # Update world-defined flags
         self.flags.update(changes.flags)
