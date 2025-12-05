@@ -26,13 +26,9 @@ player:
   starting_location: main_hallway
   starting_inventory:
     - chewed_gum
-  stats:
-    morale: 100
-    detention_risk: 0
 
 constraints:
   - "You cannot leave the school grounds until you find the exit key or a clever alternative route."
-  - "If your 'detention_risk' gets too high from getting caught doing mischief, you lose."
   - "Running in the halls is strictly prohibited (unless no one is watching)."
 
 commands:

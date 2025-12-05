@@ -32,10 +32,6 @@ export interface GameState {
   player_name: string;
   current_location: string;
   inventory: string[];
-  stats: {
-    health: number;
-    [key: string]: number;
-  };
   discovered_locations: string[];
   flags: Record<string, boolean>;
   turn_count: number;

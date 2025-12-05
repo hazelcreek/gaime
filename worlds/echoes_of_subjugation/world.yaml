@@ -24,9 +24,6 @@ player:
   starting_location: cell_block_c
   starting_inventory:
     - hidden_shiv
-  stats:
-    health: 100
-    compliance: 15
 
 constraints:
   - "Protector drones scan for unauthorized movement every 10 turns."

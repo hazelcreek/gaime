@@ -109,9 +109,6 @@ POST /api/game/new
     "player_name": "Traveler",
     "current_location": "entrance_hall",
     "inventory": ["pocket_watch", "journal"],
-    "stats": {
-      "health": 100
-    },
     "discovered_locations": ["entrance_hall"],
     "flags": {},
     "turn_count": 0,
@@ -165,9 +162,6 @@ POST /api/game/action
     "player_name": "Traveler",
     "current_location": "entrance_hall",
     "inventory": ["pocket_watch", "journal"],
-    "stats": {
-      "health": 100
-    },
     "discovered_locations": ["entrance_hall"],
     "flags": {},
     "turn_count": 1,
@@ -202,9 +196,6 @@ GET /api/game/state/{session_id}
     "player_name": "Traveler",
     "current_location": "entrance_hall",
     "inventory": ["pocket_watch", "journal"],
-    "stats": {
-      "health": 100
-    },
     "discovered_locations": ["entrance_hall"],
     "flags": {},
     "turn_count": 5,
@@ -659,10 +650,6 @@ interface GameState {
   player_name: string;
   current_location: string;
   inventory: string[];
-  stats: {
-    health: number;
-    [key: string]: number;
-  };
   discovered_locations: string[];
   flags: Record<string, boolean>;           // World-defined flags (set by interactions)
   turn_count: number;

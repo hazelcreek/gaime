@@ -88,7 +88,6 @@ SYSTEM_PROMPT = """You are the Game Master for a text adventure game.
 ## Current Game State
 - Location: {current_location}
 - Inventory: {inventory}
-- Stats: {stats}
 - Discovered: {discovered}
 - Story Flags: {flags}
 
@@ -118,7 +117,6 @@ Respond with JSON only:
   "state_changes": {{
     "inventory": {{ "add": [], "remove": [] }},
     "location": null or "new_location",
-    "stats": {{ "health": 0 }},
     "discovered_locations": []
   }},
   "memory_updates": {{
@@ -159,7 +157,6 @@ def parse_response(response: str) -> ActionResult:
         state_changes=StateChanges(
             inventory=data["state_changes"].get("inventory", {}),
             location=data["state_changes"].get("location"),
-            stats=data["state_changes"].get("stats", {}),
             memory_updates=MemoryUpdates(
                 npc_interactions=data.get("memory_updates", {}).get("npc_interactions", {}),
                 new_discoveries=data.get("memory_updates", {}).get("new_discoveries", [])

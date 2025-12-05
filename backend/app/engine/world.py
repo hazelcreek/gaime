@@ -118,8 +118,7 @@ class WorldLoader:
         player_data = data.get("player", {})
         player = PlayerSetup(
             starting_location=player_data.get("starting_location", "start"),
-            starting_inventory=player_data.get("starting_inventory", []),
-            stats=player_data.get("stats", {"health": 100})
+            starting_inventory=player_data.get("starting_inventory", [])
         )
         
         # Parse victory condition

@@ -34,8 +34,6 @@ player:
   starting_inventory:
     - pocket_watch
     - journal
-  stats:
-    health: 100
 
 constraints:
   - "The basement door is locked and requires the iron_key to open"

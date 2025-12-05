@@ -328,10 +328,6 @@ class ActionProcessor:
                 if changes.location not in state.discovered_locations:
                     state.discovered_locations.append(changes.location)
         
-        # Stat changes
-        for stat, delta in changes.stats.items():
-            self.state_manager.modify_stat(stat, delta)
-        
         # Flag changes
         for flag, value in changes.flags.items():
             self.state_manager.set_flag(flag, value)
