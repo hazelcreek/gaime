@@ -766,15 +766,6 @@ export default function WorldBuilder() {
           )}
         </div>
 
-        {/* Back to game link */}
-        <div className="mt-8 text-center">
-          <a
-            href="/"
-            className="text-terminal-dim hover:text-terminal-accent transition-colors"
-          >
-            ← Back to Game
-          </a>
-        </div>
       </div>
     </div>
   );

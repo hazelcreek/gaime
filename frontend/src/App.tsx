@@ -11,16 +11,33 @@ function App() {
 
   if (view === 'builder') {
     return (
-      <div>
-        <WorldBuilder />
-        <div className="fixed bottom-4 left-4">
-          <button
-            onClick={() => setView('game')}
-            className="px-4 py-2 bg-terminal-surface border border-terminal-border 
-                     text-terminal-dim hover:text-terminal-accent rounded transition-colors"
-          >
-            ← Back to Game
-          </button>
+      <div className="h-screen bg-terminal-bg flex flex-col overflow-hidden">
+        {/* Header - consistent with game screen */}
+        <header className="flex-shrink-0 flex items-center justify-between px-4 py-2 border-b border-terminal-border/30">
+          <div className="flex items-center gap-4">
+            <h1 className="font-display text-lg text-terminal-accent tracking-wider">
+              GAIME
+            </h1>
+            <span className="text-terminal-dim/50">|</span>
+            <span className="text-terminal-text text-sm font-display tracking-wide">
+              World Builder
+            </span>
+          </div>
+          <nav className="flex items-center gap-3">
+            <button
+              onClick={() => setView('game')}
+              className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-text 
+                       border border-terminal-border/50 hover:border-terminal-dim 
+                       rounded transition-colors"
+            >
+              ← Home
+            </button>
+          </nav>
+        </header>
+        
+        {/* World Builder content */}
+        <div className="flex-1 overflow-hidden">
+          <WorldBuilder />
         </div>
       </div>
     )
@@ -83,9 +100,11 @@ function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void 
           {!sessionId && (
             <button
               onClick={() => setView('builder')}
-              className="text-xs text-terminal-dim hover:text-terminal-accent transition-colors"
+              className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-accent 
+                       border border-terminal-border/50 hover:border-terminal-accent/50 
+                       rounded transition-colors"
             >
-              World Builder →
+              World Builder
             </button>
           )}
         </nav>

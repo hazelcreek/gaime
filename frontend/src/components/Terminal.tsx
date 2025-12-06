@@ -57,9 +57,9 @@ export default function Terminal() {
     const selectedWorldInfo = worlds.find(w => w.id === selectedWorld);
     
     return (
-      <div className="flex-1 bg-terminal-surface border border-terminal-border rounded-lg p-4 lg:p-6 
+      <div className="h-full bg-terminal-surface border border-terminal-border rounded-lg p-4 lg:p-6 
                       flex flex-col items-center justify-center overflow-y-auto">
-        <div className="text-center w-full max-w-md">
+        <div className="text-center w-full max-w-md mx-auto">
           <h2 className="font-display text-xl lg:text-2xl text-terminal-accent mb-1">
             Welcome, Traveler
           </h2>
@@ -135,8 +135,8 @@ export default function Terminal() {
   return (
     <div 
       ref={scrollRef}
-      className="flex-1 bg-terminal-surface border border-terminal-border rounded-lg p-3 
-                 overflow-y-auto space-y-2.5 min-h-[100px]"
+      className="h-full bg-terminal-surface border border-terminal-border rounded-lg p-3 
+                 overflow-y-auto space-y-2.5"
     >
       {narrative.map((entry) => (
         <div 

@@ -141,7 +141,7 @@ export default function SceneImage({ worldId = 'cursed-manor' }: SceneImageProps
           }}
         />
 
-        {/* Inventory Badge Overlay - bottom right */}
+        {/* Inventory Badge Overlay - bottom right, expands upward */}
         {inventory.length > 0 && (
           <div 
             className="absolute bottom-3 right-3 z-10"
@@ -150,23 +150,11 @@ export default function SceneImage({ worldId = 'cursed-manor' }: SceneImageProps
               setInventoryExpanded(!inventoryExpanded);
             }}
           >
-            {inventoryExpanded ? (
-              // Expanded inventory list
-              <div className="bg-terminal-bg/90 backdrop-blur-sm border border-terminal-border 
-                            rounded-lg p-3 min-w-[160px] animate-fade-in">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-terminal-dim text-xs uppercase tracking-wider">Inventory</span>
-                  <button 
-                    className="text-terminal-dim hover:text-terminal-text text-xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setInventoryExpanded(false);
-                    }}
-                  >
-                    ✕
-                  </button>
-                </div>
-                <ul className="space-y-1">
+            <div className="bg-terminal-bg/90 backdrop-blur-sm border border-terminal-border 
+                          rounded-lg overflow-hidden min-w-[140px] transition-all duration-200">
+              {/* Expanded items list - appears above the header */}
+              {inventoryExpanded && (
+                <ul className="p-2 space-y-1 border-b border-terminal-border/50 animate-fade-in">
                   {inventory.map((item, idx) => (
                     <li key={idx} className="text-terminal-text text-sm flex items-center gap-2">
                       <span className="text-terminal-warning">•</span>
@@ -174,18 +162,21 @@ export default function SceneImage({ worldId = 'cursed-manor' }: SceneImageProps
                     </li>
                   ))}
                 </ul>
-              </div>
-            ) : (
-              // Collapsed badge
+              )}
+              
+              {/* Always visible header/button */}
               <button 
-                className="bg-terminal-bg/80 backdrop-blur-sm border border-terminal-border 
-                          hover:border-terminal-accent/50 rounded-lg px-3 py-2
-                          flex items-center gap-2 transition-colors"
+                className="w-full px-3 py-2 flex items-center justify-between gap-3
+                          hover:bg-terminal-surface/50 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setInventoryExpanded(!inventoryExpanded);
+                }}
               >
-                <span className="text-base">🎒</span>
+                <span className="text-terminal-dim text-xs uppercase tracking-wider">Inventory</span>
                 <span className="text-terminal-accent font-medium text-sm">{inventory.length}</span>
               </button>
-            )}
+            </div>
           </div>
         )}
       </div>
