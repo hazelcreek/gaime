@@ -4,8 +4,9 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { useGame } from '../hooks/useGame';
-import { gameAPI, WorldInfo } from '../api/client';
+import { useGame, NarrativeEntry } from '../hooks/useGame';
+import { gameAPI, WorldInfo, LLMDebugInfo } from '../api/client';
+import LLMDebugModal from './LLMDebugModal';
 
 export default function Terminal() {
   const { narrative, isLoading, sessionId, startNewGame } = useGame();
@@ -16,6 +17,20 @@ export default function Terminal() {
   const [selectedWorld, setSelectedWorld] = useState<string>('');
   const [playerName, setPlayerName] = useState('Traveler');
   const [loadingWorlds, setLoadingWorlds] = useState(true);
+  
+  // LLM Debug modal state
+  const [selectedDebugInfo, setSelectedDebugInfo] = useState<LLMDebugInfo | null>(null);
+
+  // Close debug modal on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectedDebugInfo) {
+        setSelectedDebugInfo(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedDebugInfo]);
 
   // Load available worlds on mount
   useEffect(() => {
@@ -133,28 +148,65 @@ export default function Terminal() {
   }
 
   return (
-    <div 
-      ref={scrollRef}
-      className="h-full bg-terminal-surface border border-terminal-border rounded-lg p-3 
-                 overflow-y-auto space-y-2.5"
-    >
-      {narrative.map((entry) => (
-        <div 
-          key={entry.id} 
-          className={`animate-fade-in ${getEntryStyles(entry.type)}`}
-        >
-          {entry.type === 'player' && (
-            <span className="text-terminal-accent mr-1.5">›</span>
-          )}
-          <span className="whitespace-pre-wrap break-words">{entry.content}</span>
-        </div>
-      ))}
+    <>
+      <div 
+        ref={scrollRef}
+        className="h-full bg-terminal-surface border border-terminal-border rounded-lg p-3 
+                   overflow-y-auto space-y-2.5"
+      >
+        {narrative.map((entry) => (
+          <NarrativeEntryRow 
+            key={entry.id}
+            entry={entry}
+            onDebugClick={() => entry.debugInfo && setSelectedDebugInfo(entry.debugInfo)}
+          />
+        ))}
+        
+        {isLoading && (
+          <div className="flex items-center gap-2 text-terminal-dim text-sm">
+            <span className="animate-pulse">●</span>
+            <span>The world shifts around you...</span>
+          </div>
+        )}
+      </div>
+
+      {/* LLM Debug Modal */}
+      {selectedDebugInfo && (
+        <LLMDebugModal 
+          debugInfo={selectedDebugInfo}
+          onClose={() => setSelectedDebugInfo(null)}
+        />
+      )}
+    </>
+  );
+}
+
+interface NarrativeEntryRowProps {
+  entry: NarrativeEntry;
+  onDebugClick: () => void;
+}
+
+function NarrativeEntryRow({ entry, onDebugClick }: NarrativeEntryRowProps) {
+  return (
+    <div className={`animate-fade-in flex items-start gap-2 group ${getEntryStyles(entry.type)}`}>
+      <div className="flex-1 min-w-0">
+        {entry.type === 'player' && (
+          <span className="text-terminal-accent mr-1.5">›</span>
+        )}
+        <span className="whitespace-pre-wrap break-words">{entry.content}</span>
+      </div>
       
-      {isLoading && (
-        <div className="flex items-center gap-2 text-terminal-dim text-sm">
-          <span className="animate-pulse">●</span>
-          <span>The world shifts around you...</span>
-        </div>
+      {/* Debug icon - only show for entries with debug info */}
+      {entry.debugInfo && (
+        <button
+          onClick={onDebugClick}
+          className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity
+                     text-terminal-dim hover:text-terminal-warning text-xs p-1 rounded
+                     hover:bg-terminal-warning/10"
+          title="View LLM interaction details"
+        >
+          🔧
+        </button>
       )}
     </div>
   );

@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { GameProvider, useGame } from './hooks/useGame'
 import Terminal from './components/Terminal'
 import CommandInput from './components/CommandInput'
 import WorldBuilder from './components/WorldBuilder'
 import SceneImage from './components/SceneImage'
-import DebugPanel from './components/DebugPanel'
+import StateOverlay from './components/StateOverlay'
 
 function App() {
   const [view, setView] = useState<'game' | 'builder'>('game')
@@ -51,7 +51,19 @@ function App() {
 }
 
 function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void }) {
-  const { sessionId, resetGame, worldId, worldName, startNewGame, isLoading } = useGame();
+  const { sessionId, resetGame, worldId, worldName, startNewGame, isLoading, gameState } = useGame();
+  const [stateOverlayOpen, setStateOverlayOpen] = useState(false);
+
+  // Close overlay on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && stateOverlayOpen) {
+        setStateOverlayOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [stateOverlayOpen]);
   
   return (
     <div className="h-screen bg-terminal-bg flex flex-col overflow-hidden">
@@ -115,19 +127,19 @@ function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void 
         {/* Scene image - only show when in game */}
         {sessionId && (
           <div className="lg:w-2/3 lg:h-full shrink-0 lg:shrink">
-            <SceneImage worldId={worldId || 'cursed-manor'} />
+            <SceneImage 
+              worldId={worldId || 'cursed-manor'} 
+              onStateClick={() => setStateOverlayOpen(true)}
+            />
           </div>
         )}
         
-        {/* Terminal + Debug + Input */}
+        {/* Terminal + Input */}
         <div className={`flex-1 flex flex-col min-h-0 gap-2 overflow-hidden ${sessionId ? 'lg:w-1/3' : 'w-full'}`}>
           {/* Terminal - scrollable */}
           <div className="flex-1 min-h-0 overflow-hidden">
             <Terminal />
           </div>
-          
-          {/* Debug Panel - only in game */}
-          {sessionId && <DebugPanel />}
           
           {/* Command input - only in game */}
           {sessionId && (
@@ -137,6 +149,14 @@ function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void 
           )}
         </div>
       </main>
+
+      {/* State Overlay */}
+      {stateOverlayOpen && gameState && (
+        <StateOverlay 
+          gameState={gameState} 
+          onClose={() => setStateOverlayOpen(false)} 
+        />
+      )}
     </div>
   )
 }

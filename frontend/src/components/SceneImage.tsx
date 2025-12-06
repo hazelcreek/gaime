@@ -8,9 +8,10 @@ import { useGame } from '../hooks/useGame';
 
 interface SceneImageProps {
   worldId?: string;
+  onStateClick?: () => void;
 }
 
-export default function SceneImage({ worldId = 'cursed-manor' }: SceneImageProps) {
+export default function SceneImage({ worldId = 'cursed-manor', onStateClick }: SceneImageProps) {
   const { gameState, sessionId } = useGame();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -141,44 +142,63 @@ export default function SceneImage({ worldId = 'cursed-manor' }: SceneImageProps
           }}
         />
 
-        {/* Inventory Badge Overlay - bottom right, expands upward */}
-        {inventory.length > 0 && (
-          <div 
-            className="absolute bottom-3 right-3 z-10"
-            onClick={(e) => {
-              e.stopPropagation();
-              setInventoryExpanded(!inventoryExpanded);
-            }}
-          >
-            <div className="bg-terminal-bg/90 backdrop-blur-sm border border-terminal-border 
-                          rounded-lg overflow-hidden min-w-[140px] transition-all duration-200">
-              {/* Expanded items list - appears above the header */}
-              {inventoryExpanded && (
-                <ul className="p-2 space-y-1 border-b border-terminal-border/50 animate-fade-in">
-                  {inventory.map((item, idx) => (
-                    <li key={idx} className="text-terminal-text text-sm flex items-center gap-2">
-                      <span className="text-terminal-warning">•</span>
-                      {formatItemName(item)}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              
-              {/* Always visible header/button */}
-              <button 
-                className="w-full px-3 py-2 flex items-center justify-between gap-3
-                          hover:bg-terminal-surface/50 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setInventoryExpanded(!inventoryExpanded);
-                }}
-              >
-                <span className="text-terminal-dim text-xs uppercase tracking-wider">Inventory</span>
-                <span className="text-terminal-accent font-medium text-sm">{inventory.length}</span>
-              </button>
+        {/* Bottom right overlay badges - State and Inventory */}
+        <div className="absolute bottom-3 right-3 z-10 flex items-end gap-2">
+          {/* State Button - 36x36px square */}
+          {onStateClick && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onStateClick();
+              }}
+              className="bg-terminal-bg/90 backdrop-blur-sm border border-terminal-border 
+                        rounded-lg w-9 h-9 flex items-center justify-center
+                        hover:bg-terminal-surface/50 hover:border-terminal-warning/50 
+                        text-terminal-dim hover:text-terminal-warning transition-colors"
+              title="View game state"
+            >
+              <span className="text-sm">🔧</span>
+            </button>
+          )}
+
+          {/* Inventory Badge - expands upward */}
+          {inventory.length > 0 && (
+            <div 
+              onClick={(e) => {
+                e.stopPropagation();
+                setInventoryExpanded(!inventoryExpanded);
+              }}
+            >
+              <div className="bg-terminal-bg/90 backdrop-blur-sm border border-terminal-border 
+                            rounded-lg overflow-hidden min-w-[140px] transition-all duration-200">
+                {/* Expanded items list - appears above the header */}
+                {inventoryExpanded && (
+                  <ul className="p-2 space-y-1 border-b border-terminal-border/50 animate-fade-in">
+                    {inventory.map((item, idx) => (
+                      <li key={idx} className="text-terminal-text text-sm flex items-center gap-2">
+                        <span className="text-terminal-warning">•</span>
+                        {formatItemName(item)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                
+                {/* Always visible header/button - 34px so with 2px container border = 36px total */}
+                <button 
+                  className="w-full h-[34px] px-3 flex items-center justify-between gap-3
+                            hover:bg-terminal-surface/50 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setInventoryExpanded(!inventoryExpanded);
+                  }}
+                >
+                  <span className="text-terminal-dim text-xs uppercase tracking-wider">Inventory</span>
+                  <span className="text-terminal-accent font-medium text-sm">{inventory.length}</span>
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Fullscreen overlay for zoom viewing */}
