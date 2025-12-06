@@ -16,6 +16,7 @@ interface GameContextValue {
   // State
   sessionId: string | null;
   worldId: string | null;
+  worldName: string | null;
   gameState: GameState | null;
   narrative: NarrativeEntry[];
   isLoading: boolean;
@@ -24,7 +25,7 @@ interface GameContextValue {
   lastDebugInfo: LLMDebugInfo | null;
   
   // Actions
-  startNewGame: (worldId?: string, playerName?: string) => Promise<void>;
+  startNewGame: (worldId?: string, playerName?: string, worldName?: string) => Promise<void>;
   sendAction: (action: string) => Promise<void>;
   clearError: () => void;
   resetGame: () => void;
@@ -39,6 +40,7 @@ const DEBUG_MODE_KEY = 'gaime_debug_mode';
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [worldId, setWorldId] = useState<string | null>(null);
+  const [worldName, setWorldName] = useState<string | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [narrative, setNarrative] = useState<NarrativeEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -67,7 +69,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        const { sessionId: storedId, worldId: storedWorldId } = JSON.parse(stored);
+        const { sessionId: storedId, worldId: storedWorldId, worldName: storedWorldName } = JSON.parse(stored);
         if (storedId) {
           // Try to restore game state from backend
           setIsLoading(true);
@@ -77,6 +79,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
               setSessionId(storedId);
               if (storedWorldId) {
                 setWorldId(storedWorldId);
+              }
+              if (storedWorldName) {
+                setWorldName(storedWorldName);
               }
               setGameState(state);
               addNarrative('system', 'Game restored. Continue your adventure!');
@@ -98,11 +103,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   // Save session to localStorage
   useEffect(() => {
     if (sessionId) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ sessionId, worldId }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ sessionId, worldId, worldName }));
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
-  }, [sessionId, worldId]);
+  }, [sessionId, worldId, worldName]);
 
   // Save debug mode preference
   const setDebugMode = useCallback((enabled: boolean) => {
@@ -111,7 +116,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Start a new game
-  const startNewGame = useCallback(async (selectedWorldId?: string, playerName?: string) => {
+  const startNewGame = useCallback(async (selectedWorldId?: string, playerName?: string, selectedWorldName?: string) => {
     // Use provided worldId, or fall back to current world, or default to 'cursed-manor'
     const effectiveWorldId = selectedWorldId ?? worldId ?? 'cursed-manor';
     const effectivePlayerName = playerName ?? gameState?.player_name ?? 'Traveler';
@@ -125,6 +130,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const response = await gameAPI.newGame(effectiveWorldId, effectivePlayerName, debugMode);
       setSessionId(response.session_id);
       setWorldId(effectiveWorldId);
+      setWorldName(selectedWorldName ?? null);
       setGameState(response.state);
       addNarrative('narrative', response.narrative);
       addNarrative('system', 'Type your commands below. Try "look around" or "help" to get started.');
@@ -188,6 +194,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const resetGame = useCallback(() => {
     setSessionId(null);
     setWorldId(null);
+    setWorldName(null);
     setGameState(null);
     setNarrative([]);
     setError(null);
@@ -199,6 +206,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     <GameContext.Provider value={{
       sessionId,
       worldId,
+      worldName,
       gameState,
       narrative,
       isLoading,
