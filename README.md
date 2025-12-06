@@ -56,7 +56,7 @@ gaime/
 ├── frontend/         # React + TypeScript UI
 ├── worlds/           # YAML game world definitions
 ├── docs/             # Developer documentation
-└── PLAN.md           # Implementation roadmap
+└── ideas/            # Future plans and feature concepts
 ```
 
 ## Documentation
