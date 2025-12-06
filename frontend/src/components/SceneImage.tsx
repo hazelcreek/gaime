@@ -68,82 +68,99 @@ export default function SceneImage({ worldId = 'cursed-manor', onStateClick }: S
 
   return (
     <>
-      {/* Scene Image Container - Full height on desktop */}
+      {/* Scene Image Container - Full height on desktop with Ambilight effect */}
       <div 
         className="relative overflow-hidden rounded-lg border border-terminal-border 
-                   h-64 lg:h-full lg:min-h-[400px] cursor-pointer group"
+                   h-64 lg:h-full lg:min-h-[400px] cursor-pointer group
+                   bg-terminal-bg"
         onClick={() => setIsFullscreen(true)}
       >
-        {/* Gradient background for atmosphere when no image */}
+        {/* Ambilight layer - blurred, scaled image creates ambient glow */}
+        {imageUrl && (
+          <div 
+            className={`absolute inset-0 transition-opacity duration-1000
+                       ${showPlaceholder ? 'opacity-0' : 'opacity-100'}`}
+          >
+            <img
+              src={imageUrl}
+              alt=""
+              aria-hidden="true"
+              className="absolute w-[140%] h-[140%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+                         object-cover blur-[60px] saturate-[1.3] opacity-60"
+            />
+            {/* Darken edges for depth */}
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: `radial-gradient(ellipse 80% 70% at 50% 50%, 
+                  transparent 30%, 
+                  rgba(10, 10, 15, 0.7) 70%,
+                  rgba(10, 10, 15, 0.95) 100%)`
+              }}
+            />
+          </div>
+        )}
+        
+        {/* Placeholder state when no image */}
         <div 
-          className={`absolute inset-0 bg-gradient-to-b from-terminal-surface via-terminal-bg to-terminal-surface
-                      transition-opacity duration-500 ${showPlaceholder ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-0 z-10 flex items-center justify-center
+                      transition-opacity duration-500 ${showPlaceholder ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         >
-          {/* Atmospheric pattern overlay */}
-          <div className="absolute inset-0 opacity-20"
-               style={{
-                 backgroundImage: `radial-gradient(circle at 50% 50%, rgba(125, 211, 252, 0.1) 0%, transparent 50%)`,
-               }}
-          />
-          
-          {/* Location name when no image */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center px-4">
-              {isLoading ? (
-                <div className="flex items-center gap-2 text-terminal-dim">
-                  <span className="animate-pulse">◈</span>
-                  <span className="font-display text-sm tracking-wider">Loading scene...</span>
-                </div>
-              ) : (
-                <>
-                  <p className="font-display text-2xl text-terminal-accent mb-2 tracking-wide">
-                    {formatLocationName(currentLocation || 'Unknown Location')}
-                  </p>
-                  <p className="text-terminal-dim text-sm italic">
-                    No scene image available
-                  </p>
-                </>
-              )}
-            </div>
+          <div className="text-center px-4">
+            {isLoading ? (
+              <div className="flex items-center gap-2 text-terminal-dim">
+                <span className="animate-pulse">◈</span>
+                <span className="font-display text-sm tracking-wider">Loading scene...</span>
+              </div>
+            ) : !imageUrl && (
+              <>
+                <p className="font-display text-2xl text-terminal-accent mb-2 tracking-wide">
+                  {formatLocationName(currentLocation || 'Unknown Location')}
+                </p>
+                <p className="text-terminal-dim text-sm italic">
+                  No scene image available
+                </p>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Actual scene image */}
+        {/* Main scene image - crisp, centered with object-contain */}
         {imageUrl && (
           <img
             src={imageUrl}
             alt={`Scene: ${currentLocation || 'Unknown'}`}
-            className={`w-full h-full object-cover transition-opacity duration-700
+            className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-700 z-10
                        ${showPlaceholder ? 'opacity-0' : 'opacity-100'}`}
           />
         )}
 
-        {/* Gradient overlay for text legibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-terminal-bg/80 via-transparent to-transparent pointer-events-none" />
+        {/* Cinematic vignette - subtle for in-game view */}
+        <div 
+          className="absolute inset-0 pointer-events-none z-20"
+          style={{
+            boxShadow: 'inset 0 0 50px 15px rgba(0, 0, 0, 0.35)',
+          }}
+        />
+        
+        {/* Gradient overlay for text legibility - bottom area */}
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none z-20" />
 
-        {/* Location name overlay - bottom left */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
-          <h2 className="font-display text-xl text-terminal-accent drop-shadow-lg tracking-wide">
+        {/* Location name overlay - bottom left with cinematic treatment */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none z-30">
+          <h2 className="font-display text-xl text-terminal-accent drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] tracking-wide">
             {formatLocationName(currentLocation || 'Unknown Location')}
           </h2>
         </div>
 
         {/* Expand hint - shows on hover */}
         <div className="absolute top-3 right-3 text-terminal-dim/0 group-hover:text-terminal-dim/70 
-                        text-xs transition-all duration-300 pointer-events-none">
+                        text-xs transition-all duration-300 pointer-events-none z-30">
           Click to expand
         </div>
 
-        {/* Vignette effect for atmosphere */}
-        <div 
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            boxShadow: 'inset 0 0 80px rgba(0, 0, 0, 0.5)',
-          }}
-        />
-
         {/* Bottom right overlay badges - State and Inventory */}
-        <div className="absolute bottom-3 right-3 z-10 flex items-end gap-2">
+        <div className="absolute bottom-3 right-3 z-40 flex items-end gap-2">
           {/* State Button - 36x36px square */}
           {onStateClick && (
             <button
@@ -201,36 +218,69 @@ export default function SceneImage({ worldId = 'cursed-manor', onStateClick }: S
         </div>
       </div>
 
-      {/* Fullscreen overlay for zoom viewing */}
+      {/* Fullscreen overlay for zoom viewing - with Ambilight effect */}
       {isFullscreen && (
         <div 
-          className="fixed inset-0 z-50 bg-terminal-bg/95 backdrop-blur-sm 
-                     flex items-center justify-center p-8 cursor-pointer"
+          className="fixed inset-0 z-50 bg-terminal-bg flex items-center justify-center cursor-pointer overflow-hidden"
           onClick={() => setIsFullscreen(false)}
         >
-          <div className="relative max-w-6xl max-h-[90vh] w-full h-full rounded-lg overflow-hidden border border-terminal-border">
+          {/* Ambilight background - blurred image fills the screen */}
+          {imageUrl && (
+            <div className="absolute inset-0">
+              <img
+                src={imageUrl}
+                alt=""
+                aria-hidden="true"
+                className="absolute w-[150%] h-[150%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+                           object-cover blur-[80px] saturate-[1.4] opacity-50"
+              />
+              {/* Darken edges for depth and focus on center */}
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: `radial-gradient(ellipse 70% 60% at 50% 50%, 
+                    transparent 20%, 
+                    rgba(10, 10, 15, 0.6) 60%,
+                    rgba(10, 10, 15, 0.9) 100%)`
+                }}
+              />
+            </div>
+          )}
+          
+          <div className="relative max-w-7xl max-h-[95vh] w-full h-full flex items-center justify-center p-4 z-10">
             {imageUrl ? (
               <img
                 src={imageUrl}
                 alt={`Scene: ${currentLocation || 'Unknown'}`}
-                className="w-full h-full object-contain"
+                className="max-w-full max-h-full object-contain rounded-sm"
+                style={{
+                  boxShadow: '0 0 80px rgba(0, 0, 0, 0.6), 0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+                }}
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-terminal-surface">
-                <p className="font-display text-2xl text-terminal-accent">
+              <div className="w-full h-full flex items-center justify-center">
+                <p className="font-display text-3xl text-terminal-accent">
                   {formatLocationName(currentLocation || 'Unknown')}
                 </p>
               </div>
             )}
             
-            {/* Close hint */}
-            <div className="absolute top-4 right-4 text-terminal-dim text-sm">
-              Click anywhere to close
+            {/* Subtle vignette for extra depth */}
+            <div 
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                boxShadow: 'inset 0 0 150px 50px rgba(0, 0, 0, 0.4)',
+              }}
+            />
+            
+            {/* Close hint - top right */}
+            <div className="absolute top-6 right-6 text-terminal-dim/60 text-sm tracking-wide">
+              Press anywhere to close
             </div>
             
-            {/* Location info */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-terminal-bg to-transparent">
-              <h2 className="font-display text-3xl text-terminal-accent tracking-wide">
+            {/* Location info - centered bottom */}
+            <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/60 to-transparent">
+              <h2 className="font-display text-3xl text-terminal-accent text-center tracking-wide drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
                 {formatLocationName(currentLocation || 'Unknown')}
               </h2>
             </div>
