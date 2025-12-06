@@ -35,8 +35,8 @@ function App() {
           </nav>
         </header>
         
-        {/* World Builder content */}
-        <div className="flex-1 overflow-hidden">
+        {/* World Builder content - scrollable */}
+        <div className="flex-1 overflow-y-auto">
           <WorldBuilder />
         </div>
       </div>
@@ -110,27 +110,31 @@ function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void 
         </nav>
       </header>
       
-      {/* Main game area - 2/3 image + 1/3 text on large screens, stacked on mobile */}
+      {/* Main game area */}
       <main className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0 w-full overflow-hidden">
-        {/* Left: Scene image (takes 2/3 width on large screens) */}
-        <div className="lg:w-2/3 lg:h-full shrink-0 lg:shrink">
-          <SceneImage worldId={worldId || 'cursed-manor'} />
-        </div>
+        {/* Scene image - only show when in game */}
+        {sessionId && (
+          <div className="lg:w-2/3 lg:h-full shrink-0 lg:shrink">
+            <SceneImage worldId={worldId || 'cursed-manor'} />
+          </div>
+        )}
         
-        {/* Right: Terminal + Debug + Input (takes 1/3 on large screens) */}
-        <div className="flex-1 lg:w-1/3 flex flex-col min-h-0 gap-2 overflow-hidden">
+        {/* Terminal + Debug + Input */}
+        <div className={`flex-1 flex flex-col min-h-0 gap-2 overflow-hidden ${sessionId ? 'lg:w-1/3' : 'w-full'}`}>
           {/* Terminal - scrollable */}
           <div className="flex-1 min-h-0 overflow-hidden">
             <Terminal />
           </div>
           
-          {/* Debug Panel - collapsible */}
-          <DebugPanel />
+          {/* Debug Panel - only in game */}
+          {sessionId && <DebugPanel />}
           
-          {/* Command input - fixed at bottom */}
-          <div className="flex-shrink-0">
-            <CommandInput />
-          </div>
+          {/* Command input - only in game */}
+          {sessionId && (
+            <div className="flex-shrink-0">
+              <CommandInput />
+            </div>
+          )}
         </div>
       </main>
     </div>
