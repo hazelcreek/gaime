@@ -248,3 +248,4 @@ function getTrustColor(trust: number): string {
   if (trust >= -50) return 'bg-terminal-warning';
   return 'bg-terminal-error';
 }
+

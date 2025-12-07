@@ -153,3 +153,4 @@ function CollapsibleSection({ title, isExpanded, onToggle, badge, children }: Co
     </div>
   );
 }
+
