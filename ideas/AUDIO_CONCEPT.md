@@ -23,6 +23,21 @@ This document outlines a comprehensive approach to adding music and sound effect
    - [Royalty-Free Sources](#royalty-free-sources)
 6. [Implementation Roadmap](#implementation-roadmap)
 7. [File Organization](#file-organization)
+8. [Text-to-SFX Prompt Generation](#text-to-sfx-prompt-generation)
+   - [Prompt Anatomy](#prompt-anatomy)
+   - [Deriving Prompts from World YAML](#deriving-prompts-from-world-yaml)
+   - [Automated Prompt Generation System](#automated-prompt-generation-system)
+   - [Prompt Quality Guidelines](#prompt-quality-guidelines)
+9. [Music Creative Brief Generation](#music-creative-brief-generation)
+   - [Creative Brief Structure](#creative-brief-structure)
+   - [Automatic Brief Generation from World YAML](#automatic-brief-generation-from-world-yaml)
+   - [Example Generated Brief](#example-generated-brief-cursed-manor)
+10. [Seamless Looping: Deep Dive](#seamless-looping-deep-dive)
+    - [What Makes a Loop Seamless](#what-makes-a-loop-seamless)
+    - [Method 1: Crossfade Looping](#method-1-crossfade-looping-easiest)
+    - [Method 2: Musical Composition for Looping](#method-2-musical-composition-for-looping-best-quality)
+    - [Method 3: Zero-Crossing Editing](#method-3-zero-crossing-editing-for-sound-effects)
+    - [Export Settings for Looping Audio](#export-settings-for-looping-audio)
 
 ---
 
@@ -994,6 +1009,1032 @@ Place a music file at:
 ```
 frontend/public/audio/menu-theme.mp3
 ```
+
+---
+
+## Text-to-SFX Prompt Generation
+
+Modern AI sound effect generators like ElevenLabs Sound Effects, Stable Audio, and AudioGen can create realistic sounds from text descriptions. The key to quality output is **well-crafted prompts**. This section describes how to systematically generate prompts from GAIME world data.
+
+### Prompt Anatomy
+
+An effective text-to-SFX prompt contains several components:
+
+```
+[SOUND TYPE] + [MATERIAL/SOURCE] + [ACTION/STATE] + [ENVIRONMENT] + [QUALITIES] + [DURATION]
+```
+
+**Example:**
+> "Heavy wooden door creaking open slowly in a stone corridor, echoing, eerie, 3 seconds"
+
+| Component | Purpose | Examples |
+|-----------|---------|----------|
+| Sound Type | What category of sound | door, footsteps, ambient, impact |
+| Material/Source | Physical properties | wooden, metal, glass, fabric |
+| Action/State | What's happening | opening, crackling, dripping, humming |
+| Environment | Acoustic space | large hall, small room, outdoors, cave |
+| Qualities | Mood/character | eerie, gentle, harsh, distant |
+| Duration | Length needed | 2 seconds, 30-second loop |
+
+### Deriving Prompts from World YAML
+
+The world definition files contain rich descriptive text that can be parsed to generate SFX prompts.
+
+#### Source Data Mapping
+
+| YAML Source | Prompt Elements | Example Extraction |
+|-------------|-----------------|-------------------|
+| `world.theme` | Overall mood, era | "Victorian gothic" → "old, creaky, dusty" |
+| `world.tone` | Emotional qualities | "atmospheric, mysterious" → "eerie, unsettling" |
+| `location.atmosphere` | Environment, materials | "marble tiles, crystal chandelier" → materials |
+| `location.details` | Specific objects | "grandfather clock" → "clock ticking mechanism" |
+| `item.examine` | Object properties | "heavy iron key" → "metallic, weighty" |
+| `npc.appearance` | Character sounds | "translucent figure" → "ethereal, whisper-like" |
+| `interaction.narrative_hint` | Action sounds | "bookshelf swings open" → "mechanical click, wood sliding" |
+
+#### Prompt Generation Templates
+
+**For Location Ambience:**
+
+```
+Template: "[WEATHER/ATMOSPHERE] sounds in a [LOCATION TYPE] with [KEY FEATURES], 
+          [MOOD from world.tone], seamless 45-second loop"
+
+Example Input (from locations.yaml):
+  entrance_hall:
+    atmosphere: |
+      Rain hammers against the windows, and occasional lightning 
+      illuminates the decay. The air smells of old wood and dust.
+
+Generated Prompt:
+  "Heavy rain against old glass windows with distant thunder rumbles, 
+   inside a grand Victorian entrance hall with high ceilings, 
+   atmospheric and eerie, seamless 45-second loop"
+```
+
+**For Interaction Sounds:**
+
+```
+Template: "[OBJECT] [ACTION] in [ENVIRONMENT], [MATERIAL] texture, 
+          [MOOD], [DURATION] one-shot"
+
+Example Input (from locations.yaml):
+  interactions:
+    pull_red_book:
+      narrative_hint: "A mechanical click. A section of bookshelf swings inward"
+
+Generated Prompt:
+  "Old book being pulled from wooden shelf triggering hidden mechanism, 
+   followed by heavy bookcase section swinging open on rusty hinges, 
+   dusty library environment, suspenseful, 4-second one-shot"
+```
+
+**For Item Sounds:**
+
+```
+Template: "[ITEM MATERIAL] [ITEM TYPE] being [ACTION], [QUALITIES from examine], 
+          [DURATION]"
+
+Example Input (from items.yaml):
+  iron_key:
+    name: "Heavy Iron Key"
+    examine: "An old iron key, heavy and cold. The head is shaped like a serpent."
+
+Generated Prompts:
+  Take: "Heavy antique iron key picked up from stone surface, 
+         metallic clinking and jingling, 1.5 seconds"
+  Use:  "Old iron key inserted into rusty lock mechanism and turned with effort, 
+         satisfying mechanical click at end, 3 seconds"
+```
+
+**For NPC Sounds:**
+
+```
+Template: "[NPC TYPE] [ACTION/STATE], [APPEARANCE QUALITIES], 
+          [PERSONALITY TRAITS as audio qualities], [DURATION]"
+
+Example Input (from npcs.yaml):
+  ghost_child:
+    appearance: "A translucent figure of a young girl, perhaps eight years old.
+                 Her form flickers like candlelight."
+    personality:
+      traits: [innocent, helpful, sad]
+
+Generated Prompts:
+  Appear: "Ghostly child materializing with soft ethereal shimmer, 
+           gentle and melancholic, slight reverb, 2 seconds"
+  Ambient: "Faint child-like humming, distant and sad, 
+            with subtle otherworldly reverb, 8-second loop"
+```
+
+### Automated Prompt Generation System
+
+The World Builder could include an audio prompt generator that analyzes YAML files:
+
+```python
+# Conceptual implementation for backend/app/llm/audio_prompt_generator.py
+
+class AudioPromptGenerator:
+    """Generates text-to-SFX prompts from world definition data."""
+    
+    def __init__(self, world_data: WorldDefinition):
+        self.world = world_data
+        self.mood_keywords = self._extract_mood_keywords()
+    
+    def _extract_mood_keywords(self) -> list[str]:
+        """Extract mood words from theme and tone."""
+        # Parse world.theme and world.tone for audio-relevant adjectives
+        # "Victorian gothic horror" → ["old", "dark", "creaky", "dusty"]
+        # "atmospheric, mysterious" → ["eerie", "unsettling", "ambient"]
+        pass
+    
+    def generate_location_ambience_prompt(self, location_id: str) -> str:
+        """Generate ambient loop prompt for a location."""
+        location = self.world.locations[location_id]
+        
+        # Extract key elements from atmosphere text
+        elements = self._parse_atmosphere(location.atmosphere)
+        
+        prompt = f"{elements['weather']} sounds in a {elements['space_type']}"
+        prompt += f" with {elements['features']}"
+        prompt += f", {', '.join(self.mood_keywords[:2])}"
+        prompt += ", seamless 45-second loop"
+        
+        return prompt
+    
+    def generate_interaction_prompt(
+        self, 
+        location_id: str, 
+        interaction_id: str
+    ) -> str:
+        """Generate one-shot sound prompt for an interaction."""
+        interaction = self.world.locations[location_id].interactions[interaction_id]
+        
+        # Parse the narrative_hint for action verbs and objects
+        action_data = self._parse_narrative_hint(interaction.narrative_hint)
+        
+        prompt = f"{action_data['object']} {action_data['action']}"
+        prompt += f" in {self._get_location_type(location_id)}"
+        prompt += f", {action_data['material']} texture"
+        prompt += f", {self.mood_keywords[0]}, {action_data['duration']}"
+        
+        return prompt
+    
+    def generate_item_prompts(self, item_id: str) -> dict[str, str]:
+        """Generate prompts for item take/use/examine sounds."""
+        item = self.world.items[item_id]
+        
+        # Extract material and qualities from examine text
+        properties = self._parse_item_description(item.examine)
+        
+        return {
+            "take": f"{properties['material']} {item.name} picked up, "
+                   f"{properties['qualities']}, 1.5 seconds",
+            "use": f"{item.name} being used, {properties['use_sound_hint']}, "
+                   f"2-3 seconds",
+            "examine": f"Handling {properties['material']} object, "
+                      f"turning it over, subtle {properties['material']} sounds, "
+                      f"2 seconds"
+        }
+    
+    def generate_all_prompts(self) -> dict:
+        """Generate complete audio prompt manifest for the world."""
+        manifest = {
+            "world_id": self.world.id,
+            "ambience": {},
+            "interactions": {},
+            "items": {},
+            "npcs": {},
+            "random_sounds": []
+        }
+        
+        # Generate for all locations
+        for loc_id in self.world.locations:
+            manifest["ambience"][loc_id] = self.generate_location_ambience_prompt(loc_id)
+            
+            for int_id in self.world.locations[loc_id].interactions:
+                key = f"{loc_id}/{int_id}"
+                manifest["interactions"][key] = self.generate_interaction_prompt(loc_id, int_id)
+        
+        # Generate for all items
+        for item_id in self.world.items:
+            manifest["items"][item_id] = self.generate_item_prompts(item_id)
+        
+        # Generate random sound prompts based on theme
+        manifest["random_sounds"] = self._generate_thematic_random_sounds()
+        
+        return manifest
+```
+
+### Prompt Quality Guidelines
+
+#### Be Specific About Materials
+
+| Vague ❌ | Specific ✅ |
+|---------|------------|
+| "door sound" | "heavy oak door with iron hinges" |
+| "footsteps" | "leather boots on wet cobblestones" |
+| "key sound" | "large brass skeleton key in rusty lock" |
+
+#### Include Acoustic Environment
+
+| Missing Context ❌ | With Context ✅ |
+|-------------------|----------------|
+| "water dripping" | "water dripping in stone basement with echo" |
+| "fire crackling" | "fireplace crackling in large carpeted room, muffled" |
+| "clock ticking" | "grandfather clock ticking in silent hallway, resonant" |
+
+#### Specify Emotional Quality
+
+| Neutral ❌ | Emotionally Colored ✅ |
+|-----------|----------------------|
+| "wind blowing" | "mournful wind howling through broken windows" |
+| "piano notes" | "melancholic piano notes, slightly out of tune, ghostly" |
+| "child's voice" | "distant, ethereal child's whisper, sad and lonely" |
+
+### Example: Complete Prompt Set for Cursed Manor
+
+Generated from the `cursed-manor` world YAML files:
+
+```yaml
+# audio_prompts.yaml (generated output)
+
+world: cursed-manor
+mood_keywords: [eerie, gothic, Victorian, decayed, supernatural, melancholic]
+
+ambience:
+  entrance_hall: |
+    Heavy rain against tall grimy windows with distant thunder, 
+    inside a grand decayed Victorian entrance hall with marble floors 
+    and dusty chandelier, wind whistling through gaps, 
+    eerie and melancholic, seamless 60-second loop
+  
+  library: |
+    Gentle fire crackling in stone fireplace, old pages occasionally 
+    rustling in cold draft, distant wind outside, large room with 
+    tall bookshelves absorbing sound, contemplative and unsettling, 
+    seamless 45-second loop
+  
+  basement: |
+    Slow water dripping onto stone, faint scratching of rats in walls,
+    distant metallic groaning of old pipes, cold damp basement with 
+    echo, oppressive and claustrophobic, seamless 40-second loop
+  
+  ritual_chamber: |
+    Low ominous drone or hum, subtle otherworldly whispers at edge 
+    of hearing, candle flames flickering, ancient underground stone 
+    chamber, deeply unsettling and supernatural, seamless 50-second loop
+
+interactions:
+  library/pull_red_book: |
+    Old leather-bound book being pulled from wooden shelf, 
+    hidden mechanical click and grinding of stone mechanism, 
+    heavy bookcase section slowly swinging open on ancient hinges,
+    dusty library, suspenseful, 4-second one-shot
+  
+  sitting_room/play_piano: |
+    Ghostly piano playing melancholic Victorian melody by itself,
+    slightly out of tune, keys pressing without visible cause,
+    grand piano in dusty parlor, haunting and sad, 8-second clip
+  
+  master_bedroom/examine_mirror: |
+    Supernatural shimmer and distortion, brief ghostly whisper,
+    cold wind from nowhere, unsettling revelation sound,
+    2-second dramatic sting
+
+items:
+  iron_key:
+    take: |
+      Heavy antique iron key picked up from wooden surface,
+      cold metallic jingle, weighty and solid, 1.5 seconds
+    use: |
+      Large iron key inserted into old lock, rusty mechanism 
+      turning with resistance, satisfying heavy clunk as lock opens,
+      3 seconds
+  
+  candlestick:
+    take: |
+      Tarnished silver candlestick lifted from mantelpiece,
+      slight metallic scrape, cold hard surface, 1 second
+    use_with_matches: |
+      Match striking and flaring, candlewick catching flame,
+      gentle whoosh of fire taking hold, warm crackling, 2.5 seconds
+  
+  grimoire:
+    take: |
+      Ancient leather tome lifted from stone pedestal,
+      disturbing otherworldly whisper as it moves,
+      heavy book with crackling spine, 2 seconds
+    examine: |
+      Old parchment pages turning, dry crackle of ancient paper,
+      faint whispers emanating from text, 3 seconds
+
+npcs:
+  ghost_child:
+    appear: |
+      Ethereal materialization with soft shimmer and cold wind,
+      faint child's sigh, supernatural but gentle, 2 seconds
+    disappear: |
+      Ghostly figure fading with melancholic whisper,
+      sound of small footsteps retreating into nothing, 2 seconds
+    interact: |
+      Soft childlike whisper at edge of hearing, words unclear,
+      accompanied by slight temperature drop sound (subtle wind),
+      3 seconds
+  
+  butler_jenkins:
+    greet: |
+      Formal throat clearing, old man's tired sigh,
+      subtle creak of old joints, Victorian formality, 2 seconds
+    reveal_secret: |
+      Heavy emotional sigh, creaking as old man leans forward,
+      low dramatic undertone, 3 seconds
+
+random_sounds:
+  - prompt: |
+      Sudden crack of thunder, not too close, followed by 
+      rumbling echo, Victorian manor during storm, 4 seconds
+    suggested_name: thunder_rumble
+    frequency: occasional
+  
+  - prompt: |
+      Old wooden floorboards creaking under unseen weight,
+      as if someone invisible walking slowly,
+      old house settling but unsettling, 2 seconds
+    suggested_name: phantom_footsteps
+    frequency: rare
+  
+  - prompt: |
+      Clock striking single chime, deep resonant grandfather clock,
+      with metallic reverberations fading, 3 seconds
+    suggested_name: clock_chime
+    frequency: regular
+  
+  - prompt: |
+      Sudden cold wind gust from nowhere indoors,
+      papers or curtains rustling, supernatural presence hint,
+      2 seconds
+    suggested_name: supernatural_gust
+    frequency: rare
+```
+
+### Integration with Text-to-SFX APIs
+
+Once prompts are generated, they can be fed to AI sound generation APIs:
+
+```typescript
+// Conceptual frontend integration
+
+interface SFXGenerationRequest {
+  prompt: string;
+  duration_seconds: number;
+  output_format: 'mp3' | 'wav';
+}
+
+async function generateSoundEffect(prompt: string): Promise<Blob> {
+  // ElevenLabs Sound Effects API example
+  const response = await fetch('https://api.elevenlabs.io/v1/sound-generation', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${ELEVENLABS_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      text: prompt,
+      duration_seconds: 3,
+      prompt_influence: 0.5
+    })
+  });
+  
+  return response.blob();
+}
+
+// Batch generation from manifest
+async function generateAllSFX(manifest: AudioPromptManifest) {
+  for (const [id, prompt] of Object.entries(manifest.interactions)) {
+    const audio = await generateSoundEffect(prompt);
+    await saveAudioFile(audio, `effects/${id}.mp3`);
+  }
+}
+```
+
+---
+
+## Music Creative Brief Generation
+
+When using AI composers or human musicians, a well-structured **creative brief** ensures the delivered music matches the world's atmosphere. The World Builder can automatically generate these briefs from world data.
+
+### Creative Brief Structure
+
+A complete music creative brief should include:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    MUSIC CREATIVE BRIEF                      │
+├─────────────────────────────────────────────────────────────┤
+│  1. Project Overview                                         │
+│     - Game name, world name, target audience                │
+│                                                              │
+│  2. Emotional Journey                                        │
+│     - How should players FEEL throughout the game?          │
+│     - Key emotional beats and transitions                   │
+│                                                              │
+│  3. Musical Style & References                              │
+│     - Genre, era, instrumentation                           │
+│     - Reference tracks (existing music that evokes mood)    │
+│                                                              │
+│  4. Technical Requirements                                   │
+│     - Format, duration, loop points                         │
+│     - Stem breakdown (if applicable)                        │
+│                                                              │
+│  5. Location/State Variations                               │
+│     - How music should differ by area or game state         │
+│                                                              │
+│  6. Do's and Don'ts                                         │
+│     - Specific guidance on what to include/avoid            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Automatic Brief Generation from World YAML
+
+```python
+# Conceptual: backend/app/llm/music_brief_generator.py
+
+class MusicBriefGenerator:
+    """Generates music creative briefs from world definition."""
+    
+    # Mapping from theme keywords to musical suggestions
+    THEME_TO_MUSIC = {
+        "gothic": {
+            "genres": ["dark classical", "chamber music", "dark ambient"],
+            "instruments": ["piano", "strings", "choir", "pipe organ"],
+            "qualities": ["minor key", "slow tempo", "sparse", "reverberant"],
+            "references": ["Nox Arcana", "Midnight Syndicate", "Akira Yamaoka"]
+        },
+        "horror": {
+            "genres": ["dark ambient", "industrial", "tension underscore"],
+            "instruments": ["synthesizers", "prepared piano", "drones", "dissonant strings"],
+            "qualities": ["unsettling", "unpredictable", "building tension"],
+            "references": ["Silent Hill OST", "Resident Evil OST", "Amnesia OST"]
+        },
+        "victorian": {
+            "genres": ["romantic classical", "chamber music", "parlor music"],
+            "instruments": ["piano", "violin", "cello", "harpsichord"],
+            "qualities": ["elegant", "melancholic", "refined", "period-accurate"],
+            "references": ["Chopin Nocturnes", "Brahms", "Victorian parlor music"]
+        },
+        "sci-fi": {
+            "genres": ["synthwave", "electronic", "ambient"],
+            "instruments": ["synthesizers", "electronic drums", "bass"],
+            "qualities": ["futuristic", "cold", "mechanical", "spacious"],
+            "references": ["Blade Runner OST", "Deus Ex OST", "Mass Effect OST"]
+        },
+        "prison": {
+            "genres": ["industrial", "dark ambient", "minimal"],
+            "instruments": ["metallic percussion", "drones", "processed sounds"],
+            "qualities": ["oppressive", "cold", "claustrophobic", "rhythmic"],
+            "references": ["The Shawshank Redemption OST", "Escape from Butcher Bay OST"]
+        }
+    }
+    
+    def generate_brief(self, world: WorldDefinition) -> str:
+        """Generate complete creative brief as formatted text."""
+        
+        # Analyze world for musical direction
+        themes = self._extract_themes(world.theme)
+        musical_style = self._derive_musical_style(themes)
+        locations_analysis = self._analyze_locations(world.locations)
+        emotional_arc = self._map_emotional_journey(world)
+        
+        brief = self._format_brief(
+            world=world,
+            style=musical_style,
+            locations=locations_analysis,
+            emotions=emotional_arc
+        )
+        
+        return brief
+```
+
+### Example Generated Brief: Cursed Manor
+
+```markdown
+# MUSIC CREATIVE BRIEF
+## The Cursed Manor - GAIME Audio
+
+### Project Overview
+
+**Game**: GAIME (AI-Powered Text Adventure)
+**World**: The Cursed Manor
+**Genre**: Victorian Gothic Horror
+**Target Audience**: Players seeking atmospheric, narrative-driven horror experiences
+**Platform**: Web browser (audio will be streamed/downloaded)
+
+---
+
+### Emotional Journey
+
+The player progresses through distinct emotional phases:
+
+| Phase | Locations | Emotional State | Musical Approach |
+|-------|-----------|-----------------|------------------|
+| **1. Arrival** | Entrance Hall | Unease, curiosity | Subtle, ambient, establishing dread |
+| **2. Exploration** | Library, Dining Room, Kitchen | Growing tension, mystery | Building layers, melodic hints |
+| **3. Discovery** | Nursery, Master Bedroom | Sadness, horror | Emotional melody, dissonance |
+| **4. Confrontation** | Basement, Secret Passage | Fear, determination | Intense, driving undertones |
+| **5. Resolution** | Ritual Chamber | Climax, then release | Full arrangement → peaceful resolution |
+
+**Key Emotional Beats**:
+- First ghost encounter: sudden emotional weight, melancholy
+- Finding each artifact: sense of dark importance, ritual significance
+- Final ritual: cathartic crescendo, release of tension
+
+---
+
+### Musical Style & References
+
+**Primary Genre**: Dark Victorian Chamber Music meets Gothic Horror Ambient
+
+**Era/Period**: Late Victorian (1880s-1900s) with supernatural undertones
+
+**Instrumentation** (in order of prominence):
+1. **Piano** - Primary melodic instrument, slightly detuned for unease
+2. **String Quartet** - Tension, swells, emotional weight
+3. **Low Choir/Voices** - Supernatural moments, whispered textures
+4. **Music Box** - Childhood/nursery themes, innocence corrupted
+5. **Pipe Organ** - Ritual chamber, religious/occult grandeur
+6. **Subtle Electronics** - Modern production only, no synth leads
+
+**Tempo Range**: 50-80 BPM (slow, deliberate, never rushed)
+
+**Key**: Primarily minor keys (A minor, D minor), occasional Phrygian mode for ritual elements
+
+**Reference Tracks** (for mood, not imitation):
+- "Theme of Laura" - Silent Hill 2 (melancholic piano, emotional weight)
+- Nox Arcana - "Transylvania" album (Victorian gothic atmosphere)
+- "Bloodborne Main Theme" - opening restraint building to intensity
+- Chopin - Nocturne Op. 9 No. 2 (elegant sadness, Victorian piano style)
+- "Old Blood" - The Order 1886 OST (period-appropriate orchestration)
+
+---
+
+### Technical Requirements
+
+**Deliverables**:
+
+| Track | Duration | Format | Notes |
+|-------|----------|--------|-------|
+| Main Theme (Full Mix) | 3-4 minutes | Seamless loop | Must loop without audible gap |
+| Base Stem (Drone/Pad) | 3-4 minutes | Seamless loop | Always plays, foundation |
+| Tension Stem (Strings) | 3-4 minutes | Seamless loop | Fades in for danger/discovery |
+| Melody Stem (Piano) | 3-4 minutes | Seamless loop | Location-dependent intensity |
+| Accent Stem (Choir/Hits) | 3-4 minutes | Seamless loop | Triggered by events |
+
+**All stems must be**:
+- Exactly the same duration (to the sample)
+- Same BPM (locked to grid)
+- Same time signature (4/4 recommended)
+- Able to play together as full mix OR independently
+- Loop-ready (seamless at loop point)
+
+**File Format**: 
+- WAV 44.1kHz 24-bit (for editing)
+- MP3 192kbps + OGG Vorbis (for game delivery)
+
+**Loudness**: -14 LUFS integrated, peaks no higher than -1dB
+
+---
+
+### Location/State Variations
+
+The stems should be designed so different combinations evoke different spaces:
+
+| Location | Base | Tension | Melody | Accent | Mood |
+|----------|:----:|:-------:|:------:|:------:|------|
+| Entrance Hall | 100% | 20% | 30% | - | Unsettling first impression |
+| Library | 100% | 10% | 60% | - | Contemplative, mysterious |
+| Dining Room | 100% | 40% | 20% | - | Something watching |
+| Kitchen | 100% | 30% | 10% | - | Mundane but wrong |
+| Nursery | 100% | 20% | 80%* | - | Sad, music box variation |
+| Basement | 100% | 70% | 10% | - | Danger, oppressive |
+| Ritual Chamber | 100% | 50% | 40% | 60% | Supernatural climax |
+
+*Nursery could use music box sound replacing piano melody
+
+**State-Based Modulation**:
+- Ghost present: +30% Tension, +20% Accent
+- Holding artifact: +10% Accent (subtle power hum)
+- Low trust with Jenkins: +20% Tension
+- Near victory: Full crescendo build
+
+---
+
+### Stem Design Guidance
+
+**BASE STEM (Drone/Pad)**:
+- Low sustained strings or synth pad
+- Very slow movement, almost static
+- Root note focus (A2-A3 range)
+- Should feel like "the house breathing"
+- Subtle filtering/movement to prevent ear fatigue
+
+**TENSION STEM (Strings)**:
+- Tremolo strings, col legno, sul ponticello techniques
+- Dissonant intervals (minor 2nds, tritones)
+- Swells and retreats, never constant
+- Should raise heartrate when prominent
+- High register (A4-A6 range) for unease
+
+**MELODY STEM (Piano)**:
+- Victorian-style melodic fragments
+- Melancholic, Chopin-esque phrasing
+- Occasional "wrong notes" or hesitation
+- Should carry emotional narrative
+- Mid register (C3-C5 range)
+
+**ACCENT STEM (Choir/Hits)**:
+- Wordless choir "oohs" and "aahs"
+- Occasional orchestral hits (not overused)
+- Supernatural shimmer sounds
+- Should punctuate moments of significance
+- Very sparse - silence is powerful
+
+---
+
+### Do's and Don'ts
+
+**DO**:
+✅ Embrace silence and space - horror lives in anticipation
+✅ Use period-appropriate sounds (no modern synth leads)
+✅ Create emotional contrast (beauty amid horror)
+✅ Make the piano slightly imperfect (tuning, timing)
+✅ Reference the storm occasionally (low thunder rolls in base)
+✅ Build tension gradually, release rarely
+✅ Make loops genuinely seamless - players will hear them for hours
+
+**DON'T**:
+❌ Use jump-scare stingers (we're not a movie)
+❌ Make it constantly intense - players will tune out
+❌ Use recognizable samples or phrases
+❌ Include vocals with words (whispers only, unintelligible)
+❌ Add percussion/beats (no drums except in climax)
+❌ Over-produce - rawness adds to unease
+❌ Make stems that sound "incomplete" alone - each must work solo
+
+---
+
+### Additional Notes
+
+**For the Nursery**: Consider a separate music box motif that can replace or supplement the piano melody. A simple, innocent tune played by music box, slightly slowed/distorted, would powerfully evoke the children's tragedy.
+
+**For Victory**: After the climax in the ritual chamber, music should transition to a peaceful, major-key resolution. The storm passes, dawn breaks. The final 30 seconds should feel like relief and earned peace.
+
+**Silence**: Consider providing 30-60 seconds of near-silence with just the base drone for moments of pure exploration. Sometimes the absence of music is most effective.
+
+---
+
+### Delivery
+
+Please provide:
+1. Full mix (all stems combined) as single looping track
+2. Individual stems (4 files), same duration
+3. Session files (if possible) for future editing
+4. Brief notes on suggested loop point (though should be start=end)
+
+**Questions?** Contact [composer liaison] for clarification on any creative points.
+```
+
+### World Builder Integration
+
+The World Builder UI could include a "Generate Music Brief" button:
+
+```typescript
+// Conceptual API endpoint
+POST /api/builder/{world_id}/generate-music-brief
+
+Response:
+{
+  "brief_markdown": "# MUSIC CREATIVE BRIEF\n## The Cursed Manor...",
+  "brief_pdf_url": "/api/builder/cursed-manor/music-brief.pdf",
+  "key_attributes": {
+    "primary_genre": "Dark Victorian Chamber",
+    "tempo_range": "50-80 BPM",
+    "key_instruments": ["piano", "strings", "choir"],
+    "mood_keywords": ["melancholic", "eerie", "Victorian", "supernatural"],
+    "reference_tracks": [...]
+  }
+}
+```
+
+---
+
+## Seamless Looping: Deep Dive
+
+Seamless looping is **critical** for game audio. A noticeable gap, pop, or discontinuity breaks immersion and becomes annoying over extended play. This section explains the theory and practice of creating perfect loops.
+
+### What Makes a Loop Seamless?
+
+A seamless loop has **no audible discontinuity** when playback reaches the end and returns to the beginning. This requires:
+
+1. **Amplitude Continuity**: The volume at the end matches the volume at the start
+2. **Phase Continuity**: The waveform at the end connects smoothly to the waveform at the start
+3. **Harmonic Continuity**: The musical content (chords, melody) makes sense wrapping around
+4. **Reverb/Decay Continuity**: Tails of sounds don't get cut off or double up
+
+```
+Perfect Loop:
+                                                    
+   Start                                      End → Start
+     │                                             │
+     ▼                                             ▼
+    ╱╲    ╱╲    ╱╲    ╱╲    ╱╲    ╱╲    ╱╲    ╱╲ ─→╱╲    ╱╲
+   ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲   ╱  ╲  ╱  ╲
+  ╱    ╲╱    ╲╱    ╲╱    ╲╱    ╲╱    ╲╱    ╲╱    ╲─╱    ╲╱    ╲
+     │                                             │
+     └─────────────── Seamless Transition ─────────┘
+
+Bad Loop (amplitude discontinuity):
+                                                    
+     ╱╲    ╱╲    ╱╲    ╱╲    ╱╲    ╱╲    ╱╲  ╲     ╱╲
+    ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╲   ╱  ╲
+   ╱    ╲╱    ╲╱    ╲╱    ╲╱    ╲╱    ╲╱    ╲  ───╱    ╲
+                                             ▲
+                                        CLICK! (discontinuity)
+```
+
+### Loop Types
+
+| Loop Type | Description | Use Case |
+|-----------|-------------|----------|
+| **Hard Loop** | Audio simply repeats from start | Short ambient, SFX |
+| **Crossfade Loop** | End fades out while start fades in | Music, long ambient |
+| **Musical Loop** | Composed to resolve at start | Best for music |
+
+### Method 1: Crossfade Looping (Easiest)
+
+Crossfading overlaps the end and beginning, creating a smooth transition even if the original audio doesn't perfectly match.
+
+#### DAW Steps (General)
+
+1. **Import/Create your audio** (e.g., 60 seconds of ambience)
+
+2. **Determine overlap region** (typically 2-5 seconds)
+   ```
+   |◄──────────── Original Audio (60 sec) ────────────►|
+   |◄─── Keep (55 sec) ────►|◄── Overlap (5 sec) ───►|
+   ```
+
+3. **Duplicate and position**
+   ```
+   Track 1: |████████████████████████████████████░░░░░| (fade out)
+   Track 2: |░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█████| (fade in, copied from start)
+   
+   Timeline: |─────────────────────────────────────────|
+             0                                        60 sec
+   ```
+
+4. **Apply fades**
+   - Track 1: Linear or exponential fade OUT over last 5 seconds
+   - Track 2: Linear or exponential fade IN over same 5 seconds
+   - Combined, the volume stays constant
+
+5. **Bounce/Export the combined region**
+   - Export only the region that will loop (55 seconds in this example)
+   - The "tail" from Track 1 and "head" from Track 2 are baked in
+
+#### Reaper Specific Steps
+
+```
+1. Import audio file onto track
+2. Split item at 55 seconds (shortcut: S)
+3. Select the last 5-second segment, copy (Ctrl+C)
+4. Create new track below
+5. Paste at project start (Ctrl+V)
+6. Select end segment on Track 1: right-click → Item Properties → Fade Out → 5000ms
+7. Select start segment on Track 2: right-click → Item Properties → Fade In → 5000ms
+8. Set time selection from 0 to 55 seconds
+9. File → Render → "Time selection" → Render
+```
+
+#### Ableton Live Specific Steps
+
+```
+1. Drop audio clip onto arrangement
+2. Enable "Loop" on the clip
+3. In Clip View, adjust Loop End to desired point
+4. Enable "Crossfade" in Warp settings
+5. Set crossfade length (2-5 seconds)
+6. Export: File → Export Audio/Video → select region
+```
+
+### Method 2: Musical Composition for Looping (Best Quality)
+
+For music, the ideal approach is composing with looping in mind from the start.
+
+#### Composition Guidelines
+
+1. **Choose a loop-friendly structure**
+   ```
+   |: Intro → A → B → A :| (returns to Intro)
+   
+   NOT:
+   Intro → A → B → C → Outro (nowhere to return)
+   ```
+
+2. **End on the same chord as the beginning**
+   ```
+   Measure 1 (Start): Am chord
+   Measure 64 (End):  Am chord (or leading tone → Am)
+   ```
+
+3. **Maintain rhythmic continuity**
+   ```
+   If the piece starts on beat 1 of a measure,
+   it should end on beat 4 of the previous measure.
+   
+   |1   2   3   4  |1   2   3   4  |  ...  |1   2   3   4  |1
+    ▲ Start                                              ▲ End returns here
+   ```
+
+4. **Handle reverb/delay tails**
+   - Either: Compose with reverb as part of the music (tails blend)
+   - Or: Leave 1-2 seconds of silence at start for tails to decay
+   - Or: Use sidechain to duck reverb before loop point
+
+#### Stem Synchronization
+
+When creating stems that must loop together:
+
+1. **Lock all stems to the same tempo grid**
+   - Set explicit BPM (e.g., 72.000 BPM, not 72.1)
+   - Ensure all MIDI/audio is quantized to grid
+
+2. **Use the same start and end points**
+   ```
+   All stems: Bar 1, Beat 1 → Bar 33, Beat 1
+   Duration: Exactly 32 bars
+   ```
+
+3. **Export all stems from the same session**
+   - Don't export stems from different projects
+   - Use batch export if available
+
+4. **Include count-in if needed**
+   - If music doesn't start immediately, include silent bars
+   - All stems must include the same silence
+
+### Method 3: Zero-Crossing Editing (For Sound Effects)
+
+For short sound effects or ambient textures, find "zero crossings" where the waveform crosses the center line.
+
+#### Theory
+
+```
+Waveform:
+                    Zero Crossings
+                          ↓
+     ╱╲      ╱╲      ╱╲──────── Good cut points
+    ╱  ╲    ╱  ╲    ╱  ╲
+───╱────╲──╱────╲──╱────╲──── Zero line
+   ╲    ╱  ╲    ╱  ╲    ╱
+    ╲  ╱    ╲  ╱    ╲  ╱
+     ╲╱      ╲╱      ╲╱
+
+Cutting at zero crossing = no click
+Cutting at peak = click/pop
+```
+
+#### DAW Steps
+
+1. **Zoom in very close** to waveform (sample level)
+2. **Find zero crossing near desired end point**
+3. **Find zero crossing near desired start point**
+4. **Ensure both crossings are going the same direction** (both ascending or both descending)
+5. **Trim to these exact points**
+
+Most DAWs have "Snap to Zero Crossing" options:
+- **Reaper**: Options → Snap/Grid → Snap to zero crossings
+- **Ableton**: Not built-in, zoom and edit manually
+- **Logic Pro**: Edit → Snap Regions to Zero Crossings
+- **Pro Tools**: Edit → Separate Region → At Zero Crossings
+
+### Export Settings for Looping Audio
+
+#### Recommended Export Settings
+
+| Setting | Value | Reason |
+|---------|-------|--------|
+| Format (working) | WAV | Lossless, preserves loop points |
+| Format (game) | MP3 + OGG | Browser compatibility |
+| Bit Depth | 24-bit (working), 16-bit (final) | Quality vs. size |
+| Sample Rate | 44.1 kHz | Web standard |
+| Dithering | ON when reducing bit depth | Prevents quantization noise |
+| Normalize | OFF | Preserve dynamics, normalize in mixer |
+| MP3 Bitrate | 192 kbps | Good quality/size balance |
+| MP3 Mode | CBR (Constant Bit Rate) | More predictable loop points |
+
+#### MP3 Looping Caveat
+
+⚠️ **MP3 files add silence at the start and end** due to encoder padding. This can cause gaps in loops.
+
+**Solutions**:
+1. Use OGG Vorbis instead (better loop support)
+2. Use WAV in Howler.js (larger files, perfect loops)
+3. Trim silence in post with tools like `mp3trim`
+4. Encode with `--nogap` flag in LAME encoder
+5. Use Howler.js sprites to define exact loop regions
+
+#### Howler.js Loop Configuration
+
+```typescript
+// Standard loop (may have MP3 gap)
+const music = new Howl({
+  src: ['music.mp3', 'music.ogg'],
+  loop: true
+});
+
+// Precise loop using sprite (recommended for MP3)
+const music = new Howl({
+  src: ['music.mp3'],
+  sprite: {
+    // [offset_ms, duration_ms, loop]
+    main: [50, 180000, true]  // Skip 50ms padding, 3 min duration
+  }
+});
+
+music.play('main');
+```
+
+### Testing Your Loops
+
+#### Manual Testing
+
+1. Export your loop
+2. Import into a fresh DAW project
+3. Duplicate the clip end-to-end: `[loop][loop][loop]`
+4. Play across the boundaries at high volume
+5. Listen for: clicks, pops, volume dips, musical awkwardness
+
+#### Automated Testing
+
+```python
+# Simple loop continuity test
+import numpy as np
+from scipy.io import wavfile
+
+def test_loop_continuity(wav_path, boundary_samples=100):
+    """Check if a WAV file loops seamlessly."""
+    rate, data = wavfile.read(wav_path)
+    
+    # Handle stereo
+    if len(data.shape) > 1:
+        data = data.mean(axis=1)
+    
+    # Get boundary regions
+    start = data[:boundary_samples]
+    end = data[-boundary_samples:]
+    
+    # Check amplitude match
+    start_rms = np.sqrt(np.mean(start**2))
+    end_rms = np.sqrt(np.mean(end**2))
+    amplitude_diff = abs(start_rms - end_rms) / max(start_rms, end_rms)
+    
+    # Check zero-crossing alignment
+    start_crosses_up = start[0] < 0 and start[1] >= 0
+    end_crosses_up = end[-2] < 0 and end[-1] >= 0
+    crossing_match = start_crosses_up == end_crosses_up
+    
+    return {
+        'amplitude_difference': f"{amplitude_diff:.2%}",
+        'amplitude_ok': amplitude_diff < 0.1,  # <10% difference
+        'zero_crossing_match': crossing_match,
+        'overall_ok': amplitude_diff < 0.1 and crossing_match
+    }
+```
+
+### Common Looping Problems & Solutions
+
+| Problem | Symptom | Solution |
+|---------|---------|----------|
+| **Click/pop** | Sharp transient at loop point | Edit at zero crossings; apply tiny fade |
+| **Volume dip** | Quiet moment at loop | Crossfade overlap; adjust fade curves |
+| **Volume spike** | Loud moment at loop | Reduce crossfade region; check for phase |
+| **Musical awkwardness** | Melody doesn't connect | Recompose ending; use transitional phrase |
+| **Reverb tail cut** | Abrupt end of echoes | Extend audio; pre-render reverb; crossfade |
+| **Rhythm break** | Beat doesn't continue | Align to bar boundaries; check tempo |
+| **MP3 gap** | Brief silence in loop | Use OGG; use sprite definitions; trim padding |
+
+### Looping Checklist
+
+Before delivering a looped audio file:
+
+- [ ] Played loop 10+ times continuously - no artifacts heard
+- [ ] Tested at high volume - subtle issues more audible
+- [ ] Checked visually in waveform editor for discontinuities
+- [ ] Verified file duration is exactly as intended
+- [ ] Tested in actual game context (Howler.js in browser)
+- [ ] Tested both MP3 and OGG versions
+- [ ] Loop works with game's audio engine crossfade (if applicable)
 
 ---
 
