@@ -5,6 +5,7 @@ import CommandInput from './components/CommandInput'
 import WorldBuilder from './components/WorldBuilder'
 import SceneImage from './components/SceneImage'
 import StateOverlay from './components/StateOverlay'
+import MainMenu from './components/MainMenu'
 
 function App() {
   const [view, setView] = useState<'game' | 'builder'>('game')
@@ -64,6 +65,43 @@ function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [stateOverlayOpen]);
+
+  // Show main menu when no active session
+  if (!sessionId) {
+    return (
+      <div className="h-screen bg-terminal-bg flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="flex-shrink-0 flex items-center justify-between px-4 py-2 border-b border-terminal-border/30 bg-terminal-bg/80 backdrop-blur-sm z-10">
+          <div className="flex items-center gap-4">
+            <h1 className="font-display text-lg text-terminal-accent tracking-wider">
+              GAIME
+            </h1>
+            <span className="text-terminal-dim text-xs hidden sm:inline">
+              AI-Powered Text Adventure
+            </span>
+          </div>
+          <nav className="flex items-center gap-3">
+            <button
+              onClick={() => setView('builder')}
+              className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-accent 
+                       border border-terminal-border/50 hover:border-terminal-accent/50 
+                       rounded transition-colors"
+            >
+              World Builder
+            </button>
+          </nav>
+        </header>
+        
+        {/* Main Menu */}
+        <main className="flex-1 min-h-0 overflow-hidden">
+          <MainMenu 
+            onStartGame={startNewGame}
+            isLoading={isLoading}
+          />
+        </main>
+      </div>
+    );
+  }
   
   return (
     <div className="h-screen bg-terminal-bg flex flex-col overflow-hidden">
@@ -73,7 +111,7 @@ function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void 
           <h1 className="font-display text-lg text-terminal-accent tracking-wider">
             GAIME
           </h1>
-          {sessionId && worldName && (
+          {worldName && (
             <>
               <span className="text-terminal-dim/50">|</span>
               <span className="text-terminal-text text-sm font-display tracking-wide">
@@ -81,72 +119,49 @@ function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void 
               </span>
             </>
           )}
-          {!sessionId && (
-            <span className="text-terminal-dim text-xs hidden sm:inline">
-              AI-Powered Text Adventure
-            </span>
-          )}
         </div>
         <nav className="flex items-center gap-3">
-          {sessionId && (
-            <>
-              <button
-                onClick={() => startNewGame(worldId ?? undefined, undefined, worldName ?? undefined)}
-                disabled={isLoading}
-                className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-accent 
-                         border border-terminal-border/50 hover:border-terminal-accent/50 
-                         rounded transition-colors disabled:opacity-50"
-              >
-                New Game
-              </button>
-              <button
-                onClick={resetGame}
-                className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-text 
-                         border border-terminal-border/50 hover:border-terminal-dim 
-                         rounded transition-colors"
-              >
-                ← Home
-              </button>
-            </>
-          )}
-          {!sessionId && (
-            <button
-              onClick={() => setView('builder')}
-              className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-accent 
-                       border border-terminal-border/50 hover:border-terminal-accent/50 
-                       rounded transition-colors"
-            >
-              World Builder
-            </button>
-          )}
+          <button
+            onClick={() => startNewGame(worldId ?? undefined, undefined, worldName ?? undefined)}
+            disabled={isLoading}
+            className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-accent 
+                     border border-terminal-border/50 hover:border-terminal-accent/50 
+                     rounded transition-colors disabled:opacity-50"
+          >
+            New Game
+          </button>
+          <button
+            onClick={resetGame}
+            className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-text 
+                     border border-terminal-border/50 hover:border-terminal-dim 
+                     rounded transition-colors"
+          >
+            ← Home
+          </button>
         </nav>
       </header>
       
       {/* Main game area */}
       <main className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0 w-full overflow-hidden">
-        {/* Scene image - only show when in game */}
-        {sessionId && (
-          <div className="lg:w-2/3 lg:h-full shrink-0 lg:shrink">
-            <SceneImage 
-              worldId={worldId || 'cursed-manor'} 
-              onStateClick={() => setStateOverlayOpen(true)}
-            />
-          </div>
-        )}
+        {/* Scene image */}
+        <div className="lg:w-2/3 lg:h-full shrink-0 lg:shrink">
+          <SceneImage 
+            worldId={worldId || 'cursed-manor'} 
+            onStateClick={() => setStateOverlayOpen(true)}
+          />
+        </div>
         
         {/* Terminal + Input */}
-        <div className={`flex-1 flex flex-col min-h-0 gap-2 overflow-hidden ${sessionId ? 'lg:w-1/3' : 'w-full'}`}>
+        <div className="flex-1 flex flex-col min-h-0 gap-2 overflow-hidden lg:w-1/3">
           {/* Terminal - scrollable */}
           <div className="flex-1 min-h-0 overflow-hidden">
             <Terminal />
           </div>
           
-          {/* Command input - only in game */}
-          {sessionId && (
-            <div className="flex-shrink-0">
-              <CommandInput />
-            </div>
-          )}
+          {/* Command input */}
+          <div className="flex-shrink-0">
+            <CommandInput />
+          </div>
         </div>
       </main>
 
