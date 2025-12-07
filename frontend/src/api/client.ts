@@ -268,6 +268,20 @@ class GameAPIClient {
     
     return response.json();
   }
+
+  /**
+   * Get list of available menu music tracks
+   */
+  async getMenuTracks(): Promise<{ tracks: string[] }> {
+    const response = await fetch(`${API_BASE}/audio/menu-tracks`);
+    
+    if (!response.ok) {
+      // Return empty list on error - audio is non-critical
+      return { tracks: [] };
+    }
+    
+    return response.json();
+  }
 }
 
 export const gameAPI = new GameAPIClient();

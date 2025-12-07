@@ -8,7 +8,7 @@ import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import game, builder
+from app.api import game, builder, audio
 
 # Configure logging to show INFO level and above
 logging.basicConfig(
@@ -38,6 +38,7 @@ app.add_middleware(
 # Include API routers
 app.include_router(game.router, prefix="/api/game", tags=["game"])
 app.include_router(builder.router, prefix="/api/builder", tags=["builder"])
+app.include_router(audio.router, prefix="/api", tags=["audio"])
 
 
 @app.get("/")

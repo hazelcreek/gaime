@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { GameProvider, useGame } from './hooks/useGame'
+import { useAudio } from './hooks/useAudio'
 import Terminal from './components/Terminal'
 import CommandInput from './components/CommandInput'
 import WorldBuilder from './components/WorldBuilder'
@@ -53,7 +54,17 @@ function App() {
 
 function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void }) {
   const { sessionId, resetGame, worldId, worldName, startNewGame, isLoading, gameState } = useGame();
+  const { isMuted, isReady, toggleMute, playMenuMusic, stopMenuMusic } = useAudio();
   const [stateOverlayOpen, setStateOverlayOpen] = useState(false);
+
+  // Play menu music when on main menu and audio is ready, stop when game starts
+  useEffect(() => {
+    if (!sessionId && isReady) {
+      playMenuMusic();
+    } else if (sessionId) {
+      stopMenuMusic();
+    }
+  }, [sessionId, isReady, playMenuMusic, stopMenuMusic]);
 
   // Close overlay on Escape key
   useEffect(() => {
@@ -81,6 +92,44 @@ function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void 
             </span>
           </div>
           <nav className="flex items-center gap-3">
+            <button
+              onClick={toggleMute}
+              className="p-1.5 text-terminal-dim hover:text-terminal-accent 
+                       transition-colors"
+              title={isMuted ? 'Unmute' : 'Mute'}
+            >
+              {isMuted ? (
+                <svg 
+                  width="18" 
+                  height="18" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="1.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                  <line x1="22" y1="9" x2="16" y2="15" />
+                  <line x1="16" y1="9" x2="22" y2="15" />
+                </svg>
+              ) : (
+                <svg 
+                  width="18" 
+                  height="18" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="1.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                </svg>
+              )}
+            </button>
             <button
               onClick={() => setView('builder')}
               className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-accent 
