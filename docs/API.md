@@ -20,6 +20,7 @@ http://localhost:8000/api
 | GET | `/game/debug/{session_id}` | Get debug info (flags, NPC visibility) |
 | GET | `/game/image/{session_id}` | Get current location image (state-aware) |
 | GET | `/game/image/{session_id}/{location_id}` | Get location image (state-aware) |
+| GET | `/audio/menu-tracks` | List available menu music tracks |
 | POST | `/builder/generate` | Generate world from prompt |
 | POST | `/builder/save/{world_id}` | Save generated world |
 | GET | `/builder/{world_id}/locations` | List world locations |
@@ -362,6 +363,32 @@ GET /api/game/image/{session_id}
 
 **Errors**
 - `404`: Session not found
+
+---
+
+## List Menu Tracks
+
+Get available menu music tracks. The backend scans `frontend/public/audio/menu/` for `.mp3` files.
+
+```
+GET /api/audio/menu-tracks
+```
+
+**Response**
+```json
+{
+  "tracks": [
+    "/audio/menu/dark-ambient.mp3",
+    "/audio/menu/theme-1.mp3"
+  ]
+}
+```
+
+The frontend randomly selects one track from this list for playback.
+
+**Adding New Tracks**
+
+Simply drop `.mp3` files into `frontend/public/audio/menu/` - they will be automatically discovered.
 
 ---
 

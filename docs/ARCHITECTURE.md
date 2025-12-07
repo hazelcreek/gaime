@@ -392,6 +392,86 @@ After each action, the engine checks if victory conditions are met. If so:
 - LLM calls are the bottleneck (~1-3s)
 - Frontend shows loading state during LLM calls
 
+## Audio System
+
+Audio playback uses [Howler.js](https://howlerjs.com/) in the frontend, with the backend providing track discovery.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         Audio System                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│   Backend                          Frontend                  │
+│   ┌──────────────────┐            ┌──────────────────────┐  │
+│   │  /api/audio/     │  ──────►   │    AudioManager      │  │
+│   │  menu-tracks     │  track     │    (Singleton)       │  │
+│   │                  │  list      │                      │  │
+│   │  Scans:          │            │  - Random selection  │  │
+│   │  public/audio/   │            │  - Mute state        │  │
+│   │  menu/*.mp3      │            │  - localStorage      │  │
+│   └──────────────────┘            └──────────┬───────────┘  │
+│                                              │               │
+│                                   ┌──────────▼───────────┐  │
+│                                   │      Howler.js       │  │
+│                                   │   (Audio Playback)   │  │
+│                                   └──────────────────────┘  │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Current Features
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Menu Music Playlist | Implemented | Random track selection from `audio/menu/` folder |
+| Auto-Discovery | Implemented | Backend scans folder for `.mp3` files |
+| Mute Toggle | Implemented | Button in header to mute/unmute |
+| Preference Persistence | Implemented | Mute state saved to localStorage |
+| Fade Transitions | Implemented | 1-second fade out when stopping music |
+
+### Key Components
+
+**Backend Endpoint** (`backend/app/api/audio.py`):
+- `GET /api/audio/menu-tracks` - Scans and returns available menu tracks
+- Auto-discovers `.mp3` files in `frontend/public/audio/menu/`
+
+**AudioManager** (`src/audio/AudioManager.ts`):
+- Singleton pattern for global audio state
+- Fetches track list from backend on init
+- Randomly selects track for playback
+- Persists user preferences to localStorage
+
+**useAudio Hook** (`src/hooks/useAudio.ts`):
+- React hook wrapping AudioManager
+- Handles async initialization
+- Provides declarative audio control to components
+
+### Audio Files
+
+Drop `.mp3` files into `frontend/public/audio/menu/` for automatic discovery:
+
+```
+frontend/public/audio/
+└── menu/
+    ├── theme-1.mp3
+    ├── dark-ambient.mp3
+    └── any-name.mp3    # Any .mp3 file will be discovered
+```
+
+A random track is selected each time the main menu loads.
+
+### Future Expansion
+
+The audio system is designed to expand with:
+- World-specific background music
+- Location-based ambient sounds
+- Sound effects for interactions
+- Dynamic music layers (stems)
+
+See `ideas/audio-concept.md` for the full audio roadmap.
+
 ## NPC System
 
 ### Dynamic NPC Locations

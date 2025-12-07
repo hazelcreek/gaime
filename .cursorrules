@@ -1,5 +1,10 @@
 # GAIME - AI Text Adventure Engine
 
+## Folder Guidance
+
+- **`/docs`** - Reference documentation. Consult these files proactively when working on related features.
+- **`/ideas`** - Personal brainstorming and notes. Do NOT use as reference or context unless the user explicitly asks to work with a specific file from this folder.
+
 ## Project Overview
 
 GAIME is an AI-powered text adventure game engine that combines classic text-based gameplay with modern LLM capabilities. The AI acts as a dynamic game master, generating rich narrative responses while maintaining game state consistency.

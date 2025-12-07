@@ -8,4 +8,3 @@ Usage:
 # This module exists to support running submodules as scripts
 # The actual CLI is in validator.py
 
-
