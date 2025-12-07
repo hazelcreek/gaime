@@ -16,10 +16,11 @@ declare global {
 class AudioManager {
   private menuMusic: Howl | null = null;
   private menuTracks: string[] = [];
-  private isMuted: boolean = false;
+  private isMuted: boolean = true;
   private initialized: boolean = false;
   private initPromise: Promise<void> | null = null;
   private isStopping: boolean = false;
+  private shouldStartOnUnmute: boolean = false;
 
   private constructor() {
     // Private constructor for singleton
@@ -51,12 +52,6 @@ class AudioManager {
   }
 
   private async doInit(): Promise<void> {
-    // Load mute preference from localStorage
-    const savedMuted = localStorage.getItem('audio_muted');
-    if (savedMuted !== null) {
-      this.isMuted = savedMuted === 'true';
-    }
-
     // Fetch available menu tracks from backend
     try {
       const response = await gameAPI.getMenuTracks();
@@ -105,6 +100,12 @@ class AudioManager {
     // Reset stopping flag if we're starting to play
     this.isStopping = false;
     
+    // If currently muted, defer playback until user unmutes to avoid clicks
+    if (this.isMuted) {
+      this.shouldStartOnUnmute = true;
+      return;
+    }
+
     // If already playing, don't interrupt
     if (this.menuMusic?.playing()) return;
     
@@ -112,7 +113,10 @@ class AudioManager {
     this.createMenuMusic();
     
     if (this.menuMusic) {
+      // Start from 0 and fade up to target for smooth start
+      this.menuMusic.volume(0);
       this.menuMusic.play();
+      this.fadeVolume(0.5, 200);
     }
   }
 
@@ -160,14 +164,54 @@ class AudioManager {
     this.isMuted = !this.isMuted;
     
     // Apply to menu music
-    if (this.menuMusic) {
-      this.menuMusic.volume(this.isMuted ? 0 : 0.5);
+    if (!this.isMuted) {
+      // Unmuting: ensure music is playing, even if previously deferred
+      if (!this.menuMusic) {
+        this.createMenuMusic();
+      }
+
+      if (this.menuMusic) {
+        this.shouldStartOnUnmute = false;
+        this.menuMusic.volume(0);
+        this.menuMusic.play();
+        this.fadeVolume(0.5, 200);
+      }
+    } else if (this.menuMusic) {
+      // Muting: fade down smoothly
+      this.fadeVolume(0, 150);
     }
 
-    // Persist preference
-    localStorage.setItem('audio_muted', this.isMuted.toString());
-
     return this.isMuted;
+  }
+
+  /**
+   * Smoothly adjust the current menu music volume. Falls back to an
+   * immediate set if fade is not applicable (e.g., not playing).
+   */
+  private fadeVolume(targetVolume: number, durationMs: number): void {
+    if (!this.menuMusic) return;
+
+    const howl = this.menuMusic;
+    const currentVolume = howl.volume();
+
+    // If already at target, ensure it is set exactly and exit
+    if (Math.abs(currentVolume - targetVolume) < 0.001) {
+      howl.volume(targetVolume);
+      return;
+    }
+
+    // If the track isn't playing, fade won't run—set immediately
+    if (!howl.playing()) {
+      howl.volume(targetVolume);
+      return;
+    }
+
+    try {
+      howl.fade(currentVolume, targetVolume, durationMs);
+    } catch (error) {
+      // If fade throws for any reason, fall back to direct set
+      howl.volume(targetVolume);
+    }
   }
 
   /**
