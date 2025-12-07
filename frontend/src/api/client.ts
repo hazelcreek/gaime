@@ -36,6 +36,8 @@ export interface GameState {
   flags: Record<string, boolean>;
   turn_count: number;
   narrative_memory: NarrativeMemory;
+  npc_trust: Record<string, number>;
+  status: string;
 }
 
 export interface LLMDebugInfo {

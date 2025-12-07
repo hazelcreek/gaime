@@ -3,7 +3,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { gameAPI, ImageGenerationResult, WorldImagesInfo, VariantInfo } from '../api/client';
+import { gameAPI } from '../api/client';
 
 interface GeneratedWorld {
   world_id: string;
@@ -70,11 +70,7 @@ export default function WorldBuilder() {
       const response = await gameAPI.listWorldImages(worldId);
       setWorldImages(response.images);
       
-      // Parse locations from the world (we'll need to fetch locations separately)
-      // For now, we'll extract from the images API
-      const locationIds = Object.keys(response.images);
-      
-      // Also try to get all locations by fetching the world data
+      // Fetch all locations from the world data
       await fetchLocations(worldId, response.images);
     } catch (err) {
       console.error('Failed to load world images:', err);
@@ -770,15 +766,6 @@ export default function WorldBuilder() {
           )}
         </div>
 
-        {/* Back to game link */}
-        <div className="mt-8 text-center">
-          <a
-            href="/"
-            className="text-terminal-dim hover:text-terminal-accent transition-colors"
-          >
-            ← Back to Game
-          </a>
-        </div>
       </div>
     </div>
   );

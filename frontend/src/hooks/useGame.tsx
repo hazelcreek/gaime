@@ -5,60 +5,55 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { gameAPI, GameState, ActionResponse, LLMDebugInfo } from '../api/client';
 
-interface NarrativeEntry {
+export interface NarrativeEntry {
   id: string;
   type: 'narrative' | 'player' | 'system' | 'error';
   content: string;
   timestamp: Date;
+  debugInfo?: LLMDebugInfo;
 }
 
 interface GameContextValue {
   // State
   sessionId: string | null;
   worldId: string | null;
+  worldName: string | null;
   gameState: GameState | null;
   narrative: NarrativeEntry[];
   isLoading: boolean;
   error: string | null;
-  debugMode: boolean;
-  lastDebugInfo: LLMDebugInfo | null;
   
   // Actions
-  startNewGame: (worldId?: string, playerName?: string) => Promise<void>;
+  startNewGame: (worldId?: string, playerName?: string, worldName?: string) => Promise<void>;
   sendAction: (action: string) => Promise<void>;
   clearError: () => void;
   resetGame: () => void;
-  setDebugMode: (enabled: boolean) => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
 
 const STORAGE_KEY = 'gaime_session';
-const DEBUG_MODE_KEY = 'gaime_debug_mode';
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [worldId, setWorldId] = useState<string | null>(null);
+  const [worldName, setWorldName] = useState<string | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [narrative, setNarrative] = useState<NarrativeEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [debugMode, setDebugModeState] = useState<boolean>(() => {
-    const stored = localStorage.getItem(DEBUG_MODE_KEY);
-    return stored === 'true';
-  });
-  const [lastDebugInfo, setLastDebugInfo] = useState<LLMDebugInfo | null>(null);
 
   // Generate unique ID for narrative entries
   const generateId = () => Math.random().toString(36).substring(2, 9);
 
-  // Add a narrative entry
-  const addNarrative = useCallback((type: NarrativeEntry['type'], content: string) => {
+  // Add a narrative entry with optional debug info
+  const addNarrative = useCallback((type: NarrativeEntry['type'], content: string, debugInfo?: LLMDebugInfo) => {
     setNarrative(prev => [...prev, {
       id: generateId(),
       type,
       content,
       timestamp: new Date(),
+      debugInfo,
     }]);
   }, []);
 
@@ -67,7 +62,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        const { sessionId: storedId, worldId: storedWorldId } = JSON.parse(stored);
+        const { sessionId: storedId, worldId: storedWorldId, worldName: storedWorldName } = JSON.parse(stored);
         if (storedId) {
           // Try to restore game state from backend
           setIsLoading(true);
@@ -77,6 +72,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
               setSessionId(storedId);
               if (storedWorldId) {
                 setWorldId(storedWorldId);
+              }
+              if (storedWorldName) {
+                setWorldName(storedWorldName);
               }
               setGameState(state);
               addNarrative('system', 'Game restored. Continue your adventure!');
@@ -98,20 +96,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   // Save session to localStorage
   useEffect(() => {
     if (sessionId) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ sessionId, worldId }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ sessionId, worldId, worldName }));
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
-  }, [sessionId, worldId]);
+  }, [sessionId, worldId, worldName]);
 
-  // Save debug mode preference
-  const setDebugMode = useCallback((enabled: boolean) => {
-    setDebugModeState(enabled);
-    localStorage.setItem(DEBUG_MODE_KEY, enabled ? 'true' : 'false');
-  }, []);
-
-  // Start a new game
-  const startNewGame = useCallback(async (selectedWorldId?: string, playerName?: string) => {
+  // Start a new game - always request debug info
+  const startNewGame = useCallback(async (selectedWorldId?: string, playerName?: string, selectedWorldName?: string) => {
     // Use provided worldId, or fall back to current world, or default to 'cursed-manor'
     const effectiveWorldId = selectedWorldId ?? worldId ?? 'cursed-manor';
     const effectivePlayerName = playerName ?? gameState?.player_name ?? 'Traveler';
@@ -119,20 +111,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     setError(null);
     setNarrative([]);
-    setLastDebugInfo(null);
     
     try {
-      const response = await gameAPI.newGame(effectiveWorldId, effectivePlayerName, debugMode);
+      // Always request debug info (debug: true)
+      const response = await gameAPI.newGame(effectiveWorldId, effectivePlayerName, true);
       setSessionId(response.session_id);
       setWorldId(effectiveWorldId);
+      setWorldName(selectedWorldName ?? null);
       setGameState(response.state);
-      addNarrative('narrative', response.narrative);
+      // Attach debug info to the narrative entry
+      addNarrative('narrative', response.narrative, response.llm_debug);
       addNarrative('system', 'Type your commands below. Try "look around" or "help" to get started.');
-      
-      // Store debug info if present
-      if (response.llm_debug) {
-        setLastDebugInfo(response.llm_debug);
-      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to start game';
       setError(message);
@@ -140,9 +129,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [addNarrative, worldId, gameState?.player_name, debugMode]);
+  }, [addNarrative, worldId, gameState?.player_name]);
 
-  // Send a player action
+  // Send a player action - always request debug info
   const sendAction = useCallback(async (action: string) => {
     if (!sessionId) {
       setError('No active game session');
@@ -155,14 +144,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
-      const response: ActionResponse = await gameAPI.sendAction(sessionId, action, debugMode);
+      // Always request debug info (debug: true)
+      const response: ActionResponse = await gameAPI.sendAction(sessionId, action, true);
       setGameState(response.state);
-      addNarrative('narrative', response.narrative);
-      
-      // Store debug info if present
-      if (response.llm_debug) {
-        setLastDebugInfo(response.llm_debug);
-      }
+      // Attach debug info to the narrative entry
+      addNarrative('narrative', response.narrative, response.llm_debug);
       
       // Show hints if any
       if (response.hints && response.hints.length > 0) {
@@ -177,7 +163,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId, addNarrative, debugMode]);
+  }, [sessionId, addNarrative]);
 
   // Clear error
   const clearError = useCallback(() => {
@@ -188,10 +174,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const resetGame = useCallback(() => {
     setSessionId(null);
     setWorldId(null);
+    setWorldName(null);
     setGameState(null);
     setNarrative([]);
     setError(null);
-    setLastDebugInfo(null);
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
@@ -199,17 +185,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     <GameContext.Provider value={{
       sessionId,
       worldId,
+      worldName,
       gameState,
       narrative,
       isLoading,
       error,
-      debugMode,
-      lastDebugInfo,
       startNewGame,
       sendAction,
       clearError,
       resetGame,
-      setDebugMode,
     }}>
       {children}
     </GameContext.Provider>

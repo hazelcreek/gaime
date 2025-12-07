@@ -55,7 +55,7 @@ class WorldLoader:
                             "id": world_path.name,
                             "name": data.get("name", world_path.name),
                             "theme": data.get("theme", ""),
-                            "description": data.get("premise", "")[:200] + "..." if len(data.get("premise", "")) > 200 else data.get("premise", "")
+                            "description": data.get("premise", "").strip()
                         })
                     except Exception:
                         pass

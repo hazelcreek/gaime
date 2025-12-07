@@ -59,8 +59,11 @@ export default function CommandInput() {
   }
 
   return (
-    <div className="mt-2 bg-terminal-surface border border-terminal-border rounded-lg p-3 flex items-center gap-2">
+    <div className="bg-terminal-surface border border-terminal-border rounded-lg p-3 flex items-center gap-2">
+      {/* Command prompt */}
       <span className="text-terminal-accent font-bold">›</span>
+      
+      {/* Input field */}
       <input
         ref={inputRef}
         type="text"
@@ -73,6 +76,8 @@ export default function CommandInput() {
         autoComplete="off"
         spellCheck="false"
       />
+      
+      {/* Send button */}
       <button
         onClick={handleSubmit}
         disabled={isLoading || !input.trim()}
@@ -84,4 +89,3 @@ export default function CommandInput() {
     </div>
   );
 }
-
