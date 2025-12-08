@@ -31,6 +31,11 @@ yarn-error.log*
 # Build outputs
 frontend/dist/
 *.tsbuildinfo
+site/
+docs_site/docs/
+docs_site/ideas/
+docs_site/project-readme.md
+docs_site/__pycache__/
 
 # IDE
 .idea/

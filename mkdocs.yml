@@ -26,7 +26,9 @@ theme:
 
 plugins:
   - search
-  - monorepo
+  - mkdocs-simple-hooks:
+      hooks:
+        on_pre_build: "docs_site.hooks:sync_docs"
 
 markdown_extensions:
   - admonition
@@ -48,7 +50,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Project Docs:
-      - Project README: root/README.md
+      - Project README: project-readme.md
       - Overview: docs/README.md
       - Architecture: docs/ARCHITECTURE.md
       - API Reference: docs/API.md
@@ -63,4 +65,3 @@ nav:
       - Multi-language Support: ideas/multi-language-support.md
       - Plan: ideas/plan.md
       - World Builder Agent Refactor: ideas/world-builder-agent-refactor.md
-
