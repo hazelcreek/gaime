@@ -97,6 +97,21 @@ class AudioManager {
   playMenuMusic(): void {
     if (this.menuTracks.length === 0) return;
     
+    // If we're in the middle of a fade-out, cancel it and restore music
+    if (this.isStopping && this.menuMusic) {
+      this.isStopping = false;
+      
+      if (!this.isMuted) {
+        // Fade back up to normal volume
+        this.fadeVolume(0.5, 200);
+      } else {
+        // If muted, keep playing at volume 0, ready for unmute
+        this.menuMusic.volume(0);
+        this.shouldStartOnUnmute = true;
+      }
+      return;
+    }
+    
     // Reset stopping flag if we're starting to play
     this.isStopping = false;
     
@@ -145,6 +160,10 @@ class AudioManager {
     
     // Use Howler's onfade event to stop cleanly after fade completes
     this.menuMusic.once('fade', () => {
+      // Only stop if we're still in stopping mode
+      // (playMenuMusic may have been called during the fade, cancelling the stop)
+      if (!this.isStopping) return;
+      
       if (this.menuMusic) {
         this.menuMusic.stop();
         // Restore volume for next play (if not muted)
