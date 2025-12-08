@@ -1,0 +1,66 @@
+site_name: GAIME
+site_description: AI-powered text adventure engine documentation
+site_url: https://hazelcreek.github.io/gaime
+repo_url: https://github.com/hazelcreek/gaime
+repo_name: hazelcreek/gaime
+docs_dir: docs_site
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - toc.integrate
+    - content.code.copy
+    - search.highlight
+    - search.suggest
+    - content.tabs.link
+  palette:
+    - scheme: default
+      primary: teal
+      accent: deep orange
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - monorepo
+
+markdown_extensions:
+  - admonition
+  - def_list
+  - footnotes
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.snippets:
+      base_path:
+        - docs_site
+        - ..
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+nav:
+  - Home: index.md
+  - Project Docs:
+      - Project README: root/README.md
+      - Overview: docs/README.md
+      - Architecture: docs/ARCHITECTURE.md
+      - API Reference: docs/API.md
+      - World Authoring: docs/WORLD_AUTHORING.md
+      - LLM Integration: docs/LLM_INTEGRATION.md
+  - Ideas:
+      - README: ideas/README.md
+      - Agentic Game Master Architecture: ideas/agentic-game-master-architecture.md
+      - Audio Concept: ideas/audio-concept.md
+      - Features: ideas/features.md
+      - Modular Prompt Architecture: ideas/modular-prompt-architecture.md
+      - Multi-language Support: ideas/multi-language-support.md
+      - Plan: ideas/plan.md
+      - World Builder Agent Refactor: ideas/world-builder-agent-refactor.md
+

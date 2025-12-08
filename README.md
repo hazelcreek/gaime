@@ -66,6 +66,16 @@ gaime/
 - [LLM Integration](docs/LLM_INTEGRATION.md) - AI prompts and provider setup
 - [API Reference](docs/API.md) - Backend endpoint documentation
 
+### Docs site (GitHub Pages)
+
+- Source: all Markdown in `docs/`, `ideas/`, and the repository `README.md`
+- Build: automated on pushes to `main` via `.github/workflows/docs.yml`
+- Preview locally:
+  ```bash
+  pip install -r requirements-docs.txt
+  mkdocs serve
+  ```
+
 ## Features
 
 - **AI Game Master**: LLM generates contextual narrative responses
