@@ -68,6 +68,8 @@ gaime/
 
 ### Docs site (GitHub Pages)
 
+**View the docs: [hazelcreek.github.io/gaime](https://hazelcreek.github.io/gaime)**
+
 - Source: all Markdown in `docs/`, `ideas/`, and the repository `README.md`
 - Build: automated on pushes to `main` via `.github/workflows/docs.yml`
 - Preview locally:
