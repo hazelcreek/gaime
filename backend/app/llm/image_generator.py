@@ -21,6 +21,7 @@ from typing import Optional
 from dataclasses import dataclass, field
 
 from dotenv import load_dotenv
+from app.llm.prompt_loader import get_loader
 
 load_dotenv()
 
@@ -249,25 +250,13 @@ def get_edit_prompt(
     
     npcs_text = "\n".join(npc_descriptions)
     
-    prompt = f"""Edit this image to add the following character(s) while preserving the scene exactly:
-
-Location: {location_name}
-Theme: {theme}
-Tone: {tone}
-
-Characters to add:
-{npcs_text}
-
-Critical Requirements:
-- PRESERVE the original scene's composition, lighting, colors, and atmosphere completely
-- PRESERVE all existing elements: architecture, furniture, objects, exits, and environmental details
-- ADD the character(s) naturally integrated into the existing scene
-- MATCH the artistic style, perspective, and rendering of the original image
-- Position the character(s) where they would naturally appear in this space
-- The character(s) should look like they belong in this scene, with appropriate lighting and shadows
-- Do NOT change any part of the background or environment
-- Do NOT add any new objects or elements besides the specified character(s)
-- Maintain the 16:9 widescreen composition"""
+    template = get_loader().get_prompt("image_generator", "edit_prompt_template.txt")
+    prompt = template.format(
+        location_name=location_name,
+        theme=theme,
+        tone=tone,
+        npcs_text=npcs_text
+    )
     
     return prompt
 
@@ -316,34 +305,19 @@ def get_image_prompt(
     
     interactive_section = ""
     if interactive_elements:
-        interactive_section = f"""
-
-Interactive Elements to Include:
-{chr(10).join(interactive_elements)}
-
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
-and any characters should be positioned authentically within the space."""
+        interactive_template = get_loader().get_prompt("image_generator", "interactive_elements_section.txt")
+        interactive_section = interactive_template.format(
+            interactive_elements="\n".join(interactive_elements)
+        )
     
-    prompt = f"""Create a dramatic, atmospheric scene illustration for a text adventure game.
-
-Location: {location_name}
-Theme: {theme}
-Tone: {tone}
-
-Scene Description:
-{atmosphere_clean}{interactive_section}
-
-Style Requirements:
-- Digital painting style with rich colors and dramatic lighting
-- Painterly, evocative atmosphere suitable for a text adventure game
-- First-person perspective as if the player is viewing the scene
-- Moody, immersive lighting that matches the tone
-- 16:9 widescreen composition
-- Detailed environment with depth and atmospheric effects
-- Natural integration of doorways, passages, and architectural features that suggest movement possibilities
-- Subtle visual storytelling through object placement and environmental details"""
+    image_template = get_loader().get_prompt("image_generator", "image_prompt_template.txt")
+    prompt = image_template.format(
+        location_name=location_name,
+        theme=theme,
+        tone=tone,
+        atmosphere=atmosphere_clean,
+        interactive_section=interactive_section
+    )
     
     return prompt
 
