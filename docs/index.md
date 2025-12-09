@@ -6,7 +6,7 @@ Welcome to the GAIME developer documentation. This guide will help you understan
 
 | File | Description |
 |------|-------------|
-| [README.md](README.md) | This index and documentation guide |
+| [VISION.md](VISION.md) | Product and technical vision (guides all development) |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System design, data flow, and key decisions |
 | [WORLD_AUTHORING.md](WORLD_AUTHORING.md) | How to create game worlds using YAML |
 | [LLM_INTEGRATION.md](LLM_INTEGRATION.md) | AI providers, prompts, and configuration |

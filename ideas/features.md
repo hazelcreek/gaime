@@ -1,18 +1,14 @@
-# GAIME Feature Ideas & Roadmap
+# GAIME Feature Ideas
 
-This document tracks potential features and enhancements for the GAIME text adventure engine.
+This document is the **feature backlog** - a collection of ideas and enhancements for GAIME.
 
-**Status Legend:**
-- `[ ]` Proposed - idea captured, not yet started
-- `[~]` In Progress - actively being developed
-- `[x]` Completed - implemented and merged
+> **Progress Tracking**: See [planning/roadmap.md](../planning/roadmap.md) for implementation status and priorities.
 
 ---
 
 ## Narrative & Immersion
 
 ### Player Character Backstory System
-`[ ]` **Proposed**
 
 The main character should have a rich background story defined during world building to increase immersion. This backstory can be:
 - Slowly revealed through NPC dialogues during gameplay
@@ -21,12 +17,10 @@ The main character should have a rich background story defined during world buil
 - Unlocked through interactive flashback sequences
 
 ### Environmental Storytelling
-`[ ]` **Proposed**
 
 Subtle details in location descriptions that reveal world history and lore when examined closely. Objects and environments tell stories without explicit exposition.
 
 ### Emotional State Tracking
-`[ ]` **Proposed**
 
 Track the player character's emotional state (fear, confidence, anger, etc.) which affects:
 - Narration style and tone
@@ -34,51 +28,78 @@ Track the player character's emotional state (fear, confidence, anger, etc.) whi
 - How NPCs perceive and react to the player
 
 ### Consequences & Ripple Effects
-`[ ]` **Proposed**
 
 Actions have delayed consequences that surface later in the game. Helping someone early might lead to unexpected aid later; being rude might close off opportunities.
 
 ### Multiple Endings / Branching Paths
-`[ ]` **Proposed**
 
 Different outcomes based on cumulative choices and actions throughout the game. Major decisions create meaningful divergence in the story.
 
 ### Narrative Recap on Resume
-`[ ]` **Proposed**
 
 "Previously on..." style summary when returning to a saved game, helping players remember context and recent events.
 
 ### Interactive Flashbacks
-`[ ]` **Proposed**
 
 Playable memory sequences tied to the player's backstory that unlock as the game progresses, revealing character history through gameplay.
+
+---
+
+## Puzzles & Challenges
+
+### Explicit Puzzle System
+
+First-class puzzle definitions in YAML with:
+- Clear conditions and solutions
+- Multi-step puzzle sequences
+- Dependency tracking between puzzles
+- Hint definitions at multiple levels
+
+### Puzzle Validation
+
+Developer tools to verify puzzle design:
+- Check that puzzles are solvable
+- Detect unreachable puzzle states
+- Verify hint availability
+- Validate puzzle dependencies
+
+### Exit & Location Puzzle Integration
+
+Enhanced exit/location mechanics for puzzle design:
+- Locked exits with specific unlock conditions
+- Conditional exit visibility (hidden until discovered)
+- Multi-step sequences to access areas
+- Exit state tracking (opened, locked, blocked)
+
+### Narrative Puzzle Weaving
+
+Integrate puzzles into storytelling:
+- LLM constraints to not reveal puzzle solutions
+- Contextual hints that feel natural in dialogue
+- Puzzle progress tracked in narrative memory
+- NPCs react to puzzle-solving attempts
 
 ---
 
 ## Audio & Visual
 
 ### Audio Narration
-`[ ]` **Proposed**
 
 Text-to-speech narration of game narrative, with configurable voice settings and the ability to toggle on/off.
 
 ### Background Music
-`[ ]` **Proposed**
 
 Ambient music that matches the current location's atmosphere and adapts to game events (tension during danger, calm during exploration).
 
 ### Sound Effects
-`[ ]` **Proposed**
 
 Audio feedback for actions, environmental sounds, and atmospheric effects to enhance immersion.
 
 ### Varied Storytelling Tone
-`[ ]` **Proposed**
 
 More variation in the tone of narration - serious, humorous, mysterious, etc. - configurable per world or adapting to game events.
 
 ### Visual Style Variation
-`[ ]` **Proposed**
 
 More variety in image generation styles - different art styles, color palettes, and visual treatments that can be configured per world or location.
 
@@ -87,7 +108,6 @@ More variety in image generation styles - different art styles, color palettes, 
 ## World State & Dynamics
 
 ### Extensive World State Management
-`[ ]` **Proposed**
 
 NPCs and environments respond to game events:
 - NPCs behave differently after certain actions or events
@@ -95,7 +115,6 @@ NPCs and environments respond to game events:
 - World state persists and evolves throughout gameplay
 
 ### Dynamic Time & Weather System
-`[ ]` **Proposed**
 
 Time of day and weather conditions that affect:
 - Atmosphere and location descriptions
@@ -103,7 +122,6 @@ Time of day and weather conditions that affect:
 - Available actions (weather affects outdoor activities)
 
 ### Ambient Events
-`[ ]` **Proposed**
 
 Periodic atmospheric descriptions and minor events that make the world feel alive without requiring player action.
 
@@ -112,7 +130,6 @@ Periodic atmospheric descriptions and minor events that make the world feel aliv
 ## NPCs & Dialogue
 
 ### Dialog Mode with NPCs
-`[ ]` **Proposed**
 
 A dedicated conversation mode where players can:
 - Type questions directly to NPCs
@@ -120,7 +137,6 @@ A dedicated conversation mode where players can:
 - Affect game progress through dialogue choices
 
 ### Smarter NPC Behavior
-`[ ]` **Proposed**
 
 NPCs with improved intelligence:
 - Behave appropriately based on whether they know the player character
@@ -129,7 +145,6 @@ NPCs with improved intelligence:
 - Have moods and attitudes that affect conversations
 
 ### Reputation & Relationship System
-`[ ]` **Proposed**
 
 Track how NPCs feel about the player based on interactions:
 - Affects dialogue options and NPC cooperation
@@ -141,7 +156,6 @@ Track how NPCs feel about the player based on interactions:
 ## Items & Discovery
 
 ### Sophisticated Item Discovery
-`[ ]` **Proposed**
 
 More varied ways to find items:
 - Some items are visible and obvious in room descriptions
@@ -150,7 +164,6 @@ More varied ways to find items:
 - Discovering items can involve multi-step processes
 
 ### Inventory Examination Depth
-`[ ]` **Proposed**
 
 Detailed examination of items reveals:
 - Additional information and lore
@@ -163,7 +176,6 @@ Detailed examination of items reveals:
 ## UI & Player Experience
 
 ### Player Journal / Notes
-`[ ]` **Proposed**
 
 Automatic or manual recording of:
 - Important discoveries and clues
@@ -172,7 +184,6 @@ Automatic or manual recording of:
 - Player notes and reminders
 
 ### Adaptive Hint System
-`[ ]` **Proposed**
 
 Contextual hints that appear if the player seems stuck:
 - Subtle enough to not break immersion
@@ -184,7 +195,6 @@ Contextual hints that appear if the player seems stuck:
 ## Developer Tools
 
 ### Debug Mode
-`[ ]` **Proposed**
 
 Comprehensive debugging capabilities for:
 - **Gameplay**: View game state, teleport, spawn items, trigger events
@@ -193,9 +203,9 @@ Comprehensive debugging capabilities for:
 
 ---
 
-## Future Considerations
+## Future Exploration
 
-Ideas that need more exploration before becoming concrete features:
+Ideas that need more research before becoming concrete features:
 
 - **Multiplayer / Shared Worlds** - Multiple players in the same world
 - **Modding Support** - Community-created worlds with easy sharing
@@ -208,5 +218,4 @@ Ideas that need more exploration before becoming concrete features:
 
 ---
 
-*Last updated: December 2024*
-
+*Last updated: December 2025*

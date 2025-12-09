@@ -47,21 +47,6 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
 
-nav:
-  - Home: index.md
-  - Repository README: project-readme.md
-  - Project Docs:
-      - README: docs/README.md
-      - Architecture: docs/ARCHITECTURE.md
-      - API Reference: docs/API.md
-      - World Authoring: docs/WORLD_AUTHORING.md
-      - LLM Integration: docs/LLM_INTEGRATION.md
-  - Ideas:
-      - README: ideas/README.md
-      - Agentic Game Master Architecture: ideas/agentic-game-master-architecture.md
-      - Audio Concept: ideas/audio-concept.md
-      - Features: ideas/features.md
-      - Modular Prompt Architecture: ideas/modular-prompt-architecture.md
-      - Multi-language Support: ideas/multi-language-support.md
-      - Plan: ideas/plan.md
-      - World Builder Agent Refactor: ideas/world-builder-agent-refactor.md
+# Navigation is auto-discovered from folder structure.
+# Files appear alphabetically; use index.md or number prefixes for ordering.
+# Add new .md files to docs/, planning/, or ideas/ and they'll appear automatically.

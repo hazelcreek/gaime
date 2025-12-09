@@ -10,10 +10,9 @@ Personal notes, feature concepts, and architectural explorations for GAIME. Thes
 
 | File | Description |
 |------|-------------|
-| [README.md](README.md) | Folder overview and index for ideas/brainstorming |
 | [agentic-game-master-architecture.md](agentic-game-master-architecture.md) | Feasibility analysis for refactoring the Game Master to a tool-invocation agentic architecture |
 | [audio-concept.md](audio-concept.md) | Comprehensive approach to music and sound effects—background music, stems, ambient soundscapes, action-triggered sounds |
-| [features.md](features.md) | Feature ideas & roadmap tracker with status legend |
+| [features.md](features.md) | Feature ideas backlog (see planning/roadmap.md for progress) |
 | [modular-prompt-architecture.md](modular-prompt-architecture.md) | Seven-layer prompt system (MPA) for stylistically coherent image asset generation |
 | [multi-language-support.md](multi-language-support.md) | Technical considerations for supporting multiple player languages (English/German) |
 | [plan.md](plan.md) | Original implementation plan and vision for the AI text adventure prototype |
