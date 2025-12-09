@@ -76,17 +76,23 @@ class PromptLoader:
             Prompt content as string
         """
         cache_key = f"{category}/{filename}"
+        path = self._get_prompt_path(category, filename)
         
-        # Check if we should reload (file changed or forced reload)
-        if reload or cache_key not in self._cache:
-            path = self._get_prompt_path(category, filename)
+        # Determine if we need to load/reload
+        needs_reload = reload or cache_key not in self._cache
+        
+        # Hot reload: check if file has been modified since last load
+        if not needs_reload and path.exists():
+            current_mtime = path.stat().st_mtime
+            cached_mtime = self._file_timestamps.get(cache_key, 0)
+            if current_mtime > cached_mtime:
+                needs_reload = True
+                logger.info(f"Hot reloading modified prompt: {cache_key}")
+        
+        if needs_reload:
             if path.exists():
-                current_mtime = path.stat().st_mtime
-                cached_mtime = self._file_timestamps.get(cache_key, 0)
-                
-                if reload or current_mtime > cached_mtime:
-                    logger.debug(f"Loading prompt: {cache_key}")
-                    self._cache[cache_key] = self._read_prompt_file(category, filename)
+                logger.debug(f"Loading prompt: {cache_key}")
+                self._cache[cache_key] = self._read_prompt_file(category, filename)
             elif cache_key in self._cache:
                 # File was deleted but we have cache - keep using cache but warn
                 logger.warning(f"Prompt file deleted but using cached version: {cache_key}")
