@@ -68,6 +68,66 @@ LiteLLM uses prefixed model strings:
 
 ## Prompt Architecture
 
+### Prompt Organization
+
+All prompts are stored as text files in `backend/app/llm/prompts/` and organized by component:
+
+```
+backend/app/llm/prompts/
+├── game_master/          # Game engine prompts
+│   ├── system_prompt.txt      # Main system prompt for game master
+│   └── opening_prompt.txt      # Prompt for generating opening narrative
+├── world_builder/        # World builder prompts
+│   ├── world_builder_prompt.txt  # Main prompt for world generation
+│   └── system_message.txt         # System message for world builder
+└── image_generator/      # Image generation prompts
+    ├── image_prompt_template.txt      # Template for scene image generation
+    ├── edit_prompt_template.txt       # Template for editing images (NPC variants)
+    └── interactive_elements_section.txt  # Template section for interactive elements
+```
+
+**Prompt Loading**: Prompts are loaded at server startup and cached in memory. The prompt loader supports hot reloading - if you edit a prompt file, it will be automatically reloaded on the next request (checks file modification time).
+
+**Usage in Code**: Prompts are accessed via the `prompt_loader` module:
+
+```python
+from app.llm.prompt_loader import get_loader
+
+# Get a prompt template
+system_prompt_template = get_loader().get_prompt("game_master", "system_prompt.txt")
+
+# Format with variables
+formatted_prompt = system_prompt_template.format(
+    world_name="My World",
+    theme="gothic horror",
+    # ... other variables
+)
+```
+
+**Hot Reloading**: For development, you can force reload prompts:
+
+```python
+from app.llm.prompt_loader import reload_prompts, reload_category
+
+# Reload all prompts
+reload_prompts()
+
+# Reload only game master prompts
+reload_category("game_master")
+```
+
+**Which Prompt is Used Where**:
+
+| Component | Prompt File | Used In | Purpose |
+|-----------|-------------|---------|---------|
+| Game Master | `system_prompt.txt` | `game_master.py` | Main system prompt for all game actions |
+| Game Master | `opening_prompt.txt` | `game_master.py` | Generates opening narrative for new games |
+| World Builder | `world_builder_prompt.txt` | `world_builder.py` | Generates world content from user description |
+| World Builder | `system_message.txt` | `world_builder.py` | System message for world builder LLM calls |
+| Image Generator | `image_prompt_template.txt` | `image_generator.py` | Generates scene images for locations |
+| Image Generator | `edit_prompt_template.txt` | `image_generator.py` | Edits base images to add NPCs (variants) |
+| Image Generator | `interactive_elements_section.txt` | `image_generator.py` | Section describing exits/items/NPCs in images |
+
 ### System Prompt Structure
 
 The game master system prompt includes:
@@ -79,17 +139,21 @@ The game master system prompt includes:
 5. **Scene Description Rules**: How to describe scenes, items, and exits narratively
 6. **Response Format**: Expected JSON structure
 
-```python
-SYSTEM_PROMPT = """You are the Game Master for a text adventure game.
+The system prompt is defined in `backend/app/llm/prompts/game_master/system_prompt.txt`. It includes:
 
-## World Context
-{world_context}
+```text
+You are the Game Master for a text adventure game called "{world_name}".
+
+## World Setting
+Theme: {theme}
+Tone: {tone}
+{starting_situation}
 
 ## Current Game State
-- Location: {current_location}
+- Location: {current_location} ({location_name})
 - Inventory: {inventory}
-- Discovered: {discovered}
-- Story Flags: {flags}
+- Discovered Areas: {discovered}
+- Story Progress: {flags}
 
 ## Narrative Memory (use this to maintain continuity)
 ### Recent Context
@@ -98,20 +162,13 @@ SYSTEM_PROMPT = """You are the Game Master for a text adventure game.
 ### NPC Relationships
 {npc_relationships}
 
-### Already Discovered (do NOT describe as new revelations)
+### Already Discovered (mention briefly, do NOT describe in detail again)
 {discoveries}
 
-## Your Role
-- Narrate the world in second person ("You see...")
-- Respond to player actions appropriately
-- Maintain consistency with world rules
-- Track state changes and memory updates
-
-## Constraints
-{constraints}
+[... full prompt content ...]
 
 ## Response Format
-Respond with JSON only:
+You MUST respond with valid JSON in this exact format:
 {{
   "narrative": "Your narrative text here...",
   "state_changes": {{
@@ -132,8 +189,9 @@ Respond with JSON only:
   }},
   "hints": []
 }}
-"""
 ```
+
+**Note**: The actual prompt file contains the full template. See `backend/app/llm/prompts/game_master/system_prompt.txt` for the complete content.
 
 ### User Prompt
 
@@ -359,33 +417,20 @@ This logs:
 
 ## World Builder Prompts
 
-The world builder uses a different prompt style with critical consistency rules:
+The world builder uses prompts defined in `backend/app/llm/prompts/world_builder/`:
 
-```python
-WORLD_BUILDER_PROMPT = """Generate a text adventure game world.
+- **`world_builder_prompt.txt`**: Main prompt template for generating world content
+- **`system_message.txt`**: System message sent to the LLM
 
-Theme: {theme}
-Description: {prompt}
-Number of locations: {num_locations}
-Number of NPCs: {num_npcs}
+The world builder prompt includes critical consistency rules:
 
-Generate complete YAML content for:
-1. world.yaml - Theme, premise, starting_situation, victory condition, constraints
-2. locations.yaml - All locations with connections and exit details
-3. npcs.yaml - Characters with personalities
-4. items.yaml - Key items with found_descriptions
-
-## CRITICAL CONSISTENCY RULES:
 1. Every exit MUST have narrative justification in details (e.g., details.north: "A door leads north")
 2. starting_situation MUST explain WHY the player can act NOW
 3. Every item MUST have a found_description for discoverability
 4. Include a victory condition with target location and optional flag/item
 5. Starting location must make narrative sense
 
-Ensure all references between files are consistent.
-Output valid YAML for each file.
-"""
-```
+See `backend/app/llm/prompts/world_builder/world_builder_prompt.txt` for the complete prompt template.
 
 The world builder validation also checks for:
 - Missing `found_description` on items (warning)
@@ -495,30 +540,25 @@ image_path = await generate_location_image(
 )
 ```
 
-### Image Prompt Template
+### Image Prompt Templates
 
-The prompt now includes interactive elements:
+Image generation prompts are defined in `backend/app/llm/prompts/image_generator/`:
 
-```python
-prompt = f"""Create a dramatic, atmospheric scene illustration for a text adventure game.
+- **`image_prompt_template.txt`**: Template for generating scene images
+- **`edit_prompt_template.txt`**: Template for editing images to add NPCs (variants)
+- **`interactive_elements_section.txt`**: Template section for describing exits/items/NPCs
+
+The image prompt includes interactive elements that are dynamically inserted:
+
+```text
+Create a dramatic, atmospheric scene illustration for a text adventure game.
 
 Location: {location_name}
 Theme: {theme}
 Tone: {tone}
 
 Scene Description:
-{atmosphere}
-
-Interactive Elements to Include:
-Visible pathways: doorway to the left; passage ahead; stairs descending, secured with lock
-Objects in the scene: Silver Key placed naturally within the scene
-Significant objects: Ancient Amulet that draws the eye with subtle presence
-Characters visible in the scene: A figure - Jenkins (Butler): An elderly man...
-
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
-and any characters should be positioned authentically within the space.
+{atmosphere}{interactive_section}
 
 Style Requirements:
 - Digital painting style with rich colors and dramatic lighting
@@ -529,8 +569,11 @@ Style Requirements:
 - Detailed environment with depth and atmospheric effects
 - Natural integration of doorways, passages, and architectural features
 - Subtle visual storytelling through object placement and environmental details
-"""
 ```
+
+The `{interactive_section}` is built from `interactive_elements_section.txt` and includes descriptions of exits, items, and NPCs present at the location.
+
+See the prompt files in `backend/app/llm/prompts/image_generator/` for complete templates.
 
 ### Best Practices
 
