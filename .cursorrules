@@ -127,6 +127,10 @@ When making code changes, **always check if documentation needs updating**:
 | New game mechanics (victory, etc.) | `docs/ARCHITECTURE.md`, `docs/WORLD_AUTHORING.md` |
 | World builder changes | `docs/LLM_INTEGRATION.md` |
 
+### Docs/Ideas index upkeep
+- Whenever adding, renaming, or removing files in `docs/`, update the table in `docs/README.md` to list the current files with brief descriptions.
+- Whenever adding, renaming, or removing files in `ideas/`, update the table in `ideas/README.md` similarly (keep descriptions concise).
+
 ### Key Documentation Locations
 
 **World Schema Fields** (when adding to world.yaml):

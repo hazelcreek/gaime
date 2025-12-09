@@ -49,9 +49,9 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Repository README: project-readme.md
   - Project Docs:
-      - Project README: project-readme.md
-      - Overview: docs/README.md
+      - README: docs/README.md
       - Architecture: docs/ARCHITECTURE.md
       - API Reference: docs/API.md
       - World Authoring: docs/WORLD_AUTHORING.md

@@ -2,14 +2,15 @@
 
 Welcome to the GAIME developer documentation. This guide will help you understand the system architecture, create game worlds, and extend the engine.
 
-## Quick Navigation
+## Docs Index
 
-| Document | Description |
-|----------|-------------|
-| [Architecture](ARCHITECTURE.md) | System design, data flow, and key decisions |
-| [World Authoring](WORLD_AUTHORING.md) | How to create game worlds using YAML |
-| [LLM Integration](LLM_INTEGRATION.md) | AI providers, prompts, and configuration |
-| [API Reference](API.md) | Backend endpoint documentation |
+| File | Description |
+|------|-------------|
+| [README.md](README.md) | This index and documentation guide |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System design, data flow, and key decisions |
+| [WORLD_AUTHORING.md](WORLD_AUTHORING.md) | How to create game worlds using YAML |
+| [LLM_INTEGRATION.md](LLM_INTEGRATION.md) | AI providers, prompts, and configuration |
+| [API.md](API.md) | Backend endpoint documentation |
 
 ## What is GAIME?
 
