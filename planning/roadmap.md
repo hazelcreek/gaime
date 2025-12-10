@@ -145,6 +145,12 @@ Story arc modeling with victory path protection.
 - [ ] Backstory reveals through NPC dialogue
 - [ ] Skills/abilities from backstory
 
+### Emotional State Tracking
+- [ ] Track player character's emotional state (fear, confidence, anger, etc.)
+- [ ] Emotional state affects narration style and tone
+- [ ] Emotional state affects available dialogue options
+- [ ] NPCs perceive and react to player's emotional state
+
 ### Consequences & Ripple Effects
 - [ ] Delayed consequence system
 - [ ] Action memory for callbacks
@@ -254,6 +260,7 @@ When ready:
 | Date | Change |
 |------|--------|
 | 2025-12-10 | Restructured roadmap around Vision document experience goals |
+| 2025-12-10 | Added Emotional State Tracking to Phase 4 (was missing after restructuring) |
 | 2025-12 | Initial roadmap created from features.md analysis |
 
 ---
