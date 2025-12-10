@@ -221,7 +221,7 @@ Quality of life and engagement features.
 - [ ] Hint toggle for hardcore mode
 
 ### Visual Enhancements
-- [ ] Per-world art style configuration
+- [x] Per-world art style configuration (MPA-based style presets)
 - [ ] More image generation variety
 - [ ] UI theme variations
 
@@ -242,16 +242,24 @@ See [ideas/features.md](../ideas/features.md) for full descriptions.
 
 ---
 
-## Deferred: Style System
+## Style System
 
-*Per Vision: Multi-sensory atmosphere (prose tone, visual direction, audio mood) is important but deferred to focus on gameplay first.*
+*Per Vision: Multi-sensory atmosphere (prose tone, visual direction, audio mood) is important for immersion.*
 
-When ready:
-- Prose tone configuration per world
-- Visual style hints per world
-- Audio mood per world
-- Age-appropriateness settings
-- Genre conventions
+### Visual Style (Implemented)
+- [x] Modular Prompt Architecture (MPA) for image generation
+- [x] 14 style presets (classic-fantasy, dark-fantasy, noir, cyberpunk, anime, watercolor, childrens-book, horror, steampunk, pixel-art, photorealistic, comic-book, simpsons, teen-comedy)
+- [x] Per-world style configuration in world.yaml
+- [x] Preset + override system for customization
+- [x] AI-authorable presets with documentation
+- [x] Anti-style system to prevent style drift
+- [x] NPC variant generation preserves style
+
+### Remaining Style Work
+- [ ] Prose tone configuration per world
+- [ ] Audio mood per world
+- [ ] Age-appropriateness content filters
+- [ ] Genre conventions for narrative
 
 ---
 
@@ -259,6 +267,7 @@ When ready:
 
 | Date | Change |
 |------|--------|
+| 2025-12-10 | Implemented Visual Style System with MPA architecture and 14 presets |
 | 2025-12-10 | Restructured roadmap around Vision document experience goals |
 | 2025-12-10 | Added Emotional State Tracking to Phase 4 (was missing after restructuring) |
 | 2025-12 | Initial roadmap created from features.md analysis |

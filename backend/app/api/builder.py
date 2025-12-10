@@ -195,7 +195,7 @@ async def generate_single_image(world_id: str, location_id: str, model: str | No
         
         if world_yaml.exists():
             with open(world_yaml) as f:
-                world_data = yaml.safe_load(f)
+                world_data = yaml.safe_load(f) or {}
                 theme = world_data.get("theme", theme)
                 tone = world_data.get("tone", tone)
                 style_config = world_data.get("style") or world_data.get("style_block")

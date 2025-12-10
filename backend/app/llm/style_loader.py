@@ -287,10 +287,12 @@ def build_mpa_prompt(
     # Format quality constraints as bullet list
     quality_text = "\n".join(f"- {item}" for item in style_block.quality_constraints)
     
-    # Build technical effects string
+    # Build technical effects string (only add if present, with leading space)
     effects_text = style_block.technical.effects
     if effects_text:
-        effects_text = f"Effects: {effects_text}"
+        effects_text = f" {effects_text}"
+    else:
+        effects_text = ""
     
     prompt = template.format(
         location_name=location_name,

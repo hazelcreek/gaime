@@ -944,7 +944,7 @@ async def generate_world_images(
     
     if world_yaml.exists():
         with open(world_yaml) as f:
-            world_data = yaml.safe_load(f)
+            world_data = yaml.safe_load(f) or {}
             theme = world_data.get("theme", theme)
             tone = world_data.get("tone", tone)
             # Load style configuration (can be preset name, dict with preset+overrides, or full style_block)
@@ -1063,7 +1063,7 @@ async def generate_location_variants(
     
     if world_yaml.exists():
         with open(world_yaml) as f:
-            world_data = yaml.safe_load(f)
+            world_data = yaml.safe_load(f) or {}
             theme = world_data.get("theme", theme)
             tone = world_data.get("tone", tone)
             style_config = world_data.get("style") or world_data.get("style_block")

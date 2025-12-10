@@ -13,7 +13,7 @@ Mood: The atmosphere is {mood_tone}. {mood_lighting}. The color palette features
 Artistic style (most important): {style}
 This style must be maintained consistently throughout the entire image.
 
-Composition: {technical_perspective} perspective, {technical_shot} from {technical_camera}. {technical_effects}
+Composition: {technical_perspective} perspective, {technical_shot} from {technical_camera}.{technical_effects}
 
 Critical constraints - the image must NOT include:
 {anti_styles}
