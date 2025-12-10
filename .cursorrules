@@ -3,8 +3,11 @@
 ## Folder Guidance
 
 - **`/docs`** - Reference documentation including VISION.md. Consult these files proactively when working on related features.
+- **`/docs/STYLE_AUTHORING.md`** - How to create visual style presets for image generation (MPA architecture).
 - **`/planning`** - Development roadmap and progress tracking. Consult proactively and update when implementing features.
 - **`/ideas`** - Personal brainstorming and notes. Do NOT use as reference or context unless the user explicitly asks to work with a specific file from this folder.
+- **`/backend/app/llm/prompts/image_generator/presets/`** - Visual style presets. See `README.md` in that folder for quick template when creating new presets.
+
 
 ## Project Overview
 

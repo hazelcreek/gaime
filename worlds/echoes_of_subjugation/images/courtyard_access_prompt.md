@@ -1,10 +1,9 @@
 # Image Prompt: Courtyard Airlock
 
 Create a dramatic, atmospheric scene illustration for a text adventure game.
+This is a high-resolution production asset in 16:9 widescreen format.
 
 Location: Courtyard Airlock
-Theme: Sci-Fi Dystopia
-Tone: Oppressive, Desperate, Synthetic
 
 Scene Description:
 A heavy blast door separates the interior from the exercise yard. A security kiosk sits behind reinforced glass. The scanner light blinks rhythmically red.
@@ -17,12 +16,29 @@ or labelled. They should reward careful observation - exits should look like rea
 architectural features, items should be placed where they would naturally be found, 
 and any characters should be positioned authentically within the space.
 
-Style Requirements:
-- Digital painting style with rich colors and dramatic lighting
-- Painterly, evocative atmosphere suitable for a text adventure game
-- First-person perspective as if the player is viewing the scene
-- Moody, immersive lighting that matches the tone
-- 16:9 widescreen composition
-- Detailed environment with depth and atmospheric effects
-- Natural integration of doorways, passages, and architectural features that suggest movement possibilities
-- Subtle visual storytelling through object placement and environmental details
+World Context: Sci-Fi Dystopia, Oppressive, Desperate, Synthetic
+
+Mood: The atmosphere is alienating, gritty, technologically oppressive, noir-influenced. neon glow cutting through darkness, holographic displays, harsh artificial light, reflections on wet surfaces. The color palette features dark base with vibrant neon accents - magenta, cyan, electric blue, toxic green against black and chrome.
+
+Artistic style (most important): Cinematic photorealism with cyberpunk aesthetic. High-quality rendering
+reminiscent of V-Ray or Unreal Engine cinematics. Detailed reflections on
+wet surfaces and chrome. Neon signs and holographic advertisements casting
+colored light. The visual quality should evoke high-budget sci-fi films.
+The artistic style is paramount.
+This style must be maintained consistently throughout the entire image.
+
+Composition: first-person perspective, medium wide shot from low angle emphasizing towering megastructures, or eye level for street scenes. Effects: rain, steam from grates, lens flare from neon, chromatic aberration
+
+Critical constraints - the image must NOT include:
+- cartoon or stylized
+- watercolor or painterly
+- vintage or retro (unless retro-futurism)
+- bright daylight
+- natural or organic settings
+- fantasy or medieval
+- clean and sterile
+- watermarks or signatures
+- blurry or low-quality artifacts
+- distorted proportions
+- dry surfaces (everything should have wet reflections)
+- cheerful or optimistic elements

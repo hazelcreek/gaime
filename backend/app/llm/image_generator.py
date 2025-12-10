@@ -22,6 +22,14 @@ from dataclasses import dataclass, field
 
 from dotenv import load_dotenv
 from app.llm.prompt_loader import get_loader
+from app.llm.style_loader import (
+    StyleBlock,
+    resolve_style,
+    build_mpa_prompt,
+    build_mpa_edit_prompt,
+    get_world_context,
+    DEFAULT_PRESET
+)
 
 load_dotenv()
 
@@ -213,7 +221,8 @@ def get_edit_prompt(
     location_name: str,
     npcs: list[NPCInfo],
     theme: str,
-    tone: str
+    tone: str,
+    style_block: Optional[StyleBlock] = None
 ) -> str:
     """
     Generate a prompt for adding NPCs to an existing image via image editing.
@@ -226,6 +235,7 @@ def get_edit_prompt(
         npcs: List of NPCInfo objects describing the NPCs to add
         theme: World theme (e.g., "Victorian gothic horror")
         tone: World tone (e.g., "atmospheric, mysterious")
+        style_block: Optional StyleBlock for MPA-based prompt generation
     
     Returns:
         An edit-style prompt for image modification
@@ -250,6 +260,19 @@ def get_edit_prompt(
     
     npcs_text = "\n".join(npc_descriptions)
     
+    # Use MPA edit template if style_block is provided
+    if style_block is not None:
+        # Get placement from first NPC (primary)
+        first_npc = npcs[0]
+        npc_placement = first_npc.placement or "positioned naturally in the scene"
+        
+        return build_mpa_edit_prompt(
+            npc_description=npcs_text,
+            npc_placement=npc_placement,
+            style_block=style_block
+        )
+    
+    # Fallback to legacy template
     template = get_loader().get_prompt("image_generator", "edit_prompt_template.txt")
     prompt = template.format(
         location_name=location_name,
@@ -266,7 +289,8 @@ def get_image_prompt(
     atmosphere: str,
     theme: str,
     tone: str,
-    context: Optional[LocationContext] = None
+    context: Optional[LocationContext] = None,
+    style_block: Optional[StyleBlock] = None
 ) -> str:
     """
     Generate a prompt for creating a scene image.
@@ -277,6 +301,7 @@ def get_image_prompt(
         theme: World theme (e.g., "Victorian gothic horror")
         tone: World tone (e.g., "atmospheric, mysterious")
         context: Optional LocationContext with exits, items, and NPCs
+        style_block: Optional StyleBlock for MPA-based prompt generation
     
     Returns:
         A detailed prompt for image generation
@@ -310,6 +335,18 @@ def get_image_prompt(
             interactive_elements="\n".join(interactive_elements)
         )
     
+    # Use MPA template if style_block is provided
+    if style_block is not None:
+        world_context = get_world_context(theme, tone)
+        return build_mpa_prompt(
+            location_name=location_name,
+            atmosphere=atmosphere_clean,
+            world_context=world_context,
+            style_block=style_block,
+            interactive_section=interactive_section
+        )
+    
+    # Fallback to legacy template
     image_template = get_loader().get_prompt("image_generator", "image_prompt_template.txt")
     prompt = image_template.format(
         location_name=location_name,
@@ -351,7 +388,8 @@ async def generate_location_image(
     tone: str,
     output_dir: Path,
     context: Optional[LocationContext] = None,
-    model_override: Optional[str] = None
+    model_override: Optional[str] = None,
+    style_block: Optional[StyleBlock] = None
 ) -> Optional[str]:
     """
     Generate an image for a single location using Gemini's native image generation.
@@ -368,6 +406,7 @@ async def generate_location_image(
         output_dir: Directory to save the generated image
         context: Optional LocationContext with exits, items, and NPCs for visual hints
         model_override: Optional model name to use instead of the default
+        style_block: Optional StyleBlock for MPA-based prompt generation
     
     Returns:
         Path to the generated image, or None if generation failed
@@ -394,9 +433,11 @@ async def generate_location_image(
     # Create client with API key
     client = genai.Client(api_key=api_key)
     
-    # Create the prompt with context
-    prompt = get_image_prompt(location_name, atmosphere, theme, tone, context)
+    # Create the prompt with context and optional style
+    prompt = get_image_prompt(location_name, atmosphere, theme, tone, context, style_block)
     logger.info(f"[ImageGen] Prompt created (length: {len(prompt)} chars)")
+    if style_block:
+        logger.info(f"[ImageGen] Using style: {style_block.name or 'custom'}")
     
     # Ensure output directory exists
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -899,12 +940,19 @@ async def generate_world_images(
     # Load world metadata
     theme = "fantasy"
     tone = "atmospheric"
+    style_config = None
     
     if world_yaml.exists():
         with open(world_yaml) as f:
             world_data = yaml.safe_load(f)
             theme = world_data.get("theme", theme)
             tone = world_data.get("tone", tone)
+            # Load style configuration (can be preset name, dict with preset+overrides, or full style_block)
+            style_config = world_data.get("style") or world_data.get("style_block")
+    
+    # Resolve style configuration into a StyleBlock
+    style_block = resolve_style(style_config)
+    print(f"Using style: {style_block.name or DEFAULT_PRESET}")
     
     # Load locations
     with open(locations_yaml) as f:
@@ -955,7 +1003,8 @@ async def generate_world_images(
                 theme=theme,
                 tone=tone,
                 output_dir=images_dir,
-                context=context
+                context=context,
+                style_block=style_block
             )
             results[loc_id] = image_path
         except ImageGenerationError as e:
@@ -1010,12 +1059,17 @@ async def generate_location_variants(
     # Load world metadata
     theme = "fantasy"
     tone = "atmospheric"
+    style_config = None
     
     if world_yaml.exists():
         with open(world_yaml) as f:
             world_data = yaml.safe_load(f)
             theme = world_data.get("theme", theme)
             tone = world_data.get("tone", tone)
+            style_config = world_data.get("style") or world_data.get("style_block")
+    
+    # Resolve style configuration
+    style_block = resolve_style(style_config)
     
     # Load all data
     with open(locations_yaml) as f:
@@ -1078,7 +1132,8 @@ async def generate_location_variants(
             tone=tone,
             output_dir=images_dir,
             context=base_context,
-            output_filename=base_filename
+            output_filename=base_filename,
+            style_block=style_block
         )
         print(f"    - Base image generated: {base_filename}")
     except Exception as e:
@@ -1121,7 +1176,8 @@ async def generate_location_variants(
                 context=base_context,  # Context is for reference, not used in edit mode
                 output_filename=variant_filename,
                 base_image_path=base_image_path,  # Pass the base image
-                npcs_to_add=[npc_to_add]  # Specify which NPC(s) to add
+                npcs_to_add=[npc_to_add],  # Specify which NPC(s) to add
+                style_block=style_block
             )
             
             manifest.variants.append({
@@ -1154,7 +1210,8 @@ async def _generate_variant_image(
     output_filename: str,
     model_override: Optional[str] = None,
     base_image_path: Optional[Path] = None,
-    npcs_to_add: Optional[list[NPCInfo]] = None
+    npcs_to_add: Optional[list[NPCInfo]] = None,
+    style_block: Optional[StyleBlock] = None
 ) -> str:
     """
     Internal function to generate a variant image with a specific filename.
@@ -1175,6 +1232,7 @@ async def _generate_variant_image(
         model_override: Optional model name to use instead of the default
         base_image_path: Optional path to base image for image editing mode
         npcs_to_add: Optional list of NPCs to add via image editing (used with base_image_path)
+        style_block: Optional StyleBlock for MPA-based prompt generation
     
     Returns:
         Path to the generated image
@@ -1204,7 +1262,7 @@ async def _generate_variant_image(
     # Build prompt and contents based on mode
     if is_edit_mode:
         # Image editing mode: use edit prompt and include base image
-        prompt = get_edit_prompt(location_name, npcs_to_add, theme, tone)
+        prompt = get_edit_prompt(location_name, npcs_to_add, theme, tone, style_block)
         
         # Read the base image and encode it
         with open(base_image_path, 'rb') as f:
@@ -1218,7 +1276,7 @@ async def _generate_variant_image(
         logger.info(f"[ImageGen] Using base image: {base_image_path}")
     else:
         # Full generation mode: use standard scene prompt
-        prompt = get_image_prompt(location_name, atmosphere, theme, tone, context)
+        prompt = get_image_prompt(location_name, atmosphere, theme, tone, context, style_block)
         contents = [prompt]
     
     output_dir.mkdir(parents=True, exist_ok=True)

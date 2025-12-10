@@ -1,0 +1,44 @@
+# comic-book.yaml - Comic Book/Graphic Novel style preset
+# Bold lines, dynamic composition, and saturated colors
+
+name: "Comic Book"
+description: "Bold graphic novel aesthetic with strong linework, dynamic compositions, and saturated colors. Action-packed visual storytelling."
+
+# L3: Mood
+mood:
+  tone: "dynamic, bold, dramatic, action-oriented"
+  lighting: "high contrast with bold shadows, dramatic highlights, cel-shaded quality"
+  color_palette: "saturated and bold colors, strong color blocking, limited but impactful palette"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Western comic book and graphic novel illustration style. Bold black
+  linework defining shapes and forms. Cel-shaded coloring with strong
+  color blocking. Dynamic compositions with dramatic angles. Influences
+  from both American superhero comics and European graphic novels.
+  The artistic style must be consistently comic book throughout.
+
+# L5: Technical
+technical:
+  perspective: "first-person or dynamic third-person"
+  shot: "varied - from establishing shots to dramatic close-ups"
+  camera: "dynamic angles, low angles for power, dutch angles for tension"
+  effects: "halftone dots optional, speed lines for motion, bold shadows"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic"
+  - "soft or subtle"
+  - "muted colors"
+  - "watercolor or painterly"
+  - "pixel art"
+  - "anime (unless specifically manga-influenced)"
+  - "realistic proportions"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "weak or inconsistent linework"
+  - "muddy colors"
+  - "flat or boring compositions"

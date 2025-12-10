@@ -1,0 +1,44 @@
+# pixel-art.yaml - Pixel Art style preset
+# Retro gaming aesthetic with visible pixels and limited palette
+
+name: "Pixel Art"
+description: "Retro gaming aesthetic with visible pixels, limited color palette, and nostalgic 16-bit charm. Perfect for classic RPG-style adventures."
+
+# L3: Mood
+mood:
+  tone: "nostalgic, adventurous, retro-gaming charm"
+  lighting: "simplified lighting with clear light/shadow distinction, no smooth gradients"
+  color_palette: "limited palette typical of 16-bit era, distinct colors without blending, dithering for transitions"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Authentic 16-bit pixel art in the style of classic SNES or Genesis RPGs.
+  Visible pixels are essential - no anti-aliasing or smoothing. Limited color
+  palette with dithering techniques for shading. 2D sprite art aesthetic.
+  The pixel art style is absolutely essential - this should look like a
+  scene from a classic retro RPG. No smooth gradients or high-resolution details.
+
+# L5: Technical
+technical:
+  perspective: "top-down birds-eye view or side-scrolling perspective"
+  shot: "wide shot showing tile-based environment"
+  camera: "fixed orthographic or isometric"
+  effects: "dithering patterns, limited animation frames implied, CRT scanline aesthetic optional"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "3D rendering or CGI"
+  - "photorealistic"
+  - "high resolution or smooth shading"
+  - "watercolor or traditional painting"
+  - "smooth gradients"
+  - "anti-aliased edges"
+  - "modern HD game graphics"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "smooth color gradients"
+  - "anti-aliased edges"
+  - "too many colors (keep limited palette)"
+  - "modern UI elements"

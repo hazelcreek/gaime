@@ -9,6 +9,7 @@ Welcome to the GAIME developer documentation. This guide will help you understan
 | [VISION.md](VISION.md) | Product and technical vision (guides all development) |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System design, data flow, and key decisions |
 | [WORLD_AUTHORING.md](WORLD_AUTHORING.md) | How to create game worlds using YAML |
+| [STYLE_AUTHORING.md](STYLE_AUTHORING.md) | How to create visual style presets for image generation |
 | [LLM_INTEGRATION.md](LLM_INTEGRATION.md) | AI providers, prompts, and configuration |
 | [API.md](API.md) | Backend endpoint documentation |
 

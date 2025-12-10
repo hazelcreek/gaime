@@ -1,0 +1,42 @@
+# classic-fantasy.yaml - Classic Fantasy style preset
+# Default style for GAIME - matches the original hardcoded behavior
+
+name: "Classic Fantasy"
+description: "Traditional fantasy art style with rich colors, epic atmosphere, and painterly execution. The default GAIME aesthetic."
+
+# L3: Mood
+mood:
+  tone: "epic, adventurous, wondrous"
+  lighting: "dramatic lighting with rich shadows, warm torchlight or golden sunlight"
+  color_palette: "rich and vibrant colors, warm golds, deep blues, earthy tones"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Digital painting in the style of classic fantasy concept art. Rich textures,
+  visible painterly brushstrokes, and artistic color saturation. Evocative
+  atmosphere suitable for a fantasy adventure. The artistic style is paramount
+  and must be maintained consistently throughout the entire image.
+
+# L5: Technical
+technical:
+  perspective: "first-person"
+  shot: "medium wide shot"
+  camera: "eye level"
+  effects: "atmospheric depth, subtle glow on magical elements"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic or hyperrealistic"
+  - "3D CGI or Unreal Engine"
+  - "anime or manga"
+  - "pixel art or retro"
+  - "minimalist or abstract"
+  - "cartoon or childish"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "text overlays"
+  - "blurry or low-quality artifacts"
+  - "distorted proportions"
+  - "modern elements unless specified"

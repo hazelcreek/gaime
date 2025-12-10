@@ -1,0 +1,44 @@
+# noir.yaml - Film Noir style preset
+# Classic detective fiction aesthetic with dramatic shadows and moral ambiguity
+
+name: "Film Noir"
+description: "Classic detective fiction aesthetic with dramatic shadows, high contrast, and moral ambiguity. Rain-slicked streets and venetian blind shadows."
+
+# L3: Mood
+mood:
+  tone: "gritty, tense, morally ambiguous, cynical"
+  lighting: "high contrast, harsh shadows, pools of light, venetian blind patterns, neon reflections"
+  color_palette: "desaturated with selective color accents, mostly black and white with occasional red or blue highlights"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Film noir cinematography. High contrast black and white aesthetic with
+  selective color accents. Dramatic shadows, chiaroscuro lighting, rain-slicked
+  surfaces reflecting neon signs. Strong geometric shadows from blinds, railings,
+  and urban architecture. The artistic style is paramount and must evoke classic
+  1940s-1950s noir cinema.
+
+# L5: Technical
+technical:
+  perspective: "first-person"
+  shot: "medium shot or medium close-up"
+  camera: "eye level or dramatic low angle"
+  effects: "film grain, slight vignette, wet reflections, smoke or fog"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "colorful and vibrant"
+  - "bright and cheerful"
+  - "anime or manga"
+  - "cartoon or whimsical"
+  - "fantasy illustration"
+  - "watercolor or soft"
+  - "children's book"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "distorted proportions"
+  - "overly saturated colors"
+  - "flat lighting without shadows"

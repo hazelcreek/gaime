@@ -1,0 +1,44 @@
+# anime.yaml - Anime/Manga style preset
+# Japanese animation aesthetic with clean lines and expressive colors
+
+name: "Anime"
+description: "Japanese animation aesthetic with clean lines, vibrant colors, and expressive atmosphere. Suitable for both serious and lighthearted adventures."
+
+# L3: Mood
+mood:
+  tone: "expressive, vibrant, emotionally dynamic"
+  lighting: "clean and clear with dramatic highlights, soft ambient light, occasional dramatic backlighting"
+  color_palette: "vibrant and saturated colors, clear skies, distinct color coding for mood"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Anime illustration style with clean linework and cel-shaded coloring.
+  Expressive lighting with soft gradients and sharp highlights. Background
+  art in the tradition of Studio Ghibli or Makoto Shinkai - detailed yet
+  stylized environments. The artistic style must be consistently anime
+  throughout the entire image.
+
+# L5: Technical
+technical:
+  perspective: "first-person or slight third-person establishing shot"
+  shot: "wide shot for environments, medium for character focus"
+  camera: "eye level or slightly elevated for scenic views"
+  effects: "soft glow on light sources, atmospheric perspective, occasional sparkles or particles"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic"
+  - "gritty or dark"
+  - "western comic book"
+  - "oil painting or classical art"
+  - "pixel art"
+  - "3D CGI rendering"
+  - "sketch or rough"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "inconsistent line weights"
+  - "muddy or desaturated colors"
+  - "overly complex realistic details"

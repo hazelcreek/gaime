@@ -1,0 +1,44 @@
+# cyberpunk.yaml - Cyberpunk style preset
+# Near-future dystopia with neon lights, rain, and urban decay
+
+name: "Cyberpunk"
+description: "Near-future dystopian aesthetic with neon lights, rain-slicked streets, and the contrast of high technology with urban decay."
+
+# L3: Mood
+mood:
+  tone: "alienating, gritty, technologically oppressive, noir-influenced"
+  lighting: "neon glow cutting through darkness, holographic displays, harsh artificial light, reflections on wet surfaces"
+  color_palette: "dark base with vibrant neon accents - magenta, cyan, electric blue, toxic green against black and chrome"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Cinematic photorealism with cyberpunk aesthetic. High-quality rendering
+  reminiscent of V-Ray or Unreal Engine cinematics. Detailed reflections on
+  wet surfaces and chrome. Neon signs and holographic advertisements casting
+  colored light. The visual quality should evoke high-budget sci-fi films.
+  The artistic style is paramount.
+
+# L5: Technical
+technical:
+  perspective: "first-person"
+  shot: "medium wide shot"
+  camera: "low angle emphasizing towering megastructures, or eye level for street scenes"
+  effects: "rain, steam from grates, lens flare from neon, chromatic aberration"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "cartoon or stylized"
+  - "watercolor or painterly"
+  - "vintage or retro (unless retro-futurism)"
+  - "bright daylight"
+  - "natural or organic settings"
+  - "fantasy or medieval"
+  - "clean and sterile"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "distorted proportions"
+  - "dry surfaces (everything should have wet reflections)"
+  - "cheerful or optimistic elements"

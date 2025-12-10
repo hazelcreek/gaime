@@ -24,6 +24,7 @@ from app.llm.image_generator import (
     _get_conditional_npcs_at_location,
     ImageGenerationError,
 )
+from app.llm.style_loader import resolve_style
 
 router = APIRouter()
 
@@ -190,12 +191,18 @@ async def generate_single_image(world_id: str, location_id: str, model: str | No
         # Load world metadata
         theme = "fantasy"
         tone = "atmospheric"
+        style_config = None
         
         if world_yaml.exists():
             with open(world_yaml) as f:
                 world_data = yaml.safe_load(f)
                 theme = world_data.get("theme", theme)
                 tone = world_data.get("tone", tone)
+                style_config = world_data.get("style") or world_data.get("style_block")
+        
+        # Resolve style configuration
+        style_block = resolve_style(style_config)
+        logger.info(f"Using style: {style_block.name or 'default'}")
         
         # Load location data
         with open(locations_yaml) as f:
@@ -242,7 +249,8 @@ async def generate_single_image(world_id: str, location_id: str, model: str | No
             tone=tone,
             output_dir=images_dir,
             context=context,
-            model_override=model
+            model_override=model,
+            style_block=style_block
         )
         
         logger.info(f"Image generation completed for {loc_name}: {image_path}")
