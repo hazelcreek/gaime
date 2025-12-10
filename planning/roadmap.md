@@ -1,8 +1,19 @@
 # GAIME Development Roadmap
 
-This document tracks development progress across phases. Update this file when completing features or changing priorities.
+This document tracks development progress across phases, aligned with the [Vision](../docs/VISION.md).
 
 > **Source of Truth**: This is the primary progress tracker. See [ideas/features.md](../ideas/features.md) for the full feature backlog.
+
+---
+
+## Vision Alignment
+
+The roadmap is organized around **experience goals** from the Vision document:
+
+1. **Core Promise**: "Finishing a great short story you played through"
+2. **Safety Net**: "No unwinnable states, no player death"
+3. **Fair Puzzles**: Challenging but not frustrating
+4. **Guided Freedom**: Story structure with player agency
 
 ---
 
@@ -10,17 +21,19 @@ This document tracks development progress across phases. Update this file when c
 
 | Phase | Focus | Status |
 |-------|-------|--------|
-| 1 | Core Polish | 🟡 In Progress |
-| 2 | Puzzle System | ⚪ Planned |
-| 3 | Narrative Depth | ⚪ Planned |
-| 4 | World Dynamics | ⚪ Planned |
-| 5 | Player Experience | ⚪ Planned |
+| 1 | Foundation Complete | 🟡 In Progress |
+| 2 | Safety & Fairness | ⚪ Planned |
+| 3 | Puzzle System | ⚪ Planned |
+| 4 | Story Structure | ⚪ Planned |
+| 5 | World Builder Enhancement | ⚪ Planned |
+| 6 | Living World | ⚪ Planned |
+| 7 | Player Experience | ⚪ Planned |
 
 **Legend**: ✅ Complete | 🟡 In Progress | ⚪ Planned
 
 ---
 
-## Phase 1: Core Polish
+## Phase 1: Foundation Complete
 
 Complete foundational features that are partially implemented.
 
@@ -54,7 +67,37 @@ Complete foundational features that are partially implemented.
 
 ---
 
-## Phase 2: Puzzle System
+## Phase 2: Safety & Fairness
+
+*Vision requirement: "No unwinnable states, no player death" - engine must protect game integrity.*
+
+This phase ensures every world is completable and player-friendly.
+
+### Unwinnable State Prevention
+- [ ] Action validation layer in engine
+- [ ] In-world rejection narratives (not error messages)
+- [ ] Game state rollback detection
+
+### Key Item Protection
+- [ ] `critical: true` flag for quest items in items.yaml
+- [ ] Engine blocks destruction of critical items
+- [ ] Narrative explanations for blocked actions ("The letter is too precious to burn")
+
+### Death Prevention
+- [ ] Narrative deflection for lethal actions
+- [ ] No "game over" states - only setbacks
+- [ ] Graceful handling of dangerous player choices
+
+### Exit & Path Validation
+- [ ] Ensure all required exits are reachable
+- [ ] Validate victory path is always accessible
+- [ ] World Builder warns about unreachable areas
+
+---
+
+## Phase 3: Puzzle System
+
+*Vision requirement: "Fair puzzles" - challenging enough to satisfy, not so obscure they frustrate.*
 
 Explicit puzzle modeling with validation and narrative integration.
 
@@ -72,6 +115,7 @@ Explicit puzzle modeling with validation and narrative integration.
 - [ ] Validator checks puzzles are solvable
 - [ ] Detect unreachable puzzle states
 - [ ] Hint availability verification
+- [ ] Fairness scoring (obscurity detection)
 
 ### Narrative Integration
 - [ ] LLM constraints to protect puzzle solutions
@@ -80,35 +124,64 @@ Explicit puzzle modeling with validation and narrative integration.
 
 ---
 
-## Phase 3: Narrative Depth
+## Phase 4: Story Structure
 
-Richer storytelling and player character development.
+*Vision requirement: "Guided freedom" - players feel free to explore, but story structure is protected.*
 
-### Player Backstory System
+Story arc modeling with victory path protection.
+
+### Story Progression Model
+- [ ] Act/chapter structure in world.yaml
+- [ ] Progression tracking beyond flags
+- [ ] Story beat validation
+
+### Victory Path
+- [ ] Victory path always reachable (validated)
+- [ ] Multiple victory conditions (optional)
+- [ ] Ending variations based on journey
+
+### Player Backstory
 - [ ] Backstory definition in world.yaml
 - [ ] Backstory reveals through NPC dialogue
 - [ ] Skills/abilities from backstory
-
-### Emotional State Tracking
-- [ ] Player emotional state model
-- [ ] Emotion affects narration style
-- [ ] Emotion affects NPC reactions
 
 ### Consequences & Ripple Effects
 - [ ] Delayed consequence system
 - [ ] Action memory for callbacks
 - [ ] Branching based on past choices
 
-### Multiple Endings
-- [ ] Multiple victory conditions
-- [ ] Ending selection based on state
-- [ ] Ending narrative variations
+---
+
+## Phase 5: World Builder Enhancement
+
+*Vision requirement: Two AI personalities - creative World Builder and disciplined Game Master.*
+
+### "Surprise Me" Mode
+- [ ] Author provides minimal input (theme, style hints)
+- [ ] AI invents everything (backstories, characters, puzzles)
+- [ ] Author can play their own world spoiler-free
+- [ ] Magic: discover plot twists you didn't anticipate
+
+### "Lego" Mode
+- [ ] Step-by-step construction with AI assistance
+- [ ] Author guides, AI generates options
+- [ ] For modifying existing worlds or precise control
+
+### World Validation Tools
+- [ ] Completability check (victory reachable)
+- [ ] Fairness check (puzzles not obscure)
+- [ ] Consistency check (no orphan references)
+
+### Historical World Research (Future)
+- [ ] AI researches authentic settings
+- [ ] Models interactive stories on real foundations
+- [ ] Revolutionary Paris, Ancient Rome, etc.
 
 ---
 
-## Phase 4: World Dynamics
+## Phase 6: Living World
 
-Living world that changes over time.
+*Lower priority - dynamics are nice but not core to "short story" goal.*
 
 ### Time & Weather System
 - [ ] Time progression model
@@ -127,7 +200,7 @@ Living world that changes over time.
 
 ---
 
-## Phase 5: Player Experience
+## Phase 7: Player Experience
 
 Quality of life and engagement features.
 
@@ -152,11 +225,10 @@ Quality of life and engagement features.
 
 Ideas requiring more research before planning:
 
-- Multiplayer / shared worlds
 - Modding support and world sharing
 - Mobile app
 - Voice input/output
-- Procedural world generation
+- Procedural world generation (aligns with "Surprise Me" mode)
 - Achievement system
 - Accessibility features
 
@@ -164,13 +236,26 @@ See [ideas/features.md](../ideas/features.md) for full descriptions.
 
 ---
 
+## Deferred: Style System
+
+*Per Vision: Multi-sensory atmosphere (prose tone, visual direction, audio mood) is important but deferred to focus on gameplay first.*
+
+When ready:
+- Prose tone configuration per world
+- Visual style hints per world
+- Audio mood per world
+- Age-appropriateness settings
+- Genre conventions
+
+---
+
 ## Changelog
 
 | Date | Change |
 |------|--------|
+| 2025-12-10 | Restructured roadmap around Vision document experience goals |
 | 2025-12 | Initial roadmap created from features.md analysis |
 
 ---
 
 *Last updated: December 2025*
-

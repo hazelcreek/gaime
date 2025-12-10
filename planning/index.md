@@ -10,7 +10,7 @@ Project planning documents for GAIME development. These are actively maintained 
 
 | File | Description |
 |------|-------------|
-| [roadmap.md](roadmap.md) | Development phases and progress tracking |
+| [roadmap.md](roadmap.md) | Development phases and progress tracking, aligned with [Vision](../docs/VISION.md) |
 
 ---
 

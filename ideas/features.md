@@ -207,14 +207,24 @@ Comprehensive debugging capabilities for:
 
 Ideas that need more research before becoming concrete features:
 
-- **Multiplayer / Shared Worlds** - Multiple players in the same world
 - **Modding Support** - Community-created worlds with easy sharing
 - **Mobile App** - Native mobile experience
 - **Voice Input** - Speak commands instead of typing
-- **AI Dungeon Master Personality** - Configurable narrator personalities
-- **Procedural World Generation** - AI-generated worlds from simple prompts
-- **Achievement System** - Track milestones and accomplishments
+- **Procedural World Generation** - AI-generated worlds from simple prompts (aligns with "Surprise Me" World Builder mode)
+- **Achievement System** - Track milestones and accomplishments (keep minimal per Vision's "no RPG complexity")
 - **Accessibility Features** - Screen reader support, colorblind modes, font scaling
+
+---
+
+## Out of Scope per Vision
+
+The following ideas conflict with the [Vision document](../docs/VISION.md) and are not planned for implementation:
+
+- **Multiplayer / Shared Worlds** - Vision explicitly states "Single-player only" as a key constraint. GAIME is designed as a solo narrative experience.
+
+- **AI Dungeon Master Personality** - Configurable narrator personalities could conflict with the curated world experience. The Vision emphasizes that each world has its own authored tone and style, rather than a generic AI personality layer.
+
+See [docs/VISION.md](../docs/VISION.md) for the full product and technical vision.
 
 ---
 
