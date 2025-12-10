@@ -61,7 +61,10 @@ No commercial pressure (yet) - this is a passion project with room to experiment
 
 - Technical decisions should remain flexible and evolve with player feedback
 - The core idea of GAIME is the north star; specific solutions can change
-- LLM backend should be swappable as the landscape evolves (speed, quality, cost trade-offs)
+- LLM backend should be swappable as the landscape evolves, balancing three factors:
+  - **Speed** - response time affects immersion
+  - **Quality** - narrative and world-building sophistication
+  - **Cost** - sustainable operation as usage scales
 
 ### Two AI Personalities
 
@@ -105,13 +108,17 @@ GAIME uses AI differently in two contexts:
 - No player death - narrative goals require experiencing the full story
 - Hints system is secondary - nice to have, not essential
 
+**Balanced difficulty is an AI responsibility**: The World Builder must ensure puzzles are fair - challenging enough to satisfy, but not so obscure they frustrate. This is a quality gate for generated worlds, not just a "nice to have."
+
 ### Story Structure
 
 **Guided freedom** - players feel free to explore, but story structure is protected.
 
-- Each world follows a story arc (e.g., 3-act structure)
+- Each world follows a story arc (e.g., 3-act structure) that gives exploring the world a feeling of story progression
 - Every world has a predefined victory condition / resolution
 - Exploration doesn't happen in prescribed order - dead ends, distractions, and side stories enrich immersion
+
+**The purpose of side content**: Non-critical areas, optional interactions, and narrative tangents aren't filler - they serve the feeling of being *in* a real world. A room with no puzzle still has atmosphere. An NPC with no quest still has personality. This richness makes the world feel alive.
 
 **AI guardrails during gameplay:**
 
@@ -122,6 +129,8 @@ GAIME uses AI differently in two contexts:
 | Wander into side areas | Allowed, enriches world |
 | Try to skip ahead | Story gates naturally prevent |
 
+**Immersion-preserving constraints**: When the AI must prevent a game-breaking action, it should do so with *in-world explanations* that feel natural, not system messages that break the fourth wall. "The letter is too precious to burn" not "Error: cannot destroy quest item."
+
 ### Replayability
 
 **Replay value comes from world variety, not randomization within worlds.**
@@ -129,7 +138,7 @@ GAIME uses AI differently in two contexts:
 - Same world = same foundation (locations, NPCs, puzzles, story structure)
 - Two players have similar experiences, like classic adventure games
 - AI-generated narration adds freshness to prose and dialogue
-- Minor flavor interactions provide variation without diverging from story
+- Minor flavor interactions (sitting on chairs, examining decorations, idle NPC banter) provide variation across playthroughs without diverging from the main story - these moments are reflected in narration and enhance replayability even within the same world
 
 ---
 
@@ -140,6 +149,7 @@ GAIME uses AI differently in two contexts:
 **a) "Surprise Me" Mode**
 - Author provides minimal input: theme, setting, style hints
 - AI invents everything: backstories, characters, storyline, puzzles
+- **The magic**: AI creates worlds with enough depth to genuinely surprise the author during play - discovering plot twists, character motivations, and puzzle solutions they didn't anticipate
 - Author can play their own world completely spoiler-free
 - Primary mode when the author wants to be a player
 
@@ -154,7 +164,7 @@ GAIME uses AI differently in two contexts:
 **No genre limits.** The library should include:
 
 - **Classic fiction**: Fantasy, sci-fi, mystery, horror, thriller
-- **Historical**: AI-researched authentic settings (Revolutionary Paris, Ancient Rome)
+- **Historical**: AI-researched authentic settings (Revolutionary Paris, Ancient Rome) - the World Builder doesn't just invent, it *researches* real historical facts, personas, and events, then models interactive stories on top of authentic foundations
 - **Light genres**: Comedy, romance, slice-of-life
 - **Kid-friendly**: Age-appropriate adventures with matching tone and visuals
 - **Style-driven**: Noir Netflix aesthetic, anime adventure, children's book charm
@@ -171,6 +181,20 @@ Atmosphere is crucial to the GAIME experience. AI generates:
 - **Prose style** - narration that fits the genre (noir terseness, fantasy grandeur, comedic wit)
 
 This enables efficient production of a wide variety of worlds.
+
+### The Style System
+
+To support the full range of world aesthetics, the style system must control:
+
+| Dimension | What It Controls | Examples |
+|-----------|------------------|----------|
+| **Prose tone** | Vocabulary, sentence structure, narrative voice | Hardboiled noir vs. whimsical fairy tale |
+| **Visual direction** | Art style, color palette, composition | Anime, photorealistic, children's book illustration |
+| **Audio mood** | Music genre, ambient sounds, intensity | Tense orchestral vs. playful chiptune |
+| **Age-appropriateness** | Content filters, complexity, themes | Kid-friendly vs. mature horror |
+| **Genre conventions** | Tropes, pacing expectations, typical elements | Mystery red herrings vs. fantasy prophecies |
+
+The same engine should produce experiences that *feel* completely different - a cozy mystery and a cyberpunk thriller should each feel native to their genre.
 
 ---
 
