@@ -14,15 +14,15 @@ interface MainMenuProps {
 function MenuCinematicEffects() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none gaime-menu-effects">
-      {/* Fog layers */}
-      <div className="absolute inset-0 gaime-fog gaime-fog--one" aria-hidden="true" />
-      <div className="absolute inset-0 gaime-fog gaime-fog--two" aria-hidden="true" />
-      <div className="absolute inset-0 gaime-fog gaime-fog--low" aria-hidden="true" />
-      <div className="absolute inset-0 gaime-haze" aria-hidden="true" />
-
       {/* Raven fly-bys (subtle, slow, low-contrast) */}
       <Raven className="gaime-raven gaime-raven--a" />
       <Raven className="gaime-raven gaime-raven--b" />
+      
+      {/* Drifting fog layers around the gate */}
+      <div className="gaime-fog gaime-fog--1" aria-hidden="true" />
+      <div className="gaime-fog gaime-fog--2" aria-hidden="true" />
+      <div className="gaime-fog gaime-fog--3" aria-hidden="true" />
+      <div className="gaime-fog gaime-fog--4" aria-hidden="true" />
     </div>
   );
 }
@@ -99,7 +99,7 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
       className="h-full w-full bg-cover bg-center bg-no-repeat relative"
       style={{ backgroundImage: "url('/menu-bg.jpg')" }}
     >
-      {/* Cinematic animation layer (fog + subtle raven flybys) */}
+      {/* Cinematic animation layer (subtle raven flybys) */}
       <MenuCinematicEffects />
 
       {/* Dark overlay for better text readability */}
