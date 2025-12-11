@@ -39,13 +39,22 @@ markdown_extensions:
   - toc:
       permalink: true
   - pymdownx.highlight
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.snippets:
       base_path:
         - docs_site
         - ..
   - pymdownx.tasklist:
       custom_checkbox: true
+
+# Load Mermaid for GitHub Pages builds.
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+  - javascripts/mermaid-init.js
 
 # Navigation is auto-discovered from folder structure.
 # Files appear alphabetically; use index.md or number prefixes for ordering.
