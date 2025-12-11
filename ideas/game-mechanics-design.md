@@ -23,10 +23,11 @@ A comprehensive design document for GAIME's entity system, game mechanics, and g
    - [Story Structures](#story-structures)
    - [Events](#events)
 6. [Entity Relationships](#entity-relationships)
-7. [State Management](#state-management)
-8. [Gameplay Mechanics](#gameplay-mechanics)
-9. [Implementation Phases](#implementation-phases)
-10. [Schema Specifications](#schema-specifications)
+7. [State Management & Persistence](#state-management--persistence)
+8. [Narrative Architecture](#narrative-architecture)
+9. [Game Loop Architecture](#game-loop-architecture)
+10. [Implementation Phases](#implementation-phases)
+11. [Schema Specifications](#schema-specifications)
 
 ---
 
@@ -443,6 +444,10 @@ Items can belong to multiple categories that affect gameplay:
 ### NPCs
 
 Non-Player Characters are entities that can interact with the player through dialogue and behavior.
+
+> **Important**: The schema below shows the *structural* properties of NPCs. For the *narrative* approach 
+> (using prompts instead of literal text, and detailed backstory for richer AI-generated dialogue), 
+> see the [Narrative Architecture](#narrative-architecture) section.
 
 #### Current Schema (Prototype)
 
@@ -1404,154 +1409,991 @@ erDiagram
 
 ---
 
-## State Management
+## State Management & Persistence
 
-### Game State Model
+This section addresses a critical architectural concern: **how to track world changes over time and enable save/load functionality**.
+
+### The State Challenge
+
+GAIME worlds are *living* - they change as the player acts:
+
+| Change Type | Examples |
+|-------------|----------|
+| **Item Movement** | Key picked up, letter read and dropped |
+| **Discovery** | Secret door found, hidden item revealed |
+| **Transformation** | Computer repaired, painting slashed, fire started |
+| **NPC State** | Trust level changed, NPC moved, dialogue unlocked |
+| **Progression** | Puzzle solved, story beat completed |
+
+The challenge: **World definitions are static (YAML), but the game world is dynamic**.
+
+### Two-Layer State Model
+
+We separate **World Definition** (immutable, authored) from **World State** (mutable, runtime):
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Initializing
-    Initializing --> Playing: Game Started
+graph TB
+    subgraph "World Definition (Static)"
+        WD[world.yaml]
+        LD[locations.yaml]
+        ID[items.yaml]
+        ND[npcs.yaml]
+    end
     
-    Playing --> Playing: Player Action
-    Playing --> Victory: Victory Conditions Met
-    Playing --> [*]: Player Quits
+    subgraph "World State (Dynamic)"
+        GS[Game State]
+        LS[Location States]
+        IS[Item States]
+        NS[NPC States]
+        ES[Exit States]
+        PS[Puzzle States]
+    end
     
-    state Playing {
-        [*] --> Exploring
-        Exploring --> Examining: Look/Examine
-        Exploring --> Moving: Go Direction
-        Exploring --> Talking: Talk to NPC
-        Exploring --> UsingItem: Use Item
-        Examining --> Exploring: Done
-        Moving --> Exploring: Arrived
-        Talking --> Exploring: End Conversation
-        UsingItem --> Exploring: Item Used
-    }
+    subgraph "Runtime"
+        ENG[Engine]
+        MRG[Merged View]
+    end
+    
+    WD --> ENG
+    LD --> ENG
+    ID --> ENG
+    ND --> ENG
+    
+    GS --> ENG
+    LS --> ENG
+    IS --> ENG
+    NS --> ENG
+    ES --> ENG
+    PS --> ENG
+    
+    ENG --> MRG
+    
+    style GS fill:#e1f5fe
+    style LS fill:#e1f5fe
+    style IS fill:#e1f5fe
+    style NS fill:#e1f5fe
+    style ES fill:#e1f5fe
+    style PS fill:#e1f5fe
 ```
 
-### State Categories
+### Comprehensive State Schema
 
 ```yaml
-# Runtime Game State Structure
-game_state:
-  # Session Info
+# save_game.yaml - Complete saveable state
+save_game:
+  # === Metadata ===
+  meta:
+    save_id: "uuid"
+    world_id: "cursed-manor"
+    world_version: "1.0.0"  # For compatibility checks
+    created_at: "2025-12-11T10:30:00Z"
+    last_played: "2025-12-11T14:22:00Z"
+    play_time_seconds: 3720
+    
+  # === Session State ===
   session:
-    id: "uuid"
     player_name: "Traveler"
-    created_at: "timestamp"
     turn_count: 42
     status: playing  # playing, won, lost
-  
-  # Spatial State
-  spatial:
-    current_location: entrance_hall
-    discovered_locations: [entrance_hall, library, dining_room]
+    current_act: act_2
+    
+  # === Spatial State ===
+  player:
+    current_location: library
+    discovered_locations: [entrance_hall, library, dining_room, kitchen]
     visited_locations:
-      entrance_hall: {visits: 3, last_visit: 40}
-      library: {visits: 1, last_visit: 12}
-  
-  # Inventory State
+      entrance_hall: {visits: 5, first_visit: 1, last_visit: 38}
+      library: {visits: 3, first_visit: 8, last_visit: 42}
+    
+  # === Inventory State ===
   inventory:
     items: [pocket_watch, iron_key, old_letter]
+    # Items with modified state
     item_states:
-      iron_key: {state: default}
-      candlestick: {state: lit}
-  
-  # Flag State (world-defined triggers)
+      candlestick: lit        # Was default, now lit
+      pocket_watch: examined  # Has been examined in detail
+      
+  # === World Delta State ===
+  # Only stores CHANGES from world definition - sparse representation
+  world_delta:
+    # Items that have moved or changed
+    items:
+      iron_key:
+        original_location: master_bedroom
+        current_location: null  # null = in inventory
+        picked_up_turn: 22
+      old_letter:
+        current_location: null  # In inventory
+        picked_up_turn: 3
+      thornwood_amulet:
+        hidden: false  # Was hidden, now revealed
+        current_location: null  # In inventory
+      candlestick:
+        state: lit
+        
+    # Locations that have changed
+    locations:
+      entrance_hall:
+        state: visited  # Tracks that player has been here
+        items_removed: [old_letter, candlestick]  # Items taken
+      sitting_room:
+        state: on_fire  # Changed from default
+        atmosphere_override: "Flames crackle and smoke fills the room"
+      ritual_chamber:
+        state: pedestals_glowing
+        items_placed: [thornwood_amulet, ancient_dagger]
+        
+    # Exits that have changed
+    exits:
+      library_to_secret_passage:
+        visible: true   # Was hidden
+        discovered_turn: 15
+      kitchen_to_basement:
+        locked: false   # Was locked
+        unlocked_turn: 25
+        unlocked_with: iron_key
+        
+    # NPCs that have changed
+    npcs:
+      butler_jenkins:
+        trust: 3
+        disposition: friendly
+        current_location: entrance_hall  # Moved from dining_room
+        dialogue_unlocked: [family_history, curse_hints]
+        given_items: [old_photograph]
+      ghost_child:
+        first_appeared_turn: 18
+        
+  # === Flags State ===
+  # All triggered flags
   flags:
-    examined_portraits: true
-    found_secret_passage: true
-    jenkins_trust_3: false
-  
-  # NPC State
-  npcs:
-    butler_jenkins:
-      trust: 2
-      disposition: friendly
-      current_location: dining_room
-      dialogue_state: talked_about_family
-    ghost_child:
-      visible: true
-      current_location: nursery
-  
-  # Puzzle State
+    # Discovery flags
+    examined_portraits: {set_turn: 5}
+    found_secret_passage: {set_turn: 15}
+    examined_nursery: {set_turn: 30}
+    # Progress flags
+    met_jenkins: {set_turn: 2}
+    jenkins_trust_3: {set_turn: 35}
+    # Puzzle flags
+    basement_unlocked: {set_turn: 25}
+    
+  # === Puzzle State ===
   puzzles:
     basement_access:
       state: solved
-      solved_at: 15
+      solved_turn: 25
+      solution_used: iron_key
     ritual_chamber_lock:
       state: in_progress
-      progress: {items_placed: 2}
-  
-  # Story State
+      progress:
+        items_placed: 2
+        items_remaining: [grimoire]
+    gain_jenkins_trust:
+      state: solved
+      trust_reached: 3
+      
+  # === Story State ===
   story:
     current_act: act_2
-    completed_beats: [meet_jenkins, discover_portraits, find_amulet]
+    completed_acts: [act_1]
+    completed_beats:
+      - {beat: meet_jenkins, turn: 2}
+      - {beat: discover_portraits, turn: 5}
+      - {beat: find_amulet, turn: 32}
+    active_quests: [find_artifacts, learn_truth]
     
-  # Location State
-  locations:
-    sitting_room: {state: default}
-    ritual_chamber: {state: pedestals_glowing}
-  
-  # Exit State
-  exits:
-    kitchen_to_basement: {locked: false}
-    library_to_secret: {visible: true}
-  
-  # Narrative Memory (for LLM)
+  # === Narrative Memory ===
+  # Stored for LLM context continuity
   narrative_memory:
-    recent_exchanges: [...]
-    npc_memory: {...}
-    discoveries: [...]
+    recent_exchanges:
+      - turn: 40
+        action: "ask jenkins about the children"
+        summary: "Jenkins became emotional, revealing glimpses of the tragedy..."
+      - turn: 41
+        action: "examine the grimoire"
+        summary: "The ancient book contains disturbing rituals..."
+    npc_memory:
+      butler_jenkins:
+        encounter_count: 8
+        first_met_location: entrance_hall
+        topics_discussed: [weather, manor_history, family, children]
+        notable_moments: ["He wept when speaking of the children"]
+        player_disposition: sympathetic
+        npc_disposition: trusting
+    discoveries:
+      - "item:iron_key"
+      - "npc:ghost_child"
+      - "feature:slashed_portrait"
+      - "secret:children_sacrificed"
+```
+
+### State Resolution at Runtime
+
+When the engine needs to know about an entity, it **merges** definition with state:
+
+```mermaid
+flowchart LR
+    subgraph "World Definition"
+        DEF[locations.yaml\niron_key in master_bedroom]
+    end
+    
+    subgraph "World State"
+        STATE[save_game.yaml\niron_key in inventory]
+    end
+    
+    subgraph "Engine"
+        MERGE[Merge Logic]
+        RESULT[Effective State:\niron_key in player inventory]
+    end
+    
+    DEF --> MERGE
+    STATE --> MERGE
+    MERGE --> RESULT
+```
+
+```python
+# Pseudocode: Resolving item location
+def get_item_location(item_id: str) -> str | None:
+    # Check state delta first (takes precedence)
+    if item_id in state.world_delta.items:
+        delta = state.world_delta.items[item_id]
+        if delta.current_location is not None:
+            return delta.current_location
+        elif delta.current_location is None:
+            return "inventory"  # Explicitly in inventory
+    
+    # Fall back to world definition
+    item_def = world.items.get(item_id)
+    if item_def:
+        return item_def.initial_location
+    
+    return None
+```
+
+### What Gets Persisted vs. Computed
+
+| Data Type | Persisted? | Notes |
+|-----------|------------|-------|
+| Player location | ✅ Yes | Core state |
+| Inventory | ✅ Yes | Core state |
+| Flags | ✅ Yes | Core state |
+| NPC trust levels | ✅ Yes | Derived would lose granularity |
+| Item locations | ✅ Yes (delta) | Only if changed from definition |
+| Exit visibility | ✅ Yes (delta) | Only if changed |
+| Location states | ✅ Yes (delta) | Only if changed |
+| NPC dialogue state | ✅ Yes | Which topics unlocked |
+| Puzzle progress | ✅ Yes | Multi-step puzzles need this |
+| Narrative memory | ✅ Yes | For LLM continuity |
+| Available exits | ❌ Computed | Derived from location + state |
+| Visible items | ❌ Computed | Derived from location + state + flags |
+| Present NPCs | ❌ Computed | Derived from NPC rules + flags |
+
+### Save/Load API
+
+```python
+# Saving
+def save_game(session_id: str, slot: int | str = "auto") -> SaveResult:
+    """
+    Serialize current game state to persistent storage.
+    
+    - slot: "auto" for autosave, 1-10 for manual slots, or custom name
+    - Returns: SaveResult with save_id, timestamp, thumbnail_path
+    """
+    
+# Loading
+def load_game(save_id: str) -> LoadResult:
+    """
+    Restore game state from save.
+    
+    - Validates world_version compatibility
+    - Rebuilds computed state from delta
+    - Returns: LoadResult with session_id, warnings (if any)
+    """
+    
+# Listing saves
+def list_saves(world_id: str = None) -> list[SaveInfo]:
+    """
+    List available save games.
+    
+    - Filter by world_id if provided
+    - Returns: List of SaveInfo (id, name, timestamp, play_time, location)
+    """
+```
+
+### Version Compatibility
+
+World definitions may change between versions. The save system handles this:
+
+```yaml
+# Compatibility rules
+compatibility:
+  # Save includes world version
+  save_world_version: "1.0.0"
+  current_world_version: "1.1.0"
+  
+  # Compatibility matrix
+  rules:
+    - change: "new_location_added"
+      compatible: true
+      action: "Player can discover new location"
+      
+    - change: "location_removed"
+      compatible: conditional
+      action: "If player is in removed location, move to nearest valid"
+      
+    - change: "item_removed"
+      compatible: conditional
+      action: "If item in inventory, warn player it was removed"
+      
+    - change: "puzzle_changed"
+      compatible: conditional
+      action: "Reset puzzle progress, notify player"
 ```
 
 ---
 
-## Gameplay Mechanics
+## Narrative Architecture
 
-### Core Action Loop
+This section addresses the concern about **repetitive narration** when world definitions contain too much literal text. The solution: **narrative prompts instead of literal strings**.
+
+### The Problem with Literal Text
+
+Current approach (too rigid):
+```yaml
+# BAD: Literal text gets repetitive
+butler_jenkins:
+  dialogue:
+    greeting: "Good evening, sir. I am Jenkins, the butler. May I be of service?"
+```
+
+Every time the player talks to Jenkins, they get the *exact same greeting*. This breaks immersion.
+
+### Solution: Narrative Prompts
+
+Instead of literal text, provide **prompts** that guide the Narration AI:
+
+```yaml
+# GOOD: Prompts guide but don't dictate
+butler_jenkins:
+  dialogue:
+    greeting:
+      prompt: |
+        Jenkins greets the player formally. He is a Victorian butler,
+        proper and reserved. He should:
+        - Use formal address (sir/madam)
+        - Offer service
+        - Hint at underlying nervousness (subtle)
+      tone: formal_victorian
+      length: short  # 1-2 sentences
+      
+      # Optional: Key phrases that SHOULD appear (for plot reasons)
+      must_include:
+        - "butler" or "Jenkins" (establishes identity)
+      
+      # Optional: Things to AVOID
+      must_avoid:
+        - Direct mention of the curse
+        - Spoilers about the children
+```
+
+### Three-Tier Narrative Content
+
+```mermaid
+graph TB
+    subgraph "Tier 1: Literal (Rare)"
+        L1[Exact Text Required]
+        L1E[/"Letter contents,<br/>inscriptions,<br/>victory narrative"/]
+    end
+    
+    subgraph "Tier 2: Prompted (Most Common)"
+        L2[AI-Generated from Prompt]
+        L2E[/"Dialogue, descriptions,<br/>reactions, atmosphere"/]
+    end
+    
+    subgraph "Tier 3: Emergent (Freeform)"
+        L3[AI Creates Freely]
+        L3E[/"Flavor details,<br/>minor interactions,<br/>NPC idle chatter"/]
+    end
+    
+    L1 --> L1E
+    L2 --> L2E
+    L3 --> L3E
+    
+    style L1 fill:#ffcdd2
+    style L2 fill:#c8e6c9
+    style L3 fill:#e1f5fe
+```
+
+| Tier | When to Use | Example |
+|------|-------------|---------|
+| **Literal** | Plot-critical exact text | Letter that reveals a clue: must be exact |
+| **Prompted** | Character-consistent content | NPC dialogue: guided but varied |
+| **Emergent** | Atmospheric filler | What does the dust look like today? |
+
+### Enhanced NPC Definition with Prompts
+
+```yaml
+butler_jenkins:
+  # === Identity ===
+  id: butler_jenkins
+  name: "Jenkins"
+  
+  # === Character Foundation (for AI understanding) ===
+  character:
+    # Core identity
+    archetype: loyal_servant
+    age: 70
+    background_summary: |
+      Has served the Thornwood family for 50 years. Was present the
+      night of the ritual. Blames himself for not stopping it. Has
+      stayed in the manor ever since, unable to leave the children's
+      spirits. Formal on the surface, broken underneath.
+    
+    # Psychological profile
+    psychology:
+      core_motivation: redemption
+      greatest_fear: "That the children will never forgive him"
+      secret_shame: "He helped prepare the ritual chamber"
+      coping_mechanism: "Rigid formality, routine, denial"
+      
+    # Voice and manner
+    voice:
+      formality: very_formal
+      era: victorian
+      vocabulary_notes: |
+        Uses "sir" or "madam" constantly. Never contractions.
+        Speaks in complete sentences. Deflects with offers of tea.
+      verbal_tics:
+        - "If I may be so bold..."
+        - "The master always said..."
+        - "Perhaps sir would care for..."
+      
+    # Physical mannerisms
+    mannerisms:
+      nervous: ["wringing hands", "glancing at shadows", "adjusting cuffs"]
+      sad: ["distant stare", "trailing off mid-sentence", "touching the family crest"]
+      hopeful: ["straightening posture", "hint of a smile", "more direct eye contact"]
+      
+  # === Detailed Backstory (for AI deep understanding) ===
+  backstory:
+    # Timeline of key events (AI can reference these)
+    history:
+      - year: 1875
+        event: "Joined Thornwood household as junior footman, age 20"
+        emotional_note: "Idealistic, grateful for the position"
+        
+      - year: 1882
+        event: "Promoted to butler after old Butler Morrison passed"
+        emotional_note: "Proud, determined to serve well"
+        
+      - year: 1885
+        event: "Witnessed Master Edmund's growing obsession with immortality"
+        emotional_note: "Concerned but loyal, didn't question"
+        
+      - year: 1887
+        event: "THE NIGHT: Helped prepare ritual chamber without knowing purpose"
+        emotional_note: "Horror, guilt, paralysis - heard children scream"
+        
+      - year: 1887-present
+        event: "Remained in manor, tending to empty rooms"
+        emotional_note: "Penance, waiting, hoping for redemption"
+    
+    # Relationships
+    relationships:
+      edmund_thornwood: |
+        The master. Jenkins was loyal to a fault. Now feels betrayed
+        and complicit. Cannot speak ill of him directly but reveals
+        through pauses and careful word choice.
+      margaret_thornwood: |
+        The mistress. Jenkins genuinely cared for her. Her ghost
+        appearing distresses him deeply. Feels he failed her.
+      the_children: |
+        Emily, Thomas, and little Catherine. Jenkins loved them.
+        Their deaths broke him. He cannot say their names without
+        visible emotion. Would do anything to free their spirits.
+    
+    # Secrets (AI knows but Jenkins won't reveal easily)
+    secrets:
+      level_1_surface: "Something terrible happened long ago"
+      level_2_trust_2: "The children died in this house"
+      level_3_trust_4: "There was a ritual. The master performed it."
+      level_4_trust_5: "I prepared the chamber. I heard them scream. I did nothing."
+      
+  # === Narrative Prompts (NOT literal text) ===
+  narrative_prompts:
+    # First meeting
+    first_encounter:
+      prompt: |
+        Jenkins encounters a stranger in the manor for the first time in decades.
+        Generate his greeting. He should:
+        - Be formally welcoming (butler's duty)
+        - Show surprise barely contained
+        - Hint at relief (finally, someone who might help)
+        - NOT reveal anything about the curse yet
+      tone: formal_with_underlying_tension
+      length: medium
+      
+    # Subsequent greetings (varies by disposition)
+    greeting_neutral:
+      prompt: |
+        Jenkins greets the player again. Professional, guarded.
+        Variations based on time of day and location are good.
+      tone: formal
+      length: short
+      
+    greeting_trusting:
+      prompt: |
+        Jenkins has grown to trust the player. His greeting should
+        show warmth beneath the formality. Perhaps he allows himself
+        a small smile or drops the "sir" occasionally.
+      tone: formal_but_warm
+      length: short
+      
+    # When asked about the family
+    topic_family:
+      prompt: |
+        Player asks about the Thornwood family. Jenkins should:
+        - Speak with careful nostalgia about the "old days"
+        - Avoid specifics about the tragedy
+        - Show visible discomfort if pressed
+        - Deflect with offers of tea or changing subject
+      must_include:
+        - Some positive memory of the family (before)
+      must_avoid:
+        - Details about how they died
+        - Names of the children (unless trust >= 3)
+      tone: nostalgic_guarded
+      
+    # When children are mentioned
+    reaction_children_mentioned:
+      prompt: |
+        Player mentions the children. This deeply affects Jenkins.
+        - At low trust: He shuts down, changes subject abruptly
+        - At medium trust: He pauses, shows emotion, speaks vaguely
+        - At high trust: He may finally speak about them with tears
+      emotional_beat: grief_and_guilt
+      tone: varies_by_trust
+      
+    # When shown the iron key
+    reaction_iron_key:
+      prompt: |
+        Player shows Jenkins the iron key (to the basement).
+        Jenkins recognizes it immediately. His reaction should show:
+        - Fear (the basement holds dark memories)
+        - Hope (maybe the player can end this)
+        - Inner conflict about what to say
+      emotional_beat: shock_then_resignation
+      must_include:
+        - Physical reaction (going pale, stepping back)
+      tone: intense
+      
+  # === Knowledge System ===
+  knowledge:
+    # Facts organized by topic
+    topics:
+      manor_history:
+        knows: true
+        reveals_at_trust: 0
+        facts:
+          - "The manor was built in 1820"
+          - "The Thornwoods were wealthy from the foundry business"
+          
+      family_tragedy:
+        knows: true
+        reveals_at_trust: 3
+        facts:
+          - "Something happened in 1887"
+          - "The family is gone"
+        partial_reveals:
+          trust_1: "There was... an incident. Long ago."
+          trust_2: "The children... they never grew up."
+          trust_3: "It was the master's doing. His obsession."
+          
+      artifact_locations:
+        knows: true
+        reveals_at_trust: 4
+        facts:
+          - "The amulet is in the nursery, in Emily's hiding spot"
+          - "The dagger is in the basement - the mistress hid it"
+          - "The grimoire never left the ritual chamber"
+          
+      curse_solution:
+        knows: true
+        reveals_at_trust: 5
+        facts:
+          - "The artifacts must be reunited in the ritual chamber"
+          - "Only then can the children's spirits be freed"
+```
+
+### Atmosphere Prompts for Locations
+
+Same principle applies to locations:
+
+```yaml
+library:
+  name: "The Library"
+  
+  # Instead of fixed atmosphere text, use prompts
+  atmosphere_prompt:
+    base: |
+      A Victorian library. Floor-to-ceiling bookshelves. Dust and
+      aged paper smell. Moonlight through grimy windows. Cold draft.
+    elements:
+      - "ancient books, many on occult topics"
+      - "a massive oak desk covered in papers"
+      - "dust motes drifting in pale light"
+      - "a cold draft from somewhere"
+    mood: mysterious_scholarly
+    sensory_focus: smell_and_touch  # Emphasize these
+    
+  # Time/state variations
+  atmosphere_variants:
+    first_visit:
+      additional: "Everything feels untouched, waiting"
+      mood: anticipation
+    after_secret_found:
+      additional: "The revealed passage changes everything"
+      mood: revelation
+    with_ghost_present:
+      additional: "The temperature drops. The books seem to whisper"
+      mood: supernatural
+      
+  # Details as prompts too
+  detail_prompts:
+    books:
+      prompt: "Describe the library's book collection"
+      include: ["occult volumes", "family histories", "normal books"]
+      tone: unsettling_discovery
+    desk:
+      prompt: "Describe the cluttered desk"
+      include: ["handwritten notes", "strange symbols", "personal items"]
+      tone: scholarly_obsession
+```
+
+### Benefits of Prompt-Based Narration
+
+| Benefit | Explanation |
+|---------|-------------|
+| **Variety** | Same prompt produces different text each playthrough |
+| **Consistency** | Character voice and plot constraints maintained |
+| **Efficiency** | Authors write intent, not every possible sentence |
+| **Localization** | Prompts easier to translate than prose |
+| **Debugging** | Clear what the AI *should* produce |
+
+---
+
+## Game Loop Architecture
+
+This section addresses the question of **splitting the LLM call** into two phases: one for mechanics, one for narration.
+
+### Current Architecture (Single LLM)
 
 ```mermaid
 sequenceDiagram
     participant P as Player
     participant E as Engine
-    participant V as Validator
-    participant LLM as LLM
+    participant LLM as Single LLM
     participant S as State
     
-    P->>E: Action (e.g., "examine portraits")
-    E->>V: Validate Action
-    V->>V: Check Requirements
-    V->>V: Check Safety (critical items, etc.)
-    V-->>E: Valid / Invalid + Reason
-    
-    alt Action Invalid
-        E-->>P: Narrative Rejection
-    else Action Valid
-        E->>S: Get Current State
-        S-->>E: State Context
-        E->>LLM: Action + State + World Context
-        LLM-->>E: Narrative + State Changes
-        E->>S: Apply State Changes
-        E->>S: Check Victory
-        S-->>E: Victory Status
-        E-->>P: Narrative Response
-    end
+    P->>E: "examine the portraits"
+    E->>LLM: Action + State + World
+    Note over LLM: Determines state changes<br/>AND generates narrative<br/>in one call
+    LLM-->>E: {narrative: "...", state_changes: {...}}
+    E->>S: Apply changes
+    E-->>P: Display narrative
 ```
 
-### Action Types
+**Problems:**
+- LLM might hallucinate state changes
+- Narrative may not match actual state
+- Hard to validate before committing
+- Single point of failure
 
-| Action Type | Examples | Processing |
-|-------------|----------|------------|
-| **Navigation** | go north, enter library | Exit validation, requirement check |
-| **Examination** | look, examine portraits | Detail lookup, interaction check |
-| **Interaction** | pull lever, open door | Interaction matching, effect application |
-| **Item** | take key, use key on door | Inventory management, use action matching |
-| **NPC** | talk to jenkins, ask about curse | Dialogue system, knowledge check |
-| **Meta** | inventory, help | State query, no LLM needed |
+### Proposed Architecture (Two-Phase LLM)
 
-### Safety Mechanics
+```mermaid
+sequenceDiagram
+    participant P as Player
+    participant E as Engine
+    participant MA as Mechanics AI
+    participant V as Validator
+    participant S as State
+    participant NA as Narration AI
+    
+    P->>E: "examine the portraits"
+    
+    rect rgb(230, 240, 255)
+        Note over E,MA: Phase 1: Determine Mechanics
+        E->>MA: Action + State + World Rules
+        MA-->>E: {intent: "examine", target: "portraits",<br/>effects: [{set_flag: examined_portraits}]}
+    end
+    
+    rect rgb(255, 240, 230)
+        Note over E,V: Phase 2: Validate & Apply
+        E->>V: Validate proposed changes
+        V->>V: Check rules, safety, consistency
+        alt Invalid
+            V-->>E: Rejection + reason
+            E->>NA: Generate rejection narrative
+            NA-->>E: "The portraits are too high to examine closely"
+        else Valid
+            V-->>E: Approved changes
+            E->>S: Apply changes
+            S-->>E: New state
+        end
+    end
+    
+    rect rgb(230, 255, 240)
+        Note over E,NA: Phase 3: Generate Narration
+        E->>NA: Action + Applied Changes + World Context + Prompts
+        NA-->>E: Rich narrative text
+    end
+    
+    E-->>P: Display narrative
+```
+
+### Detailed Phase Breakdown
+
+#### Phase 1: Mechanics AI (Rules-Focused)
+
+**Purpose:** Interpret player intent and determine mechanical consequences.
+
+**Input:**
+```yaml
+mechanics_request:
+  player_action: "examine the portraits"
+  current_state:
+    location: entrance_hall
+    inventory: [pocket_watch, journal]
+    flags: {met_jenkins: true}
+  world_context:
+    location_details: {portraits: "Five family portraits..."}
+    available_interactions:
+      - id: examine_portraits
+        triggers: ["examine portraits", "look at portraits"]
+        effects: [{set_flag: examined_portraits}]
+    relevant_constraints:
+      - "Portraits can only be examined up close with light"
+```
+
+**Output:**
+```yaml
+mechanics_response:
+  # What the player is trying to do
+  interpreted_intent:
+    action_type: examine
+    target: portraits
+    target_type: detail
+    
+  # Matched world-defined interaction (if any)
+  matched_interaction: examine_portraits
+  
+  # Proposed state changes
+  proposed_effects:
+    - type: set_flag
+      flag: examined_portraits
+      value: true
+    - type: discover
+      discovery: "feature:slashed_portrait"
+      
+  # Additional context for narration
+  mechanical_context:
+    is_first_examination: true
+    relevant_discovery: "One portrait is slashed"
+    
+  # Confidence and alternatives
+  confidence: 0.95
+  alternative_interpretations:
+    - intent: "look at room in general"
+      confidence: 0.05
+```
+
+**Mechanics AI Characteristics:**
+- Smaller, faster model possible (structured output focused)
+- Strict JSON schema for output
+- No creative writing - just intent parsing and rule matching
+- Can be fine-tuned on action patterns
+
+#### Phase 2: Validation Engine (Deterministic)
+
+**Purpose:** Ensure proposed changes are valid and safe.
+
+```python
+class MechanicsValidator:
+    def validate(self, proposed: MechanicsResponse, state: GameState) -> ValidationResult:
+        errors = []
+        warnings = []
+        
+        for effect in proposed.proposed_effects:
+            # Check effect is allowed
+            if effect.type == "set_flag":
+                if effect.flag in PROTECTED_FLAGS:
+                    errors.append(f"Cannot modify protected flag: {effect.flag}")
+                    
+            elif effect.type == "move_to":
+                # Check exit exists and is accessible
+                if not self.can_access(effect.location, state):
+                    errors.append(f"Cannot access: {effect.location}")
+                    
+            elif effect.type == "take_item":
+                # Check item is present and takeable
+                if not self.item_available(effect.item, state):
+                    errors.append(f"Item not available: {effect.item}")
+                if self.is_item_critical(effect.item) and effect.destroy:
+                    errors.append(f"Cannot destroy critical item: {effect.item}")
+        
+        # Safety checks
+        if self.would_create_unwinnable_state(proposed, state):
+            errors.append("Action would make game unwinnable")
+            
+        return ValidationResult(
+            valid=len(errors) == 0,
+            errors=errors,
+            warnings=warnings,
+            approved_effects=proposed.proposed_effects if not errors else []
+        )
+```
+
+#### Phase 3: Narration AI (Creative)
+
+**Purpose:** Generate engaging, varied narrative based on confirmed state changes.
+
+**Input:**
+```yaml
+narration_request:
+  # What happened mechanically
+  action_taken:
+    type: examine
+    target: portraits
+  effects_applied:
+    - {type: set_flag, flag: examined_portraits}
+    - {type: discover, discovery: "feature:slashed_portrait"}
+  
+  # Context for narration
+  context:
+    location: entrance_hall
+    location_atmosphere_prompt: "Grand but decayed Victorian entrance..."
+    time_of_day: night
+    mood: mysterious
+    
+  # What to narrate about
+  narration_focus:
+    primary: "Discovery of the slashed portrait"
+    secondary: "General portrait descriptions"
+    
+  # Narrative prompts from world definition
+  narrative_guidance:
+    interaction_prompt: |
+      Player examines the family portraits. They discover that one
+      portrait (the youngest child) has been violently slashed.
+      This should feel like a disturbing discovery.
+    tone: gothic_horror
+    length: medium
+    must_include:
+      - "The slashing was done in anger/violence"
+      - "It's the portrait of a child"
+    must_avoid:
+      - "Revealing who slashed it"
+      - "Naming the child yet"
+      
+  # Memory context for continuity
+  narrative_memory:
+    recent_exchanges: [...]
+    relevant_discoveries: []  # First time seeing this
+    
+  # Player preferences (future)
+  player_preferences:
+    verbosity: medium
+    gore_level: mild
+```
+
+**Output:**
+```yaml
+narration_response:
+  narrative: |
+    You step closer to the portraits, your boots leaving prints in the 
+    thick dust. Five faces stare back at you from ornate frames—a 
+    stern patriarch, a beautiful woman with sad eyes, and three 
+    children posed before them.
+    
+    Then you see it. Your breath catches.
+    
+    The smallest portrait—a young girl with ribbons in her hair—has 
+    been savaged. Deep slashes cut across her painted face, the 
+    canvas torn with what must have been furious violence. The cuts 
+    are old, the edges yellowed, but the rage behind them still feels 
+    present in the room.
+    
+    Someone wanted to destroy this child's image. But why?
+    
+  # Metadata for UI
+  metadata:
+    word_count: 112
+    emotional_beat: disturbing_discovery
+    suggested_pause: true  # UI might pause for effect
+```
+
+**Narration AI Characteristics:**
+- Larger, more creative model
+- Follows prompts but generates varied prose
+- Maintains voice consistency via character prompts
+- Can reference narrative memory for continuity
+
+### Architecture Comparison
+
+| Aspect | Single LLM | Two-Phase LLM |
+|--------|------------|---------------|
+| **Latency** | 1 LLM call | 2 LLM calls (can parallelize partially) |
+| **Reliability** | State changes may be wrong | State changes validated before narration |
+| **Consistency** | Narrative may not match state | Narrative always matches approved state |
+| **Cost** | 1 call (larger model) | 2 calls (can use smaller for mechanics) |
+| **Debugging** | Hard to separate issues | Clear separation of concerns |
+| **Flexibility** | Tightly coupled | Can swap models independently |
+
+### Hybrid Approach (Recommended)
+
+For efficiency, use a **hybrid approach**:
+
+```mermaid
+flowchart TD
+    A[Player Action] --> B{Action Type?}
+    
+    B -->|Simple/Mechanical| C[Engine Only]
+    C --> D[Direct state change]
+    D --> E[Simple narration template]
+    
+    B -->|Complex/Narrative| F[Two-Phase LLM]
+    F --> G[Mechanics AI]
+    G --> H[Validate]
+    H --> I[Apply State]
+    I --> J[Narration AI]
+    J --> K[Rich narrative]
+    
+    E --> L[Response to Player]
+    K --> L
+```
+
+**Simple actions** (handled by engine + templates):
+- `go north` → Engine moves player, template: "You walk north into the {location_name}."
+- `inventory` → Engine returns list, template: "You are carrying: {items}"
+- `take {known_item}` → Engine handles, template: "{take_description}"
+
+**Complex actions** (need full LLM pipeline):
+- `examine {something}` → May trigger discoveries, need rich description
+- `talk to {npc}` → Dialogue generation
+- `use {item} on {target}` → Context-dependent outcomes
+- Ambiguous input → Need interpretation
+
+### Implementation Phases
+
+1. **Phase 1:** Extract mechanics determination into separate prompt (same LLM, different calls)
+2. **Phase 2:** Add validation layer between mechanics and narration
+3. **Phase 3:** Experiment with smaller model for mechanics
+4. **Phase 4:** Full separation with model-specific optimization
+
+---
+
+## Safety Mechanics
 
 Per Vision: "No unwinnable states, no player death"
 
@@ -1942,11 +2784,35 @@ This design document establishes a comprehensive entity framework for GAIME that
 3. **Empowers Authors**: Provides clear, documented schemas for world creation
 4. **Guides the LLM**: Gives explicit facts and constraints for consistent gameplay
 5. **Ensures Quality**: Enables validation and prevents unwinnable states
+6. **Enables Persistence**: Clear state model supports save/load functionality
+7. **Promotes Variety**: Prompt-based narration prevents repetitive text
+8. **Separates Concerns**: Two-phase LLM architecture improves reliability
 
-The implementation should proceed in phases, starting with enhancing core entities (Exits, Interactions) before adding advanced systems (Puzzles, Story Structure, Events).
+### Key Architectural Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| **Two-layer state model** | Static world definition + dynamic world state enables save/load |
+| **Sparse state delta** | Only persist changes, not entire world state |
+| **Prompt-based narration** | AI generates varied text from intent, not literal strings |
+| **Rich NPC backstory** | Deep character understanding enables consistent, nuanced dialogue |
+| **Two-phase LLM** | Mechanics AI + Narration AI improves validation and reliability |
+| **Hybrid action handling** | Simple actions don't need LLM, complex ones get full pipeline |
+
+### Implementation Priority
+
+1. **State persistence foundation** - Enable save/load with current schema
+2. **Exit enhancement** - Make exits first-class entities
+3. **Validation layer** - Add mechanics validation before state changes
+4. **Narrative prompts** - Migrate from literal text to prompts
+5. **NPC backstory** - Enhance character depth for dialogue
+6. **Two-phase LLM** - Split mechanics and narration calls
+7. **Puzzle system** - Add first-class puzzle entities
+8. **Story structure** - Add act/beat modeling
 
 ---
 
-*Document Version: 1.0*  
+*Document Version: 1.1*  
 *Created: December 2025*  
+*Updated: December 2025 - Added state persistence, narrative architecture, two-phase LLM*  
 *Authors: GAIME Development Team*
