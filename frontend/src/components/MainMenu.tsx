@@ -17,6 +17,7 @@ function MenuCinematicEffects() {
       {/* Fog layers */}
       <div className="absolute inset-0 gaime-fog gaime-fog--one" aria-hidden="true" />
       <div className="absolute inset-0 gaime-fog gaime-fog--two" aria-hidden="true" />
+      <div className="absolute inset-0 gaime-fog gaime-fog--low" aria-hidden="true" />
       <div className="absolute inset-0 gaime-haze" aria-hidden="true" />
 
       {/* Raven fly-bys (subtle, slow, low-contrast) */}
@@ -102,10 +103,14 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
       <MenuCinematicEffects />
 
       {/* Dark overlay for better text readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+
+      {/* Lightning flashes (behind UI, above dark overlay) */}
+      <div className="absolute inset-0 z-20 pointer-events-none gaime-lightning gaime-lightning--a" aria-hidden="true" />
+      <div className="absolute inset-0 z-20 pointer-events-none gaime-lightning gaime-lightning--b" aria-hidden="true" />
       
       {/* Content container - left sidebar layout */}
-      <div className="relative h-full flex">
+      <div className="relative z-30 h-full flex">
         {/* Left sidebar panel */}
         <div className="w-full max-w-md lg:max-w-lg h-full flex flex-col p-6 lg:p-8">
           {/* Greeting */}
