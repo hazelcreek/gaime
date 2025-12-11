@@ -1,17 +1,17 @@
-# Image Prompt: Livery Stable
+# Image Prompt: Saloon Porch
 
 Create a dramatic, atmospheric scene illustration for a text adventure game.
 This is a high-resolution production asset in 16:9 widescreen format.
 
-Location: Livery Stable
+Location: Saloon Porch
 
 Scene Description:
-Shadowy and smelling of manure and sweet hay. Horses shift restlessly in their stalls. A heavy anvil sits near a cold forge.
+The wooden planks creak underfoot. Laughter and piano music spill from inside, sounding menacingly cheerful given the town's plight. A 'Wanted' poster flutters on a pillar.
 
 Interactive Elements to Include:
-Visible pathways: a passage or doorway visible to the right side of the scene
-Objects in the scene: Coil of Rope hangs looped over a wooden post near the entrance
-Characters visible in the scene: A figure - Timmy (Hidden Observer), hides behind a bale of hay, peeking out fearfully: A scrawny boy of maybe twelve, all elbows and knees. Straw-colored hair pokes out from under an oversized hat that probably belonged to his father. His freckled face is smudged with dirt and hay, and 
+Visible pathways: an opening or exit behind, perhaps suggested by light or shadows; a doorway or passage visible ahead in the distance; a passage or doorway visible to the right side of the scene
+Objects in the scene: Boone Wanted Poster is nailed to a support beam, flapping in the hot wind
+Characters visible in the scene: A figure - Lefty (Gatekeeper), leans against the wall, whittling a stick with a large knife: A hulking brute with a face like a clenched fist. A scar runs from his left eye down to his stubbled jaw - hence the name. Greasy black hair spills from under a sweat-stained hat. His vest strains over a barrel chest, and a Colt revolver hangs low on his hip. He's missing two fingers on his right hand, the stumps long healed.
 
 Important: These elements should be integrated naturally into the scene, not highlighted 
 or labelled. They should reward careful observation - exits should look like real 

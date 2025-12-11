@@ -11,7 +11,7 @@ Dust motes dance in the shafts of harsh sunlight cutting through the barred wind
 Interactive Elements to Include:
 Visible pathways: a doorway or passage visible ahead in the distance
 Objects in the scene: Armory Key hangs on a nail behind the heavy oak desk
-Characters visible in the scene: A figure - Sheriff 'Iron' Eli Hayes (Wounded Mentor), slumps in the wooden chair, clutching his bandaged leg: A weathered man in his sixties with a face like cracked leather, deep-set eyes still sharp despite the pain. Silver stubble covers his jaw. His once-proud sheriff's vest is stained dark with blood, an
+Characters visible in the scene: A figure - Sheriff 'Iron' Eli Hayes (Wounded Mentor), slumps in the wooden chair, clutching his bandaged leg: A weathered man in his sixties with a face like cracked leather, deep-set eyes still sharp despite the pain. Silver stubble covers his jaw. His once-proud sheriff's vest is stained dark with blood, and his left leg is wrapped in makeshift bandages. A lifetime of frontier justice is etched into every line on his face.
 
 Important: These elements should be integrated naturally into the scene, not highlighted 
 or labelled. They should reward careful observation - exits should look like real 

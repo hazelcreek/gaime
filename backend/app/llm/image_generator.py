@@ -197,8 +197,8 @@ def _build_npcs_description(npcs: list[NPCInfo]) -> str:
         placement_part = f", {npc.placement}" if npc.placement else ""
         
         if npc.appearance:
-            # Clean up the appearance text
-            appearance_clean = npc.appearance.strip().replace('\n', ' ')[:200]
+            # Clean up the appearance text without truncation
+            appearance_clean = " ".join(npc.appearance.split())
             npc_descriptions.append(
                 f"A figure - {npc.name} ({npc.role}){placement_part}: {appearance_clean}"
             )
@@ -249,7 +249,8 @@ def get_edit_prompt(
         placement_part = f" {npc.placement}" if npc.placement else " positioned naturally in the scene"
         
         if npc.appearance:
-            appearance_clean = npc.appearance.strip().replace('\n', ' ')[:300]
+            # Preserve full appearance while normalizing whitespace for clarity
+            appearance_clean = " ".join(npc.appearance.split())
             npc_descriptions.append(
                 f"- {npc.name} ({npc.role}){placement_part}: {appearance_clean}"
             )
@@ -374,7 +375,9 @@ def _save_prompt_markdown(
         location_name: Display name of the location (used in header)
         prompt: The full prompt text that was sent to the model
     """
-    prompt_path = output_dir / f"{location_id}_prompt.md"
+    prompt_dir = output_dir / "promptlogs"
+    prompt_dir.mkdir(parents=True, exist_ok=True)
+    prompt_path = prompt_dir / f"{location_id}_prompt.md"
     prompt_content = f"# Image Prompt: {location_name}\n\n{prompt}"
     with open(prompt_path, 'w') as f:
         f.write(prompt_content)

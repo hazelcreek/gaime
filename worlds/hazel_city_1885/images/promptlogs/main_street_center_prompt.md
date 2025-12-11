@@ -1,17 +1,16 @@
-# Image Prompt: The Grand Saloon
+# Image Prompt: Main Street (Center)
 
 Create a dramatic, atmospheric scene illustration for a text adventure game.
 This is a high-resolution production asset in 16:9 widescreen format.
 
-Location: The Grand Saloon
+Location: Main Street (Center)
 
 Scene Description:
-Smoke hangs in the air like a thick fog. The piano player stops abruptly as you enter. Tables are overturned, save for the large poker table in the center where the gang holds court.
+The heart of Hazel City. The imposing Grand Saloon dominates the northern view. A water trough sits dry and cracking nearby. To the west is the Livery Stable.
 
 Interactive Elements to Include:
-Visible pathways: an opening or exit behind, perhaps suggested by light or shadows; stairs leading upward, or a visible upper level or balcony
-Objects in the scene: Glass of Whiskey sits abandoned on a sticky table near the door
-Characters visible in the scene: A figure - Jackal Boone (Villain), sits at the center table, cleaning a massive revolver: Lean and coiled like a rattlesnake, with the cold blue eyes of a killer. His face is angular, almost handsome, framed by slicked-back dark hair and a meticulously trimmed goatee. He wears a long black; A figure - Fingers McCoy (Hostage), freezes at the keys of the upright piano in the corner: A thin, pale man who looks desperately out of place in this dusty hellhole. His once-fine Eastern clothes are rumpled and sweat-stained, his bowler hat askew. Long, delicate fingers - a pianist's hand
+Visible pathways: an opening or exit behind, perhaps suggested by light or shadows; a doorway or passage visible ahead in the distance; a passage or doorway visible to the left side of the scene
+Characters visible in the scene: A figure - Whiskey Pete (Useless Witness), lies passed out in the shadow of the water trough: A sun-baked wreck of a man sprawled in the dust. His clothes are more patches than fabric, a battered hat pulled low over bloodshot eyes. A scraggly gray beard stained with tobacco juice frames a toothless grin. Despite his sorry state, his eyes track movement with surprising clarity.
 
 Important: These elements should be integrated naturally into the scene, not highlighted 
 or labelled. They should reward careful observation - exits should look like real 
