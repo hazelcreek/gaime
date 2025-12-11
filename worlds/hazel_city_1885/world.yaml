@@ -1,0 +1,34 @@
+name: "Hazel City Showdown"
+theme: "Spaghetti Western"
+tone: "Gritty, tense, sun-bleached"
+style: spaghetti-western
+
+premise: |
+  Hazel City, Arizona, 1885. The Red Jackal Gang has strangled the life out of this frontier town. Sheriff 'Iron' Eli Hayes is the only law left, but he's old and outgunned. The gang's leader, Jackal Boone, has taken over the Saloon and is planning to rob the incoming Union Pacific shipment at noon.
+
+starting_situation: |
+  You are the Sheriff's newly appointed (and only) deputy. Sheriff Hayes was wounded in a shootout this morning and is currently holed up in his office. He can't walk, let alone fight. He just handed you his badge and the key to the armory. It's up to you to gather evidence, rally the terrified townsfolk, and confront Jackal Boone before the train arrives.
+
+victory:
+  location: grand_saloon
+  item: winchester_rifle
+  narrative: |
+    With the Winchester leveled and the evidence of the train robbery plans in your pocket, you confront Jackal Boone. The townsfolk, emboldened by your stand, gather at the windows with shotguns. Boone realizes his reign is over. He drops his iron. Hazel City is free.
+
+player:
+  starting_location: sheriff_office
+  starting_inventory:
+    - deputy_badge
+
+constraints:
+  - "You cannot shoot civilians."
+  - "Time is ticking; the train arrives at high noon."
+  - "You need a weapon to confront the Jackal."
+
+commands:
+  help: "Display available commands"
+  look: "Examine surroundings"
+  inventory: "Check inventory"
+  go: "Move in a direction"
+  talk: "Speak to an NPC"
+  take: "Pick up an item"

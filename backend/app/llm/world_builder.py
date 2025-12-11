@@ -63,12 +63,16 @@ class WorldBuilder:
         
         logger.info("Calling LLM for world generation...")
         # Use gemini-3-pro-preview for world building (has thinking/reasoning)
-        # Need higher max_tokens to account for both thinking + output tokens
+        # Need very high max_tokens to account for:
+        # 1. Thinking tokens (model's internal reasoning)
+        # 2. Large output (4 YAML files with detailed content)
+        # For 6+ locations and 3+ NPCs, the output alone can be 8k+ tokens
+        # Note: Gemini 3 models require temperature=1.0 for best results
         response = await get_completion(
             messages,
             model="gemini/gemini-3-pro-preview",
-            temperature=0.8,  # More creative for world building
-            max_tokens=16384,  # High limit for thinking tokens + output
+            temperature=1.0,  # Required for Gemini 3 models
+            max_tokens=32768,  # Very high limit for thinking + large worlds
             response_format={"type": "json_object"}
         )
         
