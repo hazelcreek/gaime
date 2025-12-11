@@ -11,6 +11,57 @@ interface MainMenuProps {
   isLoading: boolean;
 }
 
+function MenuCinematicEffects() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none gaime-menu-effects">
+      {/* Raven fly-bys (subtle, slow, low-contrast) */}
+      <Raven className="gaime-raven gaime-raven--a" />
+      <Raven className="gaime-raven gaime-raven--b" />
+      
+      {/* Drifting fog layers around the gate */}
+      <div className="gaime-fog gaime-fog--1" aria-hidden="true" />
+      <div className="gaime-fog gaime-fog--2" aria-hidden="true" />
+      <div className="gaime-fog gaime-fog--3" aria-hidden="true" />
+      <div className="gaime-fog gaime-fog--4" aria-hidden="true" />
+    </div>
+  );
+}
+
+function Raven({ className }: { className: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 120 60"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {/* Body */}
+      <path
+        d="M54 33c3-6 10-10 16-7 6 3 8 10 4 15-6 6-20 5-24-2-1-2 1-4 4-6z"
+        fill="currentColor"
+        opacity="0.95"
+      />
+
+      {/* Left wing */}
+      <path
+        className="gaime-raven__wing gaime-raven__wing--l"
+        d="M58 30C40 10 18 10 2 22c16 1 28 7 38 16 6 5 12 4 18-8z"
+        fill="currentColor"
+        opacity="0.9"
+      />
+
+      {/* Right wing */}
+      <path
+        className="gaime-raven__wing gaime-raven__wing--r"
+        d="M62 30c18-20 40-20 56-8-16 1-28 7-38 16-6 5-12 4-18-8z"
+        fill="currentColor"
+        opacity="0.9"
+      />
+    </svg>
+  );
+}
+
 export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
   const [worlds, setWorlds] = useState<WorldInfo[]>([]);
   const [selectedWorld, setSelectedWorld] = useState<string>('');
@@ -48,11 +99,18 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
       className="h-full w-full bg-cover bg-center bg-no-repeat relative"
       style={{ backgroundImage: "url('/menu-bg.jpg')" }}
     >
+      {/* Cinematic animation layer (subtle raven flybys) */}
+      <MenuCinematicEffects />
+
       {/* Dark overlay for better text readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+
+      {/* Lightning flashes (behind UI, above dark overlay) */}
+      <div className="absolute inset-0 z-20 pointer-events-none gaime-lightning gaime-lightning--a" aria-hidden="true" />
+      <div className="absolute inset-0 z-20 pointer-events-none gaime-lightning gaime-lightning--b" aria-hidden="true" />
       
       {/* Content container - left sidebar layout */}
-      <div className="relative h-full flex">
+      <div className="relative z-30 h-full flex">
         {/* Left sidebar panel */}
         <div className="w-full max-w-md lg:max-w-lg h-full flex flex-col p-6 lg:p-8">
           {/* Greeting */}
