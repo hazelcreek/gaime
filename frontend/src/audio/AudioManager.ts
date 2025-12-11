@@ -20,7 +20,6 @@ class AudioManager {
   private initialized: boolean = false;
   private initPromise: Promise<void> | null = null;
   private isStopping: boolean = false;
-  private shouldStartOnUnmute: boolean = false;
 
   private constructor() {
     // Private constructor for singleton
@@ -107,7 +106,6 @@ class AudioManager {
       } else {
         // If muted, keep playing at volume 0, ready for unmute
         this.menuMusic.volume(0);
-        this.shouldStartOnUnmute = true;
       }
       return;
     }
@@ -117,7 +115,6 @@ class AudioManager {
     
     // If currently muted, defer playback until user unmutes to avoid clicks
     if (this.isMuted) {
-      this.shouldStartOnUnmute = true;
       return;
     }
 
@@ -190,7 +187,6 @@ class AudioManager {
       }
 
       if (this.menuMusic) {
-        this.shouldStartOnUnmute = false;
         this.menuMusic.volume(0);
         this.menuMusic.play();
         this.fadeVolume(0.5, 200);
