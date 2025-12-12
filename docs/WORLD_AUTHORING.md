@@ -513,9 +513,46 @@ butler_jenkins:
     - "Hints that 'the master kept important things among his books'"
 ```
 
-## AI World Builder
+## World Builder Tools
 
-You can use the AI World Builder to generate starter content:
+GAIME provides two ways to create worlds with AI assistance:
+
+### TUI (Terminal User Interface) - Recommended
+
+The **GAIME World Builder TUI** is a polished terminal application for creating and managing worlds:
+
+```bash
+# From project root, with virtual environment activated
+cd /path/to/gaime
+source backend/venv/bin/activate
+pip install -e .  # First time only
+gaime-builder
+```
+
+**Features:**
+- **Create World**: Enter a description and generate a complete world with locations, NPCs, and items
+- **Generate Images**: Batch generate location images with automatic NPC variant support
+- **Manage Worlds**: View, validate, and inspect existing worlds
+
+**Keyboard Shortcuts:**
+| Key | Action |
+|-----|--------|
+| `1` | Create World screen |
+| `2` | Generate Images screen |
+| `3` | Manage Worlds screen |
+| `d` | Toggle dark mode |
+| `?` | Show help |
+| `q` | Quit |
+| `Esc` | Go back |
+
+**Image Generation in TUI:**
+- Select a world from the dropdown
+- Click "Generate All" to create images for all locations (including NPC variants)
+- Or select specific locations and click "Regenerate Selected" (variants included automatically)
+
+### REST API
+
+For programmatic access, use the REST API:
 
 ```
 POST /api/builder/generate

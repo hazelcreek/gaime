@@ -1,0 +1,44 @@
+# watercolor.yaml - Watercolor style preset
+# Soft, dreamy aesthetic with flowing colors and gentle atmosphere
+
+name: "Watercolor"
+description: "Soft, dreamy watercolor aesthetic with flowing colors, gentle edges, and an ethereal quality. Perfect for whimsical or contemplative adventures."
+
+# L3: Mood
+mood:
+  tone: "dreamy, gentle, contemplative, ethereal"
+  lighting: "soft and diffused, natural light, gentle shadows without harsh edges"
+  color_palette: "soft pastels and muted tones, colors bleeding into each other, white space as breathing room"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Traditional watercolor painting aesthetic. Soft edges where colors bleed
+  and blend naturally. Visible paper texture underneath. Delicate washes of
+  color with areas of intentional white space. The style should feel hand-painted
+  and organic, with the beautiful imperfections of real watercolor.
+  The artistic style is paramount.
+
+# L5: Technical
+technical:
+  perspective: "first-person"
+  shot: "medium wide shot"
+  camera: "eye level"
+  effects: "color bleeding, soft vignette, visible brush strokes, paper texture"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic"
+  - "sharp and crisp edges"
+  - "digital or CGI"
+  - "dark and gritty"
+  - "high contrast"
+  - "neon or vibrant saturated colors"
+  - "anime or cartoon"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "overly sharp details"
+  - "flat digital coloring"
+  - "harsh black outlines"

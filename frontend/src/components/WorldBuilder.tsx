@@ -376,6 +376,15 @@ export default function WorldBuilder() {
   return (
     <div className="min-h-screen bg-terminal-bg p-8">
       <div className="max-w-7xl mx-auto">
+        {/* Deprecation Notice */}
+        <div className="mb-6 p-4 bg-yellow-900/30 border border-yellow-500/50 rounded-lg">
+          <p className="text-yellow-300 font-medium">⚠️ Deprecation Notice</p>
+          <p className="text-yellow-200/80 text-sm mt-1">
+            This web-based builder is being replaced by a terminal UI (TUI) for better developer experience.
+            Use <code className="bg-yellow-900/50 px-1 rounded">gaime-builder</code> from the project root instead.
+          </p>
+        </div>
+
         {/* Header */}
         <header className="mb-8 text-center">
           <h1 className="font-display text-3xl text-terminal-accent tracking-wider mb-2">

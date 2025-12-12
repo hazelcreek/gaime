@@ -1,0 +1,20 @@
+Create a dramatic, atmospheric scene illustration for a text adventure game.
+This is a high-resolution production asset in 16:9 widescreen format.
+
+Location: {location_name}
+
+Scene Description:
+{atmosphere}
+{interactive_section}
+World Context: {world_context}
+
+Mood: The atmosphere is {mood_tone}. {mood_lighting}. The color palette features {mood_color_palette}.
+
+Artistic style (most important): {style}
+This style must be maintained consistently throughout the entire image.
+
+Composition: {technical_perspective} perspective, {technical_shot} from {technical_camera}.{technical_effects}
+
+Critical constraints - the image must NOT include:
+{anti_styles}
+{quality_constraints}

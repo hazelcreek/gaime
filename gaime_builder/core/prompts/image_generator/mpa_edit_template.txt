@@ -1,0 +1,19 @@
+Edit this image to add the following character while preserving the scene exactly.
+
+Character to add:
+{npc_description}
+
+Position: {npc_placement}
+
+Critical Requirements:
+- PRESERVE the original scene's composition, lighting, colors, and atmosphere exactly
+- DO NOT REMOVE OR CHANGE any existing characters in the image - they must remain exactly as they are
+- MATCH the artistic style of the original image: {style_summary}
+- The character must be rendered in the SAME artistic style as the background
+- Position the character naturally within the existing space without overlapping existing characters
+- Maintain consistent lighting direction and shadow quality
+
+The image must NOT include:
+{anti_styles_brief}
+- Any changes to the background scene
+- Style inconsistencies between character and environment

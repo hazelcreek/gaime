@@ -54,6 +54,7 @@ An AI-powered text adventure game engine that combines classic text-based gamepl
 gaime/
 ├── backend/          # Python FastAPI server
 ├── frontend/         # React + TypeScript UI
+├── gaime_builder/    # TUI for world creation and image generation
 ├── worlds/           # YAML game world definitions
 ├── docs/             # Developer documentation
 └── ideas/            # Future plans and feature concepts
@@ -86,6 +87,42 @@ gaime/
 - **Light Game Mechanics**: Track inventory, location, flags, and NPC trust
 - **Victory Conditions**: Define win states with location, flag, and item requirements
 - **AI World Builder**: Generate complete game worlds from text descriptions
+- **TUI World Builder**: Terminal interface for creating worlds and generating images
+
+## World Builder TUI
+
+The **GAIME World Builder TUI** is a polished terminal application for creating and managing game worlds. It provides a better developer experience than the web UI for world creation and image generation.
+
+### Running the TUI
+
+```bash
+# From project root, with backend virtual environment activated
+source backend/venv/bin/activate
+pip install -e .  # First time only - installs gaime-builder command
+gaime-builder
+```
+
+### TUI Features
+
+| Screen | Description |
+|--------|-------------|
+| **Create World** | Enter a description and generate a complete world with locations, NPCs, and items |
+| **Generate Images** | Batch generate location images with automatic NPC variant support |
+| **Manage Worlds** | View, validate, and inspect existing worlds |
+
+### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `1` | Create World screen |
+| `2` | Generate Images screen |
+| `3` | Manage Worlds screen |
+| `d` | Toggle dark mode |
+| `?` | Show help |
+| `q` | Quit |
+| `Esc` | Go back |
+
+See [World Authoring](docs/WORLD_AUTHORING.md) for detailed TUI usage instructions.
 
 ## License
 

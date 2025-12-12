@@ -162,6 +162,13 @@ Story arc modeling with victory path protection.
 
 *Vision requirement: Two AI personalities - creative World Builder and disciplined Game Master.*
 
+### TUI World Builder ✅
+- [x] Terminal UI for world creation and management
+- [x] Create new worlds from text descriptions
+- [x] Batch image generation with progress feedback
+- [x] Automatic NPC variant generation
+- [x] World validation and inspection
+
 ### "Surprise Me" Mode
 - [ ] Author provides minimal input (theme, style hints)
 - [ ] AI invents everything (backstories, characters, puzzles)
@@ -173,7 +180,13 @@ Story arc modeling with victory path protection.
 - [ ] Author guides, AI generates options
 - [ ] For modifying existing worlds or precise control
 
+### Cursor Agent (Future)
+- [ ] Conversational world building in editor
+- [ ] Deep iterative design sessions
+- [ ] See planning/worldbuilder-strategy.md for details
+
 ### World Validation Tools
+- [x] Basic YAML validation
 - [ ] Completability check (victory reachable)
 - [ ] Fairness check (puzzles not obscure)
 - [ ] Consistency check (no orphan references)
@@ -267,6 +280,7 @@ See [ideas/features.md](../ideas/features.md) for full descriptions.
 
 | Date | Change |
 |------|--------|
+| 2025-12-12 | Implemented TUI World Builder (gaime_builder package) - terminal UI for world creation and image generation |
 | 2025-12-10 | Implemented Visual Style System with MPA architecture and 14 presets |
 | 2025-12-10 | Restructured roadmap around Vision document experience goals |
 | 2025-12-10 | Added Emotional State Tracking to Phase 4 (was missing after restructuring) |

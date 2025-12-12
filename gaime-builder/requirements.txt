@@ -1,0 +1,19 @@
+# GAIME World Builder TUI Dependencies
+
+# TUI Framework
+textual>=0.50.0
+rich>=13.0.0
+
+# CLI
+click>=8.0.0
+
+# LLM Integration (shared with backend)
+litellm>=1.0.0
+python-dotenv>=1.0.0
+
+# YAML processing
+pyyaml>=6.0.0
+
+# Google Gemini SDK (for image generation)
+google-genai>=0.4.0
+

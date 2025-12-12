@@ -1,0 +1,44 @@
+# childrens-book.yaml - Children's Book Illustration style preset
+# Warm, inviting aesthetic suitable for young audiences
+
+name: "Children's Book"
+description: "Warm, inviting children's book illustration style with friendly shapes, gentle colors, and an approachable atmosphere. Age-appropriate for young players."
+
+# L3: Mood
+mood:
+  tone: "warm, inviting, friendly, wonder-filled, safe"
+  lighting: "soft and warm, gentle shadows, golden hour quality, welcoming light"
+  color_palette: "warm and friendly colors, soft pastels mixed with cheerful primaries, nothing harsh or scary"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Children's book illustration style with rounded, friendly shapes and
+  warm, inviting colors. Simplified but charming details. The style should
+  feel like a beloved picture book - approachable, gentle, and full of wonder.
+  Influences from classic children's illustrators. The artistic style must
+  be consistently warm and child-friendly throughout.
+
+# L5: Technical
+technical:
+  perspective: "first-person or gentle third-person"
+  shot: "medium wide shot"
+  camera: "eye level or slightly elevated for a friendly view"
+  effects: "soft edges, gentle glow, whimsical details"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "dark or scary"
+  - "horror or gothic"
+  - "realistic violence"
+  - "gritty or noir"
+  - "photorealistic"
+  - "complex or overwhelming detail"
+  - "sharp aggressive angles"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "scary or disturbing elements"
+  - "overly complex details"
+  - "dark shadows or harsh lighting"

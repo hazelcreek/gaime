@@ -1,0 +1,44 @@
+# horror.yaml - Horror style preset
+# Unsettling, dread-inducing aesthetic for mature horror adventures
+
+name: "Horror"
+description: "Unsettling horror aesthetic with oppressive atmosphere, disturbing details, and a pervasive sense of dread. For mature horror adventures."
+
+# L3: Mood
+mood:
+  tone: "dread, unease, isolation, wrongness, psychological tension"
+  lighting: "harsh and unnatural, deep shadows hiding threats, sickly light sources, flickering uncertainty"
+  color_palette: "heavily desaturated with sickly accents - bile yellow, bruise purple, dried blood brown, corpse pale"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Gritty horror illustration with unsettling atmosphere. Desaturated colors
+  with occasional disturbing accent colors. Details that feel slightly wrong -
+  proportions that unsettle, shadows that seem to move. Inspired by horror
+  game aesthetics and psychological horror films. The artistic style must
+  maintain consistent dread throughout.
+
+# L5: Technical
+technical:
+  perspective: "first-person"
+  shot: "medium shot or claustrophobic close framing"
+  camera: "eye level or disorienting dutch angle"
+  effects: "film grain, chromatic aberration, vignette, visual noise"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "bright and cheerful"
+  - "colorful and vibrant"
+  - "cartoon or whimsical"
+  - "children's illustration"
+  - "clean and polished"
+  - "heroic or epic"
+  - "anime or stylized cute"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts (unless intentional)"
+  - "bright saturated colors"
+  - "friendly or inviting elements"
+  - "clean sterile environments"

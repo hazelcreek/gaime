@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gaime-builder"
+version = "0.1.0"
+description = "GAIME World Builder - TUI for creating text adventure game worlds"
+requires-python = ">=3.11"
+dependencies = [
+    "textual>=0.50.0",
+    "rich>=13.0.0",
+    "click>=8.0.0",
+    "litellm>=1.0.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0.0",
+    "google-genai>=0.4.0",
+]
+
+[project.scripts]
+gaime-builder = "gaime_builder.__main__:main"
+
+[tool.setuptools]
+packages = ["gaime_builder", "gaime_builder.core", "gaime_builder.screens", "gaime_builder.widgets", "gaime_builder.utils"]
+
+[tool.setuptools.package-data]
+"gaime_builder.core" = ["prompts/**/*.txt", "prompts/**/*.yaml"]

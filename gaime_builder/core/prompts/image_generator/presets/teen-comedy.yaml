@@ -1,0 +1,46 @@
+# teen-comedy.yaml - Teen Comedy Film style preset
+# Late 90s/early 2000s high school comedy aesthetic like American Pie, Can't Hardly Wait, 10 Things I Hate About You
+
+name: "Teen Comedy"
+description: "Late 90s/early 2000s teen comedy film aesthetic. Bright, warm cinematography with nostalgic golden-hour lighting. Perfect for lighthearted high school adventures."
+
+# L3: Mood
+mood:
+  tone: "lighthearted, nostalgic, warm, comedic, slightly irreverent"
+  lighting: "bright natural daylight, warm golden hour glow, soft shadows, slightly overexposed highlights, sunlight streaming through windows"
+  color_palette: "warm and saturated, golden yellows, soft oranges, blue skies, green grass, the warm tones of late 90s film stock"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Cinematic photography in the style of late 90s teen comedy films like American Pie
+  and 10 Things I Hate About You. Warm color grading with slightly lifted shadows.
+  Natural lighting that feels sunny and optimistic. The aesthetic should feel like
+  a film still from a beloved coming-of-age movie - nostalgic, warm, and inviting.
+  Shot on 35mm film with natural bokeh and gentle lens flares from sunlight.
+  The photographic quality is paramount.
+
+# L5: Technical
+technical:
+  perspective: "first-person"
+  shot: "medium wide shot"
+  camera: "eye level, 35mm lens"
+  effects: "subtle film grain, warm color grading, natural lens flare, soft focus backgrounds"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "dark or gritty"
+  - "horror or scary"
+  - "cartoon or animated"
+  - "anime or manga"
+  - "noir or high contrast"
+  - "cold blue tones"
+  - "dystopian or bleak"
+  - "overly stylized or artificial"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "distorted proportions"
+  - "modern smartphones or post-2005 technology"
+  - "harsh unflattering lighting"
