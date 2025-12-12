@@ -1,0 +1,53 @@
+badger_barnaby:
+  name: "Barnaby the Badger"
+  role: "Timekeeper of the Forest"
+  location: mossy_clearing
+  personality: "Grumpy, precise, anxious about lateness"
+  knowledge:
+    - "The Oak stopped singing at exactly 3:00 PM last Tuesday."
+    - "He saw a shiny thing wash down the brook towards the caves."
+  dialogue_hints:
+    greeting: "'Late! It's all running late! The seasons are stuck!'"
+
+owl_orion:
+  name: "Orion the Owl"
+  role: "Watcher of the Woods"
+  location: whispering_woods
+  personality: "Aloof, speaks in riddles, sleepy"
+  knowledge:
+    - "To wake the tree, one must return its heart."
+    - "The heart was stolen by a magpie who loves shiny things in dark places."
+  dialogue_hints:
+    greeting: "'Whooo walks beneath my branch? A fox with no song?'"
+
+witch_mokey:
+  name: "Mokey the Mushroom Witch"
+  role: "Alchemist"
+  location: witch_cottage
+  personality: "Scatterbrained, cheerful, slightly dangerous"
+  knowledge:
+    - "Moonlight can reveal hidden paths, if you have a jar of it."
+    - "She needs a shiny pebble to finish her soup."
+  dialogue_hints:
+    greeting: "'Add a pinch of... oh! A fox! Are you an ingredient?'"
+
+mole_miner:
+  name: "Monty the Mole"
+  role: "Excavator"
+  location: glitter_caves
+  personality: "Obsessive, near-sighted, loves textures"
+  knowledge:
+    - "There is a chamber ahead, but it's too bright for my eyes."
+    - "He found a golden nut but it was too hot to hold."
+  dialogue_hints:
+    greeting: "'Soft fur? Sniff sniff. You're not a rock.'"
+
+spirit_dryad:
+  name: "Elara the Dryad"
+  role: "Guardian of the Oak"
+  location: elder_grove
+  personality: "Ethereal, sorrowful, fading"
+  knowledge:
+    - "Place the Golden Acorn in the hollow to wake the tree."
+  dialogue_hints:
+    greeting: "'The silence... it is so heavy...'"

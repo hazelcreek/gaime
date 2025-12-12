@@ -1,0 +1,36 @@
+name: "Whistlewood Fable"
+theme: "Quaint Fairy Tale"
+
+# Visual style preset for image generation
+style: watercolor
+tone: "Whimsical, Gentle, Slightly Melancholic"
+
+premise: |
+  You are Finnick, a small fox with russet fur and clever eyes, living in the Whistlewood. The Great Singing Oak, which keeps the forest seasons turning, has fallen silent. Without its song, the forest is stuck in an eternal, chilly twilight. The colors are fading, and the fabulous creatures are losing their magic. You must restore the song before the Whistlewood turns grey forever.
+
+starting_situation: |
+  For weeks, the brambles surrounding the Elder Grove were impassable, thick with thorns of silence. But this morning, a single sunbeam pierced the grey clouds, causing one patch of brambles to wither just enough for a small fox to squeeze through. Now is your chance to slip out of your burrow area and find out why the Oak sleeps.
+
+victory:
+  location: elder_grove
+  item: golden_acorn
+  narrative: |
+    You place the Golden Acorn into the hollow of the Great Singing Oak. A warm hum vibrates through the bark. Suddenly, a melody bursts forth—a song of sun and rain. The grey lifts, leaves turn emerald and gold, and the forest breathes again. You curl up at the roots, a hero in a fox's skin.
+
+player:
+  starting_location: fox_burrow
+  starting_inventory:
+    - red_scarf
+
+constraints:
+  - "You are a fox; you cannot open heavy iron doors or fight large beasts."
+  - "Magic in this world responds to kindness and rhyme, not force."
+  - "Some creatures only speak if you offer them something shiny or sweet."
+
+commands:
+  help: "Display available commands"
+  look: "Sniff the air and examine surroundings"
+  inventory: "Check your pouch"
+  go: "Trot in a direction"
+  talk: "Yip at a creature"
+  take: "Grab with your mouth or paws"

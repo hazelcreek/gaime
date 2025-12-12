@@ -1,0 +1,141 @@
+fox_burrow:
+  name: "Finnick's Cozy Burrow"
+  atmosphere: |
+    Your home is a hollow beneath the roots of a sleeping willow. It smells of dried sage and warm earth. Outside, the world is unusually quiet and grey.
+  exits:
+    up: mossy_clearing
+  items:
+    - berry_basket
+  item_placements:
+    berry_basket: "rests near the entrance, half-filled with dried provisions"
+  npcs: []
+  npc_placements: {}
+  details:
+    roots: "Twisted willow roots that form the ceiling of your home."
+    up: "A tunnel leading up to the surface world, where the light is dim."
+
+mossy_clearing:
+  name: "The Mossy Clearing"
+  atmosphere: |
+    A circular glade cushioned by velvet moss. The air is still. To the north, the trees grow tall and strange. To the east, a bubbling sound suggests water.
+  exits:
+    down: fox_burrow
+    north: whispering_woods
+    east: babbling_brook
+  items: []
+  item_placements: {}
+  npcs:
+    - badger_barnaby
+  npc_placements:
+    badger_barnaby: "sits on a toadstool, grumbling at a pocket watch"
+  details:
+    moss: "Thick and soft, perfect for silent fox steps."
+    north: "The trees loom tall, their branches forming a dark archway."
+    east: "The sound of water trickles from the east, promising refreshment."
+    down: "The hidden entrance to your safe burrow."
+
+babbling_brook:
+  name: "The Babbling Brook"
+  atmosphere: |
+    A stream of water that literally speaks in hushed giggles flows here. Violet reeds line the banks. A stone bridge crosses to the further woods.
+  exits:
+    west: mossy_clearing
+    south: glitter_caves
+  items:
+    - shiny_pebble
+  item_placements:
+    shiny_pebble: "glints brightly from the muddy bank near the water's edge"
+  npcs: []
+  npc_placements: {}
+  details:
+    water: "The water whispers jokes you can't quite catch."
+    west: "The path leads back to the quiet clearing."
+    south: "A dark opening in the rocks leads into the Glitter Caves."
+
+whispering_woods:
+  name: "The Whispering Woods"
+  atmosphere: |
+    The trees here have faces in their bark and murmur secrets. The canopy is dense, blocking the grey sky. Fireflies drift aimlessly.
+  exits:
+    south: mossy_clearing
+    north: elder_grove
+    west: witch_cottage
+  items: []
+  item_placements: {}
+  npcs:
+    - owl_orion
+  npc_placements:
+    owl_orion: "perches high on a branch, head rotated completely backward"
+  details:
+    trees: "Ancient oaks with solemn faces carved by time."
+    south: "The way back to the clearing seems safer."
+    north: "A majestic, glowing aura emanates from the path north."
+    west: "A twist of chimney smoke marks the path to a cottage."
+
+witch_cottage:
+  name: "Mokey's Mushroom Cottage"
+  atmosphere: |
+    A house grown entirely from a giant red mushroom. The windows are made of crystallized sugar. It smells of cinnamon and sulfur.
+  exits:
+    east: whispering_woods
+  items:
+    - jar_of_moonlight
+  item_placements:
+    jar_of_moonlight: "sits on the windowsill, glowing with a soft, pale luminescence"
+  npcs:
+    - witch_mokey
+  npc_placements:
+    witch_mokey: "stirs a cauldron made of a pumpkin shell, muttering rhymes"
+  details:
+    cauldron: "Bubbling with a purple liquid that smells like grape soda."
+    east: "The dark woods await outside the cottage door."
+
+glitter_caves:
+  name: "The Glitter Caves"
+  atmosphere: |
+    Underground tunnels lined with crystals that hum. It is chilly here, but the walls provide enough light to see.
+  exits:
+    north: babbling_brook
+    east: crystal_chamber
+  items: []
+  item_placements: {}
+  npcs:
+    - mole_miner
+  npc_placements:
+    mole_miner: "digs frantically at a wall with a tiny silver shovel"
+  details:
+    crystals: "Sharp, glowing gems that vibrate when you get close."
+    north: "The exit leads back to the fresh air of the brook."
+    east: "The tunnel widens into a larger, brighter chamber."
+
+crystal_chamber:
+  name: "The Crystal Chamber"
+  atmosphere: |
+    A vast cavern where the ceiling looks like a starry night sky made of gems. In the center is a pedestal.
+  exits:
+    west: glitter_caves
+  items:
+    - golden_acorn
+  item_placements:
+    golden_acorn: "rests atop a pedestal of pure quartz, pulsing with warm light"
+  npcs: []
+  npc_placements: {}
+  details:
+    pedestal: "A smooth column of quartz rising from the floor."
+    west: "The tunnel leads back to the miner's area."
+
+elder_grove:
+  name: "The Elder Grove"
+  atmosphere: |
+    The heart of the forest. The Great Singing Oak dominates the view, its leaves grey and silent. The air is heavy with waiting.
+  exits:
+    south: whispering_woods
+  items: []
+  item_placements: {}
+  npcs:
+    - spirit_dryad
+  npc_placements:
+    spirit_dryad: "fades in and out of existence near the Oak's trunk, looking weeping"
+  details:
+    oak: "The massive tree looks like it is holding its breath."
+    south: "The whispering woods lie behind you."
