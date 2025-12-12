@@ -1,0 +1,49 @@
+# star-trek-tng.yaml - Star Trek: The Next Generation TV show aesthetic
+# Warm, optimistic 80s/90s sci-fi television set design with LCARS, soft studio lighting, and practical realism.
+
+name: "Star Trek: TNG (TV Show)"
+description: "Aesthetic inspired by Star Trek: The Next Generation: warm, optimistic Federation interiors, LCARS displays, practical starship sets, and a calm cinematic TV-still feeling."
+
+# L3: Mood - Emotional and atmospheric qualities
+mood:
+  tone: "optimistic, thoughtful, exploratory, calm under pressure, ethical"
+  lighting: "soft studio lighting with gentle falloff, practical set lighting, subtle rim light, minimal harsh shadows"
+  color_palette: "warm beige and soft grays, muted primaries, LCARS oranges/ambers/magentas as accents, clean whites and Federation blues"
+
+# L4: Style - Artistic medium (MOST IMPORTANT LAYER)
+style: |
+  High-quality illustration that feels like a still frame from a late-80s/90s science-fiction television show
+  set aboard a Federation starship. Practical set realism: carpeted decks, smooth bulkheads, LCARS panels,
+  and believable starship materials (brushed metal, composite panels, glass). The image should feel calm,
+  composed, and human — never grimdark. The artistic style is paramount and must remain consistent across
+  all locations in the world.
+
+# L5: Technical - Composition and camera
+technical:
+  perspective: "first-person"
+  shot: "medium wide shot"
+  camera: "eye level"
+  effects: "subtle film grain, slight diffusion/softness, gentle bloom on LCARS and starfield highlights"
+
+# L6: Anti-styles - What to AVOID (prevents style drift)
+anti_styles:
+  - "cyberpunk neon dystopia"
+  - "grimdark or horror lighting"
+  - "hard industrial grime and rust"
+  - "fantasy illustration"
+  - "medieval or historical costumes"
+  - "anime or manga"
+  - "cartoon or caricature"
+  - "high-poly 3D CGI / Unreal Engine look"
+  - "modern minimalist sleek smartphone UI (Apple-store sci-fi)"
+
+# L6: Quality constraints - Technical flaws to prevent
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "distorted proportions"
+  - "garbled readable text on screens (LCARS should be abstract, not legible words)"
+  - "extra limbs or malformed hands"
+  - "overly saturated neon colors"
+
+

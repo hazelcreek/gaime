@@ -1,0 +1,175 @@
+combadge:
+  name: "Starfleet Combadge"
+  portable: true
+  examine: |
+    A small Starfleet delta worn at the chest. It is deceptively simple: communicator, locator,
+    and symbol. A single tap can connect you to the ship’s voice — and to its expectations.
+  found_description: "Your combadge sits at your chest, ready to connect you to the ship"
+  take_description: "It’s already clipped to your uniform"
+
+cadet_padd:
+  name: "Cadet PADD"
+  portable: true
+  examine: |
+    A Starfleet-issued PADD preloaded with your duty schedule, training modules, and the kind of
+    procedural checklists that feel dull right up until they save a life.
+  found_description: "A Starfleet PADD is in your hand, its LCARS interface awaiting input"
+  take_description: "You secure the PADD in your hand"
+
+starfleet_field_manual:
+  name: "Starfleet Field Manual"
+  portable: true
+  examine: |
+    A compact manual of principles and practice: emergency protocols, ethical guidelines, and
+    reminders that procedure exists to protect people, not to replace thinking.
+  found_description: "Your field manual is tucked neatly in your kit, well-thumbed already"
+  take_description: "You already have the manual"
+
+academy_commencement_pin:
+  name: "Academy Commencement Pin"
+  portable: true
+  examine: |
+    A small metal pin issued at graduation: understated, a little old-fashioned, and strangely heavy
+    for its size. The design is simple — Starfleet delta over the Academy seal — but the meaning is
+    personal. It reminds you of sleepless nights, impossible exams, and the moment you realized that
+    competence isn’t the same thing as confidence.
+  found_description: "A small Academy pin is secured to your kit, more sentimental than practical"
+  take_description: "It’s already yours — you keep it close without thinking"
+
+family_holochip:
+  name: "Family Holochip"
+  portable: true
+  examine: |
+    A tiny holochip containing a short message from home: awkward encouragement, ordinary affection,
+    and the quiet faith that you’ll be fine even if you’re terrified. It’s the kind of thing you
+    would never admit helps — which is exactly why it does.
+  found_description: "A small holochip sits in your pocket, warm from your body heat"
+  take_description: "You already have it"
+
+tricorder:
+  name: "Tricorder"
+  portable: true
+  examine: |
+    A standard Starfleet tricorder: sensors, diagnostics, and analysis in a handheld frame.
+    It can’t replace judgment — but it can turn vague suspicion into measurable truth.
+  found_description: "A tricorder rests in a wall-mounted diagnostic cradle"
+  take_description: "You lift the tricorder from its cradle, feeling its familiar weight"
+
+insulated_gloves:
+  name: "Insulated Gloves"
+  portable: true
+  examine: |
+    Thick, flexible gloves designed to protect hands from heat and electrical discharge.
+    They smell faintly of polymer and the last emergency they were used in.
+  found_description: "A pair of insulated gloves sits in an emergency kit compartment"
+  take_description: "You pull on the insulated gloves, flexing your fingers to test the fit"
+
+briefing_padd:
+  name: "Briefing PADD"
+  portable: true
+  examine: |
+    A PADD prepared for a senior staff briefing. It contains a concise incident summary template:
+    observations, hypotheses, actions taken, and ethical considerations — as if the ship expects
+    every technical problem to have a moral shadow.
+  found_description: "A PADD set aside for the next briefing rests on a side console"
+  take_description: "You take the briefing PADD, careful not to smudge its pristine screen"
+
+engineering_access_padd:
+  name: "Engineering Access PADD"
+  portable: true
+  examine: |
+    A temporary authorization PADD tagged to Engineering protocols. The permissions are narrow and
+    time-limited: just enough to do necessary work, not enough to do something irreversible.
+  found_description: "A temporary Engineering access PADD is secured near Ops, flagged for incident use"
+  take_description: "You take the Engineering access PADD; its permissions authenticate with a soft chime"
+
+engineering_toolkit:
+  name: "Engineering Toolkit"
+  portable: true
+  examine: |
+    A compact kit of precision tools: field spanners, diagnostic leads, an isolinear contact brush,
+    and a small graviton clamp. It’s the kind of kit that says: problems can be solved by hands and
+    patience, not just by heroics.
+  found_description: "An engineering toolkit sits open on a console, tools neatly slotted"
+  take_description: "You secure the toolkit, double-checking each tool is locked in place"
+
+replacement_isolinear_chip:
+  name: "Replacement Isolinear Chip"
+  portable: true
+  hidden: true
+  find_condition:
+    requires_flag: retrieved_replacement_chip
+  examine: |
+    A slim, durable isolinear chip: logic pathways etched into matter. It looks unimpressive until
+    you remember it can change how an entire ship thinks about power.
+  found_description: "A replacement isolinear chip rests in foam inside a labeled storage drawer"
+  take_description: "You take the replacement isolinear chip and close the drawer carefully"
+
+plasma_injector_regulator:
+  name: "Plasma Injector Regulator"
+  portable: true
+  examine: |
+    A specialized regulator used to smooth plasma flow fluctuations. In the wrong hands it’s a
+    hazard; in the right hands it’s a quiet promise that systems can be brought back into harmony.
+  found_description: "A plasma injector regulator is secured in a diagnostic cradle by the control panel"
+  take_description: "You detach the regulator from its cradle, mindful of its calibration"
+
+phase_inverter:
+  name: "Phase Inverter"
+  portable: true
+  hidden: true
+  find_condition:
+    requires_flag: found_feedback_path
+  examine: |
+    A compact engineering component used to invert and cancel phase-aligned feedback. It’s a
+    deceptively simple answer to a complex problem: meet the loop with its own mirror.
+  found_description: "A phase inverter is clipped to a maintenance strap near a junction box"
+  take_description: "You unclip the phase inverter and stow it securely"
+
+holodeck_safety_key:
+  name: "Holodeck Safety Key"
+  portable: true
+  examine: |
+    A physical interlock key for holodeck safety systems. It’s old-fashioned on purpose: a reminder
+    that some safeguards should exist beyond software — beyond persuasion — beyond error.
+  found_description: "A physical safety key sits recessed in the holodeck arch’s interlock slot"
+  take_description: "You carefully remove the safety key and keep it close"
+
+data_crystal:
+  name: "High-Density Data Crystal"
+  portable: true
+  examine: |
+    A storage crystal designed for secure, high-fidelity archival: not just data, but patterns of
+    behavior, memory states, and contextual metadata. In other words: a chance to preserve something
+    without letting it roam.
+  found_description: "A padded case contains a high-density data crystal, kept ready for careful use"
+  take_description: "You take the data crystal case, as if handling a fragile moral argument"
+
+hypospray:
+  name: "Hypospray"
+  portable: true
+  examine: |
+    A medical hypospray — compact, precise, and intentionally non-intimidating. It can deliver a
+    dose with minimal discomfort. Even its design suggests that care should not feel like force.
+  found_description: "A hypospray rests on a sterilized tray beside a biobed"
+  take_description: "You take the hypospray, careful to keep it sterile"
+
+synthcoffee:
+  name: "Synthehol Coffee"
+  portable: false
+  examine: |
+    A warm cup that smells like coffee and tastes like a convincing attempt at comfort. It won’t
+    solve the problem, but it might steady your hands long enough to solve it yourself.
+  found_description: "A cup of synthehol coffee steams quietly on a nearby table"
+  take_description: "You carry it carefully, trying not to spill"
+
+earl_grey_tea:
+  name: "Earl Grey Tea"
+  portable: false
+  examine: |
+    Hot tea, fragrant and calm. It tastes like civilization insisting on itself, even when the ship
+    is under strain.
+  found_description: "A cup of tea sits steaming beside the desk"
+  take_description: "You lift the cup carefully"
+
+
