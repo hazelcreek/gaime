@@ -833,9 +833,11 @@ def _npc_default_present_at_location(npc_data: dict, location_id: str) -> bool:
     """
     Check if an NPC is present by DEFAULT at a location (before any conditions apply).
     
-    This is used to determine the correct image variant strategy:
-    - If default present: base image HAS the NPC, variant is WITHOUT
-    - If default absent: base image is WITHOUT the NPC, variant is WITH
+    This determines whether to generate a "with NPC" or "without NPC" variant:
+    - If default present: base image HAS the NPC, so we generate a "without" variant
+    - If default absent: base image is WITHOUT the NPC, so we generate a "with" variant
+    
+    Note: The base image is always shown when no conditional NPCs are currently visible.
     
     An NPC is present by default if:
     - Their starting `location` matches this location (for location_changes NPCs)
@@ -977,8 +979,12 @@ class ImageVariantManifest:
     Variant format: {"npcs": [...], "image": "...", "default": bool}
     - npcs: List of NPC IDs shown in this variant
     - image: Filename of the variant image
-    - default: If True, this variant should be shown when the NPC is present by default
-               (e.g., Picard on the bridge before he moves to the ready room)
+    - default: If True, this NPC is present by default at this location (metadata for
+               external code to use when initializing game state)
+    
+    The appropriate variant is selected based on which NPCs are currently visible
+    at the location according to game state. If no conditional NPCs are visible,
+    the base image is shown.
     
     Base image always has NO conditional NPCs (only unconditional ones).
     """
@@ -1013,21 +1019,15 @@ class ImageVariantManifest:
         """
         visible_set = set(visible_npc_ids)
         
-        # First pass: exact or subset matches based on visible NPCs
+        # Find variant with exact NPC match
         for variant in self.variants:
             variant_npcs = set(variant.get("npcs", []))
-            # If all NPCs in this variant are visible, use this variant
-            if variant_npcs and variant_npcs.issubset(visible_set):
+            # Only use this variant if the NPCs match exactly
+            if variant_npcs == visible_set:
                 return variant["image"]
         
-        # Second pass: if no visible NPCs match, check for default variant
-        # This handles the case where NPCs are "present by default" at a location
-        if not visible_set:
-            for variant in self.variants:
-                if variant.get("default", False):
-                    return variant["image"]
-        
-        # No variant match - return base image
+        # No exact match - return base image
+        # This includes the case where visible_set is empty (no NPCs present)
         return self.base
 
 
@@ -1179,10 +1179,10 @@ async def generate_location_variants(
     - Base image WITHOUT any conditional NPCs (only unconditional ones)
     - "With" variants for each conditional NPC (added via image editing)
     
-    The manifest tracks which NPCs are "default present" so the runtime knows
-    which image to show initially:
-    - For "present by default" NPCs: show the "with" variant initially
-    - For "absent by default" NPCs: show the base image initially
+    The runtime selects the appropriate image based on which NPCs are currently
+    visible at the location according to game state:
+    - If conditional NPCs are visible: show the matching variant
+    - If no conditional NPCs are visible: show the base image
     
     Args:
         world_id: ID of the world
@@ -1370,13 +1370,13 @@ async def generate_location_variants(
                 print(f"    - Full regeneration also failed: {e2}")
         
         if variant_generated:
-            # Track whether this NPC is present by default
+            # Track whether this NPC is present by default (for external use)
             is_default = npc_id in default_present_npcs
             
             manifest.variants.append({
                 "npcs": [npc_id],
                 "image": variant_filename,
-                "default": is_default  # True = show this variant initially
+                "default": is_default
             })
             print(f"    - Manifest updated (default={is_default})")
         
