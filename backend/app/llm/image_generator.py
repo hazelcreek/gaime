@@ -795,11 +795,21 @@ def _npc_is_conditional_at_location(npc_data: dict, location_id: str) -> bool:
     """
     Check if an NPC is conditional (needs image variants) at a specific location.
     
-    An NPC is conditional at a location if:
+    An NPC is CONDITIONAL (requires a variant image) at a location if their presence
+    can change during gameplay. This happens when:
+    
     1. They have `appears_when` conditions (standard conditional appearance)
     2. They have `location_changes` that involve this location:
-       - At their starting location: only if a change moves them AWAY (to a different location)
-       - At a move_to destination: only if they're arriving FROM somewhere else
+       - At their starting location: if they can move AWAY to a different location
+       - At a destination location: if they can arrive here FROM somewhere else
+    
+    IMPORTANT: "Starting location" does NOT mean "unconditional". If an NPC starts
+    at a location but can later move away, they are CONDITIONAL there:
+    - Base image: NO NPC (for when they're absent)
+    - Variant image: WITH NPC (loaded when they're present)
+    
+    The starting location only determines which variant to LOAD by default at game
+    start, not whether they belong in base vs variant images.
     """
     # Standard conditional: has appears_when
     if npc_data.get("appears_when"):
@@ -816,14 +826,14 @@ def _npc_is_conditional_at_location(npc_data: dict, location_id: str) -> bool:
             for change in location_changes:
                 move_to = change.get("move_to")
                 if move_to and move_to != starting_location:
-                    # This change moves them away from here
+                    # This change moves them away from here - they're conditional
                     return True
         
         # Check if this location is a move_to destination FROM somewhere else
         for change in location_changes:
             move_to = change.get("move_to")
             if move_to == location_id and starting_location != location_id:
-                # They arrive here from their starting location
+                # They arrive here from their starting location - conditional
                 return True
     
     return False
@@ -831,15 +841,21 @@ def _npc_is_conditional_at_location(npc_data: dict, location_id: str) -> bool:
 
 def _npc_default_present_at_location(npc_data: dict, location_id: str) -> bool:
     """
-    Check if an NPC is present by DEFAULT at a location (before any conditions apply).
+    Check if an NPC is present at a location at GAME START (initial state).
     
-    This determines whether to generate a "with NPC" or "without NPC" variant:
-    - If default present: base image HAS the NPC, so we generate a "without" variant
-    - If default absent: base image is WITHOUT the NPC, so we generate a "with" variant
+    This is used for the variant manifest to determine which variant to LOAD
+    by default when the player first enters a location. It does NOT affect
+    which image the NPC appears in (base vs variant).
     
-    Note: The base image is always shown when no conditional NPCs are currently visible.
+    Image generation logic (separate from this function):
+    - Base image: ONLY unconditional NPCs (those who can NEVER leave)
+    - Variant images: one for each conditional NPC (those who can be absent)
     
-    An NPC is present by default if:
+    This function determines: at game start, is this conditional NPC present?
+    - If yes: load the "with NPC" variant initially
+    - If no: load the base image initially
+    
+    An NPC is present by default (at game start) if:
     - Their starting `location` matches this location (for location_changes NPCs)
     - The location is in their `locations` list (multi-location NPCs)
     - They DON'T have `appears_when` (which means absent by default)
