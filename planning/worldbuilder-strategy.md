@@ -2,7 +2,7 @@
 
 **Status**: Planning Document  
 **Created**: December 2025  
-**Related**: [World Builder Agent Refactor](../ideas/world-builder-agent-refactor.md) | [TUI Plan](../.cursor/plans/buil_25f78b41.plan.md)
+**Related**: [World Builder Agent Refactor](../ideas/world-builder-agent-refactor.md)
 
 ---
 
