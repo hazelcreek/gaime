@@ -322,19 +322,12 @@ class ActionProcessor:
         
         # Location change
         if changes.location:
-            print(f"DEBUG: Attempting location change from '{state.current_location}' to '{changes.location}'")
             can_access, access_reason = self.state_manager.can_access_location(changes.location)
-            print(f"DEBUG: can_access={can_access}, reason='{access_reason}'")
             if can_access:
                 # Update location directly on the state manager's internal state
-                old_location = self.state_manager._state.current_location
                 self.state_manager._state.current_location = changes.location
-                print(f"DEBUG: Location updated: {old_location} -> {self.state_manager._state.current_location}")
                 if changes.location not in state.discovered_locations:
                     state.discovered_locations.append(changes.location)
-            else:
-                # Log access denial for debugging
-                print(f"WARNING: Location change to '{changes.location}' denied: {access_reason}")
         
         # Flag changes
         for flag, value in changes.flags.items():
