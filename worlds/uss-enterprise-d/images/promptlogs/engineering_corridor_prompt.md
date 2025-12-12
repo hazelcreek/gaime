@@ -20,7 +20,7 @@ World Context: Star Trek: The Next Generation — life aboard a Federation stars
 
 Mood: The atmosphere is optimistic, thoughtful, exploratory, calm under pressure, ethical. soft studio lighting with gentle falloff, practical set lighting, subtle rim light, minimal harsh shadows. The color palette features warm beige and soft grays, muted primaries, LCARS oranges/ambers/magentas as accents, clean whites and Federation blues.
 
-Artistic style (most important): High-quality illustration that feels like a still frame from a late-80s/90s science-fiction television show
+Artistic style (most important): High-quality photographic image that feels like a still frame from a late-80s/90s science-fiction television show
 set aboard a Federation starship. Practical set realism: carpeted decks, smooth bulkheads, LCARS panels,
 and believable starship materials (brushed metal, composite panels, glass). The image should feel calm,
 composed, and human — never grimdark. The artistic style is paramount and must remain consistent across
