@@ -16,6 +16,7 @@ from app.models.world import (
     InteractionEffect,
     NPCPersonality,
     NPCTrust,
+    NPCLocationChange,
     ItemProperty,
     ItemUseAction,
     ItemClue,
@@ -184,7 +185,9 @@ class WorldLoader:
                 npcs=loc_data.get("npcs", []),
                 details=loc_data.get("details", {}),
                 interactions=interactions,
-                requires=requires
+                requires=requires,
+                item_placements=loc_data.get("item_placements", {}) or {},
+                npc_placements=loc_data.get("npc_placements", {}) or {}
             )
         
         return locations
@@ -233,6 +236,18 @@ class WorldLoader:
                         condition=cond.get("condition", ""),
                         value=cond.get("value", True)
                     ))
+
+            # Parse trigger-based location changes
+            location_changes = []
+            for change in npc_data.get("location_changes", []):
+                if isinstance(change, dict):
+                    # move_to can be a location_id string or null to remove NPC
+                    location_changes.append(
+                        NPCLocationChange(
+                            when_flag=change.get("when_flag", ""),
+                            move_to=change.get("move_to")
+                        )
+                    )
             
             npcs[npc_id] = NPC(
                 name=npc_data.get("name", npc_id),
@@ -245,7 +260,8 @@ class WorldLoader:
                 dialogue_rules=npc_data.get("dialogue_rules", []),
                 trust=trust,
                 appears_when=appears_when,
-                behavior=npc_data.get("behavior", "")
+                behavior=npc_data.get("behavior", ""),
+                location_changes=location_changes
             )
         
         return npcs
