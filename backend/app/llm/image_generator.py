@@ -458,6 +458,9 @@ async def generate_location_image(
         config = types.GenerateContentConfig(
             temperature=1.0,
             response_modalities=["IMAGE"],  # Explicitly request image output
+            image_config=types.ImageConfig(
+                aspect_ratio="16:9"  # Generate 16:9 images for game layout
+            ),
             safety_settings=[
                 types.SafetySetting(
                     category="HARM_CATEGORY_HARASSMENT",
@@ -573,8 +576,16 @@ async def generate_location_image(
                     await asyncio.sleep(delay)
                     continue
                 raise last_error
-            except ImageGenerationError:
-                raise  # Don't retry our own errors
+            except ImageGenerationError as img_error:
+                # Check if this is a retryable error and we have retries left
+                if img_error.is_retryable and attempt < MAX_RETRIES - 1:
+                    delay = min(INITIAL_RETRY_DELAY * (2 ** attempt) + random.uniform(0, 1), MAX_RETRY_DELAY)
+                    logger.info(f"[ImageGen] Retryable ImageGenerationError ({img_error.status_code}), waiting {delay:.1f}s before retry...")
+                    await asyncio.sleep(delay)
+                    last_error = img_error
+                    continue
+                # Non-retryable error or retries exhausted
+                raise
             except Exception as api_error:
                 error_str = str(api_error)
                 logger.warning(f"[ImageGen] API error on attempt {attempt + 1}/{MAX_RETRIES}: {error_str}")
@@ -1469,6 +1480,9 @@ async def _generate_variant_image(
     config = types.GenerateContentConfig(
         temperature=1.0,
         response_modalities=["IMAGE"],  # Explicitly request image output
+        image_config=types.ImageConfig(
+            aspect_ratio="16:9"  # Generate 16:9 images for game layout
+        ),
         safety_settings=[
             types.SafetySetting(
                 category="HARM_CATEGORY_HARASSMENT",
