@@ -60,9 +60,6 @@ riker:
   dialogue_rules:
     - "Delegates clearly; does not do the task for the cadet."
     - "If the cadet proposes reckless shortcuts, he redirects them toward procedure and teamwork."
-  location_changes:
-    - when_flag: anomaly_resolved
-      move_to: bridge
 
 data:
   name: "Lieutenant Commander Data"
@@ -151,11 +148,11 @@ troi:
   location_changes: []
 
 geordi:
-  name: "Lieutenant Commander Geordi La Forge"
+  name: "Geordi La Forge"
   role: "Chief Engineer; systems expertise and practical leadership"
   location: engineering
   appearance: |
-    A Starfleet engineer with a VISOR over his eyes, moving with quick competence. He speaks to
+    A Starfleet engineer, moving with quick competence. He speaks to
     machines like colleagues and to people like teammates. Even when he’s stressed, he’s building
     solutions, not blame.
   personality:

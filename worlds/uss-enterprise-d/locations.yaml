@@ -3,7 +3,7 @@ cadet_quarters:
   atmosphere: |
     Compact, immaculate, and quietly personal — a Starfleet-issue cabin softened by small choices.
     Your uniform hangs perfectly aligned. A PADD rests beside a neatly folded field manual. Through
-    a narrow viewport, the stars are steady and indifferent to human schedules. The ship’s carpeted
+    a narrow viewport, the stars are steady and indifferent to human schedules. The ship's carpeted
     deck and gentle ambient hum make even urgency feel… civilized.
   exits:
     west: main_corridor
@@ -29,7 +29,7 @@ cadet_quarters:
 main_corridor:
   name: "Main Corridor (Deck 9)"
   atmosphere: |
-    A wide, softly lit corridor curves with the ship’s saucer section. LCARS panels glow in warm
+    A wide, softly lit corridor curves with the ship's saucer section. LCARS panels glow in warm
     oranges and muted reds. Crew members move with efficient calm, exchanging brief nods and clipped
     updates — professional, not fearful. Somewhere deeper in the ship, the ambient hum wavers like a
     cello string touched by an unsteady hand.
@@ -53,7 +53,7 @@ main_corridor:
     conduit_hum: "A faint vibration runs through the bulkhead: EPS flow, a living river under the deck."
     north: "The turbolift doors stand ready, their seams lit by a thin line of white."
     south: "The corridor opens toward Ten Forward; you can almost hear the low murmur of conversation."
-    west: "A red medical marker indicates Sickbay’s entrance."
+    west: "A red medical marker indicates Sickbay's entrance."
     up: "A corridor branch leads toward the holodecks; the lighting there seems subtly colder."
     down: "A maintenance access hatch is set into the deck plating — normally secured and ignored."
   interactions:
@@ -73,7 +73,7 @@ main_corridor:
         - "open jeffries hatch"
         - "pry open hatch"
         - "access hatch"
-      narrative_hint: "The hatch is warm to the touch. You’ll want insulated protection before opening it fully."
+      narrative_hint: "The hatch is warm to the touch. You'll want insulated protection before opening it fully."
       sets_flag: opened_jeffries_hatch
   requires:
     flag: acknowledged_call
@@ -83,7 +83,7 @@ turbolift:
   atmosphere: |
     A clean, compact lift car lined with smooth panels and subtle illumination. The control interface
     offers destinations in calm LCARS categories. Normally, the turbolift feels like effortless
-    certainty — today, there’s a slight hesitation in its response, like a breath held too long.
+    certainty — today, there's a slight hesitation in its response, like a breath held too long.
   exits:
     south: main_corridor
     up: bridge
@@ -95,8 +95,8 @@ turbolift:
   details:
     controls: "A responsive LCARS interface awaiting your destination."
     speakers: "A soft chime that usually reassures — now just a touch delayed."
-    up: "The turbolift route to the Bridge — the ship’s nerve center."
-    down: "A route toward Engineering, deeper into the ship’s humming heart."
+    up: "The turbolift route to the Bridge — the ship's nerve center."
+    down: "A route toward Engineering, deeper into the ship's humming heart."
     south: "Back out into the corridor traffic."
   interactions:
     call_destination:
@@ -133,11 +133,11 @@ bridge:
     - worf
     - troi
   npc_placements:
-    picard: "stands near the captain’s chair, hands loosely clasped behind his back, watching the stars like an old friend"
+    picard: "stands near the captain's chair, hands loosely clasped behind his back, watching the stars like an old friend"
     riker: "leans over the central rail, posture relaxed but eyes sharp, coordinating quiet reports"
     data: "stands at Ops, fingers moving with precise economy across the LCARS interface"
     worf: "holds position at Tactical, rigid and vigilant, gaze scanning for threats that may not exist"
-    troi: "stands slightly apart, attentive to the room’s emotional weather as much as the ship’s"
+    troi: "stands slightly apart, attentive to the room's emotional weather as much as the ship's"
   details:
     viewscreen: "A starfield that should be reassuring — and yet feels like a question."
     captain_chair: "A simple seat, more symbolic than luxurious."
@@ -145,7 +145,7 @@ bridge:
     tactical: "Weapons and defensive systems — used reluctantly, but maintained flawlessly."
     east: "The Ready Room door — private, quiet, and weighty with responsibility."
     west: "The Observation Lounge — where decisions gain their context."
-    down: "The turbolift back toward the ship’s decks."
+    down: "The turbolift back toward the ship's decks."
   interactions:
     receive_orders:
       triggers:
@@ -185,7 +185,7 @@ observation_lounge:
       sets_flag: anomaly_resolved
 
 ready_room:
-  name: "Captain’s Ready Room"
+  name: "Captain's Ready Room"
   atmosphere: |
     Warm wood tones and quiet order. Books — real books — are shelved with care. A small desk sits
     beneath soft lighting, and a cup of tea waits with the patience of habit. This is not a place of
@@ -241,7 +241,7 @@ engineering:
   atmosphere: |
     Main Engineering feels like standing inside a controlled star. The warp core rises like a luminous
     pillar, blue light pulsing with restrained power. Consoles ring the space, and above, catwalks
-    and conduits form a practical cathedral. The crew’s competence is almost a kind of prayer.
+    and conduits form a practical cathedral. The crew's competence is almost a kind of prayer.
   exits:
     south: engineering_corridor
     north: warp_core
@@ -254,14 +254,14 @@ engineering:
     - geordi
     - obrien
   npc_placements:
-    geordi: "stands at the main diagnostic console, visor angled toward the warp core’s shifting light"
+    geordi: "stands at the main diagnostic console, visor angled toward the warp core's shifting light"
     obrien: "moves between panels with practical speed, hands steady and unglamorous in their competence"
   details:
-    warp_core: "The warp core’s glow is steady — for now — but you can feel the system compensating."
+    warp_core: "The warp core's glow is steady — for now — but you can feel the system compensating."
     consoles: "LCARS readouts show EPS load spikes rippling outward like waves."
     catwalks: "Metal catwalks above, with conduits and access points to half the ship."
     north: "A reinforced accessway toward the warp core control alcove."
-    east: "A corridor leading toward the ship’s computer core and its isolinear pathways."
+    east: "A corridor leading toward the ship's computer core and its isolinear pathways."
     south: "Back out to the engineering corridor."
   interactions:
     coordinate_repairs:
@@ -277,9 +277,9 @@ engineering:
 warp_core:
   name: "Warp Core Access Alcove"
   atmosphere: |
-    Behind reinforced panels, the warp core’s presence is louder — not in volume, but in consequence.
+    Behind reinforced panels, the warp core's presence is louder — not in volume, but in consequence.
     Every flicker of light is an equation made physical. The safety fields hold with quiet confidence,
-    but EPS indicators show a feedback pattern that shouldn’t exist outside a simulation.
+    but EPS indicators show a feedback pattern that shouldn't exist outside a simulation.
   exits:
     south: engineering
   requires:
@@ -339,9 +339,9 @@ computer_core:
 ten_forward:
   name: "Ten Forward"
   atmosphere: |
-    A wide room of conversation and starlight, with the curve of the saucer’s windows giving the
+    A wide room of conversation and starlight, with the curve of the saucer's windows giving the
     galaxy a gentle, social intimacy. The lighting is warm. The mood is relaxed — even when the ship
-    isn’t. People come here to remember they are more than their duty rosters.
+    isn't. People come here to remember they are more than their duty rosters.
   exits:
     north: main_corridor
     east: ten_forward_celebration
@@ -354,11 +354,11 @@ ten_forward:
   npcs:
     - guinan
   npc_placements:
-    guinan: "stands behind the bar, composed and watchful, as if she can hear decisions forming before they’re spoken"
+    guinan: "stands behind the bar, composed and watchful, as if she can hear decisions forming before they're spoken"
   details:
     bar: "A polished bar with bottles that are mostly stories and a few that are genuinely excellent."
     windows: "A panoramic view of stars that makes even uncertainty feel survivable."
-    north: "Back into the corridor and the ship’s purposeful motion."
+    north: "Back into the corridor and the ship's purposeful motion."
     east: "A corner area where tables can be pushed together — a place the crew claims when they want to be together about something."
   interactions:
     seek_perspective:
@@ -367,13 +367,13 @@ ten_forward:
         - "ask guinan"
         - "seek advice"
         - "ask for perspective"
-      narrative_hint: "Guinan’s advice won’t be technical — it will be about what kind of solution you choose when you could choose an easy one."
+      narrative_hint: "Guinan's advice won't be technical — it will be about what kind of solution you choose when you could choose an easy one."
       sets_flag: sought_perspective
 
 ten_forward_celebration:
   name: "Ten Forward (Celebration)"
   atmosphere: |
-    The same room, but changed by context. The ship’s hum is steady again, and the crew’s posture has
+    The same room, but changed by context. The ship's hum is steady again, and the crew's posture has
     shifted from problem-solving to togetherness. A corner table has been claimed for an impromptu
     celebration — small, sincere, and unmistakably Starfleet: pride in the work, gratitude for each
     other, and the quiet belief that doing the right thing matters.
@@ -396,8 +396,8 @@ sickbay:
   name: "Sickbay"
   atmosphere: |
     Clean, bright, and quietly reassuring. The biobeds and monitors look clinical, but the human
-    energy here is gentle: care as a discipline. The ship’s instability reaches even this far — a
-    minor fluctuation in the lights — but Sickbay’s calm is a kind of shield.
+    energy here is gentle: care as a discipline. The ship's instability reaches even this far — a
+    minor fluctuation in the lights — but Sickbay's calm is a kind of shield.
   exits:
     east: main_corridor
   items:
@@ -441,7 +441,7 @@ holodeck_corridor:
   details:
     indicator: "A warning indicator: holodeck safety interlocks are reporting an error state."
     door: "The holodeck door — sealed unless you have authorization."
-    north: "Into the holodeck — if you’re cleared to enter."
+    north: "Into the holodeck — if you're cleared to enter."
     down: "Back to the main corridor."
   interactions:
     request_holodeck_access:
@@ -456,11 +456,11 @@ holodeck_corridor:
 holodeck:
   name: "Holodeck 2"
   atmosphere: |
-    The moment you step inside, the ship’s clean geometry dissolves. The holodeck projects a world
+    The moment you step inside, the ship's clean geometry dissolves. The holodeck projects a world
     with convincing confidence — and today that confidence has turned stubborn. The arch is present,
     but its controls lag, as if arguing. The simulation is running with a fraction too much reality:
     edges feel sharp, light feels heavy, and the air holds the charged stillness of a storm that
-    hasn’t decided where to break.
+    hasn't decided where to break.
   exits:
     south: holodeck_corridor
   requires:
@@ -472,7 +472,7 @@ holodeck:
   npcs:
     - elysian_echo
   npc_placements:
-    elysian_echo: "stands just beyond the arch’s projected boundary, edges flickering as if the holodeck is struggling to keep them whole; their gaze darts to the control arch with unmistakable fear"
+    elysian_echo: "stands just beyond the arch's projected boundary, edges flickering as if the holodeck is struggling to keep them whole; their gaze darts to the control arch with unmistakable fear"
   details:
     arch: "The holodeck control arch — an exit, a boundary, and today an argument."
     panel: "A sliding access panel that protects physical safety interlocks from casual hands."
@@ -504,7 +504,7 @@ holodeck:
         - "grant dignity"
         - "promise you will be reviewed"
         - "promise starfleets will decide ethically"
-      narrative_hint: "A dignified option is to preserve the entity’s pattern in a secure data crystal rather than deleting it — and to promise future ethical review. You will need the data_crystal."
+      narrative_hint: "A dignified option is to preserve the entity's pattern in a secure data crystal rather than deleting it — and to promise future ethical review. You will need the data_crystal."
       sets_flag: ethical_resolution_complete
     access_safety_interlock:
       triggers:
@@ -518,7 +518,7 @@ holodeck:
 jeffries_hatch:
   name: "Jeffries Tube Access"
   atmosphere: |
-    The maintenance hatch opens onto a narrow, utilitarian tunnel — the ship’s hidden anatomy.
+    The maintenance hatch opens onto a narrow, utilitarian tunnel — the ship's hidden anatomy.
     Cables and conduits run like veins. The air is warm and smells faintly of ozone. It is not
     glamorous work, but it is honest: the kind of place that proves ideals require infrastructure.
   exits:
@@ -531,7 +531,7 @@ jeffries_hatch:
   npcs: []
   npc_placements: {}
   details:
-    ladder: "A short ladder down into the ship’s maintenance space."
+    ladder: "A short ladder down into the ship's maintenance space."
     conduit: "An EPS conduit wrapped in insulation, vibrating with too much load."
     up: "Back to the corridor and normal ship life."
     north: "Deeper into the Jeffries tubes."
@@ -539,10 +539,14 @@ jeffries_hatch:
 jeffries_tube:
   name: "Jeffries Tubes"
   atmosphere: |
-    Cramped and metallic, the Jeffries tubes demand patience and breath control. Light comes from
-    spaced-out utility strips, leaving long shadows between junctions. Every few meters there’s an
-    access panel, a diagnostic port, a manual override — small reminders that the ship can be
-    understood and repaired by hands, not only by genius.
+    A horizontal maintenance tube with a hexagonal cross-section, approximately one meter in diameter —
+    far too narrow to stand, forcing you to crawl on hands and knees. The bare metal walls curve close
+    on all sides; your shoulders nearly touch both walls at once. Metal ladder rungs are welded to the
+    tube walls for climbing vertical sections. Bundles of ODN cables and EPS conduits run along the
+    ceiling just above your head. Recessed utility lights every few meters cast harsh pools of white
+    in an otherwise dim tunnel. Access hatches, junction boxes, and manual bypass panels are set into
+    the hexagonal walls at intervals. This is a maintenance crawlspace, not a corridor — cramped,
+    industrial, and claustrophobic. The bare duranium plating hums with power transfer.
   exits:
     south: jeffries_hatch
     north: engineering
@@ -554,9 +558,11 @@ jeffries_tube:
   npc_placements: {}
   details:
     junction_box: "A junction box with scorch marks: evidence of a brief but intense feedback surge."
-    access_ports: "Ports for diagnostics and manual rerouting — if you know what you’re doing."
-    north: "A maintenance access route that emerges near Engineering."
-    south: "Back toward the main corridor."
+    access_ports: "Ports for diagnostics and manual rerouting — if you know what you're doing."
+    tube_structure: "Hexagonal metal tube walls press in from all sides — you can touch both walls with your elbows while crawling."
+    cables: "ODN cables and EPS conduits bundled overhead, close enough to bump your head on."
+    north: "The tube stretches ahead into shadow — more crawling on hands and knees."
+    south: "Back toward the access hatch and the corridor above."
   interactions:
     examine_scorch_marks:
       triggers:
@@ -566,5 +572,3 @@ jeffries_tube:
         - "look at scorch marks"
       narrative_hint: "These scorch marks suggest a feedback path — the holodeck might be involved."
       sets_flag: found_feedback_path
-
-
