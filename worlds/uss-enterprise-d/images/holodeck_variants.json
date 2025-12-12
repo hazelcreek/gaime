@@ -1,0 +1,13 @@
+{
+  "location_id": "holodeck",
+  "base": "holodeck.png",
+  "variants": [
+    {
+      "npcs": [
+        "elysian_echo"
+      ],
+      "image": "holodeck__with__elysian_echo.png",
+      "default": false
+    }
+  ]
+}

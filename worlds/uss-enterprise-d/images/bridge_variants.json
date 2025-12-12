@@ -1,0 +1,13 @@
+{
+  "location_id": "bridge",
+  "base": "bridge.png",
+  "variants": [
+    {
+      "npcs": [
+        "picard"
+      ],
+      "image": "bridge__with__picard.png",
+      "default": true
+    }
+  ]
+}
