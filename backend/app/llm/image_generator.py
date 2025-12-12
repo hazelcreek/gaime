@@ -1002,11 +1002,19 @@ class ImageVariantManifest:
         """
         visible_set = set(visible_npc_ids)
         
+        # First pass: exact or subset matches based on visible NPCs
         for variant in self.variants:
             variant_npcs = set(variant.get("npcs", []))
             # If all NPCs in this variant are visible, use this variant
             if variant_npcs and variant_npcs.issubset(visible_set):
                 return variant["image"]
+        
+        # Second pass: if no visible NPCs match, check for default variant
+        # This handles the case where NPCs are "present by default" at a location
+        if not visible_set:
+            for variant in self.variants:
+                if variant.get("default", False):
+                    return variant["image"]
         
         # No variant match - return base image
         return self.base
