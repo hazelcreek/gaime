@@ -39,9 +39,9 @@ load_dotenv()
 # We exclusively use Gemini 3 Pro Image Preview for high quality 16:9 4K images
 IMAGE_MODEL = "gemini-3-pro-image-preview"
 
-# Retry configuration for transient errors
-MAX_RETRIES = 3
-INITIAL_RETRY_DELAY = 2.0  # seconds
+# Retry configuration for transient errors (including IMAGE_OTHER soft rejections)
+MAX_RETRIES = 5
+INITIAL_RETRY_DELAY = 3.0  # seconds
 MAX_RETRY_DELAY = 30.0  # seconds
 
 
@@ -200,20 +200,21 @@ def _build_npcs_description(npcs: list[NPCInfo]) -> str:
             # Clean up the appearance text without truncation
             appearance_clean = " ".join(npc.appearance.split())
             npc_descriptions.append(
-                f"A figure - {npc.name} ({npc.role}){placement_part}: {appearance_clean}"
+                f"- {npc.name} ({npc.role}){placement_part}: {appearance_clean}"
             )
         elif npc.placement:
             # Has placement but no detailed appearance
             npc_descriptions.append(
-                f"A figure - {npc.name}, {npc.role}, {npc.placement}"
+                f"- {npc.name}, {npc.role}, {npc.placement}"
             )
         else:
             npc_descriptions.append(
-                f"A figure present in the scene - {npc.name}, {npc.role}"
+                f"- {npc.name}, {npc.role}"
             )
     
     if npc_descriptions:
-        return "Characters visible in the scene: " + "; ".join(npc_descriptions)
+        # Use separate paragraphs per character (blank line between each)
+        return "Characters visible in the scene:\n\n" + "\n\n".join(npc_descriptions)
     return ""
 
 
@@ -445,18 +446,39 @@ async def generate_location_image(
     # Ensure output directory exists
     output_dir.mkdir(parents=True, exist_ok=True)
     
+    # Save prompt to logs immediately (before API call) for debugging
+    _save_prompt_markdown(output_dir, location_id, location_name, prompt)
+    logger.info(f"[ImageGen] Prompt saved to promptlogs/{location_id}_prompt.md")
+    
     try:
         logger.info(f"[ImageGen] Calling {model_to_use}...")
         
         # Configure for Gemini 3 Pro Image Preview via generate_content
-        # This model uses generate_content but supports image_config for resolution control
+        # Matching AI Studio settings: temperature=1, explicitly request image output
         config = types.GenerateContentConfig(
-            image_config=types.ImageConfig(
-                aspect_ratio="16:9"
-            )
+            temperature=1.0,
+            response_modalities=["IMAGE"],  # Explicitly request image output
+            safety_settings=[
+                types.SafetySetting(
+                    category="HARM_CATEGORY_HARASSMENT",
+                    threshold="BLOCK_ONLY_HIGH"
+                ),
+                types.SafetySetting(
+                    category="HARM_CATEGORY_HATE_SPEECH",
+                    threshold="BLOCK_ONLY_HIGH"
+                ),
+                types.SafetySetting(
+                    category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    threshold="BLOCK_ONLY_HIGH"
+                ),
+                types.SafetySetting(
+                    category="HARM_CATEGORY_DANGEROUS_CONTENT",
+                    threshold="BLOCK_ONLY_HIGH"
+                ),
+            ]
         )
         
-        # Retry loop for transient errors
+        # Retry loop for transient errors AND soft rejections (IMAGE_OTHER)
         last_error = None
         for attempt in range(MAX_RETRIES):
             try:
@@ -464,14 +486,82 @@ async def generate_location_image(
                     asyncio.to_thread(
                         client.models.generate_content,
                         model=model_to_use,
-                        contents=[prompt],
+                        contents=prompt,  # Pass as string, not list (matching AI Studio)
                         config=config
                     ),
                     timeout=120.0  # 2 minute timeout
                 )
-                break  # Success, exit retry loop
+                
+                # Log response details for debugging
+                logger.info(f"[ImageGen] Got response from API (attempt {attempt + 1}/{MAX_RETRIES})")
+                logger.info(f"[ImageGen] Response type: {type(response).__name__}")
+                
+                # Try to extract image from response
+                image_path = output_dir / f"{location_id}.png"
+                
+                # Handle GenerateImagesResponse
+                if hasattr(response, 'generated_images') and response.generated_images:
+                    for img in response.generated_images:
+                        if hasattr(img, 'image') and img.image:
+                            if hasattr(img.image, 'save'):
+                                await asyncio.to_thread(img.image.save, str(image_path))
+                            else:
+                                with open(image_path, 'wb') as f:
+                                    f.write(img.image.image_bytes)
+                            logger.info(f"[ImageGen] Saved generated image to {image_path}")
+                            return str(image_path)
+                
+                # Extract image data from response parts (generate_content style)
+                if hasattr(response, 'parts') and response.parts:
+                    for part in response.parts:
+                        if part.inline_data is not None:
+                            try:
+                                image = part.as_image()
+                                await asyncio.to_thread(image.save, str(image_path))
+                            except Exception:
+                                image_data = part.inline_data.data
+                                if isinstance(image_data, str):
+                                    image_data = base64.b64decode(image_data)
+                                with open(image_path, 'wb') as f:
+                                    f.write(image_data)
+                            logger.info(f"[ImageGen] Saved image to {image_path}")
+                            return str(image_path)
+                
+                # No image found - check finish reason for retryable conditions
+                finish_reason = None
+                if hasattr(response, 'candidates') and response.candidates:
+                    candidate = response.candidates[0]
+                    finish_reason = getattr(candidate, 'finish_reason', None)
+                    logger.warning(f"[ImageGen] No image data, finish_reason={finish_reason} (attempt {attempt + 1}/{MAX_RETRIES})")
+                
+                # IMAGE_OTHER is a soft rejection that may succeed on retry
+                finish_reason_str = str(finish_reason) if finish_reason else ""
+                if "IMAGE_OTHER" in finish_reason_str or "OTHER" in finish_reason_str:
+                    if attempt < MAX_RETRIES - 1:
+                        delay = min(INITIAL_RETRY_DELAY * (2 ** attempt) + random.uniform(0, 1), MAX_RETRY_DELAY)
+                        logger.info(f"[ImageGen] IMAGE_OTHER - retrying in {delay:.1f}s...")
+                        await asyncio.sleep(delay)
+                        continue
+                
+                # Check for explicit blocking
+                if hasattr(response, 'prompt_feedback'):
+                    feedback = response.prompt_feedback
+                    if hasattr(feedback, 'block_reason') and feedback.block_reason:
+                        raise ImageGenerationError(
+                            f"Prompt blocked: {feedback.block_reason}",
+                            is_retryable=False,
+                            status_code=400
+                        )
+                
+                # No image and not retryable
+                raise ImageGenerationError(
+                    f"No image data in API response (finish_reason={finish_reason}). The model may have rejected the prompt.",
+                    is_retryable=False,
+                    status_code=500
+                )
+                
             except asyncio.TimeoutError:
-                logger.error(f"[ImageGen] API call timed out after 120 seconds for {location_id} (attempt {attempt + 1}/{MAX_RETRIES})")
+                logger.error(f"[ImageGen] API call timed out (attempt {attempt + 1}/{MAX_RETRIES})")
                 last_error = ImageGenerationError(
                     "API call timed out after 120 seconds. The model may be overloaded.",
                     is_retryable=True,
@@ -483,6 +573,8 @@ async def generate_location_image(
                     await asyncio.sleep(delay)
                     continue
                 raise last_error
+            except ImageGenerationError:
+                raise  # Don't retry our own errors
             except Exception as api_error:
                 error_str = str(api_error)
                 logger.warning(f"[ImageGen] API error on attempt {attempt + 1}/{MAX_RETRIES}: {error_str}")
@@ -528,90 +620,11 @@ async def generate_location_image(
                         is_retryable=False,
                         status_code=500
                     )
-        else:
-            # All retries exhausted
-            if last_error:
-                raise last_error
-            raise ImageGenerationError("All retry attempts failed", is_retryable=True, status_code=503)
         
-        # Log response details for debugging
-        logger.info(f"[ImageGen] Got response from API")
-        
-        # Handle GenerateImagesResponse
-        if hasattr(response, 'generated_images') and response.generated_images:
-            for i, img in enumerate(response.generated_images):
-                if hasattr(img, 'image') and img.image:
-                    image_path = output_dir / f"{location_id}.png"
-                    
-                    try:
-                        # Save using the image object's save method
-                        # The Image object in google-genai has a save method
-                        if hasattr(img.image, 'save'):
-                            await asyncio.to_thread(img.image.save, str(image_path))
-                            logger.info(f"[ImageGen] Saved generated image to {image_path}")
-                            _save_prompt_markdown(output_dir, location_id, location_name, prompt)
-                            return str(image_path)
-                        else:
-                            # Fallback to writing bytes directly
-                            with open(image_path, 'wb') as f:
-                                f.write(img.image.image_bytes)
-                            logger.info(f"[ImageGen] Saved generated image bytes to {image_path}")
-                            _save_prompt_markdown(output_dir, location_id, location_name, prompt)
-                            return str(image_path)
-                    except Exception as save_err:
-                        logger.error(f"[ImageGen] Failed to save image: {save_err}")
-        
-        # Fallback for generate_content response (legacy path or if mixed response)
-        if hasattr(response, 'candidates') and response.candidates:
-            for i, candidate in enumerate(response.candidates):
-                logger.info(f"[ImageGen] Candidate {i}: finish_reason={getattr(candidate, 'finish_reason', 'N/A')}")
-                safety_ratings = getattr(candidate, 'safety_ratings', None)
-                if safety_ratings:
-                    for rating in safety_ratings:
-                        if hasattr(rating, 'probability') and rating.probability and rating.probability.name != 'NEGLIGIBLE':
-                            logger.warning(f"[ImageGen] Safety rating: {rating.category.name}={rating.probability.name}")
-        
-        # Check for blocking
-        if hasattr(response, 'prompt_feedback'):
-            feedback = response.prompt_feedback
-            if hasattr(feedback, 'block_reason') and feedback.block_reason:
-                logger.error(f"[ImageGen] BLOCKED: {feedback.block_reason}")
-                return None
-        
-        # Extract image data from response parts (generate_content style)
-        if hasattr(response, 'parts'):
-            logger.info(f"[ImageGen] Response has {len(response.parts) if response.parts else 0} parts")
-            
-            for i, part in enumerate(response.parts):
-                logger.info(f"[ImageGen] Part {i}: inline_data={part.inline_data is not None}")
-                if part.inline_data is not None:
-                    # Save the image using PIL if available, otherwise raw bytes
-                    image_path = output_dir / f"{location_id}.png"
-                    
-                    try:
-                        # Try using the as_image() method (returns PIL Image)
-                        image = part.as_image()
-                        await asyncio.to_thread(image.save, str(image_path))
-                        logger.info(f"[ImageGen] Saved image via PIL to {image_path}")
-                    except Exception as pil_err:
-                        logger.warning(f"[ImageGen] PIL save failed ({pil_err}), trying raw bytes")
-                        # Fallback: save raw bytes
-                        image_data = part.inline_data.data
-                        if isinstance(image_data, str):
-                            image_data = base64.b64decode(image_data)
-                        with open(image_path, 'wb') as f:
-                            f.write(image_data)
-                        logger.info(f"[ImageGen] Saved image via raw bytes to {image_path}")
-                    
-                    _save_prompt_markdown(output_dir, location_id, location_name, prompt)
-                    return str(image_path)
-        
-        logger.warning(f"[ImageGen] No image data in response for {location_id}")
-        raise ImageGenerationError(
-            "No image data in API response. The model may have rejected the prompt or returned only text.",
-            is_retryable=False,
-            status_code=500
-        )
+        # All retries exhausted
+        if last_error:
+            raise last_error
+        raise ImageGenerationError("All retry attempts failed", is_retryable=True, status_code=503)
         
     except ImageGenerationError:
         # Re-raise our custom errors as-is
@@ -742,15 +755,109 @@ def _build_location_context(
     return context
 
 
+def _npc_can_be_at_location(npc_id: str, npc_data: dict, location_id: str) -> bool:
+    """
+    Check if an NPC can potentially be at a location (considering location_changes).
+    
+    An NPC can be at a location if:
+    - Their starting `location` matches
+    - The location is in their `locations` list
+    - A `location_changes` entry has `move_to` pointing to this location
+    """
+    # Check starting location
+    if npc_data.get("location") == location_id:
+        return True
+    
+    # Check locations list
+    if location_id in npc_data.get("locations", []):
+        return True
+    
+    # Check location_changes destinations
+    for change in npc_data.get("location_changes", []):
+        if change.get("move_to") == location_id:
+            return True
+    
+    return False
+
+
+def _npc_is_conditional_at_location(npc_data: dict, location_id: str) -> bool:
+    """
+    Check if an NPC is conditional (needs image variants) at a specific location.
+    
+    An NPC is conditional at a location if:
+    1. They have `appears_when` conditions (standard conditional appearance)
+    2. They have `location_changes` that involve this location:
+       - At their starting location: only if a change moves them AWAY (to a different location)
+       - At a move_to destination: only if they're arriving FROM somewhere else
+    """
+    # Standard conditional: has appears_when
+    if npc_data.get("appears_when"):
+        return True
+    
+    # Dynamic location: has location_changes
+    location_changes = npc_data.get("location_changes", [])
+    if location_changes:
+        starting_location = npc_data.get("location")
+        
+        # Check if any change moves them AWAY from their starting location
+        # (i.e., move_to is a DIFFERENT location than starting_location)
+        if starting_location == location_id:
+            for change in location_changes:
+                move_to = change.get("move_to")
+                if move_to and move_to != starting_location:
+                    # This change moves them away from here
+                    return True
+        
+        # Check if this location is a move_to destination FROM somewhere else
+        for change in location_changes:
+            move_to = change.get("move_to")
+            if move_to == location_id and starting_location != location_id:
+                # They arrive here from their starting location
+                return True
+    
+    return False
+
+
+def _npc_default_present_at_location(npc_data: dict, location_id: str) -> bool:
+    """
+    Check if an NPC is present by DEFAULT at a location (before any conditions apply).
+    
+    This is used to determine the correct image variant strategy:
+    - If default present: base image HAS the NPC, variant is WITHOUT
+    - If default absent: base image is WITHOUT the NPC, variant is WITH
+    
+    An NPC is present by default if:
+    - Their starting `location` matches this location (for location_changes NPCs)
+    - The location is in their `locations` list (multi-location NPCs)
+    - They DON'T have `appears_when` (which means absent by default)
+    """
+    # If they have appears_when, they're absent by default
+    if npc_data.get("appears_when"):
+        return False
+    
+    # Check starting location (for location_changes NPCs)
+    if npc_data.get("location") == location_id:
+        return True
+    
+    # Check locations list (multi-location NPCs without conditions)
+    if location_id in npc_data.get("locations", []):
+        return True
+    
+    # Destinations in location_changes are "arrive" locations (absent by default)
+    return False
+
+
 def _get_conditional_npcs_at_location(
     location_id: str,
     loc_data: dict,
     npcs_data: dict
 ) -> list[str]:
     """
-    Get list of NPC IDs that have appears_when conditions at this location.
+    Get list of NPC IDs that are conditional at this location.
     
-    These are the NPCs that need image variants.
+    These are the NPCs that need image variants. An NPC is conditional if:
+    1. They have `appears_when` conditions
+    2. They have `location_changes` that involve this location
     """
     conditional_npcs = []
     location_npcs = loc_data.get("npcs", [])
@@ -758,17 +865,20 @@ def _get_conditional_npcs_at_location(
     # Check NPCs explicitly in location
     for npc_id in location_npcs:
         npc_data = npcs_data.get(npc_id, {})
-        if npc_data and npc_data.get("appears_when"):
+        if npc_data and _npc_is_conditional_at_location(npc_data, location_id):
             conditional_npcs.append(npc_id)
     
-    # Check NPCs that have this location in their locations list
+    # Check all NPCs that could potentially be at this location
     for npc_id, npc_data in npcs_data.items():
         if npc_id in location_npcs:
             continue
-        npc_location = npc_data.get("location")
-        npc_locations = npc_data.get("locations", [])
-        if (npc_location == location_id or location_id in npc_locations) and npc_data.get("appears_when"):
-            conditional_npcs.append(npc_id)
+        if npc_id in conditional_npcs:
+            continue
+        
+        # Check if this NPC can be at this location
+        if _npc_can_be_at_location(npc_id, npc_data, location_id):
+            if _npc_is_conditional_at_location(npc_data, location_id):
+                conditional_npcs.append(npc_id)
     
     return conditional_npcs
 
@@ -779,9 +889,12 @@ def _get_unconditional_npcs_at_location(
     npcs_data: dict
 ) -> list[str]:
     """
-    Get list of NPC IDs that do NOT have appears_when conditions at this location.
+    Get list of NPC IDs that are NOT conditional at this location.
     
-    These NPCs should always appear in all variants.
+    These NPCs should always appear in all variants. An NPC is unconditional if:
+    - They are at this location (via `location`, `locations`, or listed in loc_data)
+    - They do NOT have `appears_when` conditions
+    - They do NOT have `location_changes` involving this location
     """
     unconditional_npcs = []
     location_npcs = loc_data.get("npcs", [])
@@ -789,17 +902,20 @@ def _get_unconditional_npcs_at_location(
     # Check NPCs explicitly in location
     for npc_id in location_npcs:
         npc_data = npcs_data.get(npc_id, {})
-        if npc_data and not npc_data.get("appears_when"):
+        if npc_data and not _npc_is_conditional_at_location(npc_data, location_id):
             unconditional_npcs.append(npc_id)
     
-    # Check NPCs that have this location in their locations list
+    # Check all NPCs that could be at this location
     for npc_id, npc_data in npcs_data.items():
         if npc_id in location_npcs:
             continue
-        npc_location = npc_data.get("location")
-        npc_locations = npc_data.get("locations", [])
-        if (npc_location == location_id or location_id in npc_locations) and not npc_data.get("appears_when"):
-            unconditional_npcs.append(npc_id)
+        if npc_id in unconditional_npcs:
+            continue
+        
+        # Only include if they can be here AND they're not conditional
+        if _npc_can_be_at_location(npc_id, npc_data, location_id):
+            if not _npc_is_conditional_at_location(npc_data, location_id):
+                unconditional_npcs.append(npc_id)
     
     return unconditional_npcs
 
@@ -845,10 +961,19 @@ def parse_variant_filename(filename: str) -> tuple[str, list[str]]:
 
 @dataclass
 class ImageVariantManifest:
-    """Manifest describing all image variants for a location"""
+    """Manifest describing all image variants for a location.
+    
+    Variant format: {"npcs": [...], "image": "...", "default": bool}
+    - npcs: List of NPC IDs shown in this variant
+    - image: Filename of the variant image
+    - default: If True, this variant should be shown when the NPC is present by default
+               (e.g., Picard on the bridge before he moves to the ready room)
+    
+    Base image always has NO conditional NPCs (only unconditional ones).
+    """
     location_id: str
     base: str  # Base image filename (no conditional NPCs)
-    variants: list[dict]  # List of {"npcs": [...], "image": "filename.png"}
+    variants: list[dict]  # List of variant descriptors
     
     def to_dict(self) -> dict:
         return {
@@ -870,20 +995,20 @@ class ImageVariantManifest:
         Get the appropriate image filename for a set of visible NPCs.
         
         Args:
-            visible_npc_ids: List of NPC IDs currently visible
+            visible_npc_ids: List of NPC IDs currently visible at this location
         
         Returns:
             Filename of the matching variant, or base if no match
         """
-        # Sort for consistent comparison
-        sorted_visible = sorted(visible_npc_ids)
+        visible_set = set(visible_npc_ids)
         
         for variant in self.variants:
-            variant_npcs = sorted(variant.get("npcs", []))
-            if variant_npcs == sorted_visible:
+            variant_npcs = set(variant.get("npcs", []))
+            # If all NPCs in this variant are visible, use this variant
+            if variant_npcs and variant_npcs.issubset(visible_set):
                 return variant["image"]
         
-        # No exact match - return base image
+        # No variant match - return base image
         return self.base
 
 
@@ -1031,13 +1156,14 @@ async def generate_location_variants(
     """
     Generate all image variants for a location with conditional NPCs.
     
-    Creates:
-    - Base image (no conditional NPCs, only unconditional ones)
-    - One variant for each conditional NPC combination
-    - Manifest JSON file mapping conditions to images
+    Always generates:
+    - Base image WITHOUT any conditional NPCs (only unconditional ones)
+    - "With" variants for each conditional NPC (added via image editing)
     
-    For a location with N conditional NPCs, this generates up to 2^N images.
-    Currently limited to single-NPC variants for simplicity.
+    The manifest tracks which NPCs are "default present" so the runtime knows
+    which image to show initially:
+    - For "present by default" NPCs: show the "with" variant initially
+    - For "absent by default" NPCs: show the base image initially
     
     Args:
         world_id: ID of the world
@@ -1099,9 +1225,17 @@ async def generate_location_variants(
     conditional_npcs = _get_conditional_npcs_at_location(location_id, loc_data, npcs_data)
     unconditional_npcs = _get_unconditional_npcs_at_location(location_id, loc_data, npcs_data)
     
+    # Determine which conditional NPCs are present by default (for manifest metadata)
+    default_present_npcs = []
+    for npc_id in conditional_npcs:
+        npc_data = npcs_data.get(npc_id, {})
+        if npc_data and _npc_default_present_at_location(npc_data, location_id):
+            default_present_npcs.append(npc_id)
+    
     print(f"Generating variants for: {loc_name}")
     print(f"  - Unconditional NPCs (always shown): {unconditional_npcs}")
     print(f"  - Conditional NPCs (need variants): {conditional_npcs}")
+    print(f"  - Default present (show 'with' variant initially): {default_present_npcs}")
     
     images_dir.mkdir(parents=True, exist_ok=True)
     
@@ -1111,8 +1245,8 @@ async def generate_location_variants(
         variants=[]
     )
     
-    # Generate base image (only unconditional NPCs)
-    print(f"  Generating base image (no conditional NPCs)...")
+    # Base image: only unconditional NPCs (no conditional NPCs)
+    print(f"  Generating base image (NPCs: {unconditional_npcs or 'none'})...")
     base_context = _build_location_context(
         location_id=location_id,
         loc_data=loc_data,
@@ -1126,7 +1260,6 @@ async def generate_location_variants(
     base_image_path = images_dir / base_filename
     
     try:
-        # Generate base image with full generation (no base image input)
         await _generate_variant_image(
             location_id=location_id,
             location_name=loc_name,
@@ -1143,21 +1276,18 @@ async def generate_location_variants(
         print(f"    - Failed to generate base image: {e}")
         return None
     
-    # Get NPC placements from location data for building NPCInfo
+    # Get NPC placements from location data
     npc_placements = loc_data.get("npc_placements", {})
     
-    # Generate variants for each conditional NPC using image editing mode
-    # This uses the base image as input and adds the NPC to maintain visual consistency
+    # Generate "with" variants for ALL conditional NPCs using image editing
     for npc_id in conditional_npcs:
         print(f"  Generating variant with {npc_id} (using image editing)...")
         
-        # Get the NPC data for the conditional NPC we're adding
         npc_data = npcs_data.get(npc_id, {})
         if not npc_data:
             print(f"    - Skipping {npc_id}: NPC data not found")
             continue
         
-        # Build NPCInfo for the NPC to add
         npc_to_add = NPCInfo(
             name=npc_data.get("name", npc_id),
             appearance=npc_data.get("appearance", ""),
@@ -1165,10 +1295,11 @@ async def generate_location_variants(
             placement=npc_placements.get(npc_id, "")
         )
         
+        variant_filename = get_variant_image_filename(location_id, [npc_id])
+        variant_generated = False
+        
+        # Try image editing first
         try:
-            variant_filename = get_variant_image_filename(location_id, [npc_id])
-            
-            # Use image editing mode: pass the base image and specify NPCs to add
             await _generate_variant_image(
                 location_id=location_id,
                 location_name=loc_name,
@@ -1176,23 +1307,60 @@ async def generate_location_variants(
                 theme=theme,
                 tone=tone,
                 output_dir=images_dir,
-                context=base_context,  # Context is for reference, not used in edit mode
+                context=base_context,
                 output_filename=variant_filename,
-                base_image_path=base_image_path,  # Pass the base image
-                npcs_to_add=[npc_to_add],  # Specify which NPC(s) to add
+                base_image_path=base_image_path,
+                npcs_to_add=[npc_to_add],
                 style_block=style_block
             )
+            variant_generated = True
+            print(f"    - Variant generated via image editing: {variant_filename}")
+            
+        except Exception as e:
+            print(f"    - Image editing failed: {e}")
+            print(f"    - Falling back to full image generation with NPC...")
+            
+            # Fallback: generate full image with NPC included (not editing mode)
+            try:
+                # Create context that includes both unconditional NPCs AND this conditional NPC
+                variant_context = _build_location_context(
+                    location_id=location_id,
+                    loc_data=loc_data,
+                    locations=locations,
+                    npcs_data=npcs_data,
+                    items_data=items_data,
+                    include_npc_ids=unconditional_npcs + [npc_id]
+                )
+                
+                await _generate_variant_image(
+                    location_id=location_id,
+                    location_name=loc_name,
+                    atmosphere=atmosphere,
+                    theme=theme,
+                    tone=tone,
+                    output_dir=images_dir,
+                    context=variant_context,
+                    output_filename=variant_filename,
+                    style_block=style_block
+                    # No base_image_path or npcs_to_add = full generation mode
+                )
+                variant_generated = True
+                print(f"    - Variant generated via full regeneration: {variant_filename}")
+                
+            except Exception as e2:
+                print(f"    - Full regeneration also failed: {e2}")
+        
+        if variant_generated:
+            # Track whether this NPC is present by default
+            is_default = npc_id in default_present_npcs
             
             manifest.variants.append({
                 "npcs": [npc_id],
-                "image": variant_filename
+                "image": variant_filename,
+                "default": is_default  # True = show this variant initially
             })
-            print(f"    - Variant generated: {variant_filename}")
-            
-        except Exception as e:
-            print(f"    - Failed to generate variant: {e}")
+            print(f"    - Manifest updated (default={is_default})")
         
-        # Delay between generations
         await asyncio.sleep(1.0)
     
     # Save manifest
@@ -1280,16 +1448,43 @@ async def _generate_variant_image(
     else:
         # Full generation mode: use standard scene prompt
         prompt = get_image_prompt(location_name, atmosphere, theme, tone, context, style_block)
-        contents = [prompt]
+        contents = prompt  # Pass as string for text-only generation
     
     output_dir.mkdir(parents=True, exist_ok=True)
     
+    # Save prompt to logs immediately (before API call) for debugging
+    prompt_log_id = output_filename.replace(".png", "")
+    _save_prompt_markdown(output_dir, prompt_log_id, location_name, prompt)
+    logger.info(f"[ImageGen] Prompt saved to promptlogs/{prompt_log_id}_prompt.md")
+    
+    # Matching AI Studio settings: temperature=1, explicitly request image output
     config = types.GenerateContentConfig(
-        image_config=types.ImageConfig(aspect_ratio="16:9")
+        temperature=1.0,
+        response_modalities=["IMAGE"],  # Explicitly request image output
+        safety_settings=[
+            types.SafetySetting(
+                category="HARM_CATEGORY_HARASSMENT",
+                threshold="BLOCK_ONLY_HIGH"
+            ),
+            types.SafetySetting(
+                category="HARM_CATEGORY_HATE_SPEECH",
+                threshold="BLOCK_ONLY_HIGH"
+            ),
+            types.SafetySetting(
+                category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                threshold="BLOCK_ONLY_HIGH"
+            ),
+            types.SafetySetting(
+                category="HARM_CATEGORY_DANGEROUS_CONTENT",
+                threshold="BLOCK_ONLY_HIGH"
+            ),
+        ]
     )
     
-    # Retry loop
+    # Retry loop with IMAGE_OTHER handling (soft rejections that may succeed on retry)
     last_error = None
+    image_path = output_dir / output_filename
+    
     for attempt in range(MAX_RETRIES):
         try:
             response = await asyncio.wait_for(
@@ -1301,61 +1496,103 @@ async def _generate_variant_image(
                 ),
                 timeout=120.0
             )
-            break
+            
+            logger.info(f"[ImageGen] Got response (attempt {attempt + 1}/{MAX_RETRIES})")
+            
+            # Handle GenerateImagesResponse
+            if hasattr(response, 'generated_images') and response.generated_images:
+                for img in response.generated_images:
+                    if hasattr(img, 'image') and img.image:
+                        if hasattr(img.image, 'save'):
+                            await asyncio.to_thread(img.image.save, str(image_path))
+                        else:
+                            with open(image_path, 'wb') as f:
+                                f.write(img.image.image_bytes)
+                        return str(image_path)
+            
+            # Handle generate_content response
+            if hasattr(response, 'parts') and response.parts:
+                for part in response.parts:
+                    if part.inline_data is not None:
+                        try:
+                            image = part.as_image()
+                            await asyncio.to_thread(image.save, str(image_path))
+                        except Exception:
+                            image_data = part.inline_data.data
+                            if isinstance(image_data, str):
+                                image_data = base64.b64decode(image_data)
+                            with open(image_path, 'wb') as f:
+                                f.write(image_data)
+                        
+                        return str(image_path)
+                
+                # Log what we got instead of an image (for debugging)
+                text_parts = []
+                for part in response.parts:
+                    if hasattr(part, 'text') and part.text:
+                        text_parts.append(part.text[:200])  # First 200 chars
+                if text_parts:
+                    logger.warning(f"[ImageGen] Model returned text instead of image: {text_parts}")
+            
+            # No image found - check finish reason for retryable conditions
+            finish_reason = None
+            if hasattr(response, 'candidates') and response.candidates:
+                candidate = response.candidates[0]
+                finish_reason = getattr(candidate, 'finish_reason', None)
+                logger.warning(f"[ImageGen] No image data, finish_reason={finish_reason} (attempt {attempt + 1}/{MAX_RETRIES})")
+            
+            # IMAGE_OTHER is a soft rejection that may succeed on retry
+            finish_reason_str = str(finish_reason) if finish_reason else ""
+            if "IMAGE_OTHER" in finish_reason_str or "OTHER" in finish_reason_str:
+                if attempt < MAX_RETRIES - 1:
+                    delay = min(INITIAL_RETRY_DELAY * (2 ** attempt) + random.uniform(0, 1), MAX_RETRY_DELAY)
+                    logger.info(f"[ImageGen] IMAGE_OTHER - retrying in {delay:.1f}s...")
+                    await asyncio.sleep(delay)
+                    continue
+            
+            # Check for explicit blocking
+            if hasattr(response, 'prompt_feedback'):
+                feedback = response.prompt_feedback
+                if hasattr(feedback, 'block_reason') and feedback.block_reason:
+                    raise ImageGenerationError(
+                        f"Prompt blocked: {feedback.block_reason}",
+                        is_retryable=False,
+                        status_code=400
+                    )
+            
+            # No image and not retryable
+            raise ImageGenerationError(
+                f"No image data in response (finish_reason={finish_reason}). "
+                "The model may not support image editing for this content.",
+                is_retryable=False,
+                status_code=500
+            )
+            
         except asyncio.TimeoutError:
             last_error = ImageGenerationError("API timeout", is_retryable=True, status_code=504)
             if attempt < MAX_RETRIES - 1:
                 delay = min(INITIAL_RETRY_DELAY * (2 ** attempt) + random.uniform(0, 1), MAX_RETRY_DELAY)
+                logger.info(f"[ImageGen] Timeout - retrying in {delay:.1f}s...")
                 await asyncio.sleep(delay)
                 continue
             raise last_error
+        except ImageGenerationError:
+            raise  # Don't retry our own errors
         except Exception as api_error:
             error_str = str(api_error)
             is_retryable = any(code in error_str for code in ["503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED"])
             if is_retryable and attempt < MAX_RETRIES - 1:
                 delay = min(INITIAL_RETRY_DELAY * (2 ** attempt) + random.uniform(0, 1), MAX_RETRY_DELAY)
+                logger.info(f"[ImageGen] Retryable error - retrying in {delay:.1f}s...")
                 await asyncio.sleep(delay)
                 last_error = api_error
                 continue
             raise ImageGenerationError(f"API error: {error_str}", is_retryable=is_retryable, status_code=500)
-    else:
-        if last_error:
-            raise last_error
-        raise ImageGenerationError("All retry attempts failed", is_retryable=True, status_code=503)
     
-    # Extract and save image (use custom filename)
-    image_path = output_dir / output_filename
-    
-    # Handle GenerateImagesResponse
-    if hasattr(response, 'generated_images') and response.generated_images:
-        for img in response.generated_images:
-            if hasattr(img, 'image') and img.image:
-                if hasattr(img.image, 'save'):
-                    await asyncio.to_thread(img.image.save, str(image_path))
-                else:
-                    with open(image_path, 'wb') as f:
-                        f.write(img.image.image_bytes)
-                _save_prompt_markdown(output_dir, output_filename.replace(".png", ""), location_name, prompt)
-                return str(image_path)
-    
-    # Handle generate_content response
-    if hasattr(response, 'parts'):
-        for part in response.parts:
-            if part.inline_data is not None:
-                try:
-                    image = part.as_image()
-                    await asyncio.to_thread(image.save, str(image_path))
-                except Exception:
-                    image_data = part.inline_data.data
-                    if isinstance(image_data, str):
-                        image_data = base64.b64decode(image_data)
-                    with open(image_path, 'wb') as f:
-                        f.write(image_data)
-                
-                _save_prompt_markdown(output_dir, output_filename.replace(".png", ""), location_name, prompt)
-                return str(image_path)
-    
-    raise ImageGenerationError("No image data in response", is_retryable=False, status_code=500)
+    # All retries exhausted
+    if last_error:
+        raise last_error
+    raise ImageGenerationError("All retry attempts failed", is_retryable=True, status_code=503)
 
 
 def get_location_image_path(
