@@ -17,6 +17,7 @@ Personal notes, feature concepts, and architectural explorations for GAIME. Thes
 | [modular-prompt-architecture.md](modular-prompt-architecture.md) | Seven-layer prompt system (MPA) for stylistically coherent image asset generation |
 | [multi-language-support.md](multi-language-support.md) | Technical considerations for supporting multiple player languages (English/German) |
 | [plan.md](plan.md) | Original implementation plan and vision for the AI text adventure prototype |
+| [world-builder-quality-quick-wins.md](world-builder-quality-quick-wins.md) | Minimal-effort plan to improve World Builder output richness (puzzle depth, gating, NPC knowledge) |
 | [world-builder-agent-refactor.md](world-builder-agent-refactor.md) | Proposal for moving World Builder from UI to an in-editor Cursor agent experience |
 
 ---
