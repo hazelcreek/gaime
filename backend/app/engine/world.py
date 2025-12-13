@@ -138,6 +138,7 @@ class WorldLoader:
             theme=data.get("theme", ""),
             tone=data.get("tone", "atmospheric"),
             premise=data.get("premise", ""),
+            hero_name=data.get("hero_name", "the hero"),
             player=player,
             constraints=data.get("constraints", []),
             commands=data.get("commands", {}),
