@@ -171,7 +171,7 @@ function GameContent({ setView }: { setView: (view: 'game' | 'builder') => void 
         </div>
         <nav className="flex items-center gap-3">
           <button
-            onClick={() => startNewGame(worldId ?? undefined, undefined, worldName ?? undefined)}
+            onClick={() => startNewGame(worldId ?? undefined, worldName ?? undefined)}
             disabled={isLoading}
             className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-accent 
                      border border-terminal-border/50 hover:border-terminal-accent/50 

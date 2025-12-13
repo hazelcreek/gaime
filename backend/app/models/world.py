@@ -25,6 +25,7 @@ class World(BaseModel):
     theme: str
     tone: str = "atmospheric"
     premise: str
+    hero_name: str = "the hero"  # Protagonist name that NPCs will use in dialogue
     player: PlayerSetup
     constraints: list[str] = Field(default_factory=list)
     commands: dict[str, str] = Field(default_factory=dict)

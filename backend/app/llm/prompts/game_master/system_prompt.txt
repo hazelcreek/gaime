@@ -6,6 +6,9 @@ Theme: {theme}
 Tone: {tone}
 {starting_situation}
 
+## Protagonist
+The player character is named {hero_name}. NPCs should address them by this name when appropriate in dialogue.
+
 ## Current Game State
 - Location: {current_location} ({location_name})
 - Inventory: {inventory}

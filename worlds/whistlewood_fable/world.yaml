@@ -1,5 +1,6 @@
 name: "Whistlewood Fable"
 theme: "Quaint Fairy Tale"
+hero_name: "Finnick"
 
 # Visual style preset for image generation
 style: watercolor

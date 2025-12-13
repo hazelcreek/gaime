@@ -88,7 +88,6 @@ POST /api/game/new
 ```json
 {
   "world_id": "cursed-manor",
-  "player_name": "Traveler",
   "debug": false
 }
 ```
@@ -96,7 +95,6 @@ POST /api/game/new
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
 | world_id | string | No | "cursed-manor" | ID of world to load |
-| player_name | string | No | "Traveler" | Player's name |
 | debug | boolean | No | false | Enable LLM debug info in response |
 
 **Response**
@@ -107,7 +105,6 @@ POST /api/game/new
   "llm_debug": null,
   "state": {
     "session_id": "abc123-def456-...",
-    "player_name": "Traveler",
     "current_location": "entrance_hall",
     "inventory": ["pocket_watch", "journal"],
     "discovered_locations": ["entrance_hall"],
@@ -160,7 +157,6 @@ POST /api/game/action
   "narrative": "You find yourself in a grand entrance hall. Faded portraits line the walls...",
   "state": {
     "session_id": "abc123-def456-...",
-    "player_name": "Traveler",
     "current_location": "entrance_hall",
     "inventory": ["pocket_watch", "journal"],
     "discovered_locations": ["entrance_hall"],
@@ -194,7 +190,6 @@ GET /api/game/state/{session_id}
 {
   "state": {
     "session_id": "abc123-def456-...",
-    "player_name": "Traveler",
     "current_location": "entrance_hall",
     "inventory": ["pocket_watch", "journal"],
     "discovered_locations": ["entrance_hall"],
@@ -674,7 +669,6 @@ GET /api/builder/{world_id}/images/{location_id}
 ```typescript
 interface GameState {
   session_id: string;
-  player_name: string;
   current_location: string;
   inventory: string[];
   discovered_locations: string[];

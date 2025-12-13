@@ -2,6 +2,7 @@ name: "The Cursed Manor"
 theme: "Victorian gothic horror"
 tone: "atmospheric, mysterious, unsettling yet compelling"
 style: dark-fantasy
+hero_name: "Eleanor Ashford"
 
 premise: |
   A violent storm has driven you to seek shelter on this desolate road.

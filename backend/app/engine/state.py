@@ -22,7 +22,7 @@ NARRATIVE_WORD_LIMIT = 100
 class GameStateManager:
     """Manages game state for a single session"""
     
-    def __init__(self, world_id: str, player_name: str = "Traveler"):
+    def __init__(self, world_id: str):
         """Initialize a new game session"""
         self.session_id = str(uuid.uuid4())
         self.world_id = world_id
@@ -36,7 +36,6 @@ class GameStateManager:
         world = self.world_data.world
         self._state = GameState(
             session_id=self.session_id,
-            player_name=player_name,
             current_location=world.player.starting_location,
             inventory=list(world.player.starting_inventory),
             discovered_locations=[world.player.starting_location],

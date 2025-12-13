@@ -170,7 +170,7 @@ This document describes the system architecture of GAIME, including component de
          │
          ▼
 2. Frontend sends POST /api/game/new
-   { world_id: "cursed-manor", player_name: "Traveler" }
+   { world_id: "cursed-manor" }
          │
          ▼
 3. Backend loads world YAML files
@@ -248,7 +248,6 @@ This document describes the system architecture of GAIME, including component de
 ```python
 class GameState:
     session_id: str
-    player_name: str
     current_location: str
     inventory: list[str]
     discovered_locations: list[str]

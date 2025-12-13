@@ -24,7 +24,7 @@ interface GameContextValue {
   error: string | null;
   
   // Actions
-  startNewGame: (worldId?: string, playerName?: string, worldName?: string) => Promise<void>;
+  startNewGame: (worldId?: string, worldName?: string) => Promise<void>;
   sendAction: (action: string) => Promise<void>;
   clearError: () => void;
   resetGame: () => void;
@@ -103,10 +103,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, [sessionId, worldId, worldName]);
 
   // Start a new game - always request debug info
-  const startNewGame = useCallback(async (selectedWorldId?: string, playerName?: string, selectedWorldName?: string) => {
+  const startNewGame = useCallback(async (selectedWorldId?: string, selectedWorldName?: string) => {
     // Use provided worldId, or fall back to current world, or default to 'cursed-manor'
     const effectiveWorldId = selectedWorldId ?? worldId ?? 'cursed-manor';
-    const effectivePlayerName = playerName ?? gameState?.player_name ?? 'Traveler';
     
     setIsLoading(true);
     setError(null);
@@ -114,7 +113,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     
     try {
       // Always request debug info (debug: true)
-      const response = await gameAPI.newGame(effectiveWorldId, effectivePlayerName, true);
+      const response = await gameAPI.newGame(effectiveWorldId, true);
       setSessionId(response.session_id);
       setWorldId(effectiveWorldId);
       setWorldName(selectedWorldName ?? null);
@@ -129,7 +128,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [addNarrative, worldId, gameState?.player_name]);
+  }, [addNarrative, worldId]);
 
   // Send a player action - always request debug info
   const sendAction = useCallback(async (action: string) => {

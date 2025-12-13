@@ -1,6 +1,7 @@
 name: "USS Enterprise-D: First Duty"
 theme: "Star Trek: The Next Generation — life aboard a Federation starship on the frontier"
 tone: "philosophical, optimistic, ethical, adventurous, and grounded in teamwork under pressure"
+hero_name: "Cadet Nara Kim"
 
 # Visual style preset for image generation (MPA)
 style: star-trek-tng

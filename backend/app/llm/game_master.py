@@ -189,12 +189,16 @@ class GameMaster:
         discoveries_list = memory_context["discoveries"]
         discoveries_formatted = ", ".join(discoveries_list) if discoveries_list else "(nothing yet)"
         
+        # Get hero name (with fallback for older worlds)
+        hero_name = world.hero_name if hasattr(world, 'hero_name') and world.hero_name else "the hero"
+        
         system_prompt_template = _get_system_prompt()
         return system_prompt_template.format(
             world_name=world.name,
             theme=world.theme,
             tone=world.tone,
             starting_situation=starting_situation,
+            hero_name=hero_name,
             current_location=state.current_location,
             location_name=location.name if location else "Unknown",
             location_atmosphere=location.atmosphere if location else "",

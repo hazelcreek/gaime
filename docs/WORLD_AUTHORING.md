@@ -35,6 +35,7 @@ Defines the overall game world and player starting conditions.
 name: "The Cursed Manor"
 theme: "Victorian gothic horror"
 tone: "atmospheric, mysterious, unsettling"
+hero_name: "Eleanor Ashford"  # Protagonist name that NPCs will use in dialogue
 
 # Opening premise shown to player
 premise: |
@@ -85,6 +86,7 @@ commands:
 
 | Field | Required | Purpose |
 |-------|----------|---------|
+| `hero_name` | Recommended | Protagonist name that NPCs use in dialogue (default: "the hero") |
 | `starting_situation` | Recommended | Explains WHY the player can act now (prevents confusion) |
 | `victory` | Recommended | Defines win condition and ending narrative |
 | `victory.location` | Optional | Player must be at this location to win |

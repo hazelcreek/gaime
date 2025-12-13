@@ -29,7 +29,6 @@ export interface NarrativeMemory {
 
 export interface GameState {
   session_id: string;
-  player_name: string;
   current_location: string;
   inventory: string[];
   discovered_locations: string[];
@@ -113,11 +112,11 @@ class GameAPIClient {
   /**
    * Start a new game session
    */
-  async newGame(worldId: string = 'cursed-manor', playerName: string = 'Traveler', debug: boolean = false): Promise<NewGameResponse> {
+  async newGame(worldId: string = 'cursed-manor', debug: boolean = false): Promise<NewGameResponse> {
     const response = await fetch(`${API_BASE}/game/new`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ world_id: worldId, player_name: playerName, debug }),
+      body: JSON.stringify({ world_id: worldId, debug }),
     });
     
     if (!response.ok) {

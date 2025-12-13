@@ -25,7 +25,6 @@ game_sessions: dict[str, GameStateManager] = {}
 class NewGameRequest(BaseModel):
     """Request to start a new game"""
     world_id: str = "cursed-manor"
-    player_name: str = "Traveler"
     debug: bool = False  # Enable LLM debug info in responses
 
 
@@ -41,7 +40,7 @@ class NewGameResponse(BaseModel):
 async def new_game(request: NewGameRequest):
     """Start a new game session"""
     try:
-        manager = GameStateManager(request.world_id, request.player_name)
+        manager = GameStateManager(request.world_id)
         session_id = manager.session_id
         game_sessions[session_id] = manager
         

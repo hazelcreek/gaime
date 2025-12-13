@@ -71,7 +71,6 @@ class StateChanges(BaseModel):
 class GameState(BaseModel):
     """Current game session state"""
     session_id: str
-    player_name: str = "Traveler"
     current_location: str
     inventory: list[str] = Field(default_factory=list)
     discovered_locations: list[str] = Field(default_factory=list)
