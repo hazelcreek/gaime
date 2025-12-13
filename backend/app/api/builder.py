@@ -37,6 +37,7 @@ class GenerateWorldRequest(BaseModel):
     """Request to generate a new world"""
     prompt: str
     theme: str | None = None
+    style_preset: str | None = None
     num_locations: int = 6
     num_npcs: int = 3
 
@@ -84,6 +85,7 @@ async def generate_world(request: GenerateWorldRequest):
         result = await builder.generate(
             prompt=request.prompt,
             theme=request.theme,
+            style_preset=request.style_preset,
             num_locations=request.num_locations,
             num_npcs=request.num_npcs
         )

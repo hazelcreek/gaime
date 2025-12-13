@@ -60,3 +60,6 @@ htmlcov/
 *.temp
 .cache/
 
+# World builder (keep spoiler notes uncommitted)
+worlds/**/_world_builder_spoilers.json
+

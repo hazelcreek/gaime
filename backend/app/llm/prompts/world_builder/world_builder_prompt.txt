@@ -4,6 +4,7 @@ Generate a cohesive world with interconnected locations, interesting NPCs, and m
 
 ## Requirements
 - Theme: {theme}
+- Visual style preset: {style_preset}
 - Number of locations: {num_locations}
 - Number of NPCs: {num_npcs}
 
@@ -11,11 +12,20 @@ Generate a cohesive world with interconnected locations, interesting NPCs, and m
 {prompt}
 
 ## Output Format
-You MUST respond with valid JSON containing four YAML strings. Follow this EXACT structure:
+You MUST respond with valid JSON containing:
+- `spoiler_free_pitch` (a safe-to-read summary that does NOT reveal puzzle solutions)
+- `spoilers` (an object containing a `design_brief` with explicit puzzle/gate details)
+- four YAML strings (`world_yaml`, `locations_yaml`, `npcs_yaml`, `items_yaml`)
+
+Follow this EXACT structure:
 
 ```json
 {{
   "world_id": "snake-case-world-name",
+  "spoiler_free_pitch": "3–6 sentences: setting/genre/tone hook + why it’s fun. NO solutions, NO exact item locations, NO gate requirements.",
+  "spoilers": {{
+    "design_brief": "Bulleted outline of: (1) hidden/locked exits and how they are discovered/unlocked (2) required flags/items for navigation (3) shortcut loop (4) single victory path."
+  }},
   "world_yaml": "name: \\"World Name\\"\\ntheme: \\"theme here\\"\\ntone: \\"tone here\\"\\n\\npremise: |\\n  Description of the world premise...\\n\\nstarting_situation: |\\n  Describe WHY the player can act NOW. What event, opportunity, or change has occurred that enables the adventure to begin? This is crucial for immersion.\\n\\nvictory:\\n  location: final_location_id\\n  item: optional_required_item\\n  flag: optional_required_flag\\n  narrative: |\\n    The ending narrative when the player wins...\\n\\nplayer:\\n  starting_location: first_location_id\\n  starting_inventory:\\n    - item_id\\n\\nconstraints:\\n  - \\"Constraint 1\\"\\n  - \\"Constraint 2\\"\\n\\ncommands:\\n  help: \\"Display available commands\\"\\n  look: \\"Examine surroundings\\"\\n  inventory: \\"Check inventory\\"\\n  go: \\"Move in a direction\\"",
   "locations_yaml": "location_id:\\n  name: \\"Location Name\\"\\n  atmosphere: |\\n    Atmospheric description that establishes WHERE the player is...\\n  exits:\\n    north: other_location_id\\n  items:\\n    - item_id\\n  item_placements:\\n    item_id: \\"WHERE in this room the item is located (e.g., 'lies crumpled on the dusty side table near the door')\\"\\n  npcs:\\n    - npc_id\\n  npc_placements:\\n    npc_id: \\"WHERE in this room the NPC is positioned (e.g., 'stands rigidly by the grandfather clock, pale hands clasped')\\"\\n  details:\\n    thing: \\"Description of examinable thing\\"\\n    north: \\"Narrative description of what the north exit looks like (e.g., 'A flickering barrier blocks the passage north')\\"",
   "npcs_yaml": "npc_id:\\n  name: \\"NPC Name\\"\\n  role: \\"Their role\\"\\n  location: location_id\\n  personality: \\"Their personality\\"\\n  knowledge:\\n    - \\"Something they know\\"\\n  dialogue_hints:\\n    greeting: \\"How they greet\\"",
@@ -52,3 +62,9 @@ CRITICAL RULES FOR JSON OUTPUT:
 - Include at least one hidden secret or puzzle
 - Create a compelling premise that hooks the player
 - Every location should clearly establish WHERE the player is
+
+## Navigation-first design requirements (must)
+- Include at least 1 hidden exit (revealed by an interaction/flag).
+- Include at least 1 locked/conditional exit (requires an item or flag).
+- Include at least 1 shortcut that becomes available later and makes traversal meaningfully easier.
+- Do NOT put the solution in `spoiler_free_pitch`.
