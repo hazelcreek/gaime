@@ -69,45 +69,6 @@ export interface WorldInfo {
   description?: string;
 }
 
-export interface ImageGenerationResult {
-  location_id: string;
-  success: boolean;
-  image_url?: string;
-  error?: string;
-}
-
-export interface GenerateImagesResponse {
-  world_id: string;
-  results: ImageGenerationResult[];
-  message: string;
-}
-
-export interface WorldImagesInfo {
-  world_id: string;
-  images: Record<string, string>;
-  count: number;
-}
-
-export interface VariantInfo {
-  has_variants: boolean;
-  location_id: string;
-  base_image?: string;
-  variants?: { npcs: string[]; image: string }[];
-  conditional_npcs: string[];
-  variant_count?: number;
-  message?: string;
-}
-
-export interface GenerateVariantsResponse {
-  success: boolean;
-  location_id: string;
-  base_image: string;
-  variants: { npcs: string[]; image_url: string }[];
-  manifest_path: string;
-  images_generated: number;
-  message: string;
-}
-
 class GameAPIClient {
   /**
    * Start a new game session
@@ -173,102 +134,6 @@ class GameAPIClient {
   }
 
   /**
-   * Generate images for all or specific locations in a world
-   */
-  async generateImages(
-    worldId: string, 
-    locationIds?: string[]
-  ): Promise<GenerateImagesResponse> {
-    const response = await fetch(`${API_BASE}/builder/${worldId}/images/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ location_ids: locationIds || null }),
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Failed to generate images');
-    }
-    
-    return response.json();
-  }
-
-  /**
-   * Generate or regenerate image for a single location
-   */
-  async generateSingleImage(worldId: string, locationId: string, model?: string): Promise<{
-    success: boolean;
-    location_id: string;
-    image_url?: string;
-    message: string;
-  }> {
-    const url = new URL(`${window.location.origin}${API_BASE}/builder/${worldId}/images/${locationId}/generate`);
-    if (model) {
-      url.searchParams.set('model', model);
-    }
-    
-    const response = await fetch(url.toString(), { method: 'POST' });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Failed to generate image');
-    }
-    
-    return response.json();
-  }
-
-  /**
-   * List all available images for a world
-   */
-  async listWorldImages(worldId: string): Promise<WorldImagesInfo> {
-    const response = await fetch(`${API_BASE}/builder/${worldId}/images`);
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Failed to list images');
-    }
-    
-    return response.json();
-  }
-
-  /**
-   * Get the URL for a location image
-   */
-  getLocationImageUrl(worldId: string, locationId: string): string {
-    return `${API_BASE}/builder/${worldId}/images/${locationId}`;
-  }
-
-  /**
-   * Get variant information for a location
-   */
-  async getLocationVariantInfo(worldId: string, locationId: string): Promise<VariantInfo> {
-    const response = await fetch(`${API_BASE}/builder/${worldId}/images/${locationId}/variants`);
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Failed to get variant info');
-    }
-    
-    return response.json();
-  }
-
-  /**
-   * Generate image variants for a location with conditional NPCs
-   */
-  async generateLocationVariants(worldId: string, locationId: string): Promise<GenerateVariantsResponse> {
-    const response = await fetch(`${API_BASE}/builder/${worldId}/images/${locationId}/generate-variants`, {
-      method: 'POST',
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Failed to generate variants');
-    }
-    
-    return response.json();
-  }
-
-  /**
    * Get list of available menu music tracks
    */
   async getMenuTracks(): Promise<{ tracks: string[] }> {
@@ -284,4 +149,3 @@ class GameAPIClient {
 }
 
 export const gameAPI = new GameAPIClient();
-

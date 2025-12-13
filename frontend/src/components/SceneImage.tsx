@@ -7,11 +7,10 @@ import { useState, useEffect } from 'react';
 import { useGame } from '../hooks/useGame';
 
 interface SceneImageProps {
-  worldId?: string;
   onStateClick?: () => void;
 }
 
-export default function SceneImage({ worldId = 'cursed-manor', onStateClick }: SceneImageProps) {
+export default function SceneImage({ onStateClick }: SceneImageProps) {
   const { gameState, sessionId } = useGame();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,21 +42,11 @@ export default function SceneImage({ worldId = 'cursed-manor', onStateClick }: S
       setIsLoading(false);
     };
     img.onerror = () => {
-      // Fallback to static builder image if game endpoint fails
-      const fallbackUrl = `/api/builder/${worldId}/images/${currentLocation}`;
-      const fallbackImg = new Image();
-      fallbackImg.onload = () => {
-        setImageUrl(fallbackUrl);
-        setIsLoading(false);
-      };
-      fallbackImg.onerror = () => {
-        setImageUrl(null);
-        setIsLoading(false);
-      };
-      fallbackImg.src = fallbackUrl;
+      setImageUrl(null);
+      setIsLoading(false);
     };
     img.src = url;
-  }, [currentLocation, worldId, sessionId, turnCount, flagCount]);
+  }, [currentLocation, sessionId, turnCount, flagCount]);
 
   // Don't render if no session
   if (!sessionId) {
