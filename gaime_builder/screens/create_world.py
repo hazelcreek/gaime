@@ -242,7 +242,6 @@ class CreateWorldScreen(Screen):
             result = await generator.generate(
                 prompt=description,
                 theme=theme,
-                style_preset=style_preset,
                 num_locations=num_locations,
                 num_npcs=num_npcs,
                 progress_callback=update_progress

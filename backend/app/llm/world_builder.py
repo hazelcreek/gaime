@@ -36,7 +36,6 @@ class WorldBuilder:
         self,
         prompt: str,
         theme: str | None = None,
-        style_preset: str | None = None,
         num_locations: int = 6,
         num_npcs: int = 3
     ) -> dict:
@@ -48,7 +47,6 @@ class WorldBuilder:
         world_builder_template = _get_world_builder_prompt()
         user_prompt = world_builder_template.format(
             theme=theme or "to be determined from description",
-            style_preset=style_preset or "to be chosen by the author",
             num_locations=num_locations,
             num_npcs=num_npcs,
             prompt=prompt
@@ -137,24 +135,6 @@ class WorldBuilder:
             file_path = world_path / filename
             with open(file_path, "w") as f:
                 f.write(yaml_content)
-
-        # Save spoiler metadata separately so playthroughs stay spoiler-free.
-        spoiler_free_pitch = content.get("spoiler_free_pitch")
-        spoilers = content.get("spoilers")
-        if spoiler_free_pitch or spoilers:
-            import json
-            spoilers_path = world_path / "_world_builder_spoilers.json"
-            with open(spoilers_path, "w") as f:
-                json.dump(
-                    {
-                        "world_id": world_id,
-                        "spoiler_free_pitch": spoiler_free_pitch,
-                        "spoilers": spoilers,
-                    },
-                    f,
-                    indent=2,
-                    ensure_ascii=False,
-                )
     
     def validate_world(self, world_id: str) -> tuple[bool, list[str]]:
         """Validate a world's YAML files"""

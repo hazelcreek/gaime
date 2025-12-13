@@ -400,7 +400,6 @@ POST /api/builder/generate
 {
   "prompt": "A haunted lighthouse on a remote island",
   "theme": "cosmic horror",
-  "style_preset": "dark-fantasy",
   "num_locations": 6,
   "num_npcs": 3
 }
@@ -410,7 +409,6 @@ POST /api/builder/generate
 |-------|------|----------|---------|-------------|
 | prompt | string | Yes | - | Description of desired world |
 | theme | string | No | null | Genre/atmosphere |
-| style_preset | string | No | null | Visual style preset name for image generation (e.g., `dark-fantasy`, `star-trek-tng`) |
 | num_locations | int | No | 6 | Number of locations |
 | num_npcs | int | No | 3 | Number of NPCs |
 
