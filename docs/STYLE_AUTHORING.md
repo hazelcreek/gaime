@@ -137,7 +137,7 @@ Defines the artistic rendering technique. This is the most critical layer for vi
 **Best Practices:**
 1. Be specific about the artistic medium
 2. Reference real-world art styles or artists when helpful
-3. Include emphasis language: "The artistic style is paramount"
+3. Include emphasis language: "The visual style is paramount"
 4. Describe texture, brushwork, or rendering qualities
 
 **Example:**
@@ -145,7 +145,7 @@ Defines the artistic rendering technique. This is the most critical layer for vi
 style: |
   Film noir cinematography. High contrast black and white aesthetic with
   selective color accents. Dramatic shadows, chiaroscuro lighting, rain-slicked
-  surfaces reflecting neon signs. The artistic style is paramount and must
+  surfaces reflecting neon signs. The visual style is paramount and must
   be maintained consistently throughout the entire image.
 ```
 
@@ -206,7 +206,7 @@ Instead of `(style:1.4)`, use natural language:
 ```yaml
 # Good - natural language emphasis
 style: |
-  The artistic style is the most important aspect of this image: digital
+  The visual style is the most important aspect of this image: digital
   painting with rich textures. This style must be maintained consistently
   throughout the entire image.
 
@@ -259,7 +259,7 @@ L2: World context: {theme}, {tone}
 L3: Mood: The atmosphere is {mood.tone}. {mood.lighting}.
     Color palette: {mood.color_palette}.
 
-L4: Artistic style (most important): {style}
+L4: Visual style (most important): {style}
     This style must be maintained consistently throughout.
 
 L5: Composition: {technical.perspective} perspective, {technical.shot},
@@ -285,7 +285,7 @@ This ensures NPC variants maintain visual consistency with the base image.
 1. Create or select a world with your style: `style: your-preset`
 2. Generate images for multiple locations
 3. Check for:
-   - **Style consistency**: Do all images feel like the same artistic style?
+   - **Style consistency**: Do all images feel like the same visual style?
    - **Style drift**: Are any images pulling toward anti-styles?
    - **Mood alignment**: Does the lighting/color match the mood specification?
 4. Adjust anti-styles if drift occurs

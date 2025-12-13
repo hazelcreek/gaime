@@ -334,7 +334,7 @@ def build_mpa_edit_prompt(
     template = loader.get_prompt("image_generator", "mpa_edit_template.txt")
     
     # Create a brief style summary for the edit prompt
-    style_summary = style_block.style.split('\n')[0] if style_block.style else "the original artistic style"
+    style_summary = style_block.style.split('\n')[0] if style_block.style else "the original visual style"
     
     # Brief anti-styles (first 3-4)
     brief_anti_styles = style_block.anti_styles[:4] if style_block.anti_styles else []

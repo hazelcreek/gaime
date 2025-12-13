@@ -23,11 +23,11 @@ mood:
   lighting: "{lighting description: e.g., harsh shadows, soft diffused, neon glow}"
   color_palette: "{color guidance: e.g., desaturated with red accents, warm earth tones}"
 
-# L4: Style - Artistic medium (MOST IMPORTANT LAYER)
+# L4: Style - Visual medium (MOST IMPORTANT LAYER)
 style: |
-  {Detailed description of the artistic style. This is the most critical section.
+  {Detailed description of the visual style. This is the most critical section.
   Be specific about the rendering technique, artistic influences, and visual
-  qualities. Include a statement like "The artistic style is paramount" to
+  qualities. Include a statement like "The visual style is paramount" to
   emphasize consistency. 3-5 sentences.}
 
 # L5: Technical - Composition and camera
@@ -94,7 +94,7 @@ style: |
   Sergio Leone's work. Harsh desert lighting with strong shadows. Dust
   particles visible in sunbeams. Weathered textures on everything - wood,
   leather, skin. The composition should feel like a widescreen film frame.
-  The artistic style is paramount and must evoke classic Italian Westerns.
+  The visual style is paramount and must evoke classic Italian Westerns.
 
 technical:
   perspective: "first-person"
