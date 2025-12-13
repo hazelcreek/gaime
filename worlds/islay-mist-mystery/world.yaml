@@ -1,0 +1,32 @@
+name: "The Angel's Share Murder"
+theme: "Scottish Noir, Distillery Mystery, Celtic Folklore"
+
+# Visual style preset for image generation
+style: noir
+tone: "Atmospheric, Rain-soaked, Tense, Peaty"
+hero_name: "DI Alasdair Ross"
+
+premise: |
+  You are Detective Inspector Alasdair Ross, sent from Glasgow to the remote Isle of Islay. The famous master distiller Angus MacNeil has been found drowned in a vat of his own award-winning whisky. The ferry leaves at dawn, and with it, your only suspect. The island is closing ranks, and the distillery itself seems to be hiding secrets in its copper stills and dark cellars.
+
+starting_situation: |
+  The storm has just severed the phone lines to the mainland. You stand in the rain outside the Lochindaal Distillery. You have exactly one night to find the murder weapon, secure the evidence, and identify the killer before the morning ferry arrives to take them away forever.
+
+victory:
+  location: ferry_terminal
+  item: heavy_bung
+  flag: killer_confronted
+  narrative: |
+    As the CalMac ferry blasts its horn through the morning mist, you step forward on the slick pier. You raise the bloodied cask bung—the undeniable proof of the crime. The killer's composure cracks. They fall to their knees, weeping not for Angus, but for the legacy they tried to steal. The local constable steps in with handcuffs as the sun breaks over the Paps of Jura. Justice has been served, neat.
+
+player:
+  starting_location: distillery_courtyard
+  starting_inventory:
+    - police_badge
+    - notebook
+
+constraints:
+  - "The Tasting Room door is reinforced steel; players cannot break it down or pick the lock without the code."
+  - "The Sea Caves are flooded at high tide; players can only enter during 'low tide' turns or after manipulating the sluice gate."
+  - "The Gaelic inscription appears as gibberish text until the Dictionary is held in inventory."
+  - "NPC 'Old Tam' will not speak to the player until they have found the 'Distillery Badge' proving they are not a tourist."

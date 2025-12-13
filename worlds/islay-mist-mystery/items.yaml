@@ -1,0 +1,87 @@
+torn_logbook_page:
+  name: "Torn Logbook Page"
+  portable: true
+  examine: |
+    A crinkled page torn from a ledger. It looks blank, but the paper has a strange sheen, suggesting invisible ink.
+  found_description: "A piece of torn paper sticks out from a sack of barley."
+  take_description: "You carefully extract the torn page. It feels waxy."
+
+chemical_reagent:
+  name: "Iodine Solution"
+  portable: true
+  examine: |
+    A brown glass bottle labeled 'Reagent A - Iodine'. Used for testing starch, or perhaps revealing organic compounds.
+  found_description: "A brown bottle of iodine sits on the reagent shelf."
+  take_description: "You pocket the bottle of iodine solution."
+
+celtic_dictionary:
+  name: "Old Celtic Dictionary"
+  portable: true
+  examine: |
+    A heavy, leather-bound tome translating Gaelic to English. Essential for understanding the local history.
+  found_description: "A heavy book lies open on the armchair."
+  take_description: "You pick up the heavy dictionary. It smells of old paper."
+
+heavy_bung:
+  name: "Bloodied Cask Bung"
+  portable: true
+  examine: |
+    A solid piece of oak used to seal casks. It's incredibly heavy and stained with dark, dried blood. The murder weapon.
+  found_description: "A blood-stained wooden bung lies inside the smashed display case."
+  take_description: "You carefully bag the heavy bung as evidence."
+
+police_badge:
+  name: "Distillery Badge"
+  portable: true
+  examine: |
+    Your official Detective Inspector warrant card. It commands respect, usually.
+  found_description: "You shouldn't see this; you start with it."
+  take_description: "You shouldn't see this."
+
+notebook:
+  name: "Detective's Notebook"
+  portable: true
+  examine: |
+    Standard issue police notebook. Good for keeping track of clues.
+  found_description: "You shouldn't see this; you start with it."
+  take_description: "You shouldn't see this."
+
+winch_handle:
+  name: "Rusty Winch Handle"
+  portable: true
+  examine: |
+    A heavy iron crank handle. It looks like it fits a square peg mechanism.
+  found_description: "A rusty iron handle lies half-submerged in a puddle."
+  take_description: "You wipe the slime off the handle and pick it up."
+
+vintage_bottle:
+  name: "1902 Whisky"
+  portable: true
+  examine: |
+    A dusty bottle with a faded label. 'Lochindaal 1902'. This is worth a fortune.
+  found_description: "A dusty bottle glints from behind the false brick."
+  take_description: "You gently take the rare bottle. Don't drop it."
+
+barley_sack:
+  name: "Sack of Barley"
+  portable: false
+  examine: |
+    A heavy hessian sack filled with 'Golden Promise' barley. It has been slashed open.
+  found_description: "A sack of barley sits in the corner."
+  take_description: "It's too heavy to move."
+
+framed_photo:
+  name: "Framed Photograph"
+  portable: true
+  examine: |
+    A black and white photo of two young men arguing on a pier, a woman standing between them looking distressed.
+  found_description: "A framed photo sits on the desk."
+  take_description: "You take the photo for evidence."
+
+illegal_ledger:
+  name: "Smuggler's Ledger"
+  portable: true
+  examine: |
+    An ancient book recording illegal shipments of wool and whisky to bypass the excise man.
+  found_description: "An old ledger rests on a barrel."
+  take_description: "You secure the historical evidence."
