@@ -17,6 +17,7 @@ class ManageWorldsScreen(Screen):
         padding: 2;
         width: 100%;
         height: 100%;
+        overflow-y: auto;
     }
     
     #worlds-panel {
@@ -57,6 +58,7 @@ class ManageWorldsScreen(Screen):
     #details-panel {
         width: 100%;
         height: auto;
+        min-height: 10;
         background: $surface;
         border: round $secondary;
         padding: 2;
@@ -72,11 +74,18 @@ class ManageWorldsScreen(Screen):
         color: $secondary;
         margin-bottom: 1;
     }
+    
+    .spoiler-warning {
+        color: $error;
+        text-style: bold;
+        margin: 1 0;
+    }
     """
     
     BINDINGS = [
         ("escape", "go_back", "Back"),
         ("r", "refresh", "Refresh"),
+        ("s", "view_spoilers", "Spoilers"),
     ]
     
     def compose(self) -> ComposeResult:
@@ -88,7 +97,7 @@ class ManageWorldsScreen(Screen):
                 yield Static("[bold]📁 Manage Worlds[/]", classes="panel-title")
                 
                 yield Static(
-                    "[dim]Select a world to view details or validate. Press [bold]r[/bold] to refresh.[/]",
+                    "[dim]Select a world to view details. Press [bold]r[/bold] to refresh, [bold]s[/bold] for spoilers.[/]",
                     classes="info-text"
                 )
                 
@@ -96,6 +105,7 @@ class ManageWorldsScreen(Screen):
                 
                 with Horizontal(classes="button-row"):
                     yield Button("✅ Validate", id="validate", variant="primary")
+                    yield Button("🔍 View Spoilers", id="spoilers", variant="warning")
                     yield Button("🔄 Refresh", id="refresh", variant="default")
                     yield Button("Back", id="back", variant="default")
                 
@@ -122,6 +132,10 @@ class ManageWorldsScreen(Screen):
         """Refresh world list."""
         await self.load_worlds()
         self.notify("World list refreshed", severity="information")
+    
+    async def action_view_spoilers(self) -> None:
+        """View spoilers for the selected world."""
+        await self.view_spoilers_selected()
     
     async def load_worlds(self) -> None:
         """Load available worlds."""
@@ -158,6 +172,19 @@ class ManageWorldsScreen(Screen):
         world_id = str(event.row_key.value)
         await self.show_world_details(world_id)
     
+    def _get_selected_world_id(self) -> str | None:
+        """Get the world_id of the currently selected row."""
+        table = self.query_one("#worlds-table", DataTable)
+        
+        if table.cursor_row is None:
+            return None
+        
+        cursor_row = table.cursor_row
+        row_keys = list(table.rows.keys())
+        if cursor_row < len(row_keys):
+            return str(row_keys[cursor_row].value)
+        return None
+    
     async def show_world_details(self, world_id: str) -> None:
         """Display details for the selected world."""
         import yaml
@@ -185,6 +212,10 @@ class ManageWorldsScreen(Screen):
         victory = data.get("victory", {})
         victory_loc = victory.get("location", "Not set")
         
+        # Check if spoilers exist
+        spoilers_path = world_path / "spoilers.md"
+        spoilers_status = "[green]Available[/]" if spoilers_path.exists() else "[dim]Not available[/]"
+        
         text = f"""[bold]{name}[/]
         
 [cyan]Theme:[/] {theme}
@@ -194,9 +225,67 @@ class ManageWorldsScreen(Screen):
 [cyan]Starting Location:[/] {starting_loc}
 [cyan]Victory Location:[/] {victory_loc}
 
+[cyan]Spoilers:[/] {spoilers_status}
+
 [dim]Path: {world_path}[/]"""
         
         details.update(text)
+    
+    async def view_spoilers_selected(self) -> None:
+        """View spoilers for the selected world."""
+        world_id = self._get_selected_world_id()
+        
+        if not world_id:
+            self.notify("Please select a world first", severity="warning")
+            return
+        
+        from gaime_builder.core.world_generator import WorldGenerator
+        
+        generator = WorldGenerator(self.app.worlds_dir)
+        spoilers = generator.get_world_spoilers(world_id)
+        
+        details = self.query_one("#details-content", Static)
+        
+        if spoilers is None:
+            details.update(
+                f"[yellow]No spoilers available for '{world_id}'[/]\n\n"
+                "[dim]This world was created before the two-pass generation system was added, "
+                "or the spoilers.md file was deleted.[/]"
+            )
+            self.notify("No spoilers available for this world", severity="warning")
+            return
+        
+        # Format spoilers for display (convert markdown to rich text)
+        formatted = self._format_spoilers_for_display(spoilers)
+        details.update(formatted)
+        self.notify("Showing spoilers - contains puzzle solutions!", severity="warning")
+    
+    def _format_spoilers_for_display(self, spoilers_md: str) -> str:
+        """Convert spoilers.md content to rich text for display."""
+        lines = []
+        lines.append("[bold red]⚠️ SPOILERS - PUZZLE SOLUTIONS BELOW ⚠️[/]\n")
+        
+        for line in spoilers_md.split("\n"):
+            # Convert markdown headers to rich text
+            if line.startswith("# "):
+                lines.append(f"[bold cyan]{line[2:]}[/]")
+            elif line.startswith("## "):
+                lines.append(f"\n[bold yellow]{line[3:]}[/]")
+            elif line.startswith("### "):
+                lines.append(f"[bold]{line[4:]}[/]")
+            elif line.startswith("**") and line.endswith("**"):
+                # Bold text
+                lines.append(f"[bold]{line[2:-2]}[/]")
+            elif line.startswith("- "):
+                lines.append(f"  • {line[2:]}")
+            elif line.startswith("---"):
+                lines.append("[dim]─" * 40 + "[/]")
+            elif line.strip():
+                lines.append(line)
+            else:
+                lines.append("")
+        
+        return "\n".join(lines)
     
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button clicks."""
@@ -206,26 +295,15 @@ class ManageWorldsScreen(Screen):
             await self.action_refresh()
         elif event.button.id == "validate":
             await self.validate_selected()
+        elif event.button.id == "spoilers":
+            await self.view_spoilers_selected()
     
     async def validate_selected(self) -> None:
         """Validate the selected world."""
-        table = self.query_one("#worlds-table", DataTable)
+        world_id = self._get_selected_world_id()
         
-        if table.cursor_row is None:
+        if not world_id:
             self.notify("Please select a world to validate", severity="warning")
-            return
-        
-        row_key = table.get_row_at(table.cursor_row)
-        if not row_key:
-            return
-        
-        # Get world_id from cursor position
-        cursor_row = table.cursor_row
-        row_keys = list(table.rows.keys())
-        if cursor_row < len(row_keys):
-            world_id = str(row_keys[cursor_row].value)
-        else:
-            self.notify("Could not determine selected world", severity="error")
             return
         
         from gaime_builder.core.world_generator import WorldGenerator
@@ -247,4 +325,3 @@ class ManageWorldsScreen(Screen):
             error_text = "\n".join(f"❌ {m}" for m in messages)
             details.update(f"[red]World '{world_id}' has errors:[/]\n\n{error_text}")
             self.notify(f"World has errors", severity="error")
-

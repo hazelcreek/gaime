@@ -8,7 +8,7 @@ from textual.containers import Container, Vertical, Horizontal
 from textual.screen import Screen
 from textual.widgets import (
     Header, Footer, Button, Input, TextArea, 
-    Label, Static, ProgressBar, Select
+    Label, Static, ProgressBar, Select, Checkbox
 )
 
 
@@ -20,6 +20,7 @@ class CreateWorldScreen(Screen):
         padding: 2;
         width: 100%;
         height: 100%;
+        overflow-y: auto;
     }
     
     #form-panel {
@@ -61,6 +62,12 @@ class CreateWorldScreen(Screen):
         width: 1fr;
     }
     
+    .checkbox-row {
+        width: 100%;
+        height: auto;
+        margin: 1 0;
+    }
+    
     .button-row {
         width: 100%;
         height: auto;
@@ -89,6 +96,49 @@ class CreateWorldScreen(Screen):
         margin-top: 1;
     }
     
+    #result-panel {
+        width: 100%;
+        height: auto;
+        background: $surface;
+        border: thick $secondary;
+        padding: 2;
+        margin: 1;
+        display: none;
+    }
+    
+    #result-panel.visible {
+        display: block;
+    }
+    
+    .result-title {
+        text-style: bold;
+        color: $secondary;
+        margin-bottom: 1;
+    }
+    
+    #pitch-content {
+        margin: 1 0;
+        padding: 1;
+        background: $panel;
+    }
+    
+    #spoiler-content {
+        margin: 1 0;
+        padding: 1;
+        background: $error-darken-3;
+        display: none;
+    }
+    
+    #spoiler-content.visible {
+        display: block;
+    }
+    
+    .spoiler-warning {
+        color: $error;
+        text-style: bold;
+        margin-bottom: 1;
+    }
+    
     .error-text {
         color: $error;
         margin: 1 0;
@@ -103,6 +153,10 @@ class CreateWorldScreen(Screen):
     BINDINGS = [
         ("escape", "go_back", "Back"),
     ]
+    
+    def __init__(self):
+        super().__init__()
+        self._generation_result: dict | None = None
     
     def compose(self) -> ComposeResult:
         """Create world form UI."""
@@ -158,6 +212,23 @@ class CreateWorldScreen(Screen):
                 yield Static("[bold]Generating world...[/]", id="progress-title")
                 yield ProgressBar(id="progress-bar", total=100)
                 yield Static("", id="progress-status")
+            
+            with Vertical(id="result-panel"):
+                yield Static("[bold]✓ World Generated![/]", classes="result-title")
+                yield Static("", id="world-name-display")
+                yield Static("[bold]About this world:[/]")
+                yield Static("", id="pitch-content")
+                
+                with Horizontal(classes="checkbox-row"):
+                    yield Checkbox("Show Spoilers (puzzle solutions, secrets)", id="show-spoilers")
+                
+                with Vertical(id="spoiler-content"):
+                    yield Static("⚠️ SPOILERS BELOW", classes="spoiler-warning")
+                    yield Static("", id="spoiler-text")
+                
+                with Horizontal(classes="button-row"):
+                    yield Button("Done", id="done", variant="primary")
+                    yield Button("Create Another", id="create-another", variant="default")
         
         yield Footer()
     
@@ -191,12 +262,86 @@ class CreateWorldScreen(Screen):
         """Go back to previous screen."""
         self.app.pop_screen()
     
+    def on_checkbox_changed(self, event: Checkbox.Changed) -> None:
+        """Handle checkbox state changes."""
+        if event.checkbox.id == "show-spoilers":
+            spoiler_content = self.query_one("#spoiler-content")
+            if event.value:
+                spoiler_content.add_class("visible")
+            else:
+                spoiler_content.remove_class("visible")
+    
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button clicks."""
         if event.button.id == "cancel":
             self.app.pop_screen()
         elif event.button.id == "generate":
             await self.generate_world()
+        elif event.button.id == "done":
+            self.app.pop_screen()
+        elif event.button.id == "create-another":
+            self._reset_form()
+    
+    def _reset_form(self) -> None:
+        """Reset the form for creating another world."""
+        # Hide result panel
+        self.query_one("#result-panel").remove_class("visible")
+        self.query_one("#progress-panel").remove_class("visible")
+        
+        # Clear form
+        self.query_one("#description", TextArea).clear()
+        self.query_one("#theme", Input).value = ""
+        
+        # Reset checkbox
+        self.query_one("#show-spoilers", Checkbox).value = False
+        self.query_one("#spoiler-content").remove_class("visible")
+        
+        # Clear result data
+        self._generation_result = None
+        
+        # Focus description
+        self.query_one("#description", TextArea).focus()
+    
+    def _format_design_brief(self, brief: dict) -> str:
+        """Format the design brief for display."""
+        lines = []
+        
+        # Puzzle Threads
+        if "puzzle_threads" in brief:
+            lines.append("[bold]Puzzle Threads:[/]")
+            for thread in brief["puzzle_threads"]:
+                name = thread.get("name", "Unknown")
+                is_primary = " (Primary)" if thread.get("is_primary") else ""
+                gate = thread.get("gate_type", "")
+                lines.append(f"  • {name}{is_primary} [{gate}]")
+                for step in thread.get("steps", []):
+                    lines.append(f"    → {step}")
+            lines.append("")
+        
+        # Navigation Loop
+        if "navigation_loop" in brief:
+            loop = brief["navigation_loop"]
+            lines.append("[bold]Shortcut:[/]")
+            lines.append(f"  {loop.get('description', '')}")
+            lines.append(f"  Unlocked by: {loop.get('unlocked_by', '')}")
+            lines.append("")
+        
+        # Optional Secrets
+        if "optional_secrets" in brief:
+            lines.append("[bold]Optional Secrets:[/]")
+            for secret in brief["optional_secrets"]:
+                lines.append(f"  • {secret.get('name', '')}: {secret.get('description', '')}")
+            lines.append("")
+        
+        # Victory
+        if "victory_condition" in brief:
+            victory = brief["victory_condition"]
+            lines.append("[bold]Victory:[/]")
+            lines.append(f"  Location: {victory.get('location', '')}")
+            if victory.get("required_items"):
+                lines.append(f"  Items needed: {', '.join(victory['required_items'])}")
+        
+        return "\n".join(lines)
     
     async def generate_world(self) -> None:
         """Generate world using AI."""
@@ -258,9 +403,30 @@ class CreateWorldScreen(Screen):
             
             self.notify(f"World '{world_id}' created!", severity="information")
             
-            # Offer to generate images
-            await asyncio.sleep(1.5)
-            self.app.pop_screen()
+            # Store result and show result panel
+            self._generation_result = result
+            
+            # Update result panel content
+            world_name = result.get("world_name", world_id)
+            self.query_one("#world-name-display", Static).update(
+                f"[bold cyan]{world_name}[/] ({world_id})"
+            )
+            
+            pitch = result.get("spoiler_free_pitch", "No description available.")
+            self.query_one("#pitch-content", Static).update(pitch)
+            
+            # Format and set spoiler content
+            brief = result.get("design_brief", {})
+            if brief:
+                spoiler_text = self._format_design_brief(brief)
+                self.query_one("#spoiler-text", Static).update(spoiler_text)
+            else:
+                self.query_one("#spoiler-text", Static).update("No design brief available.")
+            
+            # Hide progress, show result
+            await asyncio.sleep(0.5)
+            progress_panel.remove_class("visible")
+            self.query_one("#result-panel").add_class("visible")
             
         except Exception as e:
             status.update(f"[red]✗ Error: {str(e)}[/]")
@@ -269,4 +435,3 @@ class CreateWorldScreen(Screen):
             # Re-enable buttons
             self.query_one("#generate", Button).disabled = False
             self.query_one("#cancel", Button).disabled = False
-

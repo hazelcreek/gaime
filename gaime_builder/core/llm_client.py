@@ -25,8 +25,23 @@ def get_provider() -> str:
 
 
 def get_model() -> str:
-    """Get configured model name"""
-    return os.getenv("LLM_MODEL", "gemini-3-pro-preview")
+    """Get configured model name for the builder.
+    
+    Uses BUILDER_LLM_MODEL if set, otherwise falls back to LLM_MODEL.
+    This allows using a different model for world building vs gameplay.
+    """
+    # Reload .env to pick up any changes
+    load_dotenv(override=True)
+    
+    builder_model = os.getenv("BUILDER_LLM_MODEL")
+    llm_model = os.getenv("LLM_MODEL")
+    default_model = "gemini-2.5-pro-preview-05-06"
+    
+    model = builder_model or llm_model or default_model
+    
+    logger.debug(f"Model selection: BUILDER_LLM_MODEL={builder_model}, LLM_MODEL={llm_model}, using={model}")
+    
+    return model
 
 
 def get_model_string() -> str:
@@ -88,10 +103,20 @@ async def get_completion(
         kwargs["response_format"] = response_format
     
     try:
+        logger.debug(f"Sending request to LiteLLM...")
         response = await litellm.acompletion(**kwargs)
         
         content = response.choices[0].message.content
         finish_reason = response.choices[0].finish_reason if hasattr(response.choices[0], 'finish_reason') else 'unknown'
+        
+        # Log usage if available
+        if hasattr(response, 'usage') and response.usage:
+            usage = response.usage
+            logger.info(f"LLM Usage: prompt_tokens={getattr(usage, 'prompt_tokens', 'N/A')}, "
+                       f"completion_tokens={getattr(usage, 'completion_tokens', 'N/A')}, "
+                       f"total_tokens={getattr(usage, 'total_tokens', 'N/A')}")
+        
+        logger.info(f"LLM Response: finish_reason={finish_reason}, content_length={len(content) if content else 0}")
         
         if finish_reason == "length":
             logger.warning(f"Response TRUNCATED due to max_tokens limit ({max_tokens}).")
@@ -99,6 +124,8 @@ async def get_completion(
         return content
     except Exception as e:
         logger.error(f"LLM Error: {type(e).__name__}: {e}")
+        import traceback
+        logger.error(f"LLM Traceback:\n{traceback.format_exc()}")
         raise
 
 
@@ -156,14 +183,34 @@ def parse_json_response(response: str | None, strict: bool = False) -> dict:
     
     try:
         return json.loads(cleaned)
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
+        logger.warning(f"Initial JSON parse failed: {e}")
+        
+        # Try to fix common double-escaping issues from LLMs
+        # LLMs sometimes output \\" when they should output \"
+        try:
+            # Replace \\" with \" (fixing double-escaped quotes)
+            fixed = cleaned.replace('\\\\"', '\\"')
+            # Replace \\n with \n inside string values (fixing double-escaped newlines)
+            # Be careful not to break actual escaped backslashes
+            result = json.loads(fixed)
+            logger.info("JSON parse succeeded after fixing double-escaping")
+            return result
+        except json.JSONDecodeError:
+            pass
+        
         # Try to extract JSON from the response
         json_match = re.search(r'\{[\s\S]*\}', cleaned)
         if json_match:
             try:
                 return json.loads(json_match.group())
             except json.JSONDecodeError:
-                pass
+                # Try the double-escape fix on the extracted JSON too
+                try:
+                    fixed = json_match.group().replace('\\\\"', '\\"')
+                    return json.loads(fixed)
+                except json.JSONDecodeError:
+                    pass
         
         if strict:
             snippet = cleaned[:200] + "..." if len(cleaned) > 200 else cleaned

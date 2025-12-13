@@ -1,0 +1,98 @@
+You are designing the puzzle structure and mechanics for a text adventure world. Create only the design brief - the detailed YAML will be generated in a second pass.
+
+## Requirements
+- Theme: {theme}
+- Number of locations: {num_locations}
+- Number of NPCs: {num_npcs}
+
+## User's Description
+{prompt}
+
+## Output Format
+Respond with valid JSON containing the world design brief. DO NOT generate YAML yet.
+
+```json
+{{
+  "world_id": "snake-case-world-name",
+  "world_name": "Human Readable World Name",
+  "spoiler_free_pitch": "A 3-6 sentence description of the world premise and vibe. Describe the setting, atmosphere, and what makes it compelling. DO NOT reveal any puzzle solutions, secrets, or how to win. This will be shown to the player.",
+  "design_brief": {{
+    "puzzle_threads": [
+      {{
+        "name": "Main Thread Name",
+        "is_primary": true,
+        "steps": [
+          "Step 1: What the player discovers or does",
+          "Step 2: What this enables",
+          "Step 3: What the player can now access"
+        ],
+        "gate_type": "hidden_exit | locked_exit | sequence_gate",
+        "gate_description": "Brief description of the specific gate mechanic"
+      }},
+      {{
+        "name": "Secondary Thread Name",
+        "is_primary": false,
+        "steps": ["Step 1", "Step 2", "Step 3"],
+        "gate_type": "hidden_exit | locked_exit | sequence_gate",
+        "gate_description": "Brief description"
+      }}
+    ],
+    "navigation_loop": {{
+      "description": "How the shortcut works",
+      "unlocked_by": "What action/item unlocks it",
+      "connects": ["location_a", "location_b"]
+    }},
+    "gate_types_used": ["hidden_exit", "locked_exit"],
+    "critical_items": [
+      {{
+        "id": "item_id",
+        "name": "Item Name",
+        "purpose": "What this item is used for",
+        "location_hint": "Where it can be found"
+      }}
+    ],
+    "optional_secrets": [
+      {{
+        "name": "Secret Name",
+        "type": "hidden_room | lore_reveal | optional_npc | bonus_item",
+        "description": "What the secret is and why it's rewarding",
+        "discovery_hint": "How the player might find it"
+      }}
+    ],
+    "environmental_storytelling": {{
+      "location_a": "What detail in Location A hints at something",
+      "location_b": "What in Location B explains or recontextualizes it"
+    }},
+    "victory_condition": {{
+      "location": "final_location_id",
+      "required_items": ["item_id"],
+      "required_flags": ["flag_name"],
+      "narrative_summary": "Brief description of what victory looks like"
+    }},
+    "key_constraints": [
+      "Important rule 1 the AI Game Master must enforce",
+      "Important rule 2 that prevents trivial solutions"
+    ]
+  }}
+}}
+```
+
+## Design Guidelines
+
+1. **Puzzle Threads**: Design at least 2 threads with 3+ steps each. The primary thread leads to victory; secondary threads unlock shortcuts, optional content, or alternative approaches.
+
+2. **Gate Variety**: Use at least 2 different gate types:
+   - `hidden_exit`: Passage not visible until discovered (pull lever, examine painting, etc.)
+   - `locked_exit`: Visible but blocked (requires key, code, or solved puzzle)
+   - `sequence_gate`: Accessible only after prerequisite (power restored, NPC convinced, etc.)
+
+3. **Navigation Loop**: Include one meaningful shortcut that makes backtracking easier once discovered.
+
+4. **Secrets**: At least 2 optional discoveries that reward exploration without blocking progress.
+
+5. **Environmental Storytelling**: Connect at least 2 locations through discoverable lore or visual details.
+
+6. **Constraints**: Be specific! "The basement is locked" is vague. "The basement door requires the iron key and cannot be broken" is enforceable.
+
+Think carefully about how the puzzle threads interweave and create a satisfying exploration experience.
+
