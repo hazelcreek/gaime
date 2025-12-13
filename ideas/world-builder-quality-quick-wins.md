@@ -1,5 +1,14 @@
 # World Builder AI: Quality Quick Wins (Minimal Effort, Max Richness)
 
+## Your current constraints (Dec 2025)
+
+- **Primary player is you**, but you still want a **spoiler-free surprise factor** to stay motivated.
+- **Baseline world size**: similar to `uss-enterprise-d` (small-to-medium, cohesive).
+- **Mechanics focus (now)**: **locations + exits** (reliable navigation, but non-trivial: locked/hidden/conditional paths).
+- **NPCs later**: a new dedicated dialog system is planned; world builder should not over-invest here *yet*.
+- **Narrative quality is non-negotiable**: bland prose reduces motivation and makes image gen generic (NPC/scene descriptions matter).
+- **Single victory condition** per world for now (quests/sidequests later).
+
 ## Context / Problem
 
 The current World Builder (now in the new TUI) reliably outputs **valid YAML**, but the resulting worlds (e.g. high school, forest, hazel city) are often:
@@ -59,8 +68,7 @@ So it frequently outputs worlds that *look complete* but *play shallow*.
 We can raise baseline quality quickly by forcing a **small set of structural commitments**:
 
 - **Puzzle graph**: multiple steps + dependencies + at least one alternative route.
-- **Gates**: at least two distinct gate types (item gate, knowledge/social gate, time/sequence gate).
-- **Knowledge map**: which NPC knows what; what they refuse to reveal; what changes after player actions.
+- **Gates**: at least two distinct gate types (primarily **exit/navigation gates** right now).
 - **Optional depth**: at least 2 optional discoveries that don’t block victory but enrich play.
 
 This aligns with GAIME’s direction (more mechanics) while keeping authoring cheap.
@@ -71,23 +79,24 @@ This aligns with GAIME’s direction (more mechanics) while keeping authoring ch
 
 These are prompt-level requirements (not engine/schema changes). They should be framed as **musts**.
 
-### A) Puzzle + gating minimums (per world)
+### A) Navigation-first gating minimums (per world)
 
-- **2 puzzle threads**, each at least **3 steps** (discover → unlock → resolve).
-- At least **2 gate types** among:
-  - item gate (key/tool/artifact)
-  - knowledge gate (NPC trust, proof/evidence, dialogue topic unlocked)
-  - sequence gate (do X then Y; requires a flag)
-  - environmental gate (light/dark; hazard; access condition)
-- At least **1 alternative solution** for a major gate (e.g., key OR pick-lock OR persuade NPC).
+- **2 navigation threads**, each at least **3 steps** (discover clue → unlock/enable access → reach new area).
+- Include **at least two** of these gate types (prefer the top ones):
+  - **hidden exit** gate (exit exists but is not visible until a discovery action sets a flag)
+  - **locked exit** gate (exit exists and is visible, but requires a key/tool or condition)
+  - **sequence/flag** gate (must do X before Y; e.g., “restore power” before a door will open)
+  - **environmental** gate (light/dark; hazard; access requirement) *only if the engine supports it today*
+- At least **one “non-trivial navigation loop”**: unlocking a shortcut that changes traversal (not just “final door opens”).
+
+> Note: “alternative solutions” are great, but they can reduce surprise for solo playtesting if too explicit. Treat them as an optional “rich mode” unless you decide otherwise later.
 
 ### B) NPC depth minimums
 
-- At least **2 “major” NPCs** with:
-  - **distinct voice** (speech style)
-  - **secrets + refusal rules** (what they won’t reveal and when)
-  - **useful mechanical role** (gatekeeper, clue source, item holder, etc.)
-- A simple **trust/progress mechanism** expressed in flags/constraints and supported by location interactions.
+- **Keep NPCs lightweight for now**, but enforce **image/narrative usefulness**:
+  - every NPC must have **appearance/description**, **role**, and **placement**
+  - at least one NPC should have a **world-grounding purpose** (guard, caretaker, engineer, clerk, etc.)
+- Avoid building a full trust/dialogue gating system until the dedicated dialog system exists.
 
 ### C) Item design minimums
 
@@ -110,7 +119,7 @@ Create a “15-turn smoke test” for any generated world:
 
 - Player can discover at least **one non-trivial clue chain** by turn ~5–7.
 - At least **one gate** cannot be bypassed by a single obvious item pickup.
-- At least **one NPC interaction** meaningfully changes available options (flag/trust/topic).
+- At least **one discovery action** meaningfully changes navigation (reveals/unlocks an exit; sets a flag used later).
 - There’s at least **one optional secret** that feels rewarding.
 
 This becomes the yardstick for the builder.
@@ -142,7 +151,16 @@ Without changing server requirements, ask the model to include an **additional J
   - which NPC knows which critical info and when
   - list of optional secrets
 
-The backend currently requires only `world_id`, `world_yaml`, `locations_yaml`, `npcs_yaml`, `items_yaml`; extra keys are safe. This “brief” becomes a debugging lens and can later be used for automated evaluation.
+The backend currently requires only `world_id`, `world_yaml`, `locations_yaml`, `npcs_yaml`, `items_yaml`; extra keys are safe.
+
+#### Spoiler-minimizing tweak (important for solo playtesting)
+
+To preserve your surprise factor, structure it like:
+
+- `spoiler_free_pitch`: 3–6 sentences you can read safely (premise + vibe + what makes it cool, **no solutions**).
+- `spoilers`: contains `design_brief` and any explicit puzzle graph/solutions.
+
+Then the TUI can hide `spoilers` by default unless you enable a “show spoilers / debug” toggle.
 
 ### Step 3 — Two-pass generation (optional, but still small) (1–2 hrs)
 
@@ -173,8 +191,8 @@ Even with prompt upgrades, the fastest way to get usable test content is a small
 
 ### Template set (no engine changes required)
 
-- **Key + knowledge gate + alternative route**
-  - locked exit requires key OR convince NPC OR find hidden bypass
+- **Navigation-first: locked + hidden + shortcut loop**
+  - a visible locked door + a hidden bypass + a later-unlocked shortcut
 - **3-artifact ritual / collection victory**
   - forces multi-step item acquisition + gated access to final chamber
 - **Time pressure without real-time clocks**
@@ -191,9 +209,9 @@ Implementation: encode templates as short “seed briefs” inside the prompt (o
 When reviewing a generated world, check:
 
 - **Puzzle graph**: can you draw it as a dependency graph with >= 6 meaningful nodes?
-- **At least one non-item gate** exists (knowledge/trust/sequence).
+- **At least one hidden exit** and **one locked/conditional exit** exist, and neither is trivial.
 - **Constraints** explicitly forbid trivial bypasses for the major gates.
-- **NPCs** have secrets + refusal rules + mechanical purpose.
+- **NPCs** have enough description to avoid generic image gen.
 - **Optional content** exists and feels worth pursuing.
 
 If any of these fail, the builder should regenerate (or the enrichment pass should expand).
