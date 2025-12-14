@@ -209,3 +209,13 @@ ferry_terminal:
   details:
     north: "The path back to the statue and distillery."
     sea: "Dark and unforgiving."
+  interactions:
+    confront_killer:
+      triggers:
+        - "confront gordon"
+        - "accuse gordon"
+        - "show bung to gordon"
+        - "present evidence"
+        - "arrest gordon"
+      narrative_hint: "You present the bloodied cask bung to Gordon MacNeil. His calm facade crumbles as he realizes his fate is sealed."
+      sets_flag: killer_confronted
