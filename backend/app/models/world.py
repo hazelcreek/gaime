@@ -31,6 +31,7 @@ class World(BaseModel):
     commands: dict[str, str] = Field(default_factory=dict)
     starting_situation: str = ""  # Initial narrative context explaining why player can act
     victory: VictoryCondition | None = None  # Win condition for the game
+    style: str | None = None  # Visual style preset for image generation
 
 
 class InteractionEffect(BaseModel):

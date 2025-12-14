@@ -143,7 +143,8 @@ class WorldLoader:
             constraints=data.get("constraints", []),
             commands=data.get("commands", {}),
             starting_situation=data.get("starting_situation", ""),
-            victory=victory
+            victory=victory,
+            style=data.get("style")
         )
     
     def _load_locations_yaml(self, path: Path) -> dict[str, Location]:

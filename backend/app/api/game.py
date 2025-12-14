@@ -57,6 +57,8 @@ async def new_game(request: NewGameRequest):
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail=f"World '{request.world_id}' not found")
     except Exception as e:
+        import traceback
+        traceback.print_exc()  # Print the actual error for debugging
         raise HTTPException(status_code=500, detail=str(e))
 
 
