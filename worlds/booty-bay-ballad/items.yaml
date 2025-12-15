@@ -1,0 +1,55 @@
+sticky_jail_key:
+  name: "Sticky Jail Key"
+  portable: true
+  examine: |
+    A heavy iron key covered in a thick, spicy glaze of dried grog. It smells like cinnamon and tetanus.
+  found_description: "You can't see it, but you know it's at the bottom of the grog barrel."
+  take_description: "You fish out the sticky key. Your hands are now gross."
+
+ceramic_parrot:
+  name: "Ceramic Parrot"
+  portable: true
+  examine: |
+    A garishly painted ceramic parrot. It looks surprised to be here.
+  found_description: "Bard Barbarossa is waving it around like a trophy."
+  take_description: "You snatch the parrot from the weeping bard."
+
+ancient_compass:
+  name: "Ancient Compass"
+  portable: true
+  examine: |
+    A brass compass that glows faintly. The needle doesn't point North; it points towards Gold.
+  found_description: "Navigator Ned is clutching it to his chest."
+  take_description: "You take the compass. It vibrates with greed."
+
+ladle_infinite:
+  name: "Ladle of Infinite Scooping"
+  portable: true
+  examine: |
+    An oversized ladle with a suspiciously deep bowl. Engraved on the handle: 'Property of the Galley - Do Not Use for Grog'.
+  found_description: "A massive ladle is sticking out of a pot of dirty oatmeal."
+  take_description: "You pull the ladle free with a squelch."
+
+rusty_cutlass:
+  name: "Rusty Cutlass"
+  portable: true
+  examine: |
+    More rust than blade, but sharp enough to cut a rope.
+  found_description: "A rusty cutlass is wedged into the railing here."
+  take_description: "You wrench the cutlass free. Tetanus shot not included."
+
+ghost_diary:
+  name: "Ghost Pirate's Diary"
+  portable: true
+  examine: |
+    A waterlogged book. Entry 1: 'Dear Diary, Captain No-Beard is actually three kids in a coat. I must tell no one.'
+  found_description: "A dusty diary lies under the floorboard."
+  take_description: "You pick up the scandalous literature."
+
+golden_tooth:
+  name: "Golden Tooth"
+  portable: true
+  examine: |
+    A solid gold molar. Heavy and valuable.
+  found_description: "Something glints inside the shark's mouth."
+  take_description: "You reach into the shark's mouth and steal its dental work."

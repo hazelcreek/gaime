@@ -1,0 +1,226 @@
+docks_landing:
+  name: "The Docks"
+  atmosphere: |
+    The smell of salt and questionable fish stew hangs heavy in the air. Seagulls squawk insults from above. To the north, the bustling Town Square awaits. To the east, your own trusty (and rusty) ship, 'The Leaky Tub', is moored.
+  exits:
+    north: town_square
+    east: ships_deck
+  items:
+    - sticky_jail_key
+  item_placements:
+    sticky_jail_key: "Deep inside the Grog Barrel (currently invisible)."
+  details:
+    north: "A cobblestone path leading into the noisy heart of Booty Bay."
+    east: "The gangplank to your ship, which creaks ominously with every wave."
+    grog_barrel: "A massive barrel labeled 'XXL SPICY GROG - DO NOT TOUCH'. It rumbles slightly."
+  interactions:
+    scoop_grog:
+      triggers:
+        - "use ladle_infinite on grog_barrel"
+      narrative_hint: "You scoop out gallons of fiery liquid with the Ladle of Infinite Scooping. At the bottom, sticky and smelling of nutmeg, lies a key!"
+      sets_flag: grog_scooped
+      reveals_item: sticky_jail_key
+
+town_square:
+  name: "Town Square"
+  atmosphere: |
+    The heart of Booty Bay. Pirates haggle over parrots and peg legs. In the center stands a grand statue of Captain No-Beard McGee, looking heroic and surprisingly clean-shaven.
+  exits:
+    south: docks_landing
+    west: tavern_entrance
+    east: brig_entrance
+  items: []
+  item_placements: {}
+  details:
+    statue: "A stone likeness of the Captain. He stands atop a plinth, one arm raised as if holding a bird. The statue looks incomplete without his famous parrot accessory."
+    plinth: "The base of the statue. It has a parrot-shaped indentation."
+    south: "The path back to the salty docks."
+    west: "The swinging doors of The Rusty Cutlass Tavern."
+    east: "The imposing iron-reinforced door of the Brig."
+  interactions:
+    place_parrot:
+      triggers:
+        - "use ceramic_parrot on statue"
+      narrative_hint: "You fit the Ceramic Parrot onto No-Beard's shoulder. It clicks into place! The plinth rumbles and slides aside, revealing a dark staircase downwards."
+      sets_flag: statue_unlocked
+      reveals_exit: smugglers_cove_entrance
+
+tavern_entrance:
+  name: "The Rusty Cutlass Tavern"
+  atmosphere: |
+    Raucous laughter and terrible music fill the room. The air is thick with smoke and the smell of spilled ale. Pirates arm-wrestle at sticky tables.
+  exits:
+    east: town_square
+    north: tavern_backroom
+  items:
+    - ceramic_parrot
+    - golden_tooth
+  item_placements:
+    ceramic_parrot: "Clutched in the hand of Bard Barbarossa, who is currently bowing."
+    golden_tooth: "Hidden inside the mouth of the mounted shark head above the bar."
+  npcs:
+    - bard_barbarossa
+  npc_placements:
+    bard_barbarossa: "Standing on a table, reciting limericks about scurvy."
+  details:
+    shark_head: "A taxidermied shark with a suspiciously shiny glint in its mouth."
+    sign: "A 'Help Wanted' sign reads: 'Seeking Cook. Must know difference between sawdust and cumin.'"
+  interactions:
+    slam_poetry:
+      triggers:
+        - "talk bard_barbarossa"
+      narrative_hint: "You challenge the Bard to an insult slam. You rhyme 'spittoon' with 'baboon'. The crowd goes wild! Barbarossa weeps and hands you his prize trophy."
+      sets_flag: won_slam
+      reveals_item: ceramic_parrot
+    examine_shark:
+      triggers:
+        - "examine shark_head"
+      narrative_hint: "You peer into the shark's maw. Wedged in the back is a solid Golden Tooth!"
+      reveals_item: golden_tooth
+
+brig_entrance:
+  name: "The Brig"
+  atmosphere: |
+    A gloomy stone building. The only sound is the dripping of water and the mournful harmonica playing of a prisoner.
+  exits:
+    west: town_square
+    in: jail_cell
+  details:
+    door: "A heavy iron door with a massive, rusty padlock."
+    west: "Sunlight streams in from the Town Square."
+    in: "The dark interior of the cells."
+  requires:
+    in:
+      item: sticky_jail_key
+      fail_msg: "The door is locked tight. The padlock is rusted shut and sticky with old grog?"
+
+jail_cell:
+  name: "Jail Cell"
+  atmosphere: |
+    Damp, cold, and smelling of regret. Navigator Ned sits on a wooden bench, looking miserable.
+  exits:
+    out: brig_entrance
+  npcs:
+    - navigator_ned
+  npc_placements:
+    navigator_ned: "Sitting on the bunk, trying to read a map in the dark."
+  items:
+    - ancient_compass
+  item_placements:
+    ancient_compass: "Held tightly by Navigator Ned."
+  interactions:
+    free_ned:
+      triggers:
+        - "talk navigator_ned"
+      narrative_hint: "Ned gasps. 'You opened the door! I'm free! Take this, I won't need it where I'm going (the tavern).' He hands you the Ancient Compass."
+      sets_flag: ned_freed
+      reveals_item: ancient_compass
+
+ships_deck:
+  name: "Deck of The Leaky Tub"
+  atmosphere: |
+    The deck of your ship. It's seen better days. Ropes coil like snakes and the main mast stretches up into the blue sky.
+  exits:
+    west: docks_landing
+    up: crows_nest
+    down: galley
+  details:
+    up: "A rope ladder leading high up to the Crow's Nest."
+    down: "A narrow hatch leading to the Galley."
+    west: "The gangplank back to the docks."
+    rope_line: "A slack line hangs from the mast, looking like it could form a zipline if tightened from above."
+
+galley:
+  name: "Ship's Galley"
+  atmosphere: |
+    A cramped kitchen. Dirty dishes are piled high. It smells faintly of sawdust and despair.
+  exits:
+    up: ships_deck
+  items:
+    - ladle_infinite
+  item_placements:
+    ladle_infinite: "Stuck into a pot of solidified oatmeal."
+  details:
+    sack: "A sack in the corner labeled 'Premium Flour'. It is ripped open, revealing pure sawdust inside."
+
+crows_nest:
+  name: "Crow's Nest"
+  atmosphere: |
+    High above the bay. The wind whips your hair. You can see the whole island from here.
+  exits:
+    down: ships_deck
+    zipline: ships_deck
+  items:
+    - rusty_cutlass
+  item_placements:
+    rusty_cutlass: "Embedded in the wooden railing."
+  npcs:
+    - weeping_lookout
+  npc_placements:
+    weeping_lookout: "Curled up in a ball, sobbing into his spyglass."
+  details:
+    counterweight_rope: "A thick rope holding a heavy counterweight. If cut, it might snap the zipline tight."
+  interactions:
+    cut_rope:
+      triggers:
+        - "use rusty_cutlass on counterweight_rope"
+      narrative_hint: "You saw through the rope. SNAP! The counterweight drops, pulling the zipline taut. You can now zip down to the deck instantly!"
+      sets_flag: zipline_active
+      reveals_exit: zipline
+    talk_lookout:
+      triggers:
+        - "talk weeping_lookout"
+      narrative_hint: "The lookout wails, 'I dropped the Jail Key! It fell right into a barrel of Spicy Grog on the docks! I'm doomed!'"
+
+smugglers_cove_entrance:
+  name: "Smuggler's Cove Entrance"
+  atmosphere: |
+    A dark, rocky tunnel revealed beneath the statue. The air is cool and smells of gold and mildew.
+  exits:
+    up: town_square
+    down: treasure_cave
+  details:
+    darkness: "The tunnel ahead is pitch black and winding."
+  requires:
+    down:
+      item: ancient_compass
+      fail_msg: "You can't navigate the twisting, pitch-black tunnels without an Ancient Compass. You'd get lost instantly."
+
+treasure_cave:
+  name: "The Treasure Cave"
+  atmosphere: |
+    A massive cavern illuminated by glowing moss. In the center, a pile of gold glitters.
+  exits:
+    up: smugglers_cove_entrance
+  details:
+    chest: "The legendary chest of Captain No-Beard."
+
+tavern_backroom:
+  name: "Tavern Backroom"
+  atmosphere: |
+    A private room for high-stakes card games. It's surprisingly quiet.
+  exits:
+    south: tavern_entrance
+  details:
+    table: "A card table covered in green felt."
+
+captains_cabin:
+  name: "Captain's Cabin"
+  atmosphere: |
+    Located at the stern of the ship (accessed from deck, though door was stuck before). Wait, this is just a narrative flavor room attached to the deck logic.
+  exits:
+    out: ships_deck
+  details:
+    floorboard: "A loose floorboard squeaks under your foot."
+  interactions:
+    examine_floor:
+      triggers:
+        - "examine floorboard"
+      narrative_hint: "You pry up the board. Underneath is a dusty diary belonging to a Ghost Pirate."
+      reveals_item: ghost_diary
+
+zipline_descent:
+  name: "Mid-Air Zipline"
+  atmosphere: "WHEEEEEEEEEE!"
+  exits:
+    land: ships_deck

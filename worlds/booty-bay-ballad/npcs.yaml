@@ -1,0 +1,54 @@
+bard_barbarossa:
+  name: "Bard Barbarossa"
+  role: "Puzzle Gatekeeper"
+  location: tavern_entrance
+  appearance: |
+    A burly pirate with a delicate lute and a beard braided with ribbons.
+  personality:
+    traits:
+      - "Melodramatic"
+      - "Competitive"
+    speech_style: "Speaks in accidental rhyming couplets."
+    quirks:
+      - "Strums a chord whenever he makes a point."
+  knowledge:
+    - "Possesses the Ceramic Parrot, won in a poker game."
+  dialogue_rules:
+    - "Will only surrender the parrot if beaten in a poetry slam."
+
+navigator_ned:
+  name: "Navigator Ned"
+  role: "Quest Giver"
+  location: jail_cell
+  appearance: |
+    A thin man with thick glasses and ink-stained fingers.
+  personality:
+    traits:
+      - "Nervous"
+      - "Directionally challenged (ironically)"
+    speech_style: "Fast and jittery."
+    quirks:
+      - "Constantly checks a pocket watch that is broken."
+  knowledge:
+    - "Knows the way through the Smuggler's Cove tunnels."
+  dialogue_rules:
+    - "Begs to be released."
+    - "Gives the Compass upon freedom."
+
+weeping_lookout:
+  name: "Weeping Lookout"
+  role: "Clue Giver"
+  location: crows_nest
+  appearance: |
+    A young pirate with red, puffy eyes and a runny nose.
+  personality:
+    traits:
+      - "Incompetent"
+      - "Emotional"
+    speech_style: "Sobbing uncontrollably."
+    quirks:
+      - "Blows nose loudly on a sail."
+  knowledge:
+    - "Knows the location of the Sticky Jail Key."
+  dialogue_rules:
+    - "Confesses his mistake immediately upon being spoken to."

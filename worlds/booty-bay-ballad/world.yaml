@@ -1,0 +1,38 @@
+name: "The Ballad of Booty Bay"
+theme: "Humorous Pirate Adventure"
+
+# Visual style preset for image generation
+style: pixel-art
+tone: "Silly, satirical, salty"
+hero_name: "Scallywag"
+
+premise: |
+  Booty Bay is a haven for the salty, the silly, and the suspiciously unwashed. You are on the hunt for Captain 'No-Beard' McGee's legendary treasure, the Golden Parrot, said to be hidden beneath the island's very foundations. But you aren't the only one looking. Rival pirates, incompetent guards, and a very rude seagull stand in your way.
+
+starting_situation: |
+  It's high noon, and the tide is turning. The Town Crier just announced that the annual 'Clean Up the Bay' initiative has accidentally unearthed the first clue to McGee's treasure, sending every pirate in town into a frenzy. You're already late to the party, docked at the pier with an empty pocket and a heart full of greed.
+
+victory:
+  location: treasure_cave
+  item: ancient_compass
+  flag: statue_unlocked
+  narrative: |
+    With the Ancient Compass guiding your steps through the dark, damp, and frankly smelly tunnels, you stumble into a cavern glittering with gold! You open the chest. It's filled with dubloons, jewels, and a note from Captain No-Beard admitting he just shaved because it was itchy. You are rich! Rich enough to buy your own ship, or at least a very nice hat.
+
+player:
+  starting_location: docks_landing
+  starting_inventory: []
+
+constraints:
+  - "The Grog Barrel cannot be tipped over or drunk; it is too heavy and too spicy. The Ladle must be used."
+  - "The Brig door is too sturdy to be kicked down; only the Sticky Jail Key works."
+  - "The Statue cannot be moved by force; the mechanism requires the weight of the Ceramic Parrot specifically."
+  - "You cannot climb the slippery cliffs to the Crow's Nest without using the rigging ladder from the Ship's Deck."
+
+commands:
+  help: "Display available commands"
+  look: "Examine surroundings"
+  inventory: "Check inventory"
+  go: "Move in a direction"
+  use: "Use an item on a target"
+  talk: "Talk to an NPC"
