@@ -1,0 +1,71 @@
+polished_sea_glass:
+  name: "Polished Sea Glass"
+  portable: true
+  examine: |
+    A smooth, heavy chunk of glass, worn by the ocean into a perfect jewel.
+  found_description: "Inside the clam sits a glowing piece of sea glass."
+  take_description: "You pocket the heavy glass shard."
+
+fresnel_lens:
+  name: "Fresnel Lens"
+  portable: true
+  examine: |
+    A complex array of crystal prisms designed to magnify light thousandfold.
+  found_description: "The crabdroid holds the lens in its claw."
+  take_description: "You carefully take the delicate lens."
+
+rusted_gear_key:
+  name: "Rusted Gear Key"
+  portable: true
+  examine: |
+    A heavy iron key with teeth like a cog.
+  found_description: "A skeleton clutches a gear-shaped key."
+  take_description: "You pry the key from the skeletal fingers."
+
+pneumatic_schematic:
+  name: "Pneumatic Schematic"
+  portable: true
+  examine: |
+    A blueprint showing the correct airflow valves to pressurize the island's grid.
+  found_description: "A blue roll of paper is pinned to the wall."
+  take_description: "You roll up the schematic."
+
+dry_driftwood:
+  name: "Dry Driftwood"
+  portable: true
+  examine: |
+    Bone-dry timber, perfect for starting a fire.
+  found_description: "A pile of dry wood sits on the dunes."
+  take_description: "You gather an armful of dry wood."
+
+lump_of_coal:
+  name: "Lump of Coal"
+  portable: true
+  examine: |
+    High-grade anthracite, capable of burning very hot.
+  found_description: "Black lumps of coal are scattered on the floor."
+  take_description: "You pick up the heavy coal lumps."
+
+leather_straps:
+  name: "Leather Straps"
+  portable: true
+  examine: |
+    Tough, oil-treated leather strips from a safety harness.
+  found_description: "Old leather straps hang from the wreckage."
+  take_description: "You salvage the leather straps."
+
+machete:
+  name: "Industrial Machete"
+  portable: true
+  examine: |
+    A rusty but sharp blade used for cutting thick cables.
+  found_description: "A machete is stuck in a vice."
+  take_description: "You pull the machete free."
+
+golden_oil_can:
+  name: "Golden Oil Can"
+  portable: true
+  examine: |
+    Filled with high-grade synthetic lubricant. It smells like lavender.
+  found_description: "A golden oil can glitters in the dark."
+  take_description: "You take the precious oil."

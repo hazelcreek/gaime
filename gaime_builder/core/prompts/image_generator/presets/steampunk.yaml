@@ -2,20 +2,21 @@
 # Victorian-era industrial fantasy with brass, gears, and steam
 
 name: "Steampunk"
-description: "Victorian-era industrial fantasy aesthetic with brass machinery, clockwork gears, and steam-powered technology. Retro-futuristic adventure."
+description: "Victorian-era industrial fantasy aesthetic with brass machinery, clockwork gears, and steam-powered technology. Stylized realism with vibrant natural colors."
 
 # L3: Mood
 mood:
-  tone: "adventurous, industrious, inventive, slightly dangerous"
-  lighting: "warm gas lamp glow, industrial lighting, fire from furnaces, golden hour through factory windows"
-  color_palette: "sepia and amber tones, brass gold, copper orange, dark wood brown, iron gray, with accent steam white"
+  tone: "adventurous, industrious, inventive, wondrous"
+  lighting: "natural lighting with warm lamp accents, dramatic atmospheric lighting, volumetric light rays, golden hour and blue hour skies"
+  color_palette: "rich natural colors - deep greens, ocean blues, sunset oranges, vibrant foliage - with brass gold and copper accents on machinery only"
 
 # L4: Style (MOST IMPORTANT)
 style: |
-  Steampunk illustration with rich detail on mechanical elements. Victorian
-  industrial aesthetic with brass, copper, and iron machinery. Visible gears,
-  pipes, and steam vents. The style balances historical Victorian elements
-  with fantastical technology. Warm, sepia-influenced color grading.
+  Stylized realism with painterly quality, detailed environments. Nature retains
+  its natural colors: lush greens, blue skies, turquoise waters, colorful flora.
+  Victorian steampunk machinery elements (brass, copper, iron, gears, pipes, steam)
+  integrate with colorful natural surroundings. Mechanical elements are warm-toned
+  but environments are NOT sepia-graded. Rich color saturation, atmospheric depth.
   The visual style is paramount.
 
 # L5: Technical
@@ -23,7 +24,7 @@ technical:
   perspective: "first-person"
   shot: "medium wide shot"
   camera: "eye level or low angle to emphasize machinery"
-  effects: "steam clouds, lens flare from gas lamps, metallic reflections"
+  effects: "atmospheric haze, volumetric lighting, steam wisps, metallic reflections on brass"
 
 # L6: Anti-styles (prevents style drift)
 anti_styles:
@@ -32,8 +33,9 @@ anti_styles:
   - "minimalist or clean"
   - "anime or cartoon"
   - "medieval fantasy"
-  - "photorealistic"
   - "futuristic sleek technology"
+  - "monochromatic sepia or brown color grading"
+  - "desaturated or muted colors"
 
 # L6: Quality constraints
 quality_constraints:
@@ -41,4 +43,5 @@ quality_constraints:
   - "blurry or low-quality artifacts"
   - "modern technology (computers, LED lights)"
   - "plastic or modern materials"
-  - "cold blue lighting"
+  - "overly dark or muddy colors"
+  - "uniform brown/sepia filter over entire image"

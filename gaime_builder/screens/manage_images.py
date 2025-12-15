@@ -17,7 +17,7 @@ from textual.widgets import (
     Header, Footer, Button, Select, Static, 
     ProgressBar, DataTable, Checkbox, Label
 )
-from textual.worker import Worker, get_current_worker
+from textual.worker import Worker, WorkerState, get_current_worker
 
 from gaime_builder.core.tasks import TaskQueue, TaskStatus
 
@@ -189,8 +189,8 @@ class ManageImagesScreen(Screen):
     
     def _on_task_update(self, task_id: str, task) -> None:
         """Handle task state changes from the queue."""
-        # This runs in the main thread, safe to update UI
-        self.call_from_thread(self._update_task_display)
+        # This runs in the main thread, safe to update UI directly
+        self._update_task_display()
     
     def _update_task_display(self) -> None:
         """Update the task progress display."""
@@ -471,48 +471,30 @@ class ManageImagesScreen(Screen):
         total = len(regen_list)
         
         # Update progress display
-        self.call_from_thread(
-            self._update_progress_display,
-            0.0, batch_name, f"Starting {total} location(s)..."
-        )
+        self._update_progress_display(0.0, batch_name, f"Starting {total} location(s)...")
         
         for i, item in enumerate(regen_list):
             loc_id = item["location_id"]
             use_smart = item["smart"]
             
             if worker.is_cancelled:
-                self.call_from_thread(
-                    self._update_location_status_in_table,
-                    loc_id, "idle", "Cancelled"
-                )
+                self._update_location_status_in_table(loc_id, "idle", "Cancelled")
                 break
             
             # Update status to generating
-            self.call_from_thread(
-                self._update_location_status_in_table,
-                loc_id, "generating", ""
-            )
+            self._update_location_status_in_table(loc_id, "generating", "")
             
             progress = i / total
-            self.call_from_thread(
-                self._update_progress_display,
-                progress, batch_name, f"Processing {loc_id}..."
-            )
+            self._update_progress_display(progress, batch_name, f"Processing {loc_id}...")
             
             try:
-                # Define callbacks that update UI via call_from_thread
+                # Define callbacks that update UI
                 def progress_callback(prog: float, msg: str):
                     overall = (i + prog) / total
-                    self.call_from_thread(
-                        self._update_progress_display,
-                        overall, batch_name, msg
-                    )
+                    self._update_progress_display(overall, batch_name, msg)
                 
                 def location_callback(lid: str, status: str, msg: str):
-                    self.call_from_thread(
-                        self._update_location_status_in_table,
-                        lid, status, msg
-                    )
+                    self._update_location_status_in_table(lid, status, msg)
                 
                 if use_smart:
                     # Smart regeneration - only regenerate what's actually outdated
@@ -532,22 +514,12 @@ class ManageImagesScreen(Screen):
                     )
                 
                 results[loc_id] = True
-                self.call_from_thread(
-                    self._update_location_status_in_table,
-                    loc_id, "done", ""
-                )
+                self._update_location_status_in_table(loc_id, "done", "")
                 
             except Exception as e:
                 results[loc_id] = False
-                self.call_from_thread(
-                    self._update_location_status_in_table,
-                    loc_id, "error", str(e)
-                )
-                self.call_from_thread(
-                    self.notify,
-                    f"Error generating {loc_id}: {e}",
-                    severity="error"
-                )
+                self._update_location_status_in_table(loc_id, "error", str(e))
+                self.notify(f"Error generating {loc_id}: {e}", severity="error")
             
             # Small delay between locations to avoid rate limiting
             await asyncio.sleep(0.5)
@@ -556,10 +528,7 @@ class ManageImagesScreen(Screen):
         success_count = sum(1 for r in results.values() if r)
         final_msg = f"Completed: {success_count}/{len(results)} successful"
         
-        self.call_from_thread(
-            self._update_progress_display,
-            1.0, batch_name, final_msg
-        )
+        self._update_progress_display(1.0, batch_name, final_msg)
         
         return results
     
@@ -578,7 +547,9 @@ class ManageImagesScreen(Screen):
     def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
         """Handle worker state changes."""
         if event.worker.name == "image_generation":
-            if event.state.is_finished:
+            # Check if worker reached a terminal state
+            terminal_states = {WorkerState.SUCCESS, WorkerState.CANCELLED, WorkerState.ERROR}
+            if event.state in terminal_states:
                 self._set_generation_controls(running=False)
                 self._active_worker = None
                 
@@ -589,9 +560,9 @@ class ManageImagesScreen(Screen):
                         name="reload_locations"
                     )
                 
-                if event.state == event.state.SUCCESS:
+                if event.state == WorkerState.SUCCESS:
                     self.notify("Image generation complete!", severity="information")
-                elif event.state == event.state.CANCELLED:
+                elif event.state == WorkerState.CANCELLED:
                     self.notify("Image generation cancelled", severity="warning")
                 elif event.state == event.state.ERROR:
                     self.notify(f"Image generation failed: {event.worker.error}", severity="error")
