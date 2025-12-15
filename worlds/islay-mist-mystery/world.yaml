@@ -2,7 +2,7 @@ name: "The Angel's Share Murder"
 theme: "Scottish Noir, Distillery Mystery, Celtic Folklore"
 
 # Visual style preset for image generation
-style: noir
+style: folk-noir
 tone: "Atmospheric, Rain-soaked, Tense, Peaty"
 hero_name: "DI Alasdair Ross"
 

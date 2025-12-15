@@ -19,27 +19,30 @@ and any characters should be positioned authentically within the space.
 
 World Context: Scottish Noir, Distillery Mystery, Celtic Folklore, Atmospheric, Rain-soaked, Tense, Peaty
 
-Mood: The atmosphere is gritty, tense, morally ambiguous, cynical. high contrast, harsh shadows, pools of light, venetian blind patterns, neon reflections. The color palette features desaturated with selective color accents, mostly black and white with occasional red or blue highlights.
+Mood: The atmosphere is uneasy, somber, ominous, introspective, quietly threatening. naturalistic but uncanny, low sun, long shadows, overcast skies, candle or firelight contrasts. The color palette features muted earth tones—lichen greens, peat browns, bone whites, weathered stone—with restrained warm highlights.
 
-Visual style (most important): Film noir cinematography. High contrast black and white aesthetic with
-selective color accents. Dramatic shadows, chiaroscuro lighting, rain-slicked
-surfaces reflecting neon signs. Strong geometric shadows from blinds, railings,
-and urban architecture. The visual style is paramount and must evoke classic
-1940s-1950s noir cinema.
+Visual style (most important): Folk noir cinematography blending grounded realism with folkloric unease.
+Landscapes appear ordinary but charged with ancestral memory: stone structures,
+coastal edges, rural courtyards, and weather-beaten environments shaped by ritual
+and labor. Color grading is desaturated and earthy, with subtle warmth introduced
+through firelight, lanterns, or interior glow. Composition favors stillness,
+symmetry that feels ritualistic, and slow observational framing. Weather—wind,
+mist, sea spray—acts as a living presence. Human absence or small figures suggest
+inherited guilt, unspoken tradition, and the persistence of the past beneath the
+present.
 This style must be maintained consistently throughout the entire image.
 
-Composition: first-person perspective, medium shot or medium close-up from eye level or dramatic low angle. film grain, slight vignette, wet reflections, smoke or fog
+Composition: third-person contemplative perspective, wide or medium-wide shots, static framing from eye level, locked-off or slow drift, no handheld. fine film grain, subtle vignette, sea mist, smoke, drifting birds, organic motion
 
 Critical constraints - the image must NOT include:
-- colorful and vibrant
-- bright and cheerful
-- anime or manga
-- cartoon or whimsical
-- fantasy illustration
-- watercolor or soft
-- children's book
+- explicit fantasy creatures or magic
+- high-action or horror spectacle
+- urban neon environments
+- modern glossy realism
+- bright, cheerful color palettes
+- overt surrealism or dream logic
 - watermarks or signatures
 - blurry or low-quality artifacts
 - distorted proportions
-- overly saturated colors
-- flat lighting without shadows
+- saturated or vivid colors
+- harsh digital sharpening
