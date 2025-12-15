@@ -1,21 +1,17 @@
 # Prompt Files
 
-This directory contains all LLM prompts used by GAIME, organized by component.
+This directory contains LLM prompts used by the GAIME backend runtime.
 
 ## Directory Structure
 
 ```
 prompts/
-├── game_master/          # Game engine prompts
-│   ├── system_prompt.txt      # Main system prompt for game master
-│   └── opening_prompt.txt      # Prompt for generating opening narrative
-└── image_generator/      # Image generation prompts
-    ├── image_prompt_template.txt      # Template for scene image generation
-    ├── edit_prompt_template.txt       # Template for editing images (NPC variants)
-    └── interactive_elements_section.txt  # Template section for interactive elements
+└── game_master/          # Game engine prompts
+    ├── system_prompt.txt      # Main system prompt for game master
+    └── opening_prompt.txt      # Prompt for generating opening narrative
 ```
 
-> **Note**: World builder prompts are in `gaime_builder/core/prompts/world_builder/` (TUI app).
+> **Note**: Image generation and world builder prompts are in `gaime_builder/core/prompts/` (TUI app).
 
 ## Usage
 
@@ -64,23 +60,6 @@ reload_category("game_master")
 - **Used in**: `app.llm.game_master.GameMaster.generate_opening()`
 - **Purpose**: User prompt for generating the opening narrative
 - **Variables**: `location_name`, `premise`, `starting_situation`
-
-### Image Generator Prompts
-
-**`image_prompt_template.txt`**
-- **Used in**: `app.llm.image_generator.get_image_prompt()`
-- **Purpose**: Template for generating scene images for locations
-- **Variables**: `location_name`, `theme`, `tone`, `atmosphere`, `interactive_section`
-
-**`edit_prompt_template.txt`**
-- **Used in**: `app.llm.image_generator.get_edit_prompt()`
-- **Purpose**: Template for editing base images to add NPCs (for variants)
-- **Variables**: `location_name`, `theme`, `tone`, `npcs_text`
-
-**`interactive_elements_section.txt`**
-- **Used in**: `app.llm.image_generator.get_image_prompt()`
-- **Purpose**: Template section describing exits, items, and NPCs in images
-- **Variables**: `interactive_elements`
 
 ## Editing Prompts
 

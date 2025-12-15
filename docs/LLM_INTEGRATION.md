@@ -568,38 +568,9 @@ image_path = await generate_location_image(
 
 ### Image Prompt Templates
 
-Image generation prompts are defined in `backend/app/llm/prompts/image_generator/`:
+Image generation is handled by the **gaime-builder TUI** (not the backend). Prompts and style presets are located in `gaime_builder/core/prompts/image_generator/`.
 
-- **`image_prompt_template.txt`**: Template for generating scene images
-- **`edit_prompt_template.txt`**: Template for editing images to add NPCs (variants)
-- **`interactive_elements_section.txt`**: Template section for describing exits/items/NPCs
-
-The image prompt includes interactive elements that are dynamically inserted:
-
-```text
-Create a dramatic, atmospheric scene illustration for a text adventure game.
-
-Location: {location_name}
-Theme: {theme}
-Tone: {tone}
-
-Scene Description:
-{atmosphere}{interactive_section}
-
-Style Requirements:
-- Digital painting style with rich colors and dramatic lighting
-- Painterly, evocative atmosphere suitable for a text adventure game
-- First-person perspective as if the player is viewing the scene
-- Moody, immersive lighting that matches the tone
-- 16:9 widescreen composition
-- Detailed environment with depth and atmospheric effects
-- Natural integration of doorways, passages, and architectural features
-- Subtle visual storytelling through object placement and environmental details
-```
-
-The `{interactive_section}` is built from `interactive_elements_section.txt` and includes descriptions of exits, items, and NPCs present at the location.
-
-See the prompt files in `backend/app/llm/prompts/image_generator/` for complete templates.
+See `docs/STYLE_AUTHORING.md` for complete documentation on the Modular Prompt Architecture (MPA) and style presets.
 
 ### Best Practices
 

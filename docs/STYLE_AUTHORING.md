@@ -78,7 +78,7 @@ style_block:
 
 ## Creating Style Presets
 
-Style presets are YAML files in `/backend/app/llm/prompts/image_generator/presets/`.
+Style presets are YAML files in `/gaime_builder/core/prompts/image_generator/presets/`.
 
 ### File Structure
 
@@ -304,6 +304,6 @@ This ensures NPC variants maintain visual consistency with the base image.
 
 ## Reference
 
-- **Quick Template**: `/backend/app/llm/prompts/image_generator/presets/README.md`
+- **Quick Template**: See the template in this document (Creating Style Presets section above)
 - **MPA Research**: `/ideas/modular-prompt-architecture.md`
-- **Image Generator**: `/backend/app/llm/image_generator.py`
+- **Image Generator**: `/gaime_builder/core/image_generator.py`
