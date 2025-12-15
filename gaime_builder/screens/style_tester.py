@@ -19,7 +19,7 @@ from textual.widgets import (
     Header, Footer, Button, Select, Static, 
     ProgressBar, DataTable
 )
-from textual.worker import Worker, get_current_worker
+from textual.worker import Worker, WorkerState, get_current_worker
 
 
 # Default output directory for style tests (relative to workspace root)
@@ -110,6 +110,7 @@ class StyleTesterScreen(Screen):
         self._current_location_name: Optional[str] = None
         self._active_worker: Optional[Worker] = None
         self._preset_statuses: dict[str, str] = {}  # preset_name -> status
+        self._status_column_key = None  # Store column key for updates
     
     def compose(self) -> ComposeResult:
         """Create style tester UI."""
@@ -178,7 +179,8 @@ class StyleTesterScreen(Screen):
         preset_names = sorted(presets.list_presets())
         
         table = self.query_one("#presets-table", DataTable)
-        table.add_columns("Preset", "Status")
+        # Capture column keys for later cell updates
+        _preset_col, self._status_column_key = table.add_columns("Preset", "Status")
         table.cursor_type = "none"
         
         for preset_name in preset_names:
@@ -276,10 +278,10 @@ class StyleTesterScreen(Screen):
             "error": "[red]✗ Error[/]",
         }.get(status, status)
         
-        # Find the row and update status column
+        # Find the row and update status column using stored column key
         for row_key in table.rows:
             if str(row_key.value) == preset_name:
-                table.update_cell(row_key, "Status", status_display)
+                table.update_cell(row_key, self._status_column_key, status_display)
                 break
     
     def _reset_preset_statuses(self) -> None:
@@ -288,7 +290,7 @@ class StyleTesterScreen(Screen):
         for row_key in table.rows:
             preset_name = str(row_key.value)
             self._preset_statuses[preset_name] = "pending"
-            table.update_cell(row_key, "Status", "[dim]Pending[/]")
+            table.update_cell(row_key, self._status_column_key, "[dim]Pending[/]")
     
     async def start_generation(self) -> None:
         """Start the batch generation process."""
@@ -378,30 +380,18 @@ class StyleTesterScreen(Screen):
         output_dir.mkdir(parents=True, exist_ok=True)
         
         # Update progress display
-        self.call_from_thread(
-            self._update_progress_display,
-            0.0, f"Testing {total} style presets", f"Starting..."
-        )
+        self._update_progress_display(0.0, f"Testing {total} style presets", "Starting...")
         
         for i, preset_name in enumerate(preset_names):
             if worker.is_cancelled:
-                self.call_from_thread(
-                    self._update_preset_status,
-                    preset_name, "pending"
-                )
+                self._update_preset_status(preset_name, "pending")
                 break
             
             # Update status
-            self.call_from_thread(
-                self._update_preset_status,
-                preset_name, "generating"
-            )
+            self._update_preset_status(preset_name, "generating")
             
             progress = i / total
-            self.call_from_thread(
-                self._update_progress_display,
-                progress, f"Testing {total} style presets", f"Generating: {preset_name}"
-            )
+            self._update_progress_display(progress, f"Testing {total} style presets", f"Generating: {preset_name}")
             
             try:
                 # Resolve style for this preset
@@ -421,30 +411,15 @@ class StyleTesterScreen(Screen):
                     style_block=style_block
                 )
                 
-                # Rename the generated file to match our naming convention
-                # (generate_location_image creates location_id.png)
-                generated_path = output_dir / f"{self._current_location_id}_{preset_name}.png"
-                final_path = output_dir / output_filename
-                
                 # The file is already correctly named since we used the combined ID
                 
                 results[preset_name] = True
-                self.call_from_thread(
-                    self._update_preset_status,
-                    preset_name, "done"
-                )
+                self._update_preset_status(preset_name, "done")
                 
             except Exception as e:
                 results[preset_name] = False
-                self.call_from_thread(
-                    self._update_preset_status,
-                    preset_name, "error"
-                )
-                self.call_from_thread(
-                    self.notify,
-                    f"Error generating {preset_name}: {str(e)[:50]}",
-                    severity="error"
-                )
+                self._update_preset_status(preset_name, "error")
+                self.notify(f"Error generating {preset_name}: {str(e)[:50]}", severity="error")
             
             # Small delay between generations to avoid rate limiting
             await asyncio.sleep(1.0)
@@ -453,10 +428,7 @@ class StyleTesterScreen(Screen):
         success_count = sum(1 for r in results.values() if r)
         final_msg = f"Completed: {success_count}/{len(results)} successful"
         
-        self.call_from_thread(
-            self._update_progress_display,
-            1.0, "Style Test Complete", final_msg
-        )
+        self._update_progress_display(1.0, "Style Test Complete", final_msg)
         
         return results
     
@@ -473,21 +445,23 @@ class StyleTesterScreen(Screen):
     def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
         """Handle worker state changes."""
         if event.worker.name == "style_test_generation":
-            if event.state.is_finished:
+            # Check if worker finished (success, error, or cancelled)
+            finished_states = {WorkerState.SUCCESS, WorkerState.ERROR, WorkerState.CANCELLED}
+            if event.state in finished_states:
                 self._set_generation_controls(running=False)
                 self._active_worker = None
                 
                 output_dir = self._get_output_dir()
                 
-                if event.state == event.state.SUCCESS:
+                if event.state == WorkerState.SUCCESS:
                     self.notify(
                         f"Style test complete! Images saved to:\n{output_dir}",
                         severity="information",
                         timeout=10
                     )
-                elif event.state == event.state.CANCELLED:
+                elif event.state == WorkerState.CANCELLED:
                     self.notify("Style test cancelled", severity="warning")
-                elif event.state == event.state.ERROR:
+                elif event.state == WorkerState.ERROR:
                     self.notify(
                         f"Style test failed: {event.worker.error}",
                         severity="error"
