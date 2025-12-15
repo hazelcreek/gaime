@@ -88,7 +88,7 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
   const handleStartGame = () => {
     if (selectedWorld) {
       const selectedWorldInfo = worlds.find(w => w.id === selectedWorld);
-      onStartGame(selectedWorld, 'Traveler', selectedWorldInfo?.name);
+      onStartGame(selectedWorld, selectedWorldInfo?.name);
     }
   };
 
