@@ -26,6 +26,7 @@ from gaime_builder.core.style_loader import (
     get_world_context,
     DEFAULT_PRESET
 )
+from gaime_builder.core.tasks import ImageHashTracker
 
 load_dotenv()
 
@@ -358,6 +359,7 @@ class ImageGenerator:
     
     def __init__(self, worlds_dir: Path):
         self.worlds_dir = worlds_dir
+        self.hash_tracker = ImageHashTracker(worlds_dir)
     
     async def generate_location_image(
         self,
@@ -462,11 +464,19 @@ class ImageGenerator:
         self,
         world_id: str,
         location_ids: Optional[list[str]] = None,
-        progress_callback=None
+        progress_callback=None,
+        location_callback=None  # New: Called with (loc_id, status, message) for per-location updates
     ) -> dict[str, Optional[str]]:
         """
         Generate images for all (or specified) locations in a world.
         Includes variants for locations with conditional NPCs.
+        
+        Args:
+            world_id: World to generate images for
+            location_ids: Optional list of specific locations (default: all)
+            progress_callback: Called with (progress_float, message) for overall progress
+            location_callback: Called with (loc_id, status, message) for per-location updates
+                             status is one of: 'pending', 'generating', 'variants', 'done', 'error'
         """
         world_path = self.worlds_dir / world_id
         locations_yaml = world_path / "locations.yaml"
@@ -482,6 +492,7 @@ class ImageGenerator:
         theme = "fantasy"
         tone = "atmospheric"
         style_config = None
+        style_preset_name = ""
         
         if world_yaml.exists():
             with open(world_yaml) as f:
@@ -489,6 +500,10 @@ class ImageGenerator:
                 theme = world_data.get("theme", theme)
                 tone = world_data.get("tone", tone)
                 style_config = world_data.get("style") or world_data.get("style_block")
+                if isinstance(style_config, str):
+                    style_preset_name = style_config
+                elif isinstance(style_config, dict):
+                    style_preset_name = style_config.get("preset", "")
         
         style_block = resolve_style(style_config)
         
@@ -523,6 +538,9 @@ class ImageGenerator:
             if progress_callback:
                 progress_callback(i / total, f"Generating {loc_name}...")
             
+            if location_callback:
+                location_callback(loc_id, "generating", f"Generating base image...")
+            
             # Build context
             context = self._build_location_context(
                 loc_id, loc_data, locations, npcs_data, items_data
@@ -530,6 +548,9 @@ class ImageGenerator:
             
             # Check for conditional NPCs
             conditional_npcs = self._get_conditional_npcs(loc_id, loc_data, npcs_data)
+            
+            # Compute hash for metadata
+            prompt_hash = self.hash_tracker.compute_location_hash(world_id, loc_id)
             
             if conditional_npcs:
                 # Generate base image (without conditional NPCs)
@@ -551,15 +572,25 @@ class ImageGenerator:
                         style_block=style_block
                     )
                     results[loc_id] = str(images_dir / f"{loc_id}.png")
+                    
+                    # Save metadata for base image
+                    self.hash_tracker.update_metadata(
+                        world_id, loc_id, prompt_hash, style_preset_name
+                    )
                 except Exception as e:
                     results[loc_id] = None
+                    if location_callback:
+                        location_callback(loc_id, "error", str(e))
                     continue
                 
                 # Generate variants for conditional NPCs
+                if location_callback:
+                    location_callback(loc_id, "variants", f"Generating {len(conditional_npcs)} variant(s)...")
+                
                 await self._generate_variants(
                     loc_id, loc_name, atmosphere, theme, tone,
                     images_dir, loc_data, npcs_data, conditional_npcs,
-                    style_block
+                    style_block, world_id, style_preset_name
                 )
             else:
                 # Simple case: no conditional NPCs
@@ -575,8 +606,18 @@ class ImageGenerator:
                         style_block=style_block
                     )
                     results[loc_id] = result
+                    
+                    # Save metadata
+                    self.hash_tracker.update_metadata(
+                        world_id, loc_id, prompt_hash, style_preset_name
+                    )
                 except Exception as e:
                     results[loc_id] = None
+                    if location_callback:
+                        location_callback(loc_id, "error", str(e))
+            
+            if location_callback:
+                location_callback(loc_id, "done", "Complete")
             
             await asyncio.sleep(0.5)
         
@@ -607,6 +648,7 @@ class ImageGenerator:
         theme = "fantasy"
         tone = "atmospheric"
         style_config = None
+        style_preset_name = ""
         
         if world_yaml.exists():
             with open(world_yaml) as f:
@@ -614,6 +656,10 @@ class ImageGenerator:
                 theme = world_data.get("theme", theme)
                 tone = world_data.get("tone", tone)
                 style_config = world_data.get("style") or world_data.get("style_block")
+                if isinstance(style_config, str):
+                    style_preset_name = style_config
+                elif isinstance(style_config, dict):
+                    style_preset_name = style_config.get("preset", "")
         
         style_block = resolve_style(style_config)
         
@@ -640,6 +686,9 @@ class ImageGenerator:
         if progress_callback:
             progress_callback(0.1, f"Regenerating {loc_name}...")
         
+        # Compute hash for metadata
+        prompt_hash = self.hash_tracker.compute_location_hash(world_id, location_id)
+        
         conditional_npcs = self._get_conditional_npcs(location_id, loc_data, npcs_data)
         
         if conditional_npcs and include_variants:
@@ -663,13 +712,18 @@ class ImageGenerator:
                 style_block=style_block
             )
             
+            # Save metadata for base image
+            self.hash_tracker.update_metadata(
+                world_id, location_id, prompt_hash, style_preset_name
+            )
+            
             if progress_callback:
                 progress_callback(0.5, "Generating variants...")
             
             await self._generate_variants(
                 location_id, loc_name, atmosphere, theme, tone,
                 images_dir, loc_data, npcs_data, conditional_npcs,
-                style_block
+                style_block, world_id, style_preset_name
             )
             
             if progress_callback:
@@ -692,6 +746,11 @@ class ImageGenerator:
                 style_block=style_block
             )
             
+            # Save metadata
+            self.hash_tracker.update_metadata(
+                world_id, location_id, prompt_hash, style_preset_name
+            )
+            
             if progress_callback:
                 progress_callback(1.0, "Done!")
             
@@ -708,7 +767,9 @@ class ImageGenerator:
         loc_data: dict,
         npcs_data: dict,
         conditional_npcs: list[str],
-        style_block: StyleBlock
+        style_block: StyleBlock,
+        world_id: str = "",
+        style_preset_name: str = ""
     ):
         """Generate variant images for conditional NPCs."""
         from google import genai
@@ -762,6 +823,15 @@ class ImageGenerator:
                     "image": variant_filename,
                     "default": is_default
                 })
+                
+                # Save metadata for variant
+                if world_id:
+                    variant_hash = self.hash_tracker.compute_location_hash(
+                        world_id, location_id, [npc_id]
+                    )
+                    self.hash_tracker.update_metadata(
+                        world_id, location_id, variant_hash, style_preset_name, [npc_id]
+                    )
                 
             except Exception as e:
                 print(f"Failed to generate variant {variant_filename}: {e}")
@@ -1045,4 +1115,259 @@ class ImageGenerator:
             }
         
         return result
+    
+    def get_location_image_status(self, world_id: str, location_id: str) -> dict:
+        """
+        Get detailed status for a location's images including outdated detection.
+        
+        Returns:
+            Dict with:
+            - has_image: bool
+            - is_outdated: bool (base image)
+            - outdated_reason: str
+            - variant_count: int
+            - variants_outdated: int
+            - outdated_variant_npc_ids: list[list[str]] - NPC IDs for each outdated variant
+        """
+        images_dir = self.worlds_dir / world_id / "images"
+        base_image = images_dir / f"{location_id}.png"
+        
+        has_image = base_image.exists()
+        
+        # Check if base image is outdated
+        is_outdated = False
+        outdated_reason = ""
+        if has_image:
+            is_outdated, outdated_reason = self.hash_tracker.is_outdated(world_id, location_id)
+        
+        # Check variants
+        manifest = load_variant_manifest(location_id, images_dir)
+        variant_count = len(manifest.variants) if manifest else 0
+        variants_outdated = 0
+        outdated_variant_npc_ids = []
+        
+        if manifest:
+            for variant in manifest.variants:
+                npc_ids = variant.get("npcs", [])
+                variant_outdated, _ = self.hash_tracker.is_outdated(
+                    world_id, location_id, npc_ids
+                )
+                if variant_outdated:
+                    variants_outdated += 1
+                    outdated_variant_npc_ids.append(npc_ids)
+        
+        return {
+            "has_image": has_image,
+            "is_outdated": is_outdated,
+            "outdated_reason": outdated_reason,
+            "variant_count": variant_count,
+            "variants_outdated": variants_outdated,
+            "outdated_variant_npc_ids": outdated_variant_npc_ids,
+        }
+    
+    def get_locations_needing_generation(self, world_id: str) -> list[dict]:
+        """
+        Get list of locations that need image generation (missing or outdated).
+        
+        Returns:
+            List of dicts with:
+            - location_id: str
+            - location_name: str  
+            - reason: str
+            - regenerate_base: bool - whether base image needs regeneration
+            - regenerate_variants: list[list[str]] - NPC IDs for variants to regenerate
+        """
+        from gaime_builder.core.world_generator import WorldGenerator
+        
+        generator = WorldGenerator(self.worlds_dir)
+        locations = generator.get_world_locations(world_id)
+        
+        needs_generation = []
+        
+        for loc in locations:
+            loc_id = loc["id"]
+            status = self.get_location_image_status(world_id, loc_id)
+            
+            if not status["has_image"]:
+                # Missing base image - need to generate everything
+                needs_generation.append({
+                    "location_id": loc_id,
+                    "location_name": loc["name"],
+                    "reason": "missing",
+                    "regenerate_base": True,
+                    "regenerate_variants": "all",  # Will regenerate all variants
+                })
+            elif status["is_outdated"]:
+                # Base image outdated - need to regenerate base + ALL variants
+                # (because variants are edited versions of the base)
+                needs_generation.append({
+                    "location_id": loc_id,
+                    "location_name": loc["name"],
+                    "reason": f"base outdated ({status['outdated_reason']})",
+                    "regenerate_base": True,
+                    "regenerate_variants": "all",
+                })
+            elif status["variants_outdated"] > 0:
+                # Only variants outdated - regenerate just those variants
+                needs_generation.append({
+                    "location_id": loc_id,
+                    "location_name": loc["name"],
+                    "reason": f"{status['variants_outdated']} variant(s) outdated",
+                    "regenerate_base": False,
+                    "regenerate_variants": status["outdated_variant_npc_ids"],
+                })
+        
+        return needs_generation
+    
+    async def regenerate_outdated(
+        self,
+        world_id: str,
+        location_id: str,
+        progress_callback=None
+    ) -> Optional[str]:
+        """
+        Smart regeneration that only regenerates what's needed.
+        
+        - If base is outdated: regenerate base + all variants
+        - If only variants are outdated: regenerate just those variants
+        """
+        status = self.get_location_image_status(world_id, location_id)
+        
+        if not status["has_image"] or status["is_outdated"]:
+            # Base needs regeneration - do full regeneration
+            return await self.regenerate_location(
+                world_id=world_id,
+                location_id=location_id,
+                include_variants=True,
+                progress_callback=progress_callback
+            )
+        elif status["variants_outdated"] > 0:
+            # Only variants need regeneration
+            return await self.regenerate_variants_only(
+                world_id=world_id,
+                location_id=location_id,
+                variant_npc_ids_list=status["outdated_variant_npc_ids"],
+                progress_callback=progress_callback
+            )
+        else:
+            # Nothing to do
+            if progress_callback:
+                progress_callback(1.0, "Already up to date")
+            return None
+    
+    async def regenerate_variants_only(
+        self,
+        world_id: str,
+        location_id: str,
+        variant_npc_ids_list: list[list[str]],
+        progress_callback=None
+    ) -> Optional[str]:
+        """
+        Regenerate specific variants without regenerating the base image.
+        
+        Uses the existing base image and applies NPC edits to create variants.
+        """
+        world_path = self.worlds_dir / world_id
+        locations_yaml = world_path / "locations.yaml"
+        world_yaml = world_path / "world.yaml"
+        npcs_yaml = world_path / "npcs.yaml"
+        images_dir = world_path / "images"
+        
+        base_image_path = images_dir / f"{location_id}.png"
+        if not base_image_path.exists():
+            raise FileNotFoundError(f"Base image not found: {base_image_path}")
+        
+        # Load world data
+        theme = "fantasy"
+        tone = "atmospheric"
+        style_config = None
+        style_preset_name = ""
+        
+        if world_yaml.exists():
+            with open(world_yaml) as f:
+                world_data = yaml.safe_load(f) or {}
+                theme = world_data.get("theme", theme)
+                tone = world_data.get("tone", tone)
+                style_config = world_data.get("style") or world_data.get("style_block")
+                if isinstance(style_config, str):
+                    style_preset_name = style_config
+                elif isinstance(style_config, dict):
+                    style_preset_name = style_config.get("preset", "")
+        
+        style_block = resolve_style(style_config)
+        
+        with open(locations_yaml) as f:
+            locations = yaml.safe_load(f) or {}
+        
+        npcs_data = {}
+        if npcs_yaml.exists():
+            with open(npcs_yaml) as f:
+                npcs_data = yaml.safe_load(f) or {}
+        
+        loc_data = locations.get(location_id)
+        if not loc_data:
+            raise ValueError(f"Location not found: {location_id}")
+        
+        loc_name = loc_data.get("name", location_id)
+        npc_placements = loc_data.get("npc_placements", {})
+        
+        total = len(variant_npc_ids_list)
+        
+        for i, npc_ids in enumerate(variant_npc_ids_list):
+            if progress_callback:
+                progress_callback(i / total, f"Regenerating variant {i+1}/{total}...")
+            
+            # Build NPC info for this variant
+            for npc_id in npc_ids:
+                npc_data = npcs_data.get(npc_id, {})
+                if not npc_data:
+                    continue
+                
+                npc_to_add = NPCInfo(
+                    name=npc_data.get("name", npc_id),
+                    appearance=npc_data.get("appearance", ""),
+                    role=npc_data.get("role", ""),
+                    placement=npc_placements.get(npc_id, "")
+                )
+                
+                variant_filename = get_variant_image_filename(location_id, npc_ids)
+                
+                try:
+                    await self._generate_variant_via_edit(
+                        location_name=loc_name,
+                        base_image_path=base_image_path,
+                        npc=npc_to_add,
+                        output_path=images_dir / variant_filename,
+                        theme=theme,
+                        tone=tone,
+                        style_block=style_block
+                    )
+                    
+                    # Save prompt log
+                    _save_prompt_markdown(
+                        images_dir,
+                        variant_filename.replace(".png", ""),
+                        loc_name,
+                        get_edit_prompt(loc_name, [npc_to_add], theme, tone, style_block)
+                    )
+                    
+                    # Update metadata for this variant
+                    variant_hash = self.hash_tracker.compute_location_hash(
+                        world_id, location_id, npc_ids
+                    )
+                    self.hash_tracker.update_metadata(
+                        world_id, location_id, variant_hash, style_preset_name, npc_ids
+                    )
+                    
+                except Exception as e:
+                    if progress_callback:
+                        progress_callback(i / total, f"Error: {e}")
+                    raise
+                
+                await asyncio.sleep(1.0)
+        
+        if progress_callback:
+            progress_callback(1.0, f"Regenerated {total} variant(s)")
+        
+        return str(base_image_path)
 

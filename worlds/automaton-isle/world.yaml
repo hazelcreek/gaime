@@ -1,0 +1,37 @@
+name: "The Isle of Forgotten Gears"
+theme: "Steampunk Survival"
+
+# Visual style preset for image generation
+style: steampunk
+tone: "Melancholy yet Wondrous"
+hero_name: "Silas"
+
+premise: |
+  A remote island where steam-powered automata simulate a bustling society long after their human masters have died out. The air smells of salt and ozone.
+
+starting_situation: |
+  You have just washed ashore, coughing up seawater. Your cruise ship is a burning wreck on the horizon. The tide is rising, and your only path forward is into the rusting embrace of the island's jungle.
+
+victory:
+  location: lighthouse_balcony
+  item: fresnel_lens
+  flag: beacon_lit
+  narrative: |
+    You slot the heavy crystal lens into the focal array. As the beam cuts through the fog, the robots on the beach below stop their eternal pantomime and look up, saluting the light they haven't seen in decades. A ship's horn bellows in the distance. You are going home.
+
+player:
+  starting_location: shipwreck_beach
+  starting_inventory: []
+
+constraints:
+  - "The Boiler Room furnace requires BOTH 'Dry Driftwood' and 'Lump of Coal' to ignite."
+  - "The Lighthouse Elevator will not move unless 'boiler_pressure_restored' is TRUE."
+  - "The Hermit Crab Droid will only trade the 'Fresnel Lens' for 'Polished Sea Glass'."
+  - "The Zipline cannot be used until repaired with 'Leather Straps'."
+
+commands:
+  help: "Display available commands"
+  look: "Examine surroundings"
+  inventory: "Check inventory"
+  go: "Move in a direction"
+  use: "Use an item on a target"

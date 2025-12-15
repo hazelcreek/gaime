@@ -56,7 +56,8 @@ class WorldBuilderApp(App):
         Binding("?", "show_help", "Help"),
         Binding("1", "go_create", "Create World", show=False),
         Binding("2", "go_images", "Generate Images", show=False),
-        Binding("3", "go_manage", "Manage Worlds", show=False),
+        Binding("3", "go_style_tester", "Style Tester", show=False),
+        Binding("4", "go_manage", "Manage Worlds", show=False),
     ]
     
     TITLE = "GAIME World Builder"
@@ -95,7 +96,7 @@ class WorldBuilderApp(App):
     def action_show_help(self) -> None:
         """Show help information."""
         self.notify(
-            "Keyboard: [1] Create World | [2] Images | [3] Manage | [d] Dark Mode | [q] Quit",
+            "Keyboard: [1] Create World | [2] Images | [3] Style Tester | [4] Manage | [d] Dark Mode | [q] Quit",
             title="Help",
             timeout=5
         )
@@ -114,6 +115,13 @@ class WorldBuilderApp(App):
         while len(self.screen_stack) > 1:
             self.pop_screen()
         self.push_screen(ManageImagesScreen())
+    
+    def action_go_style_tester(self) -> None:
+        """Navigate to style tester screen."""
+        from gaime_builder.screens.style_tester import StyleTesterScreen
+        while len(self.screen_stack) > 1:
+            self.pop_screen()
+        self.push_screen(StyleTesterScreen())
     
     def action_go_manage(self) -> None:
         """Navigate to manage worlds screen."""

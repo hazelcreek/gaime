@@ -1,0 +1,114 @@
+{
+  "shipwreck_beach": {
+    "location_id": "shipwreck_beach",
+    "prompt_hash": "8bbf6c24a3b0d92a",
+    "generated_at": "2025-12-15T21:40:13.675282",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  },
+  "captains_quarters": {
+    "location_id": "captains_quarters",
+    "prompt_hash": "36647e6d7223515f",
+    "generated_at": "2025-12-15T21:40:29.972780",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  },
+  "tidal_pools": {
+    "location_id": "tidal_pools",
+    "prompt_hash": "f2e22d26411af436",
+    "generated_at": "2025-12-15T21:40:49.669846",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  },
+  "lighthouse_base": {
+    "location_id": "lighthouse_base",
+    "prompt_hash": "c6f23f88fabdd75c",
+    "generated_at": "2025-12-15T21:41:07.883190",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  },
+  "lighthouse_balcony": {
+    "location_id": "lighthouse_balcony",
+    "prompt_hash": "d603b54e37f0180e",
+    "generated_at": "2025-12-15T21:41:22.893078",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  },
+  "jungle_path": {
+    "location_id": "jungle_path",
+    "prompt_hash": "7fe4fcf6ea310e57",
+    "generated_at": "2025-12-15T21:41:45.097171",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  },
+  "hidden_hollow": {
+    "location_id": "hidden_hollow",
+    "prompt_hash": "5e438c4dc7f85339",
+    "generated_at": "2025-12-15T21:42:03.701027",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  },
+  "graveyard": {
+    "location_id": "graveyard",
+    "prompt_hash": "aa2f9afc9ef6249c",
+    "generated_at": "2025-12-15T21:42:31.465087",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  },
+  "memory_archive": {
+    "location_id": "memory_archive",
+    "prompt_hash": "fda70947a242358b",
+    "generated_at": "2025-12-15T21:42:48.228585",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  },
+  "workshop_gate": {
+    "location_id": "workshop_gate",
+    "prompt_hash": "7ee326084a87cd43",
+    "generated_at": "2025-12-15T21:43:04.190585",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  },
+  "workshop_interior": {
+    "location_id": "workshop_interior",
+    "prompt_hash": "2478f0374037caae",
+    "generated_at": "2025-12-15T21:43:23.525016",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  },
+  "observatory_cliffs": {
+    "location_id": "observatory_cliffs",
+    "prompt_hash": "3b56fc4492677f1c",
+    "generated_at": "2025-12-15T21:43:39.807255",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  },
+  "abandoned_mines": {
+    "location_id": "abandoned_mines",
+    "prompt_hash": "7e19f88b2b3b42d3",
+    "generated_at": "2025-12-15T21:43:55.205377",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  },
+  "boiler_room": {
+    "location_id": "boiler_room",
+    "prompt_hash": "4b73485d6ae7cee3",
+    "generated_at": "2025-12-15T21:44:11.672465",
+    "generator_version": "dry-run-hash",
+    "style_preset": "steampunk",
+    "variant_npc_ids": []
+  }
+}

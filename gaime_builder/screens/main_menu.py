@@ -61,6 +61,7 @@ class MainMenuScreen(Screen):
                 
                 yield Button("🌍  Create New World", id="create", variant="primary", classes="menu-button")
                 yield Button("🖼️  Generate Images", id="images", variant="success", classes="menu-button")
+                yield Button("🎨  Style Tester", id="style-tester", variant="warning", classes="menu-button")
                 yield Button("📁  Manage Worlds", id="manage", variant="default", classes="menu-button")
                 yield Button("❌  Exit", id="exit", variant="error", classes="menu-button")
                 
@@ -76,6 +77,9 @@ class MainMenuScreen(Screen):
         elif event.button.id == "images":
             from gaime_builder.screens.manage_images import ManageImagesScreen
             self.app.push_screen(ManageImagesScreen())
+        elif event.button.id == "style-tester":
+            from gaime_builder.screens.style_tester import StyleTesterScreen
+            self.app.push_screen(StyleTesterScreen())
         elif event.button.id == "manage":
             from gaime_builder.screens.manage_worlds import ManageWorldsScreen
             self.app.push_screen(ManageWorldsScreen())
