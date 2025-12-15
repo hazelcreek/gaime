@@ -1,5 +1,11 @@
 """
 Manage Images Screen - Generate and regenerate world images.
+
+Features:
+- Background processing using Textual workers (non-blocking UI)
+- Per-location status tracking (pending/generating/done/error)
+- Hash-based outdated image detection
+- "Regenerate missing/outdated" button
 """
 import asyncio
 from typing import Optional
@@ -9,15 +15,19 @@ from textual.containers import Container, Vertical, Horizontal
 from textual.screen import Screen
 from textual.widgets import (
     Header, Footer, Button, Select, Static, 
-    ProgressBar, DataTable, Checkbox
+    ProgressBar, DataTable, Checkbox, Label
 )
+from textual.worker import Worker, get_current_worker
+
+from gaime_builder.core.tasks import TaskQueue, TaskStatus
 
 
 class ManageImagesScreen(Screen):
-    """Screen for managing world images."""
+    """Screen for managing world images with background processing."""
     
     # Store column keys for later reference
     check_column_key: str = ""
+    status_column_key: str = ""
     
     CSS = """
     #images-container {
@@ -52,7 +62,7 @@ class ManageImagesScreen(Screen):
     }
     
     #locations-table {
-        height: 15;
+        height: 18;
         margin: 1 0;
     }
     
@@ -63,15 +73,48 @@ class ManageImagesScreen(Screen):
     }
     
     .button-row Button {
-        margin-right: 2;
+        margin-right: 1;
     }
     
     #progress-section {
         margin-top: 1;
+        padding: 1;
+        background: $surface;
+        border: round $primary-lighten-2;
+    }
+    
+    #queue-status {
+        margin-bottom: 1;
+        color: $text;
+    }
+    
+    #current-task {
+        color: $secondary;
+        margin-bottom: 1;
     }
     
     #image-status {
         margin-top: 1;
+    }
+    
+    .status-pending {
+        color: $text-muted;
+    }
+    
+    .status-generating {
+        color: $warning;
+    }
+    
+    .status-done {
+        color: $success;
+    }
+    
+    .status-error {
+        color: $error;
+    }
+    
+    .status-outdated {
+        color: $warning;
     }
     """
     
@@ -79,9 +122,16 @@ class ManageImagesScreen(Screen):
         ("escape", "go_back", "Back"),
         ("a", "select_all", "Select All"),
         ("n", "select_none", "Select None"),
+        ("r", "regenerate_outdated", "Regen Outdated"),
     ]
     
-    selected_locations: set[str] = set()
+    def __init__(self):
+        super().__init__()
+        self.selected_locations: set[str] = set()
+        self.task_queue = TaskQueue()
+        self._current_world_id: Optional[str] = None
+        self._location_statuses: dict[str, dict] = {}  # loc_id -> {status, message}
+        self._active_worker: Optional[Worker] = None
     
     def compose(self) -> ComposeResult:
         """Create image management UI."""
@@ -98,7 +148,9 @@ class ManageImagesScreen(Screen):
                 )
                 
                 yield Static(
-                    "[dim]Select locations to regenerate. Variants (for dynamic NPCs) are included automatically.[/]",
+                    "[dim]Select locations to regenerate. "
+                    "⚠️ = outdated, ✗ = missing. "
+                    "Press [bold]r[/] to regenerate missing/outdated.[/]",
                     classes="info-text"
                 )
                 
@@ -106,10 +158,16 @@ class ManageImagesScreen(Screen):
                 
                 with Horizontal(classes="button-row"):
                     yield Button("🔄 Generate All", id="generate-all", variant="primary")
+                    yield Button("⚠️ Regen Missing/Outdated", id="regenerate-outdated", variant="warning")
                     yield Button("✨ Regenerate Selected", id="regenerate-selected", variant="success")
+                    yield Button("Cancel", id="cancel-generation", variant="error", disabled=True)
+                
+                with Horizontal(classes="button-row"):
                     yield Button("Back", id="back", variant="default")
                 
                 with Vertical(id="progress-section"):
+                    yield Static("", id="queue-status")
+                    yield Static("", id="current-task")
                     yield ProgressBar(id="image-progress", total=100)
                     yield Static("", id="image-status")
         
@@ -121,10 +179,46 @@ class ManageImagesScreen(Screen):
         
         # Setup table
         table = self.query_one("#locations-table", DataTable)
-        # Store the column keys returned by add_columns
-        col_keys = table.add_columns("✓", "Location", "Has Image", "Variants")
-        self.check_column_key = col_keys[0]  # Store the first column key
+        col_keys = table.add_columns("✓", "Location", "Status", "Image", "Variants")
+        self.check_column_key = col_keys[0]
+        self.status_column_key = col_keys[2]
         table.cursor_type = "row"
+        
+        # Add task queue listener
+        self.task_queue.add_listener(self._on_task_update)
+    
+    def _on_task_update(self, task_id: str, task) -> None:
+        """Handle task state changes from the queue."""
+        # This runs in the main thread, safe to update UI
+        self.call_from_thread(self._update_task_display)
+    
+    def _update_task_display(self) -> None:
+        """Update the task progress display."""
+        active = self.task_queue.get_active_task()
+        pending = self.task_queue.get_pending_tasks()
+        
+        queue_status = self.query_one("#queue-status", Static)
+        current_task = self.query_one("#current-task", Static)
+        progress_bar = self.query_one("#image-progress", ProgressBar)
+        status = self.query_one("#image-status", Static)
+        
+        if active:
+            queue_status.update(f"[cyan]Queue: {len(pending)} pending[/]")
+            current_task.update(f"[bold]{active.name}[/]: {active.progress.message}")
+            progress_bar.update(progress=int(active.progress.current * 100))
+            
+            if active.progress.sub_task:
+                status.update(f"[dim]{active.progress.sub_task}[/]")
+            else:
+                status.update("")
+        elif pending:
+            queue_status.update(f"[cyan]Queue: {len(pending)} pending, waiting to start...[/]")
+            current_task.update("")
+            status.update("")
+        else:
+            queue_status.update("[dim]No active tasks[/]")
+            current_task.update("")
+            status.update("")
     
     def action_go_back(self) -> None:
         """Go back to previous screen."""
@@ -142,14 +236,38 @@ class ManageImagesScreen(Screen):
         self.selected_locations.clear()
         self.refresh_table_selection()
     
+    def action_regenerate_outdated(self) -> None:
+        """Trigger regeneration of missing/outdated images."""
+        self.query_one("#regenerate-outdated", Button).press()
+    
     def refresh_table_selection(self) -> None:
         """Refresh checkmarks in table."""
         table = self.query_one("#locations-table", DataTable)
         for row_key in table.rows:
             loc_id = str(row_key.value)
             check = "✓" if loc_id in self.selected_locations else " "
-            # Update the first column using stored column key
             table.update_cell(row_key, self.check_column_key, check)
+    
+    def _update_location_status_in_table(self, loc_id: str, status: str, message: str = "") -> None:
+        """Update the status column for a location in the table."""
+        self._location_statuses[loc_id] = {"status": status, "message": message}
+        
+        table = self.query_one("#locations-table", DataTable)
+        
+        status_display = {
+            "pending": "[dim]⏳ Pending[/]",
+            "generating": "[yellow]🔄 Generating...[/]",
+            "variants": "[yellow]🔄 Variants...[/]",
+            "done": "[green]✓ Done[/]",
+            "error": f"[red]✗ Error[/]",
+            "idle": "",
+        }.get(status, status)
+        
+        # Find the row for this location and update status column
+        for row_key in table.rows:
+            if str(row_key.value) == loc_id:
+                table.update_cell(row_key, self.status_column_key, status_display)
+                break
     
     async def load_worlds(self) -> None:
         """Load available worlds."""
@@ -165,10 +283,11 @@ class ManageImagesScreen(Screen):
     async def on_select_changed(self, event: Select.Changed) -> None:
         """Handle world selection change."""
         if event.select.id == "world-select" and event.value:
-            await self.load_locations(str(event.value))
+            self._current_world_id = str(event.value)
+            await self.load_locations(self._current_world_id)
     
     async def load_locations(self, world_id: str) -> None:
-        """Load locations for the selected world."""
+        """Load locations for the selected world with status info."""
         from gaime_builder.core.world_generator import WorldGenerator
         from gaime_builder.core.image_generator import ImageGenerator
         
@@ -176,22 +295,40 @@ class ManageImagesScreen(Screen):
         image_gen = ImageGenerator(self.app.worlds_dir)
         
         locations = generator.get_world_locations(world_id)
-        existing_images = image_gen.list_location_images(world_id)
         
         table = self.query_one("#locations-table", DataTable)
         table.clear()
         self.selected_locations.clear()
+        self._location_statuses.clear()
         
         for loc in locations:
             loc_id = loc["id"]
             loc_name = loc["name"]
             
-            image_info = existing_images.get(loc_id, {})
-            has_image = "✓" if image_info else "✗"
-            variant_count = image_info.get("variant_count", 0) if image_info else 0
-            variants_text = str(variant_count) if variant_count > 0 else "-"
+            # Get detailed status including outdated detection
+            status = image_gen.get_location_image_status(world_id, loc_id)
             
-            table.add_row(" ", loc_name, has_image, variants_text, key=loc_id)
+            # Build status display
+            if not status["has_image"]:
+                image_display = "[red]✗ Missing[/]"
+            elif status["is_outdated"]:
+                image_display = f"[yellow]⚠️ Outdated[/]"
+            else:
+                image_display = "[green]✓[/]"
+            
+            # Variants display
+            if status["variant_count"] > 0:
+                if status["variants_outdated"] > 0:
+                    variants_text = f"{status['variant_count']} ([yellow]{status['variants_outdated']} outdated[/])"
+                else:
+                    variants_text = f"[green]{status['variant_count']}[/]"
+            else:
+                variants_text = "[dim]-[/]"
+            
+            # Task status (initially empty)
+            task_status = ""
+            
+            table.add_row(" ", loc_name, task_status, image_display, variants_text, key=loc_id)
     
     def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
         """Toggle location selection on row click."""
@@ -209,117 +346,212 @@ class ManageImagesScreen(Screen):
         if event.button.id == "back":
             self.app.pop_screen()
         elif event.button.id == "generate-all":
-            await self.generate_all_images()
+            await self.start_generation_batch(force_all=True)
+        elif event.button.id == "regenerate-outdated":
+            await self.start_generation_batch(only_outdated=True)
         elif event.button.id == "regenerate-selected":
-            await self.regenerate_selected_images()
+            await self.start_generation_batch(selected_only=True)
+        elif event.button.id == "cancel-generation":
+            self._cancel_generation()
     
-    async def generate_all_images(self) -> None:
-        """Generate all images for the selected world."""
-        world_select = self.query_one("#world-select", Select)
-        if not world_select.value:
+    def _cancel_generation(self) -> None:
+        """Cancel the current generation batch."""
+        if self._active_worker:
+            self._active_worker.cancel()
+            self.notify("Cancelling generation...", severity="warning")
+    
+    async def start_generation_batch(
+        self,
+        force_all: bool = False,
+        only_outdated: bool = False,
+        selected_only: bool = False
+    ) -> None:
+        """Start a batch image generation using a background worker."""
+        if not self._current_world_id:
             self.notify("Please select a world first", severity="warning")
             return
         
-        world_id = str(world_select.value)
-        
-        progress_bar = self.query_one("#image-progress", ProgressBar)
-        status = self.query_one("#image-status", Static)
-        
-        # Disable buttons
-        self.query_one("#generate-all", Button).disabled = True
-        self.query_one("#regenerate-selected", Button).disabled = True
-        
-        def update_progress(progress: float, message: str):
-            progress_bar.update(progress=int(progress * 100))
-            status.update(f"[cyan]{message}[/]")
-        
-        try:
-            from gaime_builder.core.image_generator import ImageGenerator
-            
-            image_gen = ImageGenerator(self.app.worlds_dir)
-            
-            status.update("[cyan]Starting image generation...[/]")
-            progress_bar.update(progress=0)
-            
-            results = await image_gen.generate_all_images(
-                world_id=world_id,
-                progress_callback=update_progress
-            )
-            
-            success_count = sum(1 for r in results.values() if r is not None)
-            total_count = len(results)
-            
-            progress_bar.update(progress=100)
-            status.update(f"[green]✓ Generated {success_count}/{total_count} images[/]")
-            
-            self.notify(f"Generated {success_count}/{total_count} images", severity="information")
-            
-            # Reload table
-            await self.load_locations(world_id)
-            
-        except Exception as e:
-            status.update(f"[red]✗ Error: {str(e)}[/]")
-            self.notify(f"Error: {str(e)}", severity="error")
-        finally:
-            self.query_one("#generate-all", Button).disabled = False
-            self.query_one("#regenerate-selected", Button).disabled = False
-    
-    async def regenerate_selected_images(self) -> None:
-        """Regenerate images for selected locations."""
-        if not self.selected_locations:
+        if selected_only and not self.selected_locations:
             self.notify("Please select at least one location", severity="warning")
             return
         
-        world_select = self.query_one("#world-select", Select)
-        if not world_select.value:
-            self.notify("Please select a world first", severity="warning")
-            return
+        # Determine which locations to process
+        from gaime_builder.core.image_generator import ImageGenerator
+        from gaime_builder.core.world_generator import WorldGenerator
         
-        world_id = str(world_select.value)
-        location_ids = list(self.selected_locations)
+        image_gen = ImageGenerator(self.app.worlds_dir)
+        generator = WorldGenerator(self.app.worlds_dir)
         
+        all_locations = generator.get_world_locations(self._current_world_id)
+        
+        if force_all:
+            location_ids = [loc["id"] for loc in all_locations]
+            batch_name = "Generate All Images"
+        elif only_outdated:
+            needs_gen = image_gen.get_locations_needing_generation(self._current_world_id)
+            location_ids = [loc["location_id"] for loc in needs_gen]
+            if not location_ids:
+                self.notify("All images are up to date!", severity="information")
+                return
+            batch_name = f"Regenerate {len(location_ids)} Missing/Outdated"
+        else:
+            location_ids = list(self.selected_locations)
+            batch_name = f"Regenerate {len(location_ids)} Selected"
+        
+        # Mark all locations as pending
+        for loc_id in location_ids:
+            self._update_location_status_in_table(loc_id, "pending")
+        
+        # Disable/enable buttons
+        self._set_generation_controls(running=True)
+        
+        # Start background worker
+        self._active_worker = self.run_worker(
+            self._generate_images_worker(
+                self._current_world_id,
+                location_ids,
+                batch_name
+            ),
+            name="image_generation",
+            exclusive=True,
+        )
+    
+    def _set_generation_controls(self, running: bool) -> None:
+        """Enable/disable generation controls based on running state."""
+        self.query_one("#generate-all", Button).disabled = running
+        self.query_one("#regenerate-outdated", Button).disabled = running
+        self.query_one("#regenerate-selected", Button).disabled = running
+        self.query_one("#cancel-generation", Button).disabled = not running
+    
+    async def _generate_images_worker(
+        self,
+        world_id: str,
+        location_ids: list[str],
+        batch_name: str
+    ) -> dict[str, bool]:
+        """
+        Background worker for image generation.
+        
+        This runs in a separate thread, keeping the UI responsive.
+        """
+        from gaime_builder.core.image_generator import ImageGenerator
+        
+        worker = get_current_worker()
+        image_gen = ImageGenerator(self.app.worlds_dir)
+        
+        results = {}
+        total = len(location_ids)
+        
+        # Update progress display
+        self.call_from_thread(
+            self._update_progress_display,
+            0.0, batch_name, f"Starting {total} location(s)..."
+        )
+        
+        for i, loc_id in enumerate(location_ids):
+            if worker.is_cancelled:
+                self.call_from_thread(
+                    self._update_location_status_in_table,
+                    loc_id, "idle", "Cancelled"
+                )
+                break
+            
+            # Update status to generating
+            self.call_from_thread(
+                self._update_location_status_in_table,
+                loc_id, "generating", ""
+            )
+            
+            progress = i / total
+            self.call_from_thread(
+                self._update_progress_display,
+                progress, batch_name, f"Processing {loc_id}..."
+            )
+            
+            try:
+                # Define callbacks that update UI via call_from_thread
+                def progress_callback(prog: float, msg: str):
+                    overall = (i + prog) / total
+                    self.call_from_thread(
+                        self._update_progress_display,
+                        overall, batch_name, msg
+                    )
+                
+                def location_callback(lid: str, status: str, msg: str):
+                    self.call_from_thread(
+                        self._update_location_status_in_table,
+                        lid, status, msg
+                    )
+                
+                # Generate the image (this is async, run in event loop)
+                await image_gen.regenerate_location(
+                    world_id=world_id,
+                    location_id=loc_id,
+                    include_variants=True,
+                    progress_callback=progress_callback
+                )
+                
+                results[loc_id] = True
+                self.call_from_thread(
+                    self._update_location_status_in_table,
+                    loc_id, "done", ""
+                )
+                
+            except Exception as e:
+                results[loc_id] = False
+                self.call_from_thread(
+                    self._update_location_status_in_table,
+                    loc_id, "error", str(e)
+                )
+                self.call_from_thread(
+                    self.notify,
+                    f"Error generating {loc_id}: {e}",
+                    severity="error"
+                )
+            
+            # Small delay between locations to avoid rate limiting
+            await asyncio.sleep(0.5)
+        
+        # Finalize
+        success_count = sum(1 for r in results.values() if r)
+        final_msg = f"Completed: {success_count}/{len(results)} successful"
+        
+        self.call_from_thread(
+            self._update_progress_display,
+            1.0, batch_name, final_msg
+        )
+        
+        return results
+    
+    def _update_progress_display(self, progress: float, task_name: str, message: str) -> None:
+        """Update the progress display widgets."""
+        queue_status = self.query_one("#queue-status", Static)
+        current_task = self.query_one("#current-task", Static)
         progress_bar = self.query_one("#image-progress", ProgressBar)
         status = self.query_one("#image-status", Static)
         
-        # Disable buttons
-        self.query_one("#generate-all", Button).disabled = True
-        self.query_one("#regenerate-selected", Button).disabled = True
-        
-        try:
-            from gaime_builder.core.image_generator import ImageGenerator
-            
-            image_gen = ImageGenerator(self.app.worlds_dir)
-            
-            total = len(location_ids)
-            success_count = 0
-            
-            for i, loc_id in enumerate(location_ids):
-                progress = (i / total)
-                progress_bar.update(progress=int(progress * 100))
-                status.update(f"[cyan]Regenerating {loc_id} (with variants)...[/]")
+        queue_status.update(f"[cyan]{task_name}[/]")
+        current_task.update(f"[bold]{int(progress * 100)}%[/]")
+        progress_bar.update(progress=int(progress * 100))
+        status.update(f"[dim]{message}[/]")
+    
+    def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
+        """Handle worker state changes."""
+        if event.worker.name == "image_generation":
+            if event.state.is_finished:
+                self._set_generation_controls(running=False)
+                self._active_worker = None
                 
-                try:
-                    await image_gen.regenerate_location(
-                        world_id=world_id,
-                        location_id=loc_id,
-                        include_variants=True
+                # Reload table to show updated status
+                if self._current_world_id:
+                    self.run_worker(
+                        self.load_locations(self._current_world_id),
+                        name="reload_locations"
                     )
-                    success_count += 1
-                except Exception as e:
-                    self.notify(f"Failed: {loc_id} - {e}", severity="warning")
-            
-            progress_bar.update(progress=100)
-            status.update(f"[green]✓ Regenerated {success_count}/{total} location(s)[/]")
-            
-            self.notify(f"Regenerated {success_count}/{total} images", severity="information")
-            
-            # Reload table
-            await self.load_locations(world_id)
-            
-        except Exception as e:
-            status.update(f"[red]✗ Error: {str(e)}[/]")
-            self.notify(f"Error: {str(e)}", severity="error")
-        finally:
-            self.query_one("#generate-all", Button).disabled = False
-            self.query_one("#regenerate-selected", Button).disabled = False
-
+                
+                if event.state == event.state.SUCCESS:
+                    self.notify("Image generation complete!", severity="information")
+                elif event.state == event.state.CANCELLED:
+                    self.notify("Image generation cancelled", severity="warning")
+                elif event.state == event.state.ERROR:
+                    self.notify(f"Image generation failed: {event.worker.error}", severity="error")

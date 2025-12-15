@@ -1,7 +1,10 @@
 """
 Create World Screen - Form for generating new game worlds.
+
+Uses Textual workers for background LLM processing to keep UI responsive.
 """
 import asyncio
+from typing import Optional
 
 from textual.app import ComposeResult
 from textual.containers import Container, Vertical, Horizontal
@@ -10,6 +13,7 @@ from textual.widgets import (
     Header, Footer, Button, Input, TextArea, 
     Label, Static, ProgressBar, Select, Checkbox
 )
+from textual.worker import Worker, get_current_worker
 
 
 class CreateWorldScreen(Screen):
@@ -157,6 +161,7 @@ class CreateWorldScreen(Screen):
     def __init__(self):
         super().__init__()
         self._generation_result: dict | None = None
+        self._active_worker: Optional[Worker] = None
     
     def compose(self) -> ComposeResult:
         """Create world form UI."""
@@ -206,6 +211,7 @@ class CreateWorldScreen(Screen):
                 
                 with Horizontal(classes="button-row"):
                     yield Button("✨ Generate World", id="generate", variant="primary")
+                    yield Button("⏹️ Stop", id="stop-generation", variant="error", disabled=True)
                     yield Button("Cancel", id="cancel", variant="default")
             
             with Vertical(id="progress-panel"):
@@ -276,11 +282,19 @@ class CreateWorldScreen(Screen):
         if event.button.id == "cancel":
             self.app.pop_screen()
         elif event.button.id == "generate":
-            await self.generate_world()
+            self.start_world_generation()
+        elif event.button.id == "stop-generation":
+            self._stop_generation()
         elif event.button.id == "done":
             self.app.pop_screen()
         elif event.button.id == "create-another":
             self._reset_form()
+    
+    def _stop_generation(self) -> None:
+        """Stop the active world generation."""
+        if self._active_worker:
+            self._active_worker.cancel()
+            self.notify("Stopping generation...", severity="warning")
     
     def _reset_form(self) -> None:
         """Reset the form for creating another world."""
@@ -343,8 +357,8 @@ class CreateWorldScreen(Screen):
         
         return "\n".join(lines)
     
-    async def generate_world(self) -> None:
-        """Generate world using AI."""
+    def start_world_generation(self) -> None:
+        """Start world generation in a background worker."""
         # Get form values
         description = self.query_one("#description", TextArea).text.strip()
         theme = self.query_one("#theme", Input).value.strip() or None
@@ -368,70 +382,126 @@ class CreateWorldScreen(Screen):
         # Show progress
         progress_panel = self.query_one("#progress-panel")
         progress_panel.add_class("visible")
+        
+        # Disable/enable buttons
+        self.query_one("#generate", Button).disabled = True
+        self.query_one("#stop-generation", Button).disabled = False
+        self.query_one("#cancel", Button).disabled = True
+        
+        # Start background worker
+        self._active_worker = self.run_worker(
+            self._generate_world_worker(
+                description=description,
+                theme=theme,
+                style_preset=style_preset,
+                num_locations=num_locations,
+                num_npcs=num_npcs,
+            ),
+            name="world_generation",
+            exclusive=True,
+        )
+    
+    async def _generate_world_worker(
+        self,
+        description: str,
+        theme: str | None,
+        style_preset: str,
+        num_locations: int,
+        num_npcs: int,
+    ) -> dict:
+        """
+        Background worker for world generation.
+        
+        This runs the LLM calls without blocking the UI.
+        """
+        from gaime_builder.core.world_generator import WorldGenerator
+        
+        worker = get_current_worker()
+        
+        def update_progress(progress: float, message: str):
+            """Update progress via call_from_thread for thread safety."""
+            self.call_from_thread(self._update_generation_progress, progress, message)
+        
+        generator = WorldGenerator(self.app.worlds_dir)
+        
+        # Generate the world
+        result = await generator.generate(
+            prompt=description,
+            theme=theme,
+            num_locations=num_locations,
+            num_npcs=num_npcs,
+            progress_callback=update_progress
+        )
+        
+        if worker.is_cancelled:
+            raise asyncio.CancelledError("Generation cancelled by user")
+        
+        # Save the world with style preset
+        world_id = result["world_id"]
+        update_progress(0.95, f"Saving world '{world_id}'...")
+        
+        generator.save_world(world_id, result, style_preset=style_preset)
+        
+        update_progress(1.0, f"World '{world_id}' created successfully!")
+        
+        return result
+    
+    def _update_generation_progress(self, progress: float, message: str) -> None:
+        """Update the progress display (called from main thread)."""
         progress_bar = self.query_one("#progress-bar", ProgressBar)
         status = self.query_one("#progress-status", Static)
         
-        # Disable buttons
-        self.query_one("#generate", Button).disabled = True
-        self.query_one("#cancel", Button).disabled = True
+        progress_bar.update(progress=int(progress * 100))
+        status.update(f"[cyan]{message}[/]")
+    
+    def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
+        """Handle worker state changes."""
+        if event.worker.name == "world_generation":
+            if event.state.is_finished:
+                self._active_worker = None
+                
+                # Re-enable buttons
+                self.query_one("#generate", Button).disabled = False
+                self.query_one("#stop-generation", Button).disabled = True
+                self.query_one("#cancel", Button).disabled = False
+                
+                if event.state == event.state.SUCCESS:
+                    # Get the result from the worker
+                    result = event.worker.result
+                    self._show_generation_result(result)
+                elif event.state == event.state.CANCELLED:
+                    self.notify("World generation cancelled", severity="warning")
+                    self.query_one("#progress-panel").remove_class("visible")
+                elif event.state == event.state.ERROR:
+                    error_msg = str(event.worker.error) if event.worker.error else "Unknown error"
+                    self.query_one("#progress-status", Static).update(f"[red]✗ Error: {error_msg}[/]")
+                    self.notify(f"Generation failed: {error_msg}", severity="error")
+    
+    def _show_generation_result(self, result: dict) -> None:
+        """Show the generation result panel."""
+        self._generation_result = result
         
-        def update_progress(progress: float, message: str):
-            progress_bar.update(progress=int(progress * 100))
-            status.update(f"[cyan]{message}[/]")
+        world_id = result.get("world_id", "unknown")
+        world_name = result.get("world_name", world_id)
         
-        try:
-            from gaime_builder.core.world_generator import WorldGenerator
-            
-            generator = WorldGenerator(self.app.worlds_dir)
-            
-            result = await generator.generate(
-                prompt=description,
-                theme=theme,
-                num_locations=num_locations,
-                num_npcs=num_npcs,
-                progress_callback=update_progress
-            )
-            
-            # Save the world with style preset
-            world_id = result["world_id"]
-            update_progress(0.95, f"Saving world '{world_id}'...")
-            
-            generator.save_world(world_id, result, style_preset=style_preset)
-            
-            progress_bar.update(progress=100)
-            status.update(f"[green]✓ World '{world_id}' created successfully![/]")
-            
-            self.notify(f"World '{world_id}' created!", severity="information")
-            
-            # Store result and show result panel
-            self._generation_result = result
-            
-            # Update result panel content
-            world_name = result.get("world_name", world_id)
-            self.query_one("#world-name-display", Static).update(
-                f"[bold cyan]{world_name}[/] ({world_id})"
-            )
-            
-            pitch = result.get("spoiler_free_pitch", "No description available.")
-            self.query_one("#pitch-content", Static).update(pitch)
-            
-            # Format and set spoiler content
-            brief = result.get("design_brief", {})
-            if brief:
-                spoiler_text = self._format_design_brief(brief)
-                self.query_one("#spoiler-text", Static).update(spoiler_text)
-            else:
-                self.query_one("#spoiler-text", Static).update("No design brief available.")
-            
-            # Hide progress, show result
-            await asyncio.sleep(0.5)
-            progress_panel.remove_class("visible")
-            self.query_one("#result-panel").add_class("visible")
-            
-        except Exception as e:
-            status.update(f"[red]✗ Error: {str(e)}[/]")
-            self.notify(f"Error: {str(e)}", severity="error")
-        finally:
-            # Re-enable buttons
-            self.query_one("#generate", Button).disabled = False
-            self.query_one("#cancel", Button).disabled = False
+        # Update result panel content
+        self.query_one("#world-name-display", Static).update(
+            f"[bold cyan]{world_name}[/] ({world_id})"
+        )
+        
+        pitch = result.get("spoiler_free_pitch", "No description available.")
+        self.query_one("#pitch-content", Static).update(pitch)
+        
+        # Format and set spoiler content
+        brief = result.get("design_brief", {})
+        if brief:
+            spoiler_text = self._format_design_brief(brief)
+            self.query_one("#spoiler-text", Static).update(spoiler_text)
+        else:
+            self.query_one("#spoiler-text", Static).update("No design brief available.")
+        
+        # Hide progress, show result
+        self.query_one("#progress-panel").remove_class("visible")
+        self.query_one("#result-panel").add_class("visible")
+        
+        self.notify(f"World '{world_id}' created!", severity="information")
