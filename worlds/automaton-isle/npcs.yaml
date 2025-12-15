@@ -1,0 +1,54 @@
+hermit_crab_droid:
+  name: "Crustacean Unit 7"
+  role: "Merchant"
+  location: tidal_pools
+  appearance: |
+    A six-legged chassis wearing a rusted shipping container like a shell. Its eyes are camera lenses.
+  personality:
+    traits:
+      - "possessive"
+      - "haggler"
+    speech_style: "Clicking mechanical noises translated via a speaker."
+    quirks:
+      - "Hoards shiny objects"
+  knowledge:
+    - "The lighthouse needs a lens to function."
+    - "Sea glass is the most beautiful thing in the world."
+  dialogue_rules:
+    - "If player gives polished_sea_glass, give fresnel_lens."
+
+grandmaster_bot:
+  name: "Deep Blue"
+  role: "Gatekeeper"
+  location: graveyard
+  appearance: |
+    An elegant, albeit tarnished, android with a velvet tuxedo jacket.
+  personality:
+    traits:
+      - "intellectual"
+      - "melancholic"
+    speech_style: "Polite, slow, and philosophical."
+    quirks:
+      - "Refuses to move until beaten at chess."
+  knowledge:
+    - "The Master buried his secrets beneath my feet."
+  dialogue_rules:
+    - "If player wins chess, unlock Memory Archive."
+
+stoker_bot:
+  name: "Furnace Keeper"
+  role: "Atmosphere"
+  location: boiler_room
+  appearance: |
+    Bulky, covered in layers of soot and ash. One arm is a shovel.
+  personality:
+    traits:
+      - "dutiful"
+      - "tired"
+    speech_style: "Grinding gears and steam hisses."
+    quirks:
+      - "Ignores the player unless repaired."
+  knowledge:
+    - "The fire must burn for the light to shine."
+  dialogue_rules:
+    - "If repaired with golden_oil_can, reveals backstory about the day the coal ran out."
