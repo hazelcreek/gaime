@@ -244,13 +244,19 @@ class ImageHashTracker:
     Computes a hash from:
     - Location atmosphere and details
     - World theme and tone
-    - Style preset configuration
+    - Style preset configuration (full YAML content, not just name)
     - NPC data (for variants)
-    - Image prompt template version
+    - Prompt template file contents
+    - Code version for prompt generation logic
     """
     
-    # Increment this when prompt templates change significantly
-    PROMPT_VERSION = "2024.12.1"
+    # Increment this when prompt generation CODE changes (not templates - those are auto-hashed)
+    # This covers changes to: get_image_prompt(), build_mpa_prompt(), _build_exits_description(), etc.
+    CODE_VERSION = "2024.12.1"
+    
+    # Cache for template hashes (computed once per session)
+    _template_hash_cache: Optional[str] = None
+    _style_presets_cache: dict[str, str] = {}
     
     def __init__(self, worlds_dir: Path):
         self.worlds_dir = worlds_dir
@@ -258,6 +264,93 @@ class ImageHashTracker:
     def _get_metadata_path(self, world_id: str) -> Path:
         """Get path to the image metadata file."""
         return self.worlds_dir / world_id / "images" / "_metadata.json"
+    
+    def _get_template_hash(self) -> str:
+        """
+        Compute a hash of all image generation prompt templates.
+        
+        This automatically detects when template files change.
+        """
+        if ImageHashTracker._template_hash_cache is not None:
+            return ImageHashTracker._template_hash_cache
+        
+        from gaime_builder.core.prompt_loader import get_loader
+        
+        # List of template files used in image generation
+        template_files = [
+            ("image_generator", "mpa_template.txt"),
+            ("image_generator", "mpa_edit_template.txt"),
+            ("image_generator", "interactive_elements_section.txt"),
+            ("image_generator", "image_prompt_template.txt"),
+            ("image_generator", "edit_prompt_template.txt"),
+        ]
+        
+        loader = get_loader()
+        template_contents = []
+        
+        for category, filename in template_files:
+            try:
+                content = loader.get_prompt(category, filename)
+                template_contents.append(f"{category}/{filename}:{content}")
+            except Exception:
+                # Template not found - include placeholder so hash changes if added later
+                template_contents.append(f"{category}/{filename}:MISSING")
+        
+        combined = "\n---\n".join(template_contents)
+        template_hash = hashlib.sha256(combined.encode()).hexdigest()[:12]
+        
+        ImageHashTracker._template_hash_cache = template_hash
+        return template_hash
+    
+    def _get_style_preset_hash(self, style_config: Any) -> str:
+        """
+        Compute a hash of the resolved style preset configuration.
+        
+        This detects changes to style preset YAML files, not just the preset name.
+        """
+        from gaime_builder.core.style_loader import resolve_style
+        
+        # Get the cache key
+        cache_key = json.dumps(style_config, sort_keys=True) if style_config else "default"
+        
+        if cache_key in ImageHashTracker._style_presets_cache:
+            return ImageHashTracker._style_presets_cache[cache_key]
+        
+        # Resolve the full style block
+        style_block = resolve_style(style_config)
+        
+        # Create a dict of all style properties
+        style_dict = {
+            "name": style_block.name,
+            "description": style_block.description,
+            "style": style_block.style,
+            "mood": {
+                "tone": style_block.mood.tone,
+                "lighting": style_block.mood.lighting,
+                "color_palette": style_block.mood.color_palette,
+            },
+            "technical": {
+                "perspective": style_block.technical.perspective,
+                "shot": style_block.technical.shot,
+                "camera": style_block.technical.camera,
+                "effects": style_block.technical.effects,
+            },
+            "anti_styles": style_block.anti_styles,
+            "quality_constraints": style_block.quality_constraints,
+        }
+        
+        style_hash = hashlib.sha256(
+            json.dumps(style_dict, sort_keys=True).encode()
+        ).hexdigest()[:12]
+        
+        ImageHashTracker._style_presets_cache[cache_key] = style_hash
+        return style_hash
+    
+    @classmethod
+    def clear_cache(cls) -> None:
+        """Clear cached template and style hashes. Call after modifying templates."""
+        cls._template_hash_cache = None
+        cls._style_presets_cache = {}
     
     def compute_location_hash(
         self,
@@ -268,7 +361,12 @@ class ImageHashTracker:
         """
         Compute a hash for a location's image based on all relevant inputs.
         
-        This hash changes when any parameter affecting the generated prompt changes.
+        This hash changes when any parameter affecting the generated prompt changes:
+        - World data (theme, tone, style)
+        - Location data (atmosphere, exits, items, NPCs)
+        - Style preset content (not just name)
+        - Prompt template files
+        - Code version
         """
         world_path = self.worlds_dir / world_id
         
@@ -279,14 +377,16 @@ class ImageHashTracker:
         items_data = self._load_yaml(world_path / "items.yaml")
         
         loc_data = locations_data.get(location_id, {})
+        style_config = world_data.get("style") or world_data.get("style_block")
         
         # Build hash input from all relevant parameters
         hash_input = {
-            "version": self.PROMPT_VERSION,
+            "code_version": self.CODE_VERSION,
+            "template_hash": self._get_template_hash(),
+            "style_hash": self._get_style_preset_hash(style_config),
             "world": {
                 "theme": world_data.get("theme", ""),
                 "tone": world_data.get("tone", ""),
-                "style": world_data.get("style"),
             },
             "location": {
                 "id": location_id,
@@ -393,7 +493,7 @@ class ImageHashTracker:
             location_id=location_id,
             prompt_hash=prompt_hash,
             generated_at=datetime.now().isoformat(),
-            generator_version=self.PROMPT_VERSION,
+            generator_version=self.CODE_VERSION,
             style_preset=style_preset,
             variant_npc_ids=variant_npc_ids or [],
         )
@@ -408,6 +508,14 @@ class ImageHashTracker:
     ) -> tuple[bool, str]:
         """
         Check if an image is outdated.
+        
+        The hash includes:
+        - World/location/NPC/item data
+        - Prompt template file contents  
+        - Style preset configuration
+        - Code version
+        
+        So comparing hashes catches ALL changes that affect the generated prompt.
         
         Returns:
             Tuple of (is_outdated, reason)
@@ -424,14 +532,12 @@ class ImageHashTracker:
         if not stored:
             return True, "no metadata"
         
-        # Compute current hash
+        # Compute current hash (includes templates, style, data, and code version)
         current_hash = self.compute_location_hash(world_id, location_id, variant_npc_ids)
         
         if stored.prompt_hash != current_hash:
-            return True, "prompt changed"
-        
-        if stored.generator_version != self.PROMPT_VERSION:
-            return True, "generator updated"
+            # Hash changed - could be data, templates, style preset, or code version
+            return True, "inputs changed"
         
         return False, ""
     
