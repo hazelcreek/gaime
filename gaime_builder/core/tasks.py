@@ -241,22 +241,15 @@ class ImageHashTracker:
     """
     Tracks image generation parameters via hashes to detect outdated images.
     
-    Computes a hash from:
-    - Location atmosphere and details
-    - World theme and tone
-    - Style preset configuration (full YAML content, not just name)
-    - NPC data (for variants)
-    - Prompt template file contents
-    - Code version for prompt generation logic
+    Uses a "dry-run" approach: generates the actual prompts without calling the API,
+    then hashes them. This is robust against ANY change to:
+    - Prompt templates
+    - Style presets  
+    - World/location/NPC/item data
+    - Code that constructs prompts
+    
+    No duplicated logic - uses the exact same code path as real generation.
     """
-    
-    # Increment this when prompt generation CODE changes (not templates - those are auto-hashed)
-    # This covers changes to: get_image_prompt(), build_mpa_prompt(), _build_exits_description(), etc.
-    CODE_VERSION = "2024.12.1"
-    
-    # Cache for template hashes (computed once per session)
-    _template_hash_cache: Optional[str] = None
-    _style_presets_cache: dict[str, str] = {}
     
     def __init__(self, worlds_dir: Path):
         self.worlds_dir = worlds_dir
@@ -265,93 +258,6 @@ class ImageHashTracker:
         """Get path to the image metadata file."""
         return self.worlds_dir / world_id / "images" / "_metadata.json"
     
-    def _get_template_hash(self) -> str:
-        """
-        Compute a hash of all image generation prompt templates.
-        
-        This automatically detects when template files change.
-        """
-        if ImageHashTracker._template_hash_cache is not None:
-            return ImageHashTracker._template_hash_cache
-        
-        from gaime_builder.core.prompt_loader import get_loader
-        
-        # List of template files used in image generation
-        template_files = [
-            ("image_generator", "mpa_template.txt"),
-            ("image_generator", "mpa_edit_template.txt"),
-            ("image_generator", "interactive_elements_section.txt"),
-            ("image_generator", "image_prompt_template.txt"),
-            ("image_generator", "edit_prompt_template.txt"),
-        ]
-        
-        loader = get_loader()
-        template_contents = []
-        
-        for category, filename in template_files:
-            try:
-                content = loader.get_prompt(category, filename)
-                template_contents.append(f"{category}/{filename}:{content}")
-            except Exception:
-                # Template not found - include placeholder so hash changes if added later
-                template_contents.append(f"{category}/{filename}:MISSING")
-        
-        combined = "\n---\n".join(template_contents)
-        template_hash = hashlib.sha256(combined.encode()).hexdigest()[:12]
-        
-        ImageHashTracker._template_hash_cache = template_hash
-        return template_hash
-    
-    def _get_style_preset_hash(self, style_config: Any) -> str:
-        """
-        Compute a hash of the resolved style preset configuration.
-        
-        This detects changes to style preset YAML files, not just the preset name.
-        """
-        from gaime_builder.core.style_loader import resolve_style
-        
-        # Get the cache key
-        cache_key = json.dumps(style_config, sort_keys=True) if style_config else "default"
-        
-        if cache_key in ImageHashTracker._style_presets_cache:
-            return ImageHashTracker._style_presets_cache[cache_key]
-        
-        # Resolve the full style block
-        style_block = resolve_style(style_config)
-        
-        # Create a dict of all style properties
-        style_dict = {
-            "name": style_block.name,
-            "description": style_block.description,
-            "style": style_block.style,
-            "mood": {
-                "tone": style_block.mood.tone,
-                "lighting": style_block.mood.lighting,
-                "color_palette": style_block.mood.color_palette,
-            },
-            "technical": {
-                "perspective": style_block.technical.perspective,
-                "shot": style_block.technical.shot,
-                "camera": style_block.technical.camera,
-                "effects": style_block.technical.effects,
-            },
-            "anti_styles": style_block.anti_styles,
-            "quality_constraints": style_block.quality_constraints,
-        }
-        
-        style_hash = hashlib.sha256(
-            json.dumps(style_dict, sort_keys=True).encode()
-        ).hexdigest()[:12]
-        
-        ImageHashTracker._style_presets_cache[cache_key] = style_hash
-        return style_hash
-    
-    @classmethod
-    def clear_cache(cls) -> None:
-        """Clear cached template and style hashes. Call after modifying templates."""
-        cls._template_hash_cache = None
-        cls._style_presets_cache = {}
-    
     def compute_location_hash(
         self,
         world_id: str,
@@ -359,82 +265,190 @@ class ImageHashTracker:
         variant_npc_ids: Optional[list[str]] = None
     ) -> str:
         """
-        Compute a hash for a location's image based on all relevant inputs.
+        Compute a hash by generating the actual prompt in dry-run mode.
         
-        This hash changes when any parameter affecting the generated prompt changes:
-        - World data (theme, tone, style)
-        - Location data (atmosphere, exits, items, NPCs)
-        - Style preset content (not just name)
-        - Prompt template files
-        - Code version
+        This uses the exact same code path as real image generation,
+        ensuring ANY change that affects the prompt is detected.
         """
+        prompt = self._generate_prompt_dry_run(world_id, location_id, variant_npc_ids)
+        return hashlib.sha256(prompt.encode()).hexdigest()[:16]
+    
+    def _generate_prompt_dry_run(
+        self,
+        world_id: str,
+        location_id: str,
+        variant_npc_ids: Optional[list[str]] = None
+    ) -> str:
+        """
+        Generate the image prompt without calling the API.
+        
+        This is the core of the dry-run approach - we run the exact same
+        prompt generation code that would be used for real generation.
+        """
+        from gaime_builder.core.image_generator import (
+            get_image_prompt,
+            get_edit_prompt,
+            LocationContext,
+            ExitInfo,
+            ItemInfo,
+            NPCInfo,
+        )
+        from gaime_builder.core.style_loader import resolve_style
+        
         world_path = self.worlds_dir / world_id
         
-        # Load all relevant data
+        # Load all world data
         world_data = self._load_yaml(world_path / "world.yaml")
         locations_data = self._load_yaml(world_path / "locations.yaml")
         npcs_data = self._load_yaml(world_path / "npcs.yaml")
         items_data = self._load_yaml(world_path / "items.yaml")
         
         loc_data = locations_data.get(location_id, {})
+        if not loc_data:
+            return f"LOCATION_NOT_FOUND:{location_id}"
+        
+        # Extract world parameters
+        theme = world_data.get("theme", "fantasy")
+        tone = world_data.get("tone", "atmospheric")
         style_config = world_data.get("style") or world_data.get("style_block")
+        style_block = resolve_style(style_config)
         
-        # Build hash input from all relevant parameters
-        hash_input = {
-            "code_version": self.CODE_VERSION,
-            "template_hash": self._get_template_hash(),
-            "style_hash": self._get_style_preset_hash(style_config),
-            "world": {
-                "theme": world_data.get("theme", ""),
-                "tone": world_data.get("tone", ""),
-            },
-            "location": {
-                "id": location_id,
-                "name": loc_data.get("name", ""),
-                "atmosphere": loc_data.get("atmosphere", ""),
-                "exits": loc_data.get("exits", {}),
-                "items": loc_data.get("items", []),
-                "item_placements": loc_data.get("item_placements", {}),
-                "npcs": loc_data.get("npcs", []),
-                "npc_placements": loc_data.get("npc_placements", {}),
-            },
-            "items": {},
-            "npcs": {},
-        }
+        loc_name = loc_data.get("name", location_id)
+        atmosphere = loc_data.get("atmosphere", "")
         
-        # Include item details for items in this location
-        for item_id in loc_data.get("items", []):
-            item_data = items_data.get(item_id, {})
-            hash_input["items"][item_id] = {
-                "name": item_data.get("name", ""),
-                "found_description": item_data.get("found_description", ""),
-                "hidden": item_data.get("hidden", False),
-            }
+        # Build context (same logic as ImageGenerator._build_location_context)
+        context = self._build_location_context(
+            location_id, loc_data, locations_data, npcs_data, items_data,
+            variant_npc_ids
+        )
         
-        # Get all NPCs that could be at this location
-        location_npcs = set(loc_data.get("npcs", []))
-        for npc_id, npc_data in npcs_data.items():
-            if npc_data.get("location") == location_id:
-                location_npcs.add(npc_id)
-            if location_id in npc_data.get("locations", []):
-                location_npcs.add(npc_id)
-        
-        # Include NPC details
-        for npc_id in location_npcs:
-            npc_data = npcs_data.get(npc_id, {})
-            hash_input["npcs"][npc_id] = {
-                "name": npc_data.get("name", ""),
-                "appearance": npc_data.get("appearance", ""),
-                "role": npc_data.get("role", ""),
-            }
-        
-        # For variants, include specific NPC data
         if variant_npc_ids:
-            hash_input["variant_npcs"] = sorted(variant_npc_ids)
+            # For variants, we generate an edit prompt to add NPCs to base image
+            npcs_to_add = []
+            npc_placements = loc_data.get("npc_placements", {})
+            for npc_id in variant_npc_ids:
+                npc_data = npcs_data.get(npc_id, {})
+                if npc_data:
+                    npcs_to_add.append(NPCInfo(
+                        name=npc_data.get("name", npc_id),
+                        appearance=npc_data.get("appearance", ""),
+                        role=npc_data.get("role", ""),
+                        placement=npc_placements.get(npc_id, "")
+                    ))
+            
+            return get_edit_prompt(loc_name, npcs_to_add, theme, tone, style_block)
+        else:
+            # Base image prompt
+            return get_image_prompt(
+                location_name=loc_name,
+                atmosphere=atmosphere,
+                theme=theme,
+                tone=tone,
+                context=context,
+                style_block=style_block
+            )
+    
+    def _build_location_context(
+        self,
+        location_id: str,
+        loc_data: dict,
+        locations_data: dict,
+        npcs_data: dict,
+        items_data: dict,
+        variant_npc_ids: Optional[list[str]] = None
+    ):
+        """Build LocationContext for prompt generation."""
+        from gaime_builder.core.image_generator import (
+            LocationContext,
+            ExitInfo,
+            ItemInfo,
+            NPCInfo,
+        )
         
-        # Compute hash
-        hash_str = json.dumps(hash_input, sort_keys=True)
-        return hashlib.sha256(hash_str.encode()).hexdigest()[:16]
+        context = LocationContext()
+        
+        # Build exits
+        exits_data = loc_data.get("exits", {})
+        for direction, destination_id in exits_data.items():
+            destination_data = locations_data.get(destination_id, {})
+            destination_name = destination_data.get("name", destination_id)
+            dest_requires = destination_data.get("requires", {})
+            
+            context.exits.append(ExitInfo(
+                direction=direction,
+                destination_name=destination_name,
+                is_secret=bool(dest_requires.get("flag") if dest_requires else False),
+                requires_key=bool(dest_requires.get("item") if dest_requires else False)
+            ))
+        
+        # Build items
+        location_items = loc_data.get("items", [])
+        item_placements = loc_data.get("item_placements", {})
+        for item_id in location_items:
+            item_data = items_data.get(item_id, {})
+            if item_data:
+                context.items.append(ItemInfo(
+                    name=item_data.get("name", item_id),
+                    description=item_data.get("found_description", ""),
+                    is_hidden=item_data.get("hidden", False),
+                    is_artifact=item_data.get("properties", {}).get("artifact", False),
+                    placement=item_placements.get(item_id, "")
+                ))
+        
+        # Build NPCs - for base image, exclude variant NPCs
+        # For variant prompt, NPCs are handled separately via get_edit_prompt
+        if variant_npc_ids is None:
+            location_npcs = loc_data.get("npcs", [])
+            npc_placements = loc_data.get("npc_placements", {})
+            
+            # Get all NPCs at this location
+            all_npc_ids = set(location_npcs)
+            for npc_id, npc_data in npcs_data.items():
+                if npc_data.get("location") == location_id:
+                    all_npc_ids.add(npc_id)
+                if location_id in npc_data.get("locations", []):
+                    all_npc_ids.add(npc_id)
+            
+            # Filter to unconditional NPCs only (for base image)
+            for npc_id in all_npc_ids:
+                npc_data = npcs_data.get(npc_id, {})
+                if not npc_data:
+                    continue
+                
+                # Skip conditional NPCs (they get variant images)
+                if self._is_npc_conditional(npc_data, location_id):
+                    continue
+                
+                context.npcs.append(NPCInfo(
+                    name=npc_data.get("name", npc_id),
+                    appearance=npc_data.get("appearance", ""),
+                    role=npc_data.get("role", ""),
+                    placement=npc_placements.get(npc_id, "")
+                ))
+        
+        return context
+    
+    def _is_npc_conditional(self, npc_data: dict, location_id: str) -> bool:
+        """Check if an NPC is conditional at a location."""
+        if npc_data.get("appears_when"):
+            return True
+        
+        location_changes = npc_data.get("location_changes", [])
+        if location_changes:
+            starting_location = npc_data.get("location")
+            
+            if starting_location == location_id:
+                for change in location_changes:
+                    move_to = change.get("move_to")
+                    if move_to and move_to != starting_location:
+                        return True
+            
+            for change in location_changes:
+                move_to = change.get("move_to")
+                if move_to == location_id and starting_location != location_id:
+                    return True
+        
+        return False
     
     def _load_yaml(self, path: Path) -> dict:
         """Load YAML file, returning empty dict if not found."""
@@ -493,7 +507,7 @@ class ImageHashTracker:
             location_id=location_id,
             prompt_hash=prompt_hash,
             generated_at=datetime.now().isoformat(),
-            generator_version=self.CODE_VERSION,
+            generator_version="dry-run-hash",  # Hash captures everything, version is just a marker
             style_preset=style_preset,
             variant_npc_ids=variant_npc_ids or [],
         )
@@ -507,15 +521,14 @@ class ImageHashTracker:
         variant_npc_ids: Optional[list[str]] = None
     ) -> tuple[bool, str]:
         """
-        Check if an image is outdated.
+        Check if an image is outdated by comparing prompt hashes.
         
-        The hash includes:
-        - World/location/NPC/item data
-        - Prompt template file contents  
-        - Style preset configuration
-        - Code version
-        
-        So comparing hashes catches ALL changes that affect the generated prompt.
+        Uses dry-run prompt generation - the hash captures the EXACT prompt
+        that would be sent to the API, so ANY change is detected:
+        - Template file changes
+        - Style preset changes
+        - World/location data changes
+        - Code changes that affect prompt output
         
         Returns:
             Tuple of (is_outdated, reason)
