@@ -3,8 +3,9 @@ Prompt Loader - Loads and manages prompts from text files with hot reloading sup
 
 Prompts are organized in subdirectories:
 - game_master/ - Game engine prompts
-- world_builder/ - World builder prompts  
 - image_generator/ - Image generation prompts
+
+Note: World builder prompts are in gaime_builder/core/prompts/ (TUI app).
 
 Prompts are loaded at startup and can be reloaded on demand for development.
 """

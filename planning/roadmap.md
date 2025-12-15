@@ -187,9 +187,11 @@ Story arc modeling with victory path protection.
 
 ### World Validation Tools
 - [x] Basic YAML validation
+- [x] Deprecated schema detection (personality string, dialogue_hints, locked_exit constraints)
+- [x] Consistency check (flags, location/item/NPC references)
+- [x] Hybrid fix system (rule-based + LLM-assisted for creative fixes)
 - [ ] Completability check (victory reachable)
 - [ ] Fairness check (puzzles not obscure)
-- [ ] Consistency check (no orphan references)
 
 ### Historical World Research (Future)
 - [ ] AI researches authentic settings
@@ -280,6 +282,7 @@ See [ideas/features.md](../ideas/features.md) for full descriptions.
 
 | Date | Change |
 |------|--------|
+| 2025-12-15 | World validation system: schema generator, deprecated pattern detection, hybrid fixer (rule + LLM), migrated 5 existing worlds |
 | 2025-12-12 | Implemented TUI World Builder (gaime_builder package) - terminal UI for world creation and image generation |
 | 2025-12-10 | Implemented Visual Style System with MPA architecture and 14 presets |
 | 2025-12-10 | Restructured roadmap around Vision document experience goals |

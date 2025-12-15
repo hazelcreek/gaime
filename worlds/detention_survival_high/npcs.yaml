@@ -1,32 +1,52 @@
 principal_skinner:
-  name: "Principal Skinner"
-  role: "The Antagonist"
+  name: Principal Skinner
+  role: The Antagonist
   location: principal_office
-  personality: "Overly dramatic, obsessed with rules, secretly hates paperwork."
+  personality:
+    traits:
+    - overly dramatic
+    - obsessed with rules
+    - secretly hates paperwork
+    speech_style: Speaks with a overly dramatic, obsessed with rules, secretly hates
+      paperwork manner
+    quirks: []
   knowledge:
-    - "He hid the front gate keys in the locker room to prevent seniors from stealing them."
-    - "He is terrified of the Lunch Lady."
-  dialogue_hints:
-    greeting: "'Is that a shirttail untucked? Detention!'"
-
+  - He hid the front gate keys in the locker room to prevent seniors from stealing
+    them.
+  - He is terrified of the Lunch Lady.
+  dialogue_rules:
+  - 'Greeting: ''Is that a shirttail untucked? Detention!'''
 lunch_lady_doris:
-  name: "Lunch Lady Doris"
-  role: "The Gatekeeper"
+  name: Lunch Lady Doris
+  role: The Gatekeeper
   location: cafeteria
-  personality: "Gruff, smokes imaginary cigarettes, surprisingly wise."
+  personality:
+    traits:
+    - gruff
+    - smokes imaginary cigarettes
+    - surprisingly wise
+    speech_style: Speaks with a gruff, smokes imaginary cigarettes, surprisingly wise
+      manner
+    quirks: []
   knowledge:
-    - "She knows the secret recipe for the meatloaf involves sawdust."
-    - "She saw the Janitor leave his keys near the showers."
-  dialogue_hints:
-    greeting: "'Kitchen's closed, kid. Scram before I ladle you.'"
-
+  - She knows the secret recipe for the meatloaf involves sawdust.
+  - She saw the Janitor leave his keys near the showers.
+  dialogue_rules:
+  - 'Greeting: ''Kitchen''s closed, kid. Scram before I ladle you.'''
 nerd_neil:
-  name: "Neil the Science Club President"
-  role: "The Hint Giver"
+  name: Neil the Science Club President
+  role: The Hint Giver
   location: science_lab
-  personality: "Anxious, speaks in technical jargon, desperately wants a friend."
+  personality:
+    traits:
+    - anxious
+    - speaks in technical jargon
+    - desperately wants a friend
+    speech_style: Speaks with a anxious, speaks in technical jargon, desperately wants
+      a friend manner
+    quirks: []
   knowledge:
-    - "He knows that baking soda and vinegar can create a distraction."
-    - "He's hiding from bullies (who have already gone home)."
-  dialogue_hints:
-    greeting: "'According to my calculations, you shouldn't be here.'"
+  - He knows that baking soda and vinegar can create a distraction.
+  - He's hiding from bullies (who have already gone home).
+  dialogue_rules:
+  - 'Greeting: ''According to my calculations, you shouldn''t be here.'''

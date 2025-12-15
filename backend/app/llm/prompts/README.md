@@ -9,14 +9,13 @@ prompts/
 ├── game_master/          # Game engine prompts
 │   ├── system_prompt.txt      # Main system prompt for game master
 │   └── opening_prompt.txt      # Prompt for generating opening narrative
-├── world_builder/        # World builder prompts
-│   ├── world_builder_prompt.txt  # Main prompt for world generation
-│   └── system_message.txt         # System message for world builder
 └── image_generator/      # Image generation prompts
     ├── image_prompt_template.txt      # Template for scene image generation
     ├── edit_prompt_template.txt       # Template for editing images (NPC variants)
     └── interactive_elements_section.txt  # Template section for interactive elements
 ```
+
+> **Note**: World builder prompts are in `gaime_builder/core/prompts/world_builder/` (TUI app).
 
 ## Usage
 
@@ -65,18 +64,6 @@ reload_category("game_master")
 - **Used in**: `app.llm.game_master.GameMaster.generate_opening()`
 - **Purpose**: User prompt for generating the opening narrative
 - **Variables**: `location_name`, `premise`, `starting_situation`
-
-### World Builder Prompts
-
-**`world_builder_prompt.txt`**
-- **Used in**: `app.llm.world_builder.WorldBuilder.generate()`
-- **Purpose**: Main prompt for generating world content from user description
-- **Variables**: `theme`, `num_locations`, `num_npcs`, `prompt`
-
-**`system_message.txt`**
-- **Used in**: `app.llm.world_builder.WorldBuilder.generate()`
-- **Purpose**: System message sent to LLM for world building
-- **Variables**: None (static message)
 
 ### Image Generator Prompts
 

@@ -1,44 +1,66 @@
 old_tam:
-  name: "Old Tam"
-  role: "Groundskeeper"
+  name: Old Tam
+  role: Groundskeeper
   location: distillery_courtyard
-  personality: "Gruff, suspicious, superstitious."
+  personality:
+    traits:
+    - gruff
+    - suspicious
+    - superstitious
+    speech_style: Speaks with a gruff, suspicious, superstitious manner
+    quirks: []
   knowledge:
-    - "He saw lights in the Tasting Room late last night."
-    - "He knows the legends of the Smuggler's Cove."
-  dialogue_hints:
-    greeting: "'Ay? Who are you then? Another tourist lookin' for a dram?'"
-    refusal: "'I don't talk to strangers without a badge.'"
-
+  - He saw lights in the Tasting Room late last night.
+  - He knows the legends of the Smuggler's Cove.
+  dialogue_rules:
+  - 'Greeting: ''Ay? Who are you then? Another tourist lookin'' for a dram?'''
+  - 'Refusal: ''I don''t talk to strangers without a badge.'''
 callum_macleod:
-  name: "Callum MacLeod"
-  role: "Head Chemist"
+  name: Callum MacLeod
+  role: Head Chemist
   location: lab
-  personality: "Nervous, brilliant, easily intimidated."
+  personality:
+    traits:
+    - nervous
+    - brilliant
+    - easily intimidated
+    speech_style: Speaks with a nervous, brilliant, easily intimidated manner
+    quirks: []
   knowledge:
-    - "He knows the formula for the invisible ink used in the logbook."
-    - "He suspects the Manager is falsifying records."
-  dialogue_hints:
-    greeting: "'Please, don't touch the beakers! This is a delicate process.'"
-
+  - He knows the formula for the invisible ink used in the logbook.
+  - He suspects the Manager is falsifying records.
+  dialogue_rules:
+  - 'Greeting: ''Please, don''t touch the beakers! This is a delicate process.'''
 fiona_campbell:
-  name: "Fiona Campbell"
-  role: "Distillery Manager"
+  name: Fiona Campbell
+  role: Distillery Manager
   location: managers_office
-  personality: "Defensive, sharp, hiding something."
+  personality:
+    traits:
+    - defensive
+    - sharp
+    - hiding something
+    speech_style: Speaks with a defensive, sharp, hiding something manner
+    quirks: []
   knowledge:
-    - "She was having an affair with the victim."
-    - "She knows about the secret blend but denies it."
-  dialogue_hints:
-    greeting: "'I'm busy, Detective. Unless you have a warrant, leave my office.'"
-
+  - She was having an affair with the victim.
+  - She knows about the secret blend but denies it.
+  dialogue_rules:
+  - 'Greeting: ''I''m busy, Detective. Unless you have a warrant, leave my office.'''
 the_killer:
-  name: "Gordon MacNeil"
-  role: "The Victim's Brother"
+  name: Gordon MacNeil
+  role: The Victim's Brother
   location: ferry_terminal
-  personality: "Calm, cold, resigned."
+  personality:
+    traits:
+    - calm
+    - cold
+    - resigned
+    speech_style: Speaks with a calm, cold, resigned manner
+    quirks: []
   knowledge:
-    - "He killed his brother over the inheritance."
-    - "He thinks he has gotten away with it."
-  dialogue_hints:
-    greeting: "'Terrible business about Angus. I'm just leaving to arrange the funeral in Glasgow.'"
+  - He killed his brother over the inheritance.
+  - He thinks he has gotten away with it.
+  dialogue_rules:
+  - 'Greeting: ''Terrible business about Angus. I''m just leaving to arrange the funeral
+    in Glasgow.'''

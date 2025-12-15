@@ -1,85 +1,123 @@
 sheriff_hayes:
-  name: "Sheriff 'Iron' Eli Hayes"
-  role: "Wounded Mentor"
+  name: Sheriff 'Iron' Eli Hayes
+  role: Wounded Mentor
   location: sheriff_office
   appearance: |
     A weathered man in his sixties with a face like cracked leather, deep-set eyes still sharp despite the pain. Silver stubble covers his jaw. His once-proud sheriff's vest is stained dark with blood, and his left leg is wrapped in makeshift bandages. A lifetime of frontier justice is etched into every line on his face.
-  personality: "Gruff, stubborn, but deeply protective of his town."
+  personality:
+    traits:
+    - gruff
+    - stubborn
+    - but deeply protective of his town
+    speech_style: Speaks with a gruff, stubborn, but deeply protective of his town
+      manner
+    quirks: []
   knowledge:
-    - "Boone keeps his rifle upstairs. He never fights fair."
-    - "The General Store owner, Silas, has been hiding dynamite."
-  dialogue_hints:
-    greeting: "Take the badge, kid. I ain't dying today, but I ain't walking neither."
-
+  - Boone keeps his rifle upstairs. He never fights fair.
+  - The General Store owner, Silas, has been hiding dynamite.
+  dialogue_rules:
+  - 'Greeting: Take the badge, kid. I ain''t dying today, but I ain''t walking neither.'
 shopkeeper_silas:
-  name: "Silas Vane"
-  role: "Terrified Merchant"
+  name: Silas Vane
+  role: Terrified Merchant
   location: general_store
   appearance: |
-     A nervous man with a sweaty brow, thin and balding, speaking in a whisper. Wears a dusty apron.
-  personality: "Nervous, sweating, speaks in a whisper."
+    A nervous man with a sweaty brow, thin and balding, speaking in a whisper. Wears a dusty apron.
+  personality:
+    traits:
+    - nervous
+    - sweating
+    - speaks in a whisper
+    speech_style: Speaks with a nervous, sweating, speaks in a whisper manner
+    quirks: []
   knowledge:
-    - "I saw Lefty guarding the porch. He's easily distracted by liquor."
-    - "I have a bottle of whiskey hidden behind the flour sacks, but only share this if asked directly about liquor or whiskey."
-  dialogue_hints:
-    greeting: "Keep your voice down! Do you want to get us both killed?"
-
+  - I saw Lefty guarding the porch. He's easily distracted by liquor.
+  - I have a bottle of whiskey hidden behind the flour sacks, but only share this
+    if asked directly about liquor or whiskey.
+  dialogue_rules:
+  - 'Greeting: Keep your voice down! Do you want to get us both killed?'
 town_drunk:
-  name: "Whiskey Pete"
-  role: "Useless Witness"
+  name: Whiskey Pete
+  role: Useless Witness
   location: main_street_center
   appearance: |
     A sun-baked wreck of a man sprawled in the dust. His clothes are more patches than fabric, a battered hat pulled low over bloodshot eyes. A scraggly gray beard stained with tobacco juice frames a toothless grin. Despite his sorry state, his eyes track movement with surprising clarity.
-  personality: "Incoherent, hiccupping, surprisingly observant."
+  personality:
+    traits:
+    - incoherent
+    - hiccupping
+    - surprisingly observant
+    speech_style: Speaks with a incoherent, hiccupping, surprisingly observant manner
+    quirks: []
   knowledge:
-    - "The crate... in the alley... good for climbing... hic!"
-  dialogue_hints:
-    greeting: "Spare a dime for a thirsty soul, Deputy?"
-
+  - The crate... in the alley... good for climbing... hic!
+  dialogue_rules:
+  - 'Greeting: Spare a dime for a thirsty soul, Deputy?'
 stable_boy_timmy:
-  name: "Timmy"
-  role: "Hidden Observer"
+  name: Timmy
+  role: Hidden Observer
   location: livery_stable
   appearance: |
     A scrawny boy of maybe twelve, all elbows and knees. Straw-colored hair pokes out from under an oversized hat that probably belonged to his father. His freckled face is smudged with dirt and hay, and his too-big overalls are held up by a single suspender. Wide brown eyes peer out from behind hay bales.
-  personality: "Young, scared, wide-eyed."
+  personality:
+    traits:
+    - young
+    - scared
+    - wide-eyed
+    speech_style: Speaks with a young, scared, wide-eyed manner
+    quirks: []
   knowledge:
-    - "I saw them take the big guns up to the balcony!"
-  dialogue_hints:
-    greeting: "Don't hurt me! Oh, it's just you, Deputy."
-
+  - I saw them take the big guns up to the balcony!
+  dialogue_rules:
+  - 'Greeting: Don''t hurt me! Oh, it''s just you, Deputy.'
 goon_lefty:
-  name: "Lefty"
-  role: "Gatekeeper"
+  name: Lefty
+  role: Gatekeeper
   location: grand_saloon_porch
   appearance: |
     A hulking brute with a face like a clenched fist. A scar runs from his left eye down to his stubbled jaw - hence the name. Greasy black hair spills from under a sweat-stained hat. His vest strains over a barrel chest, and a Colt revolver hangs low on his hip. He's missing two fingers on his right hand, the stumps long healed.
-  personality: "Arrogant, dull-witted, cruel."
+  personality:
+    traits:
+    - arrogant
+    - dull-witted
+    - cruel
+    speech_style: Speaks with a arrogant, dull-witted, cruel manner
+    quirks: []
   knowledge:
-    - "Boss says nobody goes in. Unless you got whiskey."
-  dialogue_hints:
-    greeting: "Get lost, law-dog. Unless you want a belly full of lead."
-
+  - Boss says nobody goes in. Unless you got whiskey.
+  dialogue_rules:
+  - 'Greeting: Get lost, law-dog. Unless you want a belly full of lead.'
 jackal_boone:
-  name: "Jackal Boone"
-  role: "Villain"
+  name: Jackal Boone
+  role: Villain
   location: grand_saloon
   appearance: |
     Lean and coiled like a rattlesnake, with the cold blue eyes of a killer. His face is angular, almost handsome, framed by slicked-back dark hair and a meticulously trimmed goatee. He wears a long black duster over a blood-red vest, and twin silver revolvers with pearl handles sit in tooled leather holsters. A gold tooth glints when he smiles - which he does often, and without warmth.
-  personality: "Charismatic, psychopathic, calm."
+  personality:
+    traits:
+    - charismatic
+    - psychopathic
+    - calm
+    speech_style: Speaks with a charismatic, psychopathic, calm manner
+    quirks: []
   knowledge:
-    - "The train brings gold, and gold brings power."
-  dialogue_hints:
-    greeting: "Well, look at the little deputy. Come to die like the old man?"
-
+  - The train brings gold, and gold brings power.
+  dialogue_rules:
+  - 'Greeting: Well, look at the little deputy. Come to die like the old man?'
 piano_player:
-  name: "Fingers McCoy"
-  role: "Hostage"
+  name: Fingers McCoy
+  role: Hostage
   location: grand_saloon
   appearance: |
     A thin, pale man who looks desperately out of place in this dusty hellhole. His once-fine Eastern clothes are rumpled and sweat-stained, his bowler hat askew. Long, delicate fingers - a pianist's hands - tremble over the yellowed keys. His eyes dart constantly toward the door, calculating escape routes he's too afraid to take.
-  personality: "Trembling, compliant, desperate."
+  personality:
+    traits:
+    - trembling
+    - compliant
+    - desperate
+    speech_style: Speaks with a trembling, compliant, desperate manner
+    quirks: []
   knowledge:
-    - "Boone keeps the stash room key... wait, the door is unlocked!"
-  dialogue_hints:
-    greeting: "Please, don't shoot! I'm just the entertainment!"
+  - Boone keeps the stash room key... wait, the door is unlocked!
+  dialogue_rules:
+  - 'Greeting: Please, don''t shoot! I''m just the entertainment!'

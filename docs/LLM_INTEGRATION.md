@@ -77,13 +77,17 @@ backend/app/llm/prompts/
 ├── game_master/          # Game engine prompts
 │   ├── system_prompt.txt      # Main system prompt for game master
 │   └── opening_prompt.txt      # Prompt for generating opening narrative
-├── world_builder/        # World builder prompts
-│   ├── world_builder_prompt.txt  # Main prompt for world generation
-│   └── system_message.txt         # System message for world builder
 └── image_generator/      # Image generation prompts
     ├── image_prompt_template.txt      # Template for scene image generation
     ├── edit_prompt_template.txt       # Template for editing images (NPC variants)
     └── interactive_elements_section.txt  # Template section for interactive elements
+
+gaime_builder/core/prompts/
+└── world_builder/        # World builder prompts (used by TUI)
+    ├── world_builder_prompt.txt  # Main prompt for world generation
+    ├── design_brief_prompt.txt   # First-pass design brief generation
+    ├── fix_error_prompt.txt      # LLM-assisted validation fixes
+    └── system_message.txt        # System message for world builder
 ```
 
 **Prompt Loading**: Prompts are loaded at server startup and cached in memory. The prompt loader supports hot reloading - if you edit a prompt file, it will be automatically reloaded on the next request (checks file modification time).
@@ -122,8 +126,9 @@ reload_category("game_master")
 |-----------|-------------|---------|---------|
 | Game Master | `system_prompt.txt` | `game_master.py` | Main system prompt for all game actions |
 | Game Master | `opening_prompt.txt` | `game_master.py` | Generates opening narrative for new games |
-| World Builder | `world_builder_prompt.txt` | `world_builder.py` | Generates world content from user description |
-| World Builder | `system_message.txt` | `world_builder.py` | System message for world builder LLM calls |
+| World Builder (TUI) | `world_builder_prompt.txt` | `gaime_builder/` | Generates world YAML from design brief |
+| World Builder (TUI) | `design_brief_prompt.txt` | `gaime_builder/` | First pass: creates design brief from description |
+| World Builder (TUI) | `fix_error_prompt.txt` | `gaime_builder/` | LLM-assisted fixes for creative validation errors |
 | Image Generator | `image_prompt_template.txt` | `image_generator.py` | Generates scene images for locations |
 | Image Generator | `edit_prompt_template.txt` | `image_generator.py` | Edits base images to add NPCs (variants) |
 | Image Generator | `interactive_elements_section.txt` | `image_generator.py` | Section describing exits/items/NPCs in images |
@@ -417,27 +422,48 @@ This logs:
 
 ## World Builder Prompts
 
-The world builder uses prompts defined in `backend/app/llm/prompts/world_builder/`:
+The world builder (TUI) uses prompts defined in `gaime_builder/core/prompts/world_builder/`:
 
-- **`world_builder_prompt.txt`**: Main prompt template for generating world content
-- **`system_message.txt`**: System message sent to the LLM
+- **`world_builder_prompt.txt`**: Main prompt template for generating world YAML
+- **`design_brief_prompt.txt`**: First-pass prompt to generate a design brief before YAML
+- **`fix_error_prompt.txt`**: Prompt for LLM-assisted fixes of validation errors
+- **`system_message.txt`**: System message for world builder LLM calls
 
-The world builder prompt includes critical consistency rules:
+### Schema Synchronization
 
-1. Every exit MUST have narrative justification in details (e.g., details.north: "A door leads north")
-2. starting_situation MUST explain WHY the player can act NOW
-3. Every item MUST have a found_description for discoverability
+Prompts are kept in sync with Pydantic models via `gaime_builder/core/schema_generator.py`:
+- Generates canonical YAML examples from model definitions
+- Validates that prompts use correct field structures
+- Run directly to see the current schema reference
+
+### Consistency Rules
+
+The world builder prompt enforces:
+
+1. Every exit MUST have narrative justification in details (e.g., `details.north: "A door leads north"`)
+2. `starting_situation` MUST explain WHY the player can act NOW
+3. Every item MUST have a `found_description` for discoverability
 4. Include a victory condition with target location and optional flag/item
-5. Starting location must make narrative sense
+5. NPC `personality` MUST be an object with `traits`, `speech_style`, `quirks`
+6. NPC dialogue rules use `dialogue_rules` list (not `dialogue_hints` dict)
+7. Location access restrictions use `requires` field (not `constraints` with `locked_exit`)
 
-See `backend/app/llm/prompts/world_builder/world_builder_prompt.txt` for the complete prompt template.
+### Validation System
 
-The world builder validation also checks for:
-- Missing `found_description` on items (warning)
-- Missing `starting_situation` (warning)
-- Missing `victory` condition (warning)
-- Victory location that doesn't exist (error)
-- Exit details for narrative context (warning)
+World validation runs at three levels:
+
+1. **File/Syntax**: YAML files exist and parse correctly
+2. **Schema Compliance**: Detects deprecated patterns the loader tolerates for backwards compat
+3. **Consistency**: Flag references, location/item/NPC references via `WorldValidator`
+
+### Fix System (Generation Only)
+
+When generating worlds, validation errors trigger the hybrid fixer:
+
+- **Rule-based fixes**: Typos in IDs (fuzzy matching), missing simple fields
+- **LLM-assisted fixes**: Creative problems like "flag X is required but never set"
+
+The fixer creates narratively sensible interactions rather than mechanical patches.
 
 ## Image Generation
 

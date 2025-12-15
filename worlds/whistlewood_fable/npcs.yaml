@@ -1,53 +1,79 @@
 badger_barnaby:
-  name: "Barnaby the Badger"
-  role: "Timekeeper of the Forest"
+  name: Barnaby the Badger
+  role: Timekeeper of the Forest
   location: mossy_clearing
-  personality: "Grumpy, precise, anxious about lateness"
+  personality:
+    traits:
+    - grumpy
+    - precise
+    - anxious about lateness
+    speech_style: Speaks with a grumpy, precise, anxious about lateness manner
+    quirks: []
   knowledge:
-    - "The Oak stopped singing at exactly 3:00 PM last Tuesday."
-    - "He saw a shiny thing wash down the brook towards the caves."
-  dialogue_hints:
-    greeting: "'Late! It's all running late! The seasons are stuck!'"
-
+  - The Oak stopped singing at exactly 3:00 PM last Tuesday.
+  - He saw a shiny thing wash down the brook towards the caves.
+  dialogue_rules:
+  - 'Greeting: ''Late! It''s all running late! The seasons are stuck!'''
 owl_orion:
-  name: "Orion the Owl"
-  role: "Watcher of the Woods"
+  name: Orion the Owl
+  role: Watcher of the Woods
   location: whispering_woods
-  personality: "Aloof, speaks in riddles, sleepy"
+  personality:
+    traits:
+    - aloof
+    - speaks in riddles
+    - sleepy
+    speech_style: Speaks with a aloof, speaks in riddles, sleepy manner
+    quirks: []
   knowledge:
-    - "To wake the tree, one must return its heart."
-    - "The heart was stolen by a magpie who loves shiny things in dark places."
-  dialogue_hints:
-    greeting: "'Whooo walks beneath my branch? A fox with no song?'"
-
+  - To wake the tree, one must return its heart.
+  - The heart was stolen by a magpie who loves shiny things in dark places.
+  dialogue_rules:
+  - 'Greeting: ''Whooo walks beneath my branch? A fox with no song?'''
 witch_mokey:
-  name: "Mokey the Mushroom Witch"
-  role: "Alchemist"
+  name: Mokey the Mushroom Witch
+  role: Alchemist
   location: witch_cottage
-  personality: "Scatterbrained, cheerful, slightly dangerous"
+  personality:
+    traits:
+    - scatterbrained
+    - cheerful
+    - slightly dangerous
+    speech_style: Speaks with a scatterbrained, cheerful, slightly dangerous manner
+    quirks: []
   knowledge:
-    - "Moonlight can reveal hidden paths, if you have a jar of it."
-    - "She needs a shiny pebble to finish her soup."
-  dialogue_hints:
-    greeting: "'Add a pinch of... oh! A fox! Are you an ingredient?'"
-
+  - Moonlight can reveal hidden paths, if you have a jar of it.
+  - She needs a shiny pebble to finish her soup.
+  dialogue_rules:
+  - 'Greeting: ''Add a pinch of... oh! A fox! Are you an ingredient?'''
 mole_miner:
-  name: "Monty the Mole"
-  role: "Excavator"
+  name: Monty the Mole
+  role: Excavator
   location: glitter_caves
-  personality: "Obsessive, near-sighted, loves textures"
+  personality:
+    traits:
+    - obsessive
+    - near-sighted
+    - loves textures
+    speech_style: Speaks with a obsessive, near-sighted, loves textures manner
+    quirks: []
   knowledge:
-    - "There is a chamber ahead, but it's too bright for my eyes."
-    - "He found a golden nut but it was too hot to hold."
-  dialogue_hints:
-    greeting: "'Soft fur? Sniff sniff. You're not a rock.'"
-
+  - There is a chamber ahead, but it's too bright for my eyes.
+  - He found a golden nut but it was too hot to hold.
+  dialogue_rules:
+  - 'Greeting: ''Soft fur? Sniff sniff. You''re not a rock.'''
 spirit_dryad:
-  name: "Elara the Dryad"
-  role: "Guardian of the Oak"
+  name: Elara the Dryad
+  role: Guardian of the Oak
   location: elder_grove
-  personality: "Ethereal, sorrowful, fading"
+  personality:
+    traits:
+    - ethereal
+    - sorrowful
+    - fading
+    speech_style: Speaks with a ethereal, sorrowful, fading manner
+    quirks: []
   knowledge:
-    - "Place the Golden Acorn in the hollow to wake the tree."
-  dialogue_hints:
-    greeting: "'The silence... it is so heavy...'"
+  - Place the Golden Acorn in the hollow to wake the tree.
+  dialogue_rules:
+  - 'Greeting: ''The silence... it is so heavy...'''

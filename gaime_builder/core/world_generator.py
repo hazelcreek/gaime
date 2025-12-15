@@ -4,12 +4,14 @@ World Generator - AI-assisted world generation from prompts.
 Uses two-pass generation for richer puzzle design:
   Pass 1: Design brief (puzzle structure, gates, secrets)
   Pass 2: YAML synthesis from the brief
+  Pass 3: Validation and auto-fix (if needed)
 
 Copied and adapted from backend/app/llm/world_builder.py for TUI independence.
 """
 
 import json
 import logging
+import sys
 import traceback
 from pathlib import Path
 
@@ -17,6 +19,11 @@ import yaml
 
 from gaime_builder.core.llm_client import get_completion, get_model_string, parse_json_response
 from gaime_builder.core.prompt_loader import get_loader
+
+# Add backend to path for validation imports
+BACKEND_PATH = Path(__file__).parent.parent.parent / "backend"
+if str(BACKEND_PATH) not in sys.path:
+    sys.path.insert(0, str(BACKEND_PATH))
 
 logger = logging.getLogger(__name__)
 
@@ -245,6 +252,341 @@ class WorldGenerator:
             logger.error(traceback.format_exc())
             raise
     
+    async def _validate_and_fix(
+        self,
+        yaml_result: dict,
+        design_brief: dict | None = None,
+        progress_callback=None
+    ) -> dict:
+        """
+        Pass 3: Validate the generated world and attempt auto-fixes.
+        
+        Uses the full WorldValidator from the backend and WorldFixer
+        to automatically fix common issues. For creative issues,
+        uses LLM-based fixes with the design brief for context.
+        
+        Returns:
+            Updated yaml_result with fixes applied (YAML strings updated)
+        """
+        logger.info("=" * 50)
+        logger.info("PASS 3: Validating and auto-fixing world")
+        
+        try:
+            # Import validation and fixing modules
+            from app.engine.validator import WorldValidator
+            from app.models.world import (
+                Item, Location, NPC, World, WorldData,
+                PlayerSetup, VictoryCondition, NPCPersonality,
+                InteractionEffect, LocationRequirement,
+            )
+            from gaime_builder.core.world_fixer import WorldFixer
+            
+            world_id = yaml_result.get("world_id", "generated-world")
+            
+            # Parse YAML into dicts
+            world_dict = yaml.safe_load(yaml_result["world_yaml"]) or {}
+            locations_dict = yaml.safe_load(yaml_result["locations_yaml"]) or {}
+            npcs_dict = yaml.safe_load(yaml_result["npcs_yaml"]) or {}
+            items_dict = yaml.safe_load(yaml_result["items_yaml"]) or {}
+            
+            # Check for deprecated schema patterns (don't auto-fix - prompts should be correct)
+            yaml_data = {
+                "npcs.yaml": npcs_dict,
+                "locations.yaml": locations_dict,
+            }
+            schema_errors = self._check_deprecated_schema(yaml_data)
+            if schema_errors:
+                logger.warning(f"Found {len(schema_errors)} deprecated schema pattern(s)!")
+                logger.warning("This indicates the prompts may need updating.")
+                for err in schema_errors:
+                    logger.warning(f"  ⚠️ {err}")
+            
+            # Build WorldData from parsed YAML
+            # We need to construct Pydantic models carefully
+            
+            # Build World model
+            player_data = world_dict.get("player", {})
+            player_setup = PlayerSetup(
+                starting_location=player_data.get("starting_location", ""),
+                starting_inventory=player_data.get("starting_inventory", [])
+            )
+            
+            victory_data = world_dict.get("victory")
+            victory = None
+            if victory_data:
+                victory = VictoryCondition(
+                    location=victory_data.get("location"),
+                    flag=victory_data.get("flag"),
+                    item=victory_data.get("item"),
+                    narrative=victory_data.get("narrative", "")
+                )
+            
+            world = World(
+                name=world_dict.get("name", ""),
+                theme=world_dict.get("theme", ""),
+                tone=world_dict.get("tone", "atmospheric"),
+                hero_name=world_dict.get("hero_name", "the hero"),
+                premise=world_dict.get("premise", ""),
+                player=player_setup,
+                constraints=world_dict.get("constraints", []),
+                commands=world_dict.get("commands", {}),
+                starting_situation=world_dict.get("starting_situation", ""),
+                victory=victory,
+                style=world_dict.get("style"),
+            )
+            
+            # Build Location models
+            locations = {}
+            for loc_id, loc_data in locations_dict.items():
+                requires = None
+                if loc_data.get("requires"):
+                    requires = LocationRequirement(
+                        flag=loc_data["requires"].get("flag"),
+                        item=loc_data["requires"].get("item")
+                    )
+                
+                interactions = {}
+                for int_id, int_data in (loc_data.get("interactions") or {}).items():
+                    interactions[int_id] = InteractionEffect(
+                        triggers=int_data.get("triggers", []),
+                        narrative_hint=int_data.get("narrative_hint", ""),
+                        sets_flag=int_data.get("sets_flag"),
+                        reveals_exit=int_data.get("reveals_exit"),
+                        gives_item=int_data.get("gives_item"),
+                        removes_item=int_data.get("removes_item"),
+                    )
+                
+                locations[loc_id] = Location(
+                    name=loc_data.get("name", ""),
+                    atmosphere=loc_data.get("atmosphere", ""),
+                    exits=loc_data.get("exits", {}),
+                    items=loc_data.get("items", []),
+                    npcs=loc_data.get("npcs", []),
+                    details=loc_data.get("details", {}),
+                    interactions=interactions,
+                    requires=requires,
+                    item_placements=loc_data.get("item_placements", {}),
+                    npc_placements=loc_data.get("npc_placements", {}),
+                )
+            
+            # Build NPC models
+            npcs = {}
+            for npc_id, npc_data in npcs_dict.items():
+                personality_data = npc_data.get("personality", {})
+                if isinstance(personality_data, str):
+                    # Handle old-style string personality (shouldn't happen with fixed prompts)
+                    personality = NPCPersonality(
+                        traits=[t.strip().lower() for t in personality_data.rstrip(".").split(",")],
+                        speech_style=personality_data,
+                        quirks=[]
+                    )
+                else:
+                    personality = NPCPersonality(
+                        traits=personality_data.get("traits", []),
+                        speech_style=personality_data.get("speech_style", ""),
+                        quirks=personality_data.get("quirks", [])
+                    )
+                
+                npcs[npc_id] = NPC(
+                    name=npc_data.get("name", ""),
+                    role=npc_data.get("role", ""),
+                    location=npc_data.get("location"),
+                    locations=npc_data.get("locations", []),
+                    appearance=npc_data.get("appearance", ""),
+                    personality=personality,
+                    knowledge=npc_data.get("knowledge", []),
+                    dialogue_rules=npc_data.get("dialogue_rules", []),
+                    behavior=npc_data.get("behavior", ""),
+                )
+            
+            # Build Item models
+            items = {}
+            for item_id, item_data in items_dict.items():
+                items[item_id] = Item(
+                    name=item_data.get("name", ""),
+                    portable=item_data.get("portable", True),
+                    examine=item_data.get("examine", ""),
+                    found_description=item_data.get("found_description", ""),
+                    take_description=item_data.get("take_description", ""),
+                    unlocks=item_data.get("unlocks"),
+                    location=item_data.get("location"),
+                    hidden=item_data.get("hidden", False),
+                )
+            
+            # Create WorldData
+            world_data = WorldData(
+                world=world,
+                locations=locations,
+                npcs=npcs,
+                items=items
+            )
+            
+            # Validate
+            validator = WorldValidator(world_data, world_id)
+            result = validator.validate()
+            
+            if result.is_valid:
+                logger.info("PASS 3: World is valid, no fixes needed")
+                if result.warnings:
+                    logger.info(f"  Warnings: {len(result.warnings)}")
+                    for warning in result.warnings:
+                        logger.debug(f"  ⚠️  {warning}")
+                return yaml_result
+            
+            # Attempt fixes (hybrid: rules first, then LLM for creative issues)
+            logger.info(f"PASS 3: Found {len(result.errors)} error(s), attempting fixes...")
+            for error in result.errors:
+                logger.debug(f"  ❌ {error}")
+            
+            fixer = WorldFixer(world_data, world_id, design_brief=design_brief)
+            fix_result = await fixer.fix_async()
+            
+            logger.info(f"PASS 3: Fix result after {fix_result.attempts} attempt(s):")
+            logger.info(f"  Rule fixes: {len([f for f in fix_result.fixes_applied if f.fix_type == 'rule'])}")
+            logger.info(f"  LLM fixes: {len([f for f in fix_result.fixes_applied if f.fix_type == 'llm'])}")
+            logger.info(f"  LLM calls: {fix_result.llm_calls}")
+            logger.info(f"  Remaining errors: {len(fix_result.remaining_errors)}")
+            
+            for fix in fix_result.fixes_applied:
+                fix_marker = "🔧" if fix.fix_type == "rule" else "🤖"
+                logger.debug(f"  {fix_marker} {fix.description}")
+            
+            for error in fix_result.remaining_errors:
+                logger.warning(f"  ❌ Unfixed: {error}")
+            
+            if fix_result.fixes_applied:
+                # Re-serialize fixed world data back to YAML
+                logger.debug("Re-serializing fixed world data to YAML...")
+                yaml_result = self._serialize_world_data_to_yaml(world_data, yaml_result)
+            
+            return yaml_result
+            
+        except Exception as e:
+            # Validation failures shouldn't block world generation
+            # Log the error but continue
+            logger.warning(f"PASS 3 validation/fix failed: {type(e).__name__}: {e}")
+            logger.debug(traceback.format_exc())
+            return yaml_result
+    
+    def _serialize_world_data_to_yaml(self, world_data, original_result: dict) -> dict:
+        """
+        Serialize WorldData back to YAML strings.
+        
+        Preserves the original structure as much as possible while
+        incorporating fixes from the WorldFixer.
+        """
+        # For now, we do a simple serialization. More sophisticated
+        # approaches could preserve comments and formatting.
+        
+        # Serialize locations
+        locations_dict = {}
+        for loc_id, loc in world_data.locations.items():
+            loc_dict = {
+                "name": loc.name,
+                "atmosphere": loc.atmosphere,
+                "exits": loc.exits,
+            }
+            if loc.items:
+                loc_dict["items"] = loc.items
+            if loc.item_placements:
+                loc_dict["item_placements"] = loc.item_placements
+            if loc.npcs:
+                loc_dict["npcs"] = loc.npcs
+            if loc.npc_placements:
+                loc_dict["npc_placements"] = loc.npc_placements
+            if loc.details:
+                loc_dict["details"] = loc.details
+            if loc.interactions:
+                loc_dict["interactions"] = {
+                    int_id: {
+                        "triggers": int_effect.triggers,
+                        "narrative_hint": int_effect.narrative_hint,
+                        **({"sets_flag": int_effect.sets_flag} if int_effect.sets_flag else {}),
+                        **({"reveals_exit": int_effect.reveals_exit} if int_effect.reveals_exit else {}),
+                        **({"gives_item": int_effect.gives_item} if int_effect.gives_item else {}),
+                        **({"removes_item": int_effect.removes_item} if int_effect.removes_item else {}),
+                    }
+                    for int_id, int_effect in loc.interactions.items()
+                }
+            if loc.requires:
+                loc_dict["requires"] = {}
+                if loc.requires.flag:
+                    loc_dict["requires"]["flag"] = loc.requires.flag
+                if loc.requires.item:
+                    loc_dict["requires"]["item"] = loc.requires.item
+            
+            locations_dict[loc_id] = loc_dict
+        
+        # Serialize NPCs
+        npcs_dict = {}
+        for npc_id, npc in world_data.npcs.items():
+            npc_dict = {
+                "name": npc.name,
+                "role": npc.role,
+            }
+            if npc.location:
+                npc_dict["location"] = npc.location
+            if npc.locations:
+                npc_dict["locations"] = npc.locations
+            if npc.appearance:
+                npc_dict["appearance"] = npc.appearance
+            npc_dict["personality"] = {
+                "traits": npc.personality.traits,
+                "speech_style": npc.personality.speech_style,
+                "quirks": npc.personality.quirks,
+            }
+            if npc.knowledge:
+                npc_dict["knowledge"] = npc.knowledge
+            if npc.dialogue_rules:
+                npc_dict["dialogue_rules"] = npc.dialogue_rules
+            if npc.behavior:
+                npc_dict["behavior"] = npc.behavior
+            
+            npcs_dict[npc_id] = npc_dict
+        
+        # Serialize Items
+        items_dict = {}
+        for item_id, item in world_data.items.items():
+            item_dict = {
+                "name": item.name,
+                "portable": item.portable,
+            }
+            if item.examine:
+                item_dict["examine"] = item.examine
+            if item.found_description:
+                item_dict["found_description"] = item.found_description
+            if item.take_description:
+                item_dict["take_description"] = item.take_description
+            if item.unlocks:
+                item_dict["unlocks"] = item.unlocks
+            if item.location:
+                item_dict["location"] = item.location
+            if item.hidden:
+                item_dict["hidden"] = item.hidden
+            
+            items_dict[item_id] = item_dict
+        
+        # Convert to YAML strings
+        result = dict(original_result)
+        result["locations_yaml"] = yaml.dump(locations_dict, default_flow_style=False, allow_unicode=True, sort_keys=False)
+        result["npcs_yaml"] = yaml.dump(npcs_dict, default_flow_style=False, allow_unicode=True, sort_keys=False)
+        result["items_yaml"] = yaml.dump(items_dict, default_flow_style=False, allow_unicode=True, sort_keys=False)
+        
+        # Re-serialize world.yaml if victory or player was modified
+        world_dict = yaml.safe_load(original_result["world_yaml"]) or {}
+        if world_data.world.victory:
+            world_dict["victory"] = {
+                "location": world_data.world.victory.location,
+                "flag": world_data.world.victory.flag,
+                "item": world_data.world.victory.item,
+                "narrative": world_data.world.victory.narrative,
+            }
+            # Remove None values
+            world_dict["victory"] = {k: v for k, v in world_dict["victory"].items() if v}
+        result["world_yaml"] = yaml.dump(world_dict, default_flow_style=False, allow_unicode=True, sort_keys=False)
+        
+        return result
+    
     async def generate(
         self,
         prompt: str,
@@ -301,6 +643,13 @@ class WorldGenerator:
                 design_brief=brief_result,
                 progress_callback=progress_callback
             )
+            
+            if progress_callback:
+                progress_callback(0.9, "Validating and fixing world...")
+            
+            # Pass 3: Validate and auto-fix (with design brief for LLM fixes)
+            design_brief = brief_result.get("design_brief", {})
+            yaml_result = await self._validate_and_fix(yaml_result, design_brief, progress_callback)
             
             if progress_callback:
                 progress_callback(0.95, "Finalizing world...")
@@ -605,12 +954,21 @@ class WorldGenerator:
             return f.read()
     
     def validate_world(self, world_id: str) -> tuple[bool, list[str]]:
-        """Validate a world's YAML files."""
+        """
+        Validate a world's YAML files on disk.
+        
+        Performs three levels of validation:
+        1. File existence and YAML syntax
+        2. Schema compliance (deprecated field detection)
+        3. Consistency checks (flags, references)
+        """
         world_path = self.worlds_dir / world_id
         errors = []
         warnings = []
         
+        # Level 1: File existence and basic YAML
         required_files = ["world.yaml", "locations.yaml", "npcs.yaml", "items.yaml"]
+        yaml_data = {}
         
         for filename in required_files:
             file_path = world_path / filename
@@ -627,6 +985,8 @@ class WorldGenerator:
                     errors.append(f"Empty file: {filename}")
                     continue
                 
+                yaml_data[filename] = data
+                
                 if filename == "world.yaml":
                     if "name" not in data:
                         errors.append("world.yaml missing 'name'")
@@ -640,4 +1000,118 @@ class WorldGenerator:
             except yaml.YAMLError as e:
                 errors.append(f"Invalid YAML in {filename}: {e}")
         
+        # If file checks failed, return early
+        if errors:
+            return False, errors + [f"WARNING: {w}" for w in warnings]
+        
+        # Levels 2 & 3: Schema + Consistency (shared logic)
+        schema_errors, consistency_errors, consistency_warnings = self._validate_yaml_data(
+            yaml_data, world_id
+        )
+        errors.extend(schema_errors)
+        errors.extend(consistency_errors)
+        warnings.extend(consistency_warnings)
+        
         return len(errors) == 0, errors + [f"WARNING: {w}" for w in warnings]
+    
+    def _validate_yaml_data(
+        self,
+        yaml_data: dict,
+        world_id: str
+    ) -> tuple[list[str], list[str], list[str]]:
+        """
+        Validate parsed YAML data for schema and consistency.
+        
+        This is the shared validation logic used by both:
+        - validate_world() for on-disk worlds
+        - _validate_and_fix() for in-memory generated worlds
+        
+        Args:
+            yaml_data: Dict with keys like "npcs.yaml", "locations.yaml", etc.
+            world_id: World identifier for error messages
+        
+        Returns:
+            Tuple of (schema_errors, consistency_errors, consistency_warnings)
+        """
+        from app.engine.world import WorldLoader
+        from app.engine.validator import WorldValidator
+        
+        schema_errors = []
+        consistency_errors = []
+        consistency_warnings = []
+        
+        # Level 2: Schema compliance - check for deprecated patterns
+        schema_errors = self._check_deprecated_schema(yaml_data)
+        
+        # Level 3: Consistency validation via WorldLoader + WorldValidator
+        # Only run if schema is valid (otherwise loader may have issues)
+        if not schema_errors:
+            try:
+                loader = WorldLoader(self.worlds_dir)
+                world_data = loader.load_world(world_id)
+                
+                validator = WorldValidator(world_data, world_id)
+                result = validator.validate()
+                
+                consistency_errors.extend(result.errors)
+                consistency_warnings.extend(result.warnings)
+                
+            except ValueError as e:
+                error_msg = str(e)
+                if "validation failed" in error_msg.lower():
+                    consistency_errors.append(f"Consistency error: {error_msg}")
+                else:
+                    consistency_errors.append(str(e))
+            except Exception as e:
+                error_str = str(e)
+                if "validation error" in error_str.lower():
+                    consistency_errors.append(f"Schema error: {error_str[:200]}...")
+                else:
+                    consistency_errors.append(f"Validation error: {error_str}")
+        
+        return schema_errors, consistency_errors, consistency_warnings
+    
+    def _check_deprecated_schema(self, yaml_data: dict) -> list[str]:
+        """
+        Check for deprecated schema patterns that the loader accepts
+        for backwards compatibility but should be migrated.
+        """
+        errors = []
+        
+        # Check NPCs for deprecated patterns
+        npcs_data = yaml_data.get("npcs.yaml", {})
+        for npc_id, npc_data in npcs_data.items():
+            if not isinstance(npc_data, dict):
+                continue
+            
+            # Check for string personality (should be object)
+            personality = npc_data.get("personality")
+            if isinstance(personality, str):
+                errors.append(
+                    f"NPC '{npc_id}': 'personality' should be an object with "
+                    f"traits/speech_style/quirks, not a string"
+                )
+            
+            # Check for dialogue_hints (should be dialogue_rules)
+            if "dialogue_hints" in npc_data:
+                errors.append(
+                    f"NPC '{npc_id}': 'dialogue_hints' is deprecated, "
+                    f"use 'dialogue_rules' instead"
+                )
+        
+        # Check locations for deprecated patterns
+        locations_data = yaml_data.get("locations.yaml", {})
+        for loc_id, loc_data in locations_data.items():
+            if not isinstance(loc_data, dict):
+                continue
+            
+            # Check for constraints with locked_exit pattern
+            constraints = loc_data.get("constraints", [])
+            for constraint in constraints:
+                if isinstance(constraint, str) and "locked_exit:" in constraint.lower():
+                    errors.append(
+                        f"Location '{loc_id}': 'constraints' with 'locked_exit:' pattern "
+                        f"is deprecated, use 'requires' field instead"
+                    )
+        
+        return errors

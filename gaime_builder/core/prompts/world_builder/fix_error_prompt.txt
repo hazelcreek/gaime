@@ -1,0 +1,90 @@
+You are fixing a validation error in a generated text adventure world. The world was generated but has consistency issues that need creative solutions.
+
+## The Error
+{error_description}
+
+## World Context
+**World**: {world_name}
+**Theme**: {theme}
+**Tone**: {tone}
+
+## Relevant Content
+{relevant_context}
+
+## Design Intent (if available)
+{design_intent}
+
+## Your Task
+Generate a minimal YAML patch that fixes this error while:
+1. Fitting the world's theme and tone
+2. Making narrative sense
+3. Creating an interesting discovery or interaction for the player
+
+## Output Format
+Respond with valid JSON containing the fix:
+
+```json
+{{
+  "fix_type": "add_interaction" | "modify_location" | "modify_item" | "modify_npc",
+  "target_file": "locations" | "items" | "npcs" | "world",
+  "target_id": "the_id_to_modify",
+  "patch": {{
+    // Only the fields to add or modify
+    // For interactions, include the full interaction object
+  }},
+  "explanation": "Brief explanation of why this fix makes sense narratively"
+}}
+```
+
+## Examples
+
+### Example 1: Flag never set
+Error: Flag 'secret_revealed' is checked at location:hidden_chamber/requires but never set
+
+Good fix:
+```json
+{{
+  "fix_type": "add_interaction",
+  "target_file": "locations",
+  "target_id": "library",
+  "patch": {{
+    "interactions": {{
+      "examine_bookshelf": {{
+        "triggers": ["examine bookshelf", "search books", "look at books"],
+        "narrative_hint": "Behind a row of dusty tomes, you find a hidden switch. With a click, you hear stone grinding somewhere deeper in the building.",
+        "sets_flag": "secret_revealed"
+      }}
+    }}
+  }},
+  "explanation": "Libraries often have hidden mechanisms in fiction. The bookshelf interaction creates a classic discovery moment."
+}}
+```
+
+### Example 2: Item unreachable
+Error: Item 'golden_key' is required for victory but has no path to acquire
+
+Good fix:
+```json
+{{
+  "fix_type": "add_interaction",
+  "target_file": "locations",
+  "target_id": "throne_room",
+  "patch": {{
+    "interactions": {{
+      "search_throne": {{
+        "triggers": ["examine throne", "search throne", "look under cushion"],
+        "narrative_hint": "Beneath the velvet cushion, your fingers find a hidden compartment containing a gleaming golden key.",
+        "gives_item": "golden_key"
+      }}
+    }}
+  }},
+  "explanation": "Thrones are classic hiding spots for royal treasures. The cushion detail adds tactile immersion."
+}}
+```
+
+## Important Rules
+1. Only output the JSON fix, no additional commentary
+2. The patch should be minimal - only include fields that need adding/changing
+3. Triggers should be natural player actions (examine, search, talk, use)
+4. Narrative hints should match the world's tone
+5. If fixing a flag, ensure the trigger location is accessible before the flag is needed
