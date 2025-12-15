@@ -1,0 +1,52 @@
+# lego.yaml - LEGO brick scene style preset
+# Plastic brick construction aesthetic with minifigures and modular environments
+
+name: "LEGO"
+description: "LEGO brick construction aesthetic with plastic minifigures, modular brick environments, and that distinctive toy-world charm. Perfect for playful, creative, or family-friendly adventures."
+
+# L3: Mood
+mood:
+  tone: "playful, creative, imaginative, family-friendly, toy-world wonder"
+  lighting: "bright and cheerful, clean studio-like lighting, subtle plastic reflections, warm and inviting"
+  color_palette: "bold primary LEGO colors, saturated plastic hues, classic red/blue/yellow/green bricks, shiny ABS plastic finish"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  LEGO brick construction aesthetic where everything is built from plastic LEGO bricks
+  and elements. Environments are modular brick constructions with visible studs, plates,
+  and specialized pieces. Characters are classic LEGO minifigures with cylindrical heads,
+  C-shaped hands, and that distinctive blocky body shape. All surfaces have that shiny
+  ABS plastic quality with subtle reflections. The world should feel like a massive
+  LEGO set come to life - creative, colorful, and unmistakably brick-built. Props and
+  details use recognizable LEGO elements (tiles, slopes, technic pieces). The visual
+  style must consistently maintain that authentic LEGO toy aesthetic throughout,
+  as if photographed or rendered from a real LEGO diorama.
+
+# L5: Technical
+technical:
+  perspective: "first-person or slightly elevated third-person"
+  shot: "medium wide to appreciate the brick construction"
+  camera: "eye level or low angle (toy's-eye view)"
+  effects: "subtle plastic reflections, depth of field for miniature feel, clean studio lighting, visible brick studs"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic humans"
+  - "organic shapes without brick structure"
+  - "2D hand-drawn animation"
+  - "clay or plasticine"
+  - "anime or manga"
+  - "dark or horror"
+  - "smooth non-LEGO surfaces"
+  - "realistic textures"
+  - "gritty or weathered"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "non-LEGO brick construction"
+  - "realistic human faces or proportions"
+  - "organic flowing shapes"
+  - "matte or non-plastic surfaces"
+

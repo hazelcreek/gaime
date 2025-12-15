@@ -249,6 +249,7 @@ Critical constraints - the image must NOT include:
 | `pixar` | Modern 3D animated movie (Pixar/Disney) |
 | `asterix` | Franco-Belgian bande dessinée comics |
 | `adult-animation` | Rick and Morty, BoJack, Archer style |
+| `lego` | LEGO brick scenes with minifigures |
 
 ## How Layers Combine
 
