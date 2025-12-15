@@ -1,0 +1,49 @@
+# scandi-scottish-noir.yaml - Scottish / Nordic Noir hybrid style preset
+# Temperate noir aesthetic combining Nordic restraint with Scottish grit
+
+name: "Scottish–Nordic Noir (Temperate)"
+description: "A hybrid noir style blending Nordic minimalism with Scottish grit. Rain, wind, fog, and moral ambiguity in coastal and highland environments, without winter or snow."
+
+# L3: Mood
+mood:
+  tone: "bleak, restrained, tense, morally ambiguous, quietly oppressive"
+  lighting: "soft overcast daylight, low sun angles, directional breaks through cloud, practical light sources cutting through darkness"
+  color_palette: "cool, desaturated earth tones—slate blues, moss greens, peat browns—with muted amber and sodium-vapor highlights"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Scottish–Nordic noir cinematography in a temperate climate. Desaturated,
+  naturalistic color grading with low contrast blacks and lifted shadows.
+  Landscapes feel indifferent yet historically burdened: rain-soaked roads,
+  coastal cliffs, moorland, forests, and peripheral towns. Overcast skies dominate,
+  with occasional directional light cutting through fog or rain. Composition favors
+  negative space, off-center framing, and static or slow-moving camera work.
+  Human figures appear small, isolated, and partially obscured by weather,
+  architecture, or shadow. The style emphasizes restraint, texture, and atmosphere
+  over spectacle, evoking modern Nordic noir fused with Scottish social realism.
+
+# L5: Technical
+technical:
+  perspective: "third-person observational"
+  shot: "wide establishing shots, medium shots with heavy negative space"
+  camera: "eye level or slightly elevated, minimal handheld, slow deliberate movement"
+  effects: "light film grain, subtle vignette, rain streaks, wet surfaces, fog or sea mist, wind-driven motion"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "snow or winter imagery"
+  - "high contrast chiaroscuro"
+  - "bright or saturated colors"
+  - "romanticized fantasy landscapes"
+  - "epic or heroic framing"
+  - "stylized neon cyberpunk"
+  - "cartoon or illustrative styles"
+  - "warm, cheerful, or idyllic moods"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "distorted proportions"
+  - "overly saturated or vivid colors"
+  - "harsh, contrasty shadows without atmosphere"

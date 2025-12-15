@@ -241,6 +241,8 @@ Critical constraints - the image must NOT include:
 | `pixel-art` | Retro 16-bit gaming |
 | `photorealistic` | Grounded realistic settings |
 | `comic-book` | Graphic novel action |
+| `scandi-scottish-noir` | Nordic/Scottish noir hybrid, temperate coastal |
+| `folk-noir` | Folklore-infused noir, rural unease, ritual dread |
 
 ## How Layers Combine
 

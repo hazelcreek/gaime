@@ -1,0 +1,47 @@
+# folk-noir.yaml - Folk Noir style preset
+# Noir infused with folklore, rural unease, and mythic residue
+
+name: "Folk Noir"
+description: "A noir aesthetic rooted in folklore, rural isolation, and ancestral memory. Familiar landscapes feel subtly wrong, heavy with ritual, history, and unspoken threat."
+
+# L3: Mood
+mood:
+  tone: "uneasy, somber, ominous, introspective, quietly threatening"
+  lighting: "naturalistic but uncanny, low sun, long shadows, overcast skies, candle or firelight contrasts"
+  color_palette: "muted earth tones—lichen greens, peat browns, bone whites, weathered stone—with restrained warm highlights"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Folk noir cinematography blending grounded realism with folkloric unease.
+  Landscapes appear ordinary but charged with ancestral memory: stone structures,
+  coastal edges, rural courtyards, and weather-beaten environments shaped by ritual
+  and labor. Color grading is desaturated and earthy, with subtle warmth introduced
+  through firelight, lanterns, or interior glow. Composition favors stillness,
+  symmetry that feels ritualistic, and slow observational framing. Weather—wind,
+  mist, sea spray—acts as a living presence. Human absence or small figures suggest
+  inherited guilt, unspoken tradition, and the persistence of the past beneath the
+  present.
+
+# L5: Technical
+technical:
+  perspective: "third-person contemplative"
+  shot: "wide or medium-wide shots, static framing"
+  camera: "eye level, locked-off or slow drift, no handheld"
+  effects: "fine film grain, subtle vignette, sea mist, smoke, drifting birds, organic motion"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "explicit fantasy creatures or magic"
+  - "high-action or horror spectacle"
+  - "urban neon environments"
+  - "modern glossy realism"
+  - "bright, cheerful color palettes"
+  - "overt surrealism or dream logic"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "distorted proportions"
+  - "saturated or vivid colors"
+  - "harsh digital sharpening"

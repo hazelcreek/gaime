@@ -147,3 +147,5 @@ After creating a preset:
 | `spaghetti-western` | 1960s Italian Western films, Sergio Leone style |
 | `teen-comedy` | High school comedy, 80s-90s teen movies |
 | `simpsons` | Simpsons-style cartoon aesthetic |
+| `scandi-scottish-noir` | Nordic/Scottish noir hybrid, temperate coastal mystery |
+| `folk-noir` | Folklore-infused noir, rural unease, ancestral memory |
