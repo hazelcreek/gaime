@@ -192,6 +192,7 @@ Story arc modeling with victory path protection.
 - [x] Hybrid fix system (rule-based + LLM-assisted for creative fixes)
 - [ ] Completability check (victory reachable)
 - [ ] Fairness check (puzzles not obscure)
+- [ ] Address remaining validation errors (e.g., unused flags) - decide on handling strategy
 
 ### Historical World Research (Future)
 - [ ] AI researches authentic settings
