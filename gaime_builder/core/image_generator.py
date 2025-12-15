@@ -615,6 +615,7 @@ class ImageGenerator:
                     results[loc_id] = None
                     if location_callback:
                         location_callback(loc_id, "error", str(e))
+                    continue
             
             if location_callback:
                 location_callback(loc_id, "done", "Complete")
@@ -1317,7 +1318,8 @@ class ImageGenerator:
             if progress_callback:
                 progress_callback(i / total, f"Regenerating variant {i+1}/{total}...")
             
-            # Build NPC info for this variant
+            # Current implementation only supports single-NPC variants
+            # If multi-NPC support is needed, _generate_variant_via_edit must be updated
             for npc_id in npc_ids:
                 npc_data = npcs_data.get(npc_id, {})
                 if not npc_data:
@@ -1330,7 +1332,8 @@ class ImageGenerator:
                     placement=npc_placements.get(npc_id, "")
                 )
                 
-                variant_filename = get_variant_image_filename(location_id, npc_ids)
+                # Generate one variant per NPC (matching _generate_variants pattern)
+                variant_filename = get_variant_image_filename(location_id, [npc_id])
                 
                 try:
                     await self._generate_variant_via_edit(
@@ -1351,12 +1354,12 @@ class ImageGenerator:
                         get_edit_prompt(loc_name, [npc_to_add], theme, tone, style_block)
                     )
                     
-                    # Update metadata for this variant
+                    # Update metadata for this variant (single NPC)
                     variant_hash = self.hash_tracker.compute_location_hash(
-                        world_id, location_id, npc_ids
+                        world_id, location_id, [npc_id]
                     )
                     self.hash_tracker.update_metadata(
-                        world_id, location_id, variant_hash, style_preset_name, npc_ids
+                        world_id, location_id, variant_hash, style_preset_name, [npc_id]
                     )
                     
                 except Exception as e:

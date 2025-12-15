@@ -351,8 +351,10 @@ class StyleTesterScreen(Screen):
                 tone = world_data.get("tone", tone)
         
         # Load locations
-        with open(locations_yaml) as f:
-            locations = yaml.safe_load(f) or {}
+        locations = {}
+        if locations_yaml.exists():
+            with open(locations_yaml) as f:
+                locations = yaml.safe_load(f) or {}
         
         loc_data = locations.get(self._current_location_id, {})
         loc_name = loc_data.get("name", self._current_location_id)

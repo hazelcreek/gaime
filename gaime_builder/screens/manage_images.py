@@ -563,6 +563,6 @@ class ManageImagesScreen(Screen):
                 if event.state == WorkerState.SUCCESS:
                     self.notify("Image generation complete!", severity="information")
                 elif event.state == WorkerState.CANCELLED:
-                    self.notify("Image generation cancelled", severity="warning")
-                elif event.state == event.state.ERROR:
+                    self.call_from_thread(self.notify, "Image generation cancelled", severity="warning")
+                elif event.state == WorkerState.ERROR:
                     self.notify(f"Image generation failed: {event.worker.error}", severity="error")
