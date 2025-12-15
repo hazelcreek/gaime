@@ -13,7 +13,7 @@ from textual.widgets import (
     Header, Footer, Button, Input, TextArea, 
     Label, Static, ProgressBar, Select, Checkbox
 )
-from textual.worker import Worker, get_current_worker
+from textual.worker import Worker, WorkerState, get_current_worker
 
 
 class CreateWorldScreen(Screen):
@@ -419,8 +419,8 @@ class CreateWorldScreen(Screen):
         worker = get_current_worker()
         
         def update_progress(progress: float, message: str):
-            """Update progress via call_from_thread for thread safety."""
-            self.call_from_thread(self._update_generation_progress, progress, message)
+            """Update progress directly (safe since async worker runs in main thread)."""
+            self._update_generation_progress(progress, message)
         
         generator = WorldGenerator(self.app.worlds_dir)
         
@@ -457,7 +457,7 @@ class CreateWorldScreen(Screen):
     def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
         """Handle worker state changes."""
         if event.worker.name == "world_generation":
-            if event.state.is_finished:
+            if event.worker.is_finished:
                 self._active_worker = None
                 
                 # Re-enable buttons
@@ -465,14 +465,14 @@ class CreateWorldScreen(Screen):
                 self.query_one("#stop-generation", Button).disabled = True
                 self.query_one("#cancel", Button).disabled = False
                 
-                if event.state == event.state.SUCCESS:
+                if event.state == WorkerState.SUCCESS:
                     # Get the result from the worker
                     result = event.worker.result
                     self._show_generation_result(result)
-                elif event.state == event.state.CANCELLED:
+                elif event.state == WorkerState.CANCELLED:
                     self.notify("World generation cancelled", severity="warning")
                     self.query_one("#progress-panel").remove_class("visible")
-                elif event.state == event.state.ERROR:
+                elif event.state == WorkerState.ERROR:
                     error_msg = str(event.worker.error) if event.worker.error else "Unknown error"
                     self.query_one("#progress-status", Static).update(f"[red]✗ Error: {error_msg}[/]")
                     self.notify(f"Generation failed: {error_msg}", severity="error")
