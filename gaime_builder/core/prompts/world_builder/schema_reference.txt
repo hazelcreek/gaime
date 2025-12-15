@@ -1,0 +1,109 @@
+## YAML SCHEMA REFERENCE (use ONLY these fields)
+
+### world.yaml
+```yaml
+name: "World Name"
+theme: "Genre/setting"
+tone: "Mood descriptors"
+hero_name: "Protagonist name for NPC dialogue"
+premise: |
+  Multi-line world description...
+starting_situation: |
+  WHY can the player act NOW? What changed?
+victory:
+  location: location_id      # Where to win
+  flag: required_flag        # MUST have interaction that sets this!
+  item: required_item        # Optional
+  narrative: |
+    Ending text...
+player:
+  starting_location: location_id
+  starting_inventory: [item_id]
+constraints:
+  - "Rule 1"
+  - "Rule 2"
+```
+
+### locations.yaml
+```yaml
+location_id:
+  name: "Location Name"
+  atmosphere: |
+    Sensory description...
+  exits:
+    north: other_location_id
+  items: [item_id]
+  item_placements:
+    item_id: "Where in room"
+  npcs: [npc_id]
+  npc_placements:
+    npc_id: "Where NPC stands"
+  details:
+    feature: "Description when examined"
+    north: "What the north exit looks like"
+  interactions:
+    interaction_id:
+      triggers: ["examine X", "use Y on Z"]
+      narrative_hint: "What happens"
+      sets_flag: flag_name       # Use this to enable victory!
+      reveals_exit: location_id
+      gives_item: item_id
+  requires:                      # Optional access control
+    flag: required_flag
+    item: required_item
+```
+**INVALID for locations: `constraints` (use world.yaml constraints instead)**
+
+### npcs.yaml
+```yaml
+npc_id:
+  name: "NPC Name"
+  role: "Their role in the story"
+  location: location_id          # Single location
+  # OR
+  locations: [loc1, loc2]        # Multiple locations (roaming)
+  appearance: |
+    Physical description...
+  personality:                   # RICH STRUCTURE - use this!
+    traits: [trait1, trait2]
+    speech_style: "How they talk, dialect, tone"
+    quirks:
+      - "Behavioral detail"
+      - "Mannerism"
+  knowledge:
+    - "What they know"
+  dialogue_rules:                # BEHAVIORAL CONSTRAINTS
+    - "Never reveals X directly"
+    - "Deflects questions about Y"
+  trust:                         # Optional
+    initial: 0
+    threshold: 3
+    build_actions: ["action1"]
+  appears_when:                  # Conditional appearance
+    - condition: has_flag
+      value: flag_name
+```
+**INVALID for npcs: `dialogue_hints` (use personality.speech_style and quirks instead)**
+
+### items.yaml
+```yaml
+item_id:
+  name: "Item Name"
+  portable: true
+  examine: |
+    Description when examined...
+  found_description: "How it appears in scene (REQUIRED!)"
+  take_description: "Message when taken"
+  location: location_id          # Where item starts
+  hidden: false
+  find_condition:
+    requires_flag: flag_name
+```
+
+## CRITICAL RULES
+
+1. **Victory flags MUST be settable**: If `victory.flag: X`, there MUST be an interaction with `sets_flag: X`
+2. **All exits must be valid**: Every exit must reference a defined location_id
+3. **All items must be obtainable**: Items in victory condition must be reachable
+4. **Use personality structure**: Instead of example dialogue, describe HOW they speak
+5. **Constraints go in world.yaml only**: Never add `constraints` to individual locations

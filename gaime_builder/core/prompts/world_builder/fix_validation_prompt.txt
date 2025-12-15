@@ -1,0 +1,71 @@
+The world you generated has validation errors. Fix the YAML to resolve them.
+
+## Validation Errors
+{validation_errors}
+
+## Current Content
+
+### world.yaml
+```yaml
+{world_yaml}
+```
+
+### locations.yaml
+```yaml
+{locations_yaml}
+```
+
+### npcs.yaml
+```yaml
+{npcs_yaml}
+```
+
+### items.yaml
+```yaml
+{items_yaml}
+```
+
+## Common Fixes
+
+1. **"Flag 'X' is checked but never set"**
+   - Add an interaction with `sets_flag: X` to a location
+   - Example: If victory requires `killer_confronted`, add:
+     ```yaml
+     interactions:
+       confront:
+         triggers: ["confront killer", "accuse"]
+         narrative_hint: "You present the evidence..."
+         sets_flag: killer_confronted
+     ```
+
+2. **"Exit points to invalid location 'X'"**
+   - Either fix the exit to reference an existing location, or add the missing location
+
+3. **"Item 'X' has invalid location"**
+   - Fix the item's location to match a defined location_id
+
+4. **"NPC 'X' has invalid location"**
+   - Fix the NPC's location to match a defined location_id
+
+5. **"Victory location 'X' is invalid"**
+   - Fix victory.location in world.yaml to match a defined location_id
+
+6. **"Victory item 'X' is invalid"**
+   - Fix victory.item in world.yaml to match a defined item_id, or add the missing item
+
+## Output
+Return the fixed YAML files as JSON. Include ONLY the files that need changes:
+
+```json
+{{
+  "world_yaml": "...",
+  "locations_yaml": "...",
+  "npcs_yaml": "...",
+  "items_yaml": "..."
+}}
+```
+
+CRITICAL: 
+- Use standard JSON escaping: \n for newlines, \" for quotes
+- Ensure all YAML is valid when parsed
+- Only return fields that needed fixes (you can omit unchanged files)
