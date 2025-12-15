@@ -384,23 +384,44 @@ class ManageImagesScreen(Screen):
         
         all_locations = generator.get_world_locations(self._current_world_id)
         
+        # Build list of what to regenerate
+        # Each item: {"location_id": str, "smart": bool}
+        # smart=True means use regenerate_outdated (only regen what's needed)
+        # smart=False means force full regeneration
+        regen_list = []
+        
         if force_all:
-            location_ids = [loc["id"] for loc in all_locations]
+            # Force regenerate everything
+            for loc in all_locations:
+                regen_list.append({
+                    "location_id": loc["id"],
+                    "smart": False,  # Force full regen
+                })
             batch_name = "Generate All Images"
         elif only_outdated:
+            # Smart regeneration - only what's needed
             needs_gen = image_gen.get_locations_needing_generation(self._current_world_id)
-            location_ids = [loc["location_id"] for loc in needs_gen]
-            if not location_ids:
+            if not needs_gen:
                 self.notify("All images are up to date!", severity="information")
                 return
-            batch_name = f"Regenerate {len(location_ids)} Missing/Outdated"
+            for loc in needs_gen:
+                regen_list.append({
+                    "location_id": loc["location_id"],
+                    "smart": True,  # Only regen what's outdated
+                })
+            batch_name = f"Regenerate {len(needs_gen)} Missing/Outdated"
         else:
-            location_ids = list(self.selected_locations)
-            batch_name = f"Regenerate {len(location_ids)} Selected"
+            # Selected - force regenerate selected locations
+            for loc_id in self.selected_locations:
+                regen_list.append({
+                    "location_id": loc_id,
+                    "smart": False,  # Force full regen of selected
+                })
+            batch_name = f"Regenerate {len(regen_list)} Selected"
         
         # Mark all locations as pending
-        for loc_id in location_ids:
-            self._update_location_status_in_table(loc_id, "pending")
+        for item in regen_list:
+            self._update_location_status_in_table(item["location_id"], "pending")
         
         # Disable/enable buttons
         self._set_generation_controls(running=True)
@@ -409,7 +430,7 @@ class ManageImagesScreen(Screen):
         self._active_worker = self.run_worker(
             self._generate_images_worker(
                 self._current_world_id,
-                location_ids,
+                regen_list,
                 batch_name
             ),
             name="image_generation",
@@ -426,11 +447,18 @@ class ManageImagesScreen(Screen):
     async def _generate_images_worker(
         self,
         world_id: str,
-        location_ids: list[str],
+        regen_list: list[dict],
         batch_name: str
     ) -> dict[str, bool]:
         """
         Background worker for image generation.
+        
+        Args:
+            world_id: World to process
+            regen_list: List of dicts with:
+                - location_id: str
+                - smart: bool - if True, use smart regeneration (only what's outdated)
+            batch_name: Display name for progress
         
         This runs in a separate thread, keeping the UI responsive.
         """
@@ -440,7 +468,7 @@ class ManageImagesScreen(Screen):
         image_gen = ImageGenerator(self.app.worlds_dir)
         
         results = {}
-        total = len(location_ids)
+        total = len(regen_list)
         
         # Update progress display
         self.call_from_thread(
@@ -448,7 +476,10 @@ class ManageImagesScreen(Screen):
             0.0, batch_name, f"Starting {total} location(s)..."
         )
         
-        for i, loc_id in enumerate(location_ids):
+        for i, item in enumerate(regen_list):
+            loc_id = item["location_id"]
+            use_smart = item["smart"]
+            
             if worker.is_cancelled:
                 self.call_from_thread(
                     self._update_location_status_in_table,
@@ -483,13 +514,22 @@ class ManageImagesScreen(Screen):
                         lid, status, msg
                     )
                 
-                # Generate the image (this is async, run in event loop)
-                await image_gen.regenerate_location(
-                    world_id=world_id,
-                    location_id=loc_id,
-                    include_variants=True,
-                    progress_callback=progress_callback
-                )
+                if use_smart:
+                    # Smart regeneration - only regenerate what's actually outdated
+                    # This will skip base if only variants are outdated
+                    await image_gen.regenerate_outdated(
+                        world_id=world_id,
+                        location_id=loc_id,
+                        progress_callback=progress_callback
+                    )
+                else:
+                    # Force full regeneration (base + all variants)
+                    await image_gen.regenerate_location(
+                        world_id=world_id,
+                        location_id=loc_id,
+                        include_variants=True,
+                        progress_callback=progress_callback
+                    )
                 
                 results[loc_id] = True
                 self.call_from_thread(
