@@ -1,0 +1,51 @@
+# 80s-cartoon.yaml - Classic 1980s American cartoon style preset
+# Golden age of animation aesthetic: Looney Tunes, Hanna-Barbera, and classic Saturday morning cartoons
+
+name: "80s Cartoon"
+description: "Classic American cartoon aesthetic from the golden age of animation. Think Bugs Bunny, Tom & Jerry, The Flintstones, and Scooby-Doo. Hand-drawn charm with bold outlines and expressive characters."
+
+# L3: Mood
+mood:
+  tone: "playful, comedic, energetic, whimsical, slapstick"
+  lighting: "bright and cheerful, clear distinction between lit areas and shadows, theatrical spotlight effects"
+  color_palette: "bold saturated primaries and secondaries, flat cel-shaded colors, painted watercolor backgrounds with softer tones"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Classic 1980s American animation style in the tradition of Warner Bros Looney Tunes
+  and Hanna-Barbera cartoons. Hand-drawn aesthetic with bold, confident black outlines
+  of varying thickness. Cel animation look with flat, solid color fills for characters
+  and objects. Backgrounds are painted in a looser, more impressionistic watercolor
+  style - soft, textured, and slightly muted compared to the vibrant foreground elements.
+  Exaggerated squash-and-stretch proportions implied even in still images. Characters
+  and objects have that classic "rubber hose" flexibility. The visual style absolutely
+  must capture the nostalgic charm of Saturday morning cartoons from the 1980s.
+
+# L5: Technical
+technical:
+  perspective: "first-person or theatrical side-view"
+  shot: "medium wide shot to capture environmental gags and staging"
+  camera: "eye level or dynamic angles for comedic effect"
+  effects: "speed lines implied, motion blur on fast elements, dust clouds, classic cartoon expressions"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic or hyperrealistic"
+  - "3D CGI or computer generated"
+  - "anime or manga style"
+  - "modern Flash animation"
+  - "dark or gritty"
+  - "horror or scary"
+  - "realistic proportions"
+  - "detailed realistic shading"
+  - "pixel art or retro gaming"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "inconsistent line weights within same element"
+  - "overly complex realistic details"
+  - "muddy or desaturated colors on main subjects"
+  - "modern digital effects or lens flares"
+

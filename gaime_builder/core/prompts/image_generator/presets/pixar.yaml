@@ -1,0 +1,52 @@
+# pixar.yaml - Pixar/Disney 3D Animation style preset
+# Modern 3D animated movie aesthetic with expressive characters and rich environments
+
+name: "Pixar"
+description: "Modern 3D animated movie aesthetic inspired by Pixar and Disney Animation Studios. Beautiful lighting, expressive stylized characters, and richly detailed environments. Perfect for heartfelt adventures with broad appeal."
+
+# L3: Mood
+mood:
+  tone: "heartfelt, adventurous, emotionally rich, family-friendly wonder"
+  lighting: "cinematic and beautiful, rich global illumination, dramatic but accessible, golden hour warmth or moody atmospherics as scene demands"
+  color_palette: "rich and saturated, carefully art-directed color schemes, strong color storytelling, vibrant but harmonious"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Modern 3D animated movie style in the tradition of Pixar and Disney Animation Studios.
+  High-quality CGI rendering with that distinctive stylized realism - not photorealistic,
+  but beautifully rendered with subsurface scattering on skin, detailed textures, and
+  gorgeous lighting. Characters have appealing, slightly caricatured proportions with
+  large expressive eyes and readable silhouettes. Environments are richly detailed with
+  a painterly quality to textures and careful art direction. Everything feels like a
+  frame from a major animated feature film - polished, emotionally resonant, and
+  visually stunning. The visual style must consistently achieve that Pixar-quality
+  3D animation look throughout the entire image.
+
+# L5: Technical
+technical:
+  perspective: "first-person or cinematic third-person"
+  shot: "medium wide establishing shot or dramatic close-up as scene demands"
+  camera: "dynamic cinematic angles, shallow depth of field for focus"
+  effects: "subsurface scattering, ambient occlusion, volumetric lighting, subtle lens effects"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic or live-action"
+  - "2D hand-drawn animation"
+  - "anime or manga"
+  - "low-poly or stylized 3D"
+  - "clay animation or stop-motion"
+  - "pixel art or retro gaming"
+  - "dark horror or gritty"
+  - "flat illustration"
+  - "rough or unfinished rendering"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "uncanny valley realistic humans"
+  - "flat lighting or harsh shadows"
+  - "low-resolution textures"
+  - "visible polygon edges or rendering artifacts"
+

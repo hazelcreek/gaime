@@ -243,6 +243,12 @@ Critical constraints - the image must NOT include:
 | `comic-book` | Graphic novel action |
 | `scandi-scottish-noir` | Nordic/Scottish noir hybrid, temperate coastal |
 | `folk-noir` | Folklore-infused noir, rural unease, ritual dread |
+| `80s-cartoon` | Classic Looney Tunes, Hanna-Barbera, Tom & Jerry |
+| `claymation` | Wallace & Gromit, Aardman stop-motion |
+| `muppets` | Jim Henson puppet theater aesthetic |
+| `pixar` | Modern 3D animated movie (Pixar/Disney) |
+| `asterix` | Franco-Belgian bande dessinée comics |
+| `adult-animation` | Rick and Morty, BoJack, Archer style |
 
 ## How Layers Combine
 

@@ -1,0 +1,52 @@
+# claymation.yaml - Clay Animation / Stop-Motion style preset
+# Aardman Animations aesthetic: Wallace & Gromit, Chicken Run, Shaun the Sheep
+
+name: "Claymation"
+description: "Stop-motion clay animation aesthetic inspired by Aardman Animations. Tactile, handcrafted charm with visible fingerprints, plasticine textures, and that distinctive British whimsy of Wallace & Gromit."
+
+# L3: Mood
+mood:
+  tone: "whimsical, cozy, handcrafted, charming, slightly absurd British humor"
+  lighting: "warm and soft, studio-lit quality, gentle shadows that emphasize 3D depth, practical miniature lighting feel"
+  color_palette: "warm earthy tones mixed with cheerful accents, muted but friendly colors, natural clay and plasticine hues"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Stop-motion clay animation style inspired by Aardman Animations (Wallace & Gromit,
+  Chicken Run, Shaun the Sheep). Everything appears sculpted from plasticine and clay
+  with visible tactile textures - you can almost see thumbprints and tool marks in the
+  material. Characters have that distinctive bulging-eye, wide-mouth expressiveness.
+  Environments are detailed miniature sets with handcrafted props. Slightly chunky,
+  rounded forms with that characteristic clay weight and solidity. The aesthetic must
+  feel like a physical stop-motion production - tangible, warm, and delightfully
+  handmade. The visual style is paramount and must consistently evoke that tactile
+  Aardman quality throughout.
+
+# L5: Technical
+technical:
+  perspective: "first-person or slightly elevated third-person"
+  shot: "medium wide shot to appreciate the miniature set design"
+  camera: "eye level or low angle to emphasize the physicality of the sets"
+  effects: "subtle depth of field (miniature photography feel), warm practical lighting, visible textures on all surfaces"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic"
+  - "2D hand-drawn animation"
+  - "smooth CGI or Pixar style"
+  - "anime or manga"
+  - "dark or horror"
+  - "perfectly smooth surfaces"
+  - "flat illustration"
+  - "digital painting"
+  - "hyper-detailed realism"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "overly smooth or plastic-looking surfaces"
+  - "flat 2D appearance"
+  - "harsh or dramatic lighting"
+  - "perfectly clean or sterile environments"
+

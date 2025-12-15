@@ -1,0 +1,52 @@
+# asterix.yaml - Franco-Belgian Bande Dessinée style preset
+# Classic European comic book aesthetic: Asterix, Tintin, Lucky Luke
+
+name: "Asterix"
+description: "Franco-Belgian bande dessinée comic book style inspired by Asterix, Tintin, and Lucky Luke. Clean ligne claire linework, vibrant flat colors, and that distinctively European comic charm. Perfect for comedic historical adventures."
+
+# L3: Mood
+mood:
+  tone: "comedic, adventurous, satirical, energetic, historically playful"
+  lighting: "bright and clear, minimal shadows, cheerful daylight quality, occasional dramatic moments"
+  color_palette: "vibrant and saturated flat colors, bold primaries, clean color separation, cheerful and inviting"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Franco-Belgian bande dessinée comic book style in the tradition of Asterix (Uderzo
+  and Goscinny), Tintin (Hergé's ligne claire), and Lucky Luke. Clean, confident ink
+  linework with consistent line weights - the classic European clear line style.
+  Flat, vibrant colors without gradients, applied within bold outlines. Expressive
+  character designs with exaggerated features - big noses, distinctive silhouettes,
+  comedic proportions. Detailed yet stylized backgrounds with architectural precision.
+  Panel-ready compositions that feel like frames from a classic European comic album.
+  The visual style must consistently capture that beloved Franco-Belgian comic aesthetic
+  throughout the entire image.
+
+# L5: Technical
+technical:
+  perspective: "first-person or classic comic panel framing"
+  shot: "medium wide shot for scene context, varied as dramatic needs require"
+  camera: "eye level or dynamic angles for action scenes"
+  effects: "motion lines for action, expressive speed effects, clean precise linework throughout"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic"
+  - "3D CGI or rendered"
+  - "American superhero comic style"
+  - "anime or manga"
+  - "dark or gritty"
+  - "painterly or textured"
+  - "watercolor or soft edges"
+  - "horror or scary"
+  - "rough sketch or unfinished"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "inconsistent line weights"
+  - "muddy or blended colors"
+  - "realistic shading or gradients"
+  - "overly detailed realistic textures"
+

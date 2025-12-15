@@ -1,0 +1,52 @@
+# adult-animation.yaml - Adult Animated Sitcom style preset
+# Modern adult animation aesthetic: Rick and Morty, BoJack Horseman, Archer, Bob's Burgers
+
+name: "Adult Animation"
+description: "Modern adult animated sitcom style inspired by Rick and Morty, BoJack Horseman, Archer, and Bob's Burgers. Clean vector linework, flat colors, and that distinctive sharp wit visual language. Perfect for satirical, mature, or irreverent adventures."
+
+# L3: Mood
+mood:
+  tone: "satirical, irreverent, witty, sometimes dark, self-aware, mature humor"
+  lighting: "clean and even, minimal dramatic shadows, bright indoor/outdoor scenes, occasional moody moments for dramatic effect"
+  color_palette: "bold flat colors, limited palette per scene, strong color choices, clean digital color fills"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Modern adult animated sitcom style combining elements from shows like Rick and Morty,
+  BoJack Horseman, Archer, and Bob's Burgers. Clean vector-style linework with
+  consistent line weights. Flat, solid color fills with minimal gradients or shading.
+  Characters have stylized proportions - not quite realistic, not quite cartoon,
+  occupying that distinctive adult animation middle ground. Simplified but recognizable
+  backgrounds with just enough detail to establish setting. The aesthetic should feel
+  like a frame from a premium cable or streaming adult animated series - polished,
+  intentionally styled, with that knowing visual sophistication. The visual style must
+  consistently maintain that adult animation look throughout.
+
+# L5: Technical
+technical:
+  perspective: "first-person or standard TV animation framing"
+  shot: "medium to medium-wide, typical sitcom staging"
+  camera: "eye level, occasional dramatic angles for comedic or dramatic effect"
+  effects: "clean digital lines, flat color backgrounds, occasional stylized effects for gags"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic"
+  - "3D CGI or Pixar style"
+  - "children's cartoon or family-friendly"
+  - "anime or manga"
+  - "classic 1980s hand-drawn animation"
+  - "painterly or textured"
+  - "watercolor or soft illustration"
+  - "pixel art or retro gaming"
+  - "rough sketch or unfinished"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "inconsistent line weights"
+  - "overly complex shading or gradients"
+  - "realistic detailed textures"
+  - "muddy or desaturated colors"
+

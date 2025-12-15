@@ -1,0 +1,52 @@
+# muppets.yaml - Jim Henson Muppets style preset
+# Puppet show aesthetic with felt, fabric, and theatrical staging
+
+name: "Muppets"
+description: "Jim Henson Muppets aesthetic - felt puppets, fabric textures, theatrical staging, and that magical blend of absurdist humor with genuine heart. Perfect for whimsical, musical, or variety-show inspired adventures."
+
+# L3: Mood
+mood:
+  tone: "theatrical, warm, absurdist humor, heartfelt, variety-show energy, joyful chaos"
+  lighting: "bright stage lighting, theatrical spots, warm and inviting, classic variety show illumination"
+  color_palette: "vibrant and cheerful, rainbow variety of puppet colors, warm stage lighting tones, rich theatrical reds and golds"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Jim Henson Muppet aesthetic where everything appears to be made of felt, fabric,
+  fur, and foam rubber. The world looks like a theatrical puppet production with
+  visible textures - fuzzy felt surfaces, googly eyes, stitched seams, and foam
+  puppet construction. Environments are theatrical sets with painted backdrops,
+  practical props, and stage curtains. Characters have that distinctive Muppet
+  look - expressive fabric faces with wide mouths, ping-pong ball eyes, and
+  wild yarn or feather hair. Everything feels handcrafted and tactile, like a
+  loving Jim Henson production. The visual style must consistently maintain that
+  puppet-show magic where inanimate materials come alive with personality.
+
+# L5: Technical
+technical:
+  perspective: "first-person or theatrical proscenium view"
+  shot: "medium to medium-wide to capture puppet staging"
+  camera: "eye level or slightly low (as if viewing a puppet stage)"
+  effects: "stage lighting spots, warm theatrical glow, visible fabric textures, slightly chaotic framing"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic humans"
+  - "CGI or computer-generated"
+  - "anime or manga"
+  - "dark or horror"
+  - "2D flat animation"
+  - "clay animation or stop-motion clay"
+  - "realistic proportions"
+  - "clean digital art"
+  - "gritty or noir"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "smooth non-fabric textures"
+  - "realistic human faces"
+  - "dark or scary elements"
+  - "overly polished or sterile appearance"
+
