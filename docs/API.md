@@ -100,7 +100,7 @@ GET /api/game/engines
 | `engines` | Array of available engine versions |
 | `default` | ID of the default engine |
 
-**Note:** The two-phase engine is under development. Use `classic` for production gameplay.
+**Note:** The two-phase engine currently supports movement only (Phase 1). Use `classic` for full gameplay.
 
 ---
 
@@ -522,6 +522,54 @@ interface EngineInfo {
   description: string;  // Brief description of the engine
 }
 ```
+
+### TwoPhaseGameState
+
+State model for the two-phase engine (separate from classic `GameState`).
+
+```typescript
+interface TwoPhaseGameState {
+  session_id: string;
+  current_location: string;
+  inventory: string[];
+  flags: Record<string, boolean>;
+  visited_locations: string[];          // Set of visited location IDs
+  container_states: Record<string, boolean>;  // container_id -> is_open
+  turn_count: number;
+  status: "playing" | "won" | "lost";
+}
+```
+
+### TwoPhaseNewGameResponse
+
+Response for two-phase engine game start.
+
+```typescript
+interface TwoPhaseNewGameResponse {
+  session_id: string;
+  narrative: string;
+  state: TwoPhaseGameState;            // Note: Different from classic GameState
+  engine_version: "two_phase";
+  llm_debug?: LLMDebugInfo;
+}
+```
+
+### TwoPhaseActionResponse
+
+Response from two-phase engine action processing.
+
+```typescript
+interface TwoPhaseActionResponse {
+  narrative: string;
+  state: TwoPhaseGameState;
+  events: object[];                    // List of events that occurred
+  game_complete: boolean;
+  ending_narrative?: string;
+  llm_debug?: LLMDebugInfo;
+}
+```
+
+**Note:** When using the two-phase engine, responses use `TwoPhaseGameState` instead of `GameState`. The state model is simplified and does not include narrative memory (context handled differently).
 
 ---
 

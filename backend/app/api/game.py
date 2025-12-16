@@ -1,9 +1,12 @@
 """
 Game API endpoints - Handle player actions and game state
+
+This module supports both the classic engine and the two-phase engine.
+Engine selection is done at game start via the `engine` parameter.
 """
 
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, Union
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
@@ -11,7 +14,10 @@ from pydantic import BaseModel
 
 from app.engine.state import GameStateManager
 from app.engine.actions import ActionProcessor
+from app.engine.two_phase_state import TwoPhaseStateManager
+from app.engine.two_phase import TwoPhaseProcessor
 from app.models.game import GameState, ActionRequest, ActionResponse, LLMDebugInfo
+from app.models.two_phase_state import TwoPhaseGameState, TwoPhaseActionResponse
 from app.llm.image_generator import get_location_image_path
 from app.api.engine import EngineVersion, ENGINE_INFO, DEFAULT_ENGINE
 
@@ -22,15 +28,36 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 WORLDS_DIR = PROJECT_ROOT / "worlds"
 
 
-class GameSession(NamedTuple):
-    """Session data including engine version (kept out-of-band from GameState)."""
+# =============================================================================
+# Session Types
+# =============================================================================
+
+
+class ClassicGameSession(NamedTuple):
+    """Session data for classic engine."""
 
     manager: GameStateManager
     engine: EngineVersion
 
 
+class TwoPhaseGameSession(NamedTuple):
+    """Session data for two-phase engine."""
+
+    manager: TwoPhaseStateManager
+    engine: EngineVersion
+
+
+# Union type for all session types
+GameSession = Union[ClassicGameSession, TwoPhaseGameSession]
+
+
 # In-memory game sessions (for prototype - would use Redis/DB in production)
 game_sessions: dict[str, GameSession] = {}
+
+
+# =============================================================================
+# Request/Response Models
+# =============================================================================
 
 
 class NewGameRequest(BaseModel):
@@ -38,44 +65,58 @@ class NewGameRequest(BaseModel):
 
     world_id: str = "cursed-manor"
     debug: bool = False  # Enable LLM debug info in responses
-    engine: EngineVersion = DEFAULT_ENGINE  # Engine version for migration testing
+    engine: EngineVersion = DEFAULT_ENGINE  # Engine version selection
 
 
 class NewGameResponse(BaseModel):
-    """Response after starting a new game"""
+    """Response after starting a new game (classic engine)"""
 
     session_id: str
     narrative: str
     state: GameState
-    engine_version: EngineVersion  # Confirm which engine is being used
-    llm_debug: LLMDebugInfo | None = None  # Debug info when debug mode enabled
+    engine_version: EngineVersion
+    llm_debug: LLMDebugInfo | None = None
 
 
-@router.post("/new", response_model=NewGameResponse)
+class TwoPhaseNewGameResponse(BaseModel):
+    """Response after starting a new game (two-phase engine)"""
+
+    session_id: str
+    narrative: str
+    state: TwoPhaseGameState
+    engine_version: EngineVersion
+    llm_debug: LLMDebugInfo | None = None
+
+
+class TwoPhaseActionRequest(BaseModel):
+    """Request to process an action in two-phase engine"""
+
+    session_id: str
+    action: str
+    debug: bool = False
+
+
+# =============================================================================
+# Game Start Endpoints
+# =============================================================================
+
+
+@router.post("/new")
 async def new_game(request: NewGameRequest):
-    """Start a new game session"""
+    """Start a new game session.
+
+    The engine parameter determines which engine is used:
+    - classic: Single LLM call for action processing (default)
+    - two_phase: Separated parsing and narration
+
+    Returns different response types based on engine selection.
+    """
     try:
-        manager = GameStateManager(request.world_id)
-        session_id = manager.session_id
+        if request.engine == EngineVersion.TWO_PHASE:
+            return await _start_two_phase_game(request)
+        else:
+            return await _start_classic_game(request)
 
-        # Store session with engine version (out-of-band from GameState)
-        game_sessions[session_id] = GameSession(
-            manager=manager,
-            engine=request.engine,
-        )
-
-        # Generate initial narrative
-        # TODO: Use request.engine to select processor in Phase 1+
-        processor = ActionProcessor(manager, debug=request.debug)
-        initial_narrative, debug_info = await processor.get_initial_narrative()
-
-        return NewGameResponse(
-            session_id=session_id,
-            narrative=initial_narrative,
-            state=manager.get_state(),
-            engine_version=request.engine,
-            llm_debug=debug_info,
-        )
     except FileNotFoundError:
         raise HTTPException(
             status_code=404, detail=f"World '{request.world_id}' not found"
@@ -83,35 +124,119 @@ async def new_game(request: NewGameRequest):
     except Exception as e:
         import traceback
 
-        traceback.print_exc()  # Print the actual error for debugging
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/action", response_model=ActionResponse)
+async def _start_classic_game(request: NewGameRequest) -> NewGameResponse:
+    """Start a game with the classic engine."""
+    manager = GameStateManager(request.world_id)
+    session_id = manager.session_id
+
+    # Store session
+    game_sessions[session_id] = ClassicGameSession(
+        manager=manager,
+        engine=EngineVersion.CLASSIC,
+    )
+
+    # Generate initial narrative
+    processor = ActionProcessor(manager, debug=request.debug)
+    initial_narrative, debug_info = await processor.get_initial_narrative()
+
+    return NewGameResponse(
+        session_id=session_id,
+        narrative=initial_narrative,
+        state=manager.get_state(),
+        engine_version=EngineVersion.CLASSIC,
+        llm_debug=debug_info,
+    )
+
+
+async def _start_two_phase_game(request: NewGameRequest) -> TwoPhaseNewGameResponse:
+    """Start a game with the two-phase engine."""
+    manager = TwoPhaseStateManager(request.world_id)
+    session_id = manager.session_id
+
+    # Store session
+    game_sessions[session_id] = TwoPhaseGameSession(
+        manager=manager,
+        engine=EngineVersion.TWO_PHASE,
+    )
+
+    # Generate initial narrative using two-phase processor
+    processor = TwoPhaseProcessor(manager, debug=request.debug)
+    initial_narrative, debug_info = await processor.get_initial_narrative()
+
+    return TwoPhaseNewGameResponse(
+        session_id=session_id,
+        narrative=initial_narrative,
+        state=manager.get_state(),
+        engine_version=EngineVersion.TWO_PHASE,
+        llm_debug=debug_info,
+    )
+
+
+# =============================================================================
+# Action Processing Endpoints
+# =============================================================================
+
+
+@router.post("/action")
 async def process_action(request: ActionRequest):
-    """Process a player action and return narrative response"""
+    """Process a player action and return narrative response.
+
+    Routes to the appropriate engine based on session type.
+    """
     if request.session_id not in game_sessions:
         raise HTTPException(status_code=404, detail="Game session not found")
 
     session = game_sessions[request.session_id]
-    # TODO: Use session.engine to select processor in Phase 1+
-    processor = ActionProcessor(session.manager, debug=request.debug)
 
     try:
-        response = await processor.process(request.action)
-        return response
+        if isinstance(session, TwoPhaseGameSession):
+            return await _process_two_phase_action(session, request)
+        else:
+            return await _process_classic_action(session, request)
+
     except Exception as e:
+        import traceback
+
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+
+async def _process_classic_action(
+    session: ClassicGameSession, request: ActionRequest
+) -> ActionResponse:
+    """Process action with classic engine."""
+    processor = ActionProcessor(session.manager, debug=request.debug)
+    return await processor.process(request.action)
+
+
+async def _process_two_phase_action(
+    session: TwoPhaseGameSession, request: ActionRequest
+) -> TwoPhaseActionResponse:
+    """Process action with two-phase engine."""
+    processor = TwoPhaseProcessor(session.manager, debug=request.debug)
+    return await processor.process(request.action)
+
+
+# =============================================================================
+# State Query Endpoints
+# =============================================================================
 
 
 @router.get("/state/{session_id}")
 async def get_state(session_id: str):
-    """Get current game state"""
+    """Get current game state."""
     if session_id not in game_sessions:
         raise HTTPException(status_code=404, detail="Game session not found")
 
     session = game_sessions[session_id]
-    return {"state": session.manager.get_state()}
+    return {
+        "state": session.manager.get_state(),
+        "engine": session.engine.value,
+    }
 
 
 @router.get("/debug/{session_id}")
@@ -119,12 +244,40 @@ async def debug_state(session_id: str):
     """
     Get detailed debug info about game state and NPC visibility.
 
-    Useful for understanding why NPCs aren't appearing or what flags are set.
+    Note: Full debug info is only available for classic engine sessions.
+    Two-phase engine returns simplified debug info.
     """
     if session_id not in game_sessions:
         raise HTTPException(status_code=404, detail="Game session not found")
 
     session = game_sessions[session_id]
+
+    if isinstance(session, TwoPhaseGameSession):
+        return _debug_two_phase_state(session)
+    else:
+        return _debug_classic_state(session)
+
+
+def _debug_two_phase_state(session: TwoPhaseGameSession) -> dict:
+    """Get debug info for two-phase engine session."""
+    manager = session.manager
+    state = manager.get_state()
+
+    return {
+        "session_id": manager.session_id,
+        "engine": "two_phase",
+        "current_location": state.current_location,
+        "turn_count": state.turn_count,
+        "status": state.status,
+        "flags": state.flags,
+        "inventory": state.inventory,
+        "visited_locations": list(state.visited_locations),
+        "container_states": state.container_states,
+    }
+
+
+def _debug_classic_state(session: ClassicGameSession) -> dict:
+    """Get debug info for classic engine session."""
     manager = session.manager
     state = manager.get_state()
     world_data = manager.get_world_data()
@@ -132,10 +285,8 @@ async def debug_state(session_id: str):
     # Build NPC visibility analysis
     npc_analysis = []
     for npc_id, npc in world_data.npcs.items():
-        # Get NPC's current location (considering location_changes)
         npc_current_loc = manager.get_npc_current_location(npc_id)
 
-        # Check each appears_when condition
         conditions_analysis = []
         all_conditions_met = True
 
@@ -171,23 +322,19 @@ async def debug_state(session_id: str):
                     if not is_met:
                         all_conditions_met = False
 
-        # Check if NPC was removed from game
         was_removed = manager._was_removed_from_game(npc)
-
-        # Check if NPC is at player's current location
         has_location_override = manager._has_active_location_change(npc)
+
         if was_removed:
             is_at_current_location = False
         elif has_location_override:
             is_at_current_location = npc_current_loc == state.current_location
         else:
-            # Normal behavior - check both single location and roaming locations
             is_at_current_location = (
                 npc_current_loc == state.current_location
                 or state.current_location in npc.locations
             )
 
-        # Determine visibility
         would_be_visible = (
             all_conditions_met and is_at_current_location and not was_removed
         )
@@ -210,7 +357,6 @@ async def debug_state(session_id: str):
             }
         )
 
-    # Get available interactions at current location
     current_location = manager.get_current_location()
     interactions_available = []
     if current_location and current_location.interactions:
@@ -224,7 +370,6 @@ async def debug_state(session_id: str):
                 }
             )
 
-    # Build narrative memory summary
     memory = state.narrative_memory
     narrative_memory_summary = {
         "recent_exchanges": [
@@ -257,17 +402,23 @@ async def debug_state(session_id: str):
 
     return {
         "session_id": session_id,
+        "engine": "classic",
         "current_location": state.current_location,
         "turn_count": state.turn_count,
         "status": state.status,
-        "flags": state.flags,  # World-defined flags (set by interactions)
-        "narrative_memory": narrative_memory_summary,  # Narrative context tracking
+        "flags": state.flags,
+        "narrative_memory": narrative_memory_summary,
         "inventory": state.inventory,
         "discovered_locations": state.discovered_locations,
         "npc_trust": state.npc_trust,
         "npc_analysis": npc_analysis,
         "interactions_at_location": interactions_available,
     }
+
+
+# =============================================================================
+# Image Endpoints
+# =============================================================================
 
 
 @router.get("/image/{session_id}/{location_id}")
@@ -278,21 +429,20 @@ async def get_location_image_for_session(session_id: str, location_id: str):
     This endpoint returns the correct image variant based on which NPCs
     are currently visible at the location in the game state.
 
-    For locations with conditional NPCs (e.g., ghost_child with appears_when),
-    this will return:
-    - Base image if the NPC hasn't appeared yet
-    - Variant image with the NPC if conditions are met
+    Note: NPC-based image variants only work with classic engine.
+    Two-phase engine returns the base image.
     """
     if session_id not in game_sessions:
         raise HTTPException(status_code=404, detail="Game session not found")
 
     session = game_sessions[session_id]
-    manager = session.manager
-    world_id = manager.world_id
+    world_id = session.manager.world_id
 
-    # Get visible NPCs at this location
-    visible_npcs = manager.get_visible_npcs_at_location(location_id)
-    visible_npc_ids = [npc_id for npc_id, npc in visible_npcs]
+    # Get visible NPCs (classic engine only)
+    visible_npc_ids = []
+    if isinstance(session, ClassicGameSession):
+        visible_npcs = session.manager.get_visible_npcs_at_location(location_id)
+        visible_npc_ids = [npc_id for npc_id, npc in visible_npcs]
 
     # Get the appropriate image path
     image_path = get_location_image_path(
@@ -303,7 +453,6 @@ async def get_location_image_for_session(session_id: str, location_id: str):
     )
 
     if not image_path:
-        # Fallback to base image without variants
         image_path = WORLDS_DIR / world_id / "images" / f"{location_id}.png"
         if not image_path.exists():
             raise HTTPException(
@@ -322,8 +471,6 @@ async def get_location_image_for_session(session_id: str, location_id: str):
 async def get_current_location_image(session_id: str):
     """
     Get the image for the player's current location in a game session.
-
-    Convenience endpoint that uses the session's current location.
     """
     if session_id not in game_sessions:
         raise HTTPException(status_code=404, detail="Game session not found")
@@ -334,13 +481,19 @@ async def get_current_location_image(session_id: str):
     return await get_location_image_for_session(session_id, current_location)
 
 
+# =============================================================================
+# Engine Discovery Endpoint
+# =============================================================================
+
+
 @router.get("/engines")
 async def list_engines():
     """
     List available game engine versions.
 
-    Returns the available engines for frontend discovery. Engine selection
-    is primarily for migration testing between classic and two-phase engines.
+    Returns the available engines for frontend discovery:
+    - classic: Single LLM call for action processing (default)
+    - two_phase: Separated parsing (Phase 1: movement only)
     """
     return {
         "engines": ENGINE_INFO,

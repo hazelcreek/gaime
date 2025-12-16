@@ -562,6 +562,105 @@ POST /api/builder/{world_id}/images/{location_id}/generate-variants
 GET /api/builder/{world_id}/images/{location_id}/variants
 ```
 
+## Two-Phase Engine Architecture
+
+The two-phase engine is an alternative action processing architecture that separates parsing from narration for better determinism and testability.
+
+### Engine Comparison
+
+| Aspect | Classic Engine | Two-Phase Engine |
+|--------|----------------|------------------|
+| Action Processing | Single LLM call | Parse → Validate → Narrate |
+| State Changes | LLM determines | Validators determine |
+| Narrative | Generated with state changes | Generated from confirmed events |
+| Testability | Harder (LLM-dependent) | Easier (deterministic validation) |
+| Current Status | Full featured | Movement only (Phase 1) |
+
+### Two-Phase Components
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        Two-Phase Engine Flow                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   Player Input: "go north"                                              │
+│         │                                                               │
+│         ▼                                                               │
+│   ┌─────────────────┐                                                   │
+│   │ RuleBasedParser │  ──► ActionIntent(type=MOVE, target_id="north")   │
+│   └────────┬────────┘                                                   │
+│            │                                                            │
+│            ▼                                                            │
+│   ┌─────────────────────┐                                               │
+│   │ MovementValidator   │  ──► ValidationResult(valid=true, ...)        │
+│   │ - Check exit exists │                                               │
+│   │ - Check requirements│                                               │
+│   └────────┬────────────┘                                               │
+│            │                                                            │
+│            ▼                                                            │
+│   ┌────────────────────────┐                                            │
+│   │ TwoPhaseStateManager   │  ──► Event(type=LOCATION_CHANGED)          │
+│   │ - Apply state change   │                                            │
+│   └────────┬───────────────┘                                            │
+│            │                                                            │
+│            ▼                                                            │
+│   ┌───────────────────────┐                                             │
+│   │ VisibilityResolver    │  ──► PerceptionSnapshot                     │
+│   │ - Build what's visible│                                             │
+│   └────────┬──────────────┘                                             │
+│            │                                                            │
+│            ▼                                                            │
+│   ┌─────────────────┐                                                   │
+│   │   NarratorAI    │  ──► Narrative text (LLM call)                    │
+│   └─────────────────┘                                                   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Key Models
+
+| Model | Location | Purpose |
+|-------|----------|---------|
+| `TwoPhaseGameState` | `models/two_phase_state.py` | Game state (separate from classic) |
+| `ActionIntent` | `models/intent.py` | Parsed player action |
+| `Event` | `models/event.py` | Confirmed game occurrence |
+| `PerceptionSnapshot` | `models/perception.py` | What player can see |
+| `ValidationResult` | `models/validation.py` | Validation outcome |
+
+### Key Classes
+
+| Class | Location | Purpose |
+|-------|----------|---------|
+| `TwoPhaseStateManager` | `engine/two_phase_state.py` | State management |
+| `TwoPhaseProcessor` | `engine/two_phase.py` | Main orchestrator |
+| `RuleBasedParser` | `engine/parser.py` | Rule-based parsing |
+| `MovementValidator` | `engine/validators/movement.py` | Movement validation |
+| `DefaultVisibilityResolver` | `engine/visibility.py` | Visibility computation |
+| `NarratorAI` | `llm/narrator.py` | Narrative generation |
+
+### Engine Selection
+
+Engines are selected at game start via the `engine` parameter:
+
+```json
+POST /api/game/new
+{
+  "world_id": "cursed-manor",
+  "engine": "two_phase"
+}
+```
+
+Session data stores the engine version, routing subsequent actions to the correct processor.
+
+### Design Principles
+
+1. **Complete Separation**: Two-phase engine has its own state model (`TwoPhaseGameState`) - no code sharing with classic except world data loading
+2. **Deterministic Validation**: State changes are validated by code, not LLM
+3. **Derived Visibility**: What player can see is computed at runtime, not stored
+4. **Event-Driven Narration**: Narrator receives confirmed events, not action parsing
+
+See `planning/two-phase-game-loop-spec.md` for the full specification.
+
 ## Future Considerations
 
 - Multiplayer sessions

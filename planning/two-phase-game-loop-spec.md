@@ -1397,16 +1397,22 @@ FLAVOR_ACTION: Atmospheric action (no state change)
 - [x] Add `GET /api/game/engines` endpoint
 - [x] Add frontend engine selector in Advanced Options
 
-### Phase 1: Simple Movement
+### Phase 1: Simple Movement ✅
 
 **Goal**: Movement-only two-phase loop without Interactor AI
 
-- [ ] Implement `RuleBasedParser` for direction patterns
-- [ ] Implement `MovementValidator`
-- [ ] Generate `LOCATION_CHANGED` events
-- [ ] Create basic Narrator prompt for location descriptions
-- [ ] Wire up two-phase flow for movement only
-- [ ] Fall back to classic engine for non-movement actions
+- [x] Implement `RuleBasedParser` for direction patterns
+- [x] Implement `MovementValidator`
+- [x] Generate `LOCATION_CHANGED` events
+- [x] Create basic Narrator prompt for location descriptions
+- [x] Wire up two-phase flow for movement only
+- [x] Return "command not understood" for non-movement actions (no fallback to classic)
+
+**Implementation Notes** (completed):
+- Complete engine separation: `TwoPhaseGameState` and `TwoPhaseStateManager` are independent from classic engine
+- Engines share only world data loading (same YAML schema)
+- Unsupported actions return a simple message without LLM call
+- Opening narrative uses NarratorAI with `LOCATION_CHANGED` event (is_opening=True)
 
 ### Phase 2: Examination & Taking
 

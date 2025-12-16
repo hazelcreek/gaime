@@ -34,7 +34,7 @@ The roadmap is organized around **experience goals** from the Vision document:
 | Phase | Focus | Status |
 |-------|-------|--------|
 | 0 | Foundation (data models, engine selection) | ✅ Complete |
-| 1 | Simple Movement | ⚪ Planned |
+| 1 | Simple Movement | ✅ Complete |
 | 2 | Examination & Taking | ⚪ Planned |
 | 3 | Interactor AI | ⚪ Planned |
 | 4 | Full Narrator | ⚪ Planned |
@@ -64,13 +64,16 @@ Separating action parsing from narrative generation enables deterministic state 
 - [x] Frontend engine selector (Advanced Options)
 - [x] Unit tests for engine selection
 
-### Phase 1: Simple Movement
-- [ ] `RuleBasedParser` for direction patterns
-- [ ] `MovementValidator`
-- [ ] `LOCATION_CHANGED` events
-- [ ] Basic Narrator prompt for locations
-- [ ] Two-phase flow for movement only
-- [ ] Fallback to classic engine for non-movement
+### Phase 1: Simple Movement ✅
+- [x] `RuleBasedParser` for direction patterns
+- [x] `MovementValidator` with precondition checking
+- [x] `LOCATION_CHANGED` events with first-visit detection
+- [x] Basic Narrator prompt for locations
+- [x] Two-phase flow for movement only
+- [x] "Command not understood" for non-movement (no fallback - complete engine separation)
+- [x] `TwoPhaseGameState` and `TwoPhaseStateManager` (separate from classic)
+- [x] `DefaultVisibilityResolver` for PerceptionSnapshot building
+- [x] Unit tests (79 tests) and integration tests (16 tests)
 
 ### Phase 2: Examination & Taking
 - [ ] Extend parser for examine/take patterns
@@ -358,6 +361,7 @@ See [ideas/features.md](../ideas/features.md) for full descriptions.
 
 | Date | Change |
 |------|--------|
+| 2025-12-17 | Two-Phase Engine Phase 1 complete: movement-only engine with complete separation from classic, 95 new tests |
 | 2025-12-17 | Two-Phase Engine Phase 0 complete: data models, engine selection API, frontend selector |
 | 2025-12-15 | World validation system: schema generator, deprecated pattern detection, hybrid fixer (rule + LLM), migrated 5 existing worlds |
 | 2025-12-12 | Implemented TUI World Builder (gaime_builder package) - terminal UI for world creation and image generation |
