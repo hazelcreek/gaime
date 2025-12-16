@@ -1,0 +1,40 @@
+# Test World NPCs
+#
+# Provides test coverage for:
+# - NPC knowledge and dialogue
+# - Trust mechanics
+# - Appearance conditions
+# - Location-based presence
+
+test_npc:
+  name: "Test Guide"
+  role: "A helpful guide who knows the secrets of this place"
+  location: start_room
+  appearance: |
+    A friendly figure in simple robes.
+    They have a knowing smile and patient demeanor.
+  personality:
+    traits:
+      - helpful
+      - patient
+      - cryptic
+    speech_style: "Speaks clearly but sometimes in riddles"
+    quirks:
+      - "Tilts head when thinking"
+  knowledge:
+    - "Knows about the secret room to the east"
+    - "Knows that a gem is hidden in the box"
+    - "Knows how to solve the puzzle"
+  dialogue_rules:
+    - "Only reveal secret room location at trust level 1+"
+    - "Only reveal puzzle solution at trust level 2+"
+  trust:
+    initial: 0
+    threshold: 2
+    build_actions:
+      - "Show genuine curiosity"
+      - "Be polite and respectful"
+  behavior: |
+    Watches the player with interest.
+    Offers hints when asked, based on trust level.
+

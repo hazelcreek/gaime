@@ -5,11 +5,10 @@ from app.models.world import World, Location, NPC, Item
 
 __all__ = [
     "GameState",
-    "ActionRequest", 
+    "ActionRequest",
     "ActionResponse",
     "World",
     "Location",
     "NPC",
     "Item",
 ]
-

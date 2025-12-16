@@ -1,0 +1,81 @@
+# Test World Locations
+#
+# Layout:
+#   [locked_room] (north, requires door_unlocked)
+#         |
+#   [start_room] --- [secret_room] (east, requires knows_secret)
+#
+# This provides test coverage for:
+# - Basic navigation
+# - Flag-based access control
+# - Container interactions
+# - NPC presence
+
+start_room:
+  name: "Starting Room"
+  atmosphere: |
+    A simple room with plain walls and wooden floors.
+    Exits lead north and east. A wooden box sits in the corner.
+  exits:
+    north: locked_room
+    east: secret_room
+  items:
+    - container_box
+  npcs:
+    - test_npc
+  details:
+    floor: "Plain wooden floorboards, slightly dusty."
+    walls: "Bare stone walls with no decoration."
+    box: "A small wooden box with a brass clasp."
+  item_placements:
+    container_box: "sits in the corner"
+  npc_placements:
+    test_npc: "stands near the east wall"
+  interactions:
+    examine_box:
+      triggers:
+        - "examine box"
+        - "look at box"
+        - "open box"
+      narrative_hint: "The box opens to reveal its contents"
+      sets_flag: box_opened
+
+locked_room:
+  name: "Locked Room"
+  atmosphere: |
+    A previously locked room, now accessible.
+    The door to the south leads back to the starting room.
+  exits:
+    south: start_room
+  requires:
+    flag: door_unlocked
+  details:
+    door: "A heavy wooden door with an iron lock."
+  interactions:
+    examine_lock:
+      triggers:
+        - "examine lock"
+        - "look at door"
+      narrative_hint: "The lock is now open"
+
+secret_room:
+  name: "Secret Room"
+  atmosphere: |
+    A hidden chamber that glows with an inner light.
+    Ancient symbols are carved into the walls.
+  exits:
+    west: start_room
+  requires:
+    flag: knows_secret
+  details:
+    symbols: "Strange glowing symbols pulse with energy."
+    altar: "A stone altar in the center of the room."
+  interactions:
+    solve_puzzle:
+      triggers:
+        - "use gem on altar"
+        - "place gem"
+        - "solve puzzle"
+      narrative_hint: "The gem glows and the puzzle is complete"
+      sets_flag: puzzle_solved
+

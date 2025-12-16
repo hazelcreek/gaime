@@ -156,3 +156,128 @@ When making code changes, **always check if documentation needs updating**:
 **LLM Prompts** (when changing SYSTEM_PROMPT, OPENING_PROMPT, etc.):
 - `docs/LLM_INTEGRATION.md` → "Prompt Architecture" section
 
+## Testing Requirements
+
+### Test Infrastructure
+- All new engine code MUST have corresponding tests in `backend/tests/`
+- Use the test world fixtures in `backend/tests/fixtures/test_world/` for deterministic testing
+- Mock LLM calls for unit tests using `backend/tests/mocks/llm.py`
+
+### Test Structure
+```
+backend/tests/
+├── unit/          # Test components in isolation
+├── integration/   # Test component interactions  
+├── e2e/           # Real LLM tests (marked @pytest.mark.slow)
+└── fixtures/      # Shared test data
+```
+
+### Test Conventions
+- Test files: `test_<module>.py`
+- Use `@pytest.mark.slow` for tests requiring real LLM calls
+- Use `@pytest.mark.integration` for multi-component tests
+- Run `pytest backend/tests/ -v --ignore=backend/tests/e2e/` for fast feedback
+
+## Two-Phase Engine Architecture
+
+The game engine uses a two-phase action processing loop. See `planning/two-phase-game-loop-spec.md` for the full specification.
+
+### Core Design Principles
+1. **Separation of Concerns**: Parsing (Interactor) → Validation → Narration (Narrator)
+2. **Deterministic Mechanics**: State changes are validated BEFORE narration
+3. **Derived Visibility**: Item visibility is computed from state, not stored
+4. **Protocol-Based Components**: Use `engine/protocols.py` interfaces for testability
+
+### Naming Conventions
+- Fields ending in `_id` contain **resolved entity IDs** from the world model
+- Fields without `_id` may contain raw player descriptions
+- Example: `target_id="brass_key"` (resolved) vs `target="the shiny key"` (raw)
+
+### Component Boundaries
+| Component | Responsibility | Creates |
+|-----------|---------------|---------|
+| RuleBasedParser | Fast-path parsing (directions, simple verbs) | ActionIntent |
+| InteractorAI | Complex input interpretation | ActionIntent or FlavorIntent |
+| ActionValidator | Validate against world rules | ValidationResult |
+| VisibilityResolver | Compute what player can see | Used by validators |
+| NarratorAI | Generate prose from events | Narrative text |
+
+### Key Models (in `backend/app/models/`)
+- `intent.py`: ActionIntent, FlavorIntent, ActionType
+- `event.py`: Event, RejectionEvent, EventType  
+- `perception.py`: PerceptionSnapshot, VisibleEntity
+- `validation.py`: ValidationResult, RejectionCode
+
+## Python Code Design Principles
+
+### Function Design
+- **Single Responsibility**: Each function does ONE thing well
+- **Length Guideline**: Functions should be <25 lines; if longer, consider splitting
+- **Cognitive Complexity**: Avoid deep nesting (max 3 levels); extract helper functions
+- **Pure Functions**: Prefer functions without side effects where possible
+
+### Naming Conventions
+- **Functions**: `verb_noun` pattern → `validate_intent()`, `build_snapshot()`
+- **Private Methods**: Single underscore prefix → `_check_visibility()`
+- **Boolean Functions**: `is_`, `has_`, `can_` prefix → `is_item_visible()`, `can_access_location()`
+- **Factory Functions**: `create_` or `build_` prefix → `create_processor()`
+
+### Class Design
+- **Composition over Inheritance**: Prefer injecting dependencies over deep hierarchies
+- **Dependency Injection**: Pass dependencies via `__init__`, not global imports
+- **Protocol Compliance**: Implement protocols from `engine/protocols.py` for swappable components
+
+```python
+# GOOD: Dependency injection
+class TwoPhaseProcessor:
+    def __init__(self, parser: ActionParser, validator: IntentValidator):
+        self.parser = parser
+        self.validator = validator
+
+# BAD: Hard-coded dependencies
+class TwoPhaseProcessor:
+    def __init__(self):
+        self.parser = RuleBasedParser()  # Not testable
+```
+
+### Error Handling
+- **Explicit over Silent**: Raise exceptions for unexpected states; don't silently fail
+- **Custom Exceptions**: Define domain exceptions in `engine/exceptions.py`
+- **Result Types**: For expected failures, return `ValidationResult` or `tuple[bool, str]`
+
+```python
+# For unexpected errors (bugs)
+raise ValueError(f"Unknown action type: {action_type}")
+
+# For expected failures (player did something invalid)
+return ValidationResult(valid=False, code="NO_EXIT", reason="...")
+```
+
+### Docstrings
+- **Required For**: All public functions, classes, and modules
+- **Format**: Google style with Args, Returns, Raises sections
+- **Examples**: Include usage examples for complex functions
+
+### Module Organization
+- **One Concept Per File**: Don't mix unrelated classes
+- **Imports at Top**: Standard lib → Third party → Local, separated by blank lines
+- **Circular Import Prevention**: Use `TYPE_CHECKING` for type hints only
+
+```python
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.engine.state import GameStateManager
+```
+
+### Async Patterns
+- **Async All the Way**: Don't mix sync and async in call chains
+- **LLM Calls**: Always async; never block the event loop
+- **Concurrency**: Use `asyncio.gather()` for parallel LLM calls when possible
+
+### Testing Considerations
+- **Testable by Design**: If a function is hard to test, it needs refactoring
+- **No Hidden State**: Avoid module-level mutable state
+- **Deterministic**: Functions with same input should produce same output (except LLM)
+

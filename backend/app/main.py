@@ -14,7 +14,7 @@ from app.api import game, audio
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)]
+    handlers=[logging.StreamHandler(sys.stdout)],
 )
 
 # Enable DEBUG for our LLM modules to get detailed output
@@ -50,8 +50,7 @@ async def root():
 async def list_worlds():
     """List available game worlds"""
     from app.engine.world import WorldLoader
-    
+
     loader = WorldLoader()
     worlds = loader.list_worlds()
     return {"worlds": worlds}
-

@@ -1,0 +1,47 @@
+# Test World - Minimal world definition for unit testing
+# 
+# This world provides:
+# - 3 rooms with different access requirements
+# - A container with hidden contents
+# - An NPC with knowledge topics
+# - A clear victory condition
+
+name: "Test World"
+theme: "A minimal test environment for unit testing the game engine"
+tone: "neutral"
+premise: |
+  You are in a test environment designed to verify game mechanics.
+  Find the hidden gem and reach the secret room to win.
+
+hero_name: "Tester"
+
+player:
+  starting_location: start_room
+  starting_inventory:
+    - test_key
+
+constraints:
+  - Keep responses brief for testing
+  - Focus on mechanical accuracy over narrative flourish
+  - Always acknowledge state changes explicitly
+
+commands:
+  look: "Examine your surroundings"
+  inventory: "Check what you're carrying"
+  help: "Show available commands"
+  north: "Go north"
+  south: "Go south"
+  east: "Go east"
+  west: "Go west"
+
+starting_situation: |
+  You stand in the starting room, ready to test the game engine.
+  A brass key is in your pocket. There are exits to the north and east.
+
+victory:
+  location: secret_room
+  flag: puzzle_solved
+  narrative: |
+    Congratulations! You have successfully completed all test scenarios.
+    The game engine is functioning correctly.
+

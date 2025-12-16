@@ -1,0 +1,43 @@
+# Test World Items
+#
+# Provides test coverage for:
+# - Portable items (test_key)
+# - Non-portable containers (container_box)
+# - Hidden items with reveal conditions (hidden_gem)
+# - Key/unlock mechanics
+
+test_key:
+  name: "Test Key"
+  portable: true
+  examine: "A simple brass key, slightly worn from use."
+  found_description: "A brass key catches the light."
+  take_description: "You pocket the brass key."
+  location: start_room
+  unlocks: locked_room
+
+container_box:
+  name: "Wooden Box"
+  portable: false
+  examine: |
+    A small wooden box with a brass clasp.
+    It looks like it can be opened.
+  location: start_room
+  properties:
+    container: true
+
+hidden_gem:
+  name: "Hidden Gem"
+  portable: true
+  examine: |
+    A sparkling gem that pulses with inner light.
+    It feels warm to the touch.
+  found_description: "A beautiful gem glints from inside the box."
+  take_description: "You carefully pick up the glowing gem."
+  location: start_room
+  hidden: true
+  find_condition:
+    requires_flag: box_opened
+  clues:
+    - hint_for: puzzle
+      reveals: "This gem seems to resonate with something..."
+
