@@ -14,6 +14,7 @@ http://localhost:8000/api
 |--------|----------|-------------|
 | GET | `/` | Health check |
 | GET | `/worlds` | List available worlds |
+| GET | `/game/engines` | List available game engines |
 | POST | `/game/new` | Start new game |
 | POST | `/game/action` | Process player action |
 | GET | `/game/state/{session_id}` | Get current state |
@@ -67,6 +68,42 @@ GET /api/worlds
 
 ---
 
+## List Engines
+
+Get available game engine versions. Engine selection is primarily for migration testing.
+
+```
+GET /api/game/engines
+```
+
+**Response**
+```json
+{
+  "engines": [
+    {
+      "id": "classic",
+      "name": "Classic Engine",
+      "description": "Single LLM call for action processing and narration"
+    },
+    {
+      "id": "two_phase",
+      "name": "Two-Phase Engine",
+      "description": "Separated parsing (Interactor) and narration (Narrator)"
+    }
+  ],
+  "default": "classic"
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `engines` | Array of available engine versions |
+| `default` | ID of the default engine |
+
+**Note:** The two-phase engine is under development. Use `classic` for production gameplay.
+
+---
+
 ## Start New Game
 
 Begin a new game session.
@@ -79,7 +116,8 @@ POST /api/game/new
 ```json
 {
   "world_id": "cursed-manor",
-  "debug": false
+  "debug": false,
+  "engine": "classic"
 }
 ```
 
@@ -87,12 +125,14 @@ POST /api/game/new
 |-------|------|----------|---------|-------------|
 | world_id | string | No | "cursed-manor" | ID of world to load |
 | debug | boolean | No | false | Enable LLM debug info in response |
+| engine | string | No | "classic" | Engine version (see `/game/engines`) |
 
 **Response**
 ```json
 {
   "session_id": "abc123-def456-...",
   "narrative": "A violent storm has driven you to seek shelter...",
+  "engine_version": "classic",
   "llm_debug": null,
   "state": {
     "session_id": "abc123-def456-...",
@@ -427,6 +467,7 @@ interface NewGameResponse {
   session_id: string;
   narrative: string;
   state: GameState;
+  engine_version: string;        // Engine used for this session
   llm_debug?: LLMDebugInfo;      // Debug info when debug=true
 }
 ```
@@ -469,6 +510,16 @@ interface WorldInfo {
   name: string;
   theme: string;
   description?: string;
+}
+```
+
+### EngineInfo
+
+```typescript
+interface EngineInfo {
+  id: string;           // Engine identifier (e.g., "classic", "two_phase")
+  name: string;         // Display name
+  description: string;  // Brief description of the engine
 }
 ```
 

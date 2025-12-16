@@ -29,7 +29,82 @@ The roadmap is organized around **experience goals** from the Vision document:
 | 6 | Living World | ⚪ Planned |
 | 7 | Player Experience | ⚪ Planned |
 
+### Two-Phase Engine Migration
+
+| Phase | Focus | Status |
+|-------|-------|--------|
+| 0 | Foundation (data models, engine selection) | ✅ Complete |
+| 1 | Simple Movement | ⚪ Planned |
+| 2 | Examination & Taking | ⚪ Planned |
+| 3 | Interactor AI | ⚪ Planned |
+| 4 | Full Narrator | ⚪ Planned |
+| 5 | Containers & Visibility | ⚪ Planned |
+| 6 | Polish & Comparison | ⚪ Planned |
+
+See [two-phase-game-loop-spec.md](two-phase-game-loop-spec.md) for full specification.
+
 **Legend**: ✅ Complete | 🟡 In Progress | ⚪ Planned
+
+---
+
+## Two-Phase Engine Architecture
+
+*See [two-phase-game-loop-spec.md](two-phase-game-loop-spec.md) for full specification.*
+
+Separating action parsing from narrative generation enables deterministic state management with AI-powered prose.
+
+### Phase 0: Foundation ✅
+- [x] Data models: `ActionIntent`, `FlavorIntent`, `ActionType`
+- [x] Data models: `Event`, `RejectionEvent`, `EventType`, `RejectionCode`
+- [x] Data models: `PerceptionSnapshot`, `VisibleEntity`, `VisibleExit`
+- [x] Data models: `ValidationResult` with factory functions
+- [x] `EngineVersion` enum (CLASSIC, TWO_PHASE)
+- [x] Engine selection API (`GET /api/game/engines`)
+- [x] Engine parameter in game start (`POST /api/game/new`)
+- [x] Frontend engine selector (Advanced Options)
+- [x] Unit tests for engine selection
+
+### Phase 1: Simple Movement
+- [ ] `RuleBasedParser` for direction patterns
+- [ ] `MovementValidator`
+- [ ] `LOCATION_CHANGED` events
+- [ ] Basic Narrator prompt for locations
+- [ ] Two-phase flow for movement only
+- [ ] Fallback to classic engine for non-movement
+
+### Phase 2: Examination & Taking
+- [ ] Extend parser for examine/take patterns
+- [ ] `ExamineValidator` and `TakeValidator`
+- [ ] `DETAIL_EXAMINED`, `ITEM_TAKEN` events
+- [ ] Visibility resolution for hidden items
+- [ ] Rejection events for locked containers
+
+### Phase 3: Interactor AI
+- [ ] LLM-based parsing for freeform inputs
+- [ ] "use X on Y" parsing
+- [ ] NPC communication parsing
+- [ ] `FlavorIntent` detection
+- [ ] Integration with validation pipeline
+
+### Phase 4: Full Narrator
+- [ ] Rich, context-aware narration
+- [ ] Event-specific narration templates
+- [ ] NPC dialogue generation
+- [ ] Discovery moment narration
+- [ ] Natural rejection narration
+
+### Phase 5: Containers & Visibility
+- [ ] Container model in world schema
+- [ ] OPEN/CLOSE validation
+- [ ] Visibility state machine
+- [ ] `CONTAINER_OPENED`, `ITEM_REVEALED` events
+- [ ] PerceptionSnapshot respects visibility
+
+### Phase 6: Polish & Comparison
+- [ ] Remaining action types (GIVE, SHOW, etc.)
+- [ ] A/B testing framework
+- [ ] Performance optimization
+- [ ] Edge case handling
 
 ---
 
@@ -283,6 +358,7 @@ See [ideas/features.md](../ideas/features.md) for full descriptions.
 
 | Date | Change |
 |------|--------|
+| 2025-12-17 | Two-Phase Engine Phase 0 complete: data models, engine selection API, frontend selector |
 | 2025-12-15 | World validation system: schema generator, deprecated pattern detection, hybrid fixer (rule + LLM), migrated 5 existing worlds |
 | 2025-12-12 | Implemented TUI World Builder (gaime_builder package) - terminal UI for world creation and image generation |
 | 2025-12-10 | Implemented Visual Style System with MPA architecture and 14 presets |

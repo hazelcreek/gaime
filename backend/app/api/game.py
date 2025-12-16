@@ -3,6 +3,8 @@ Game API endpoints - Handle player actions and game state
 """
 
 from pathlib import Path
+from typing import NamedTuple
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -11,6 +13,7 @@ from app.engine.state import GameStateManager
 from app.engine.actions import ActionProcessor
 from app.models.game import GameState, ActionRequest, ActionResponse, LLMDebugInfo
 from app.llm.image_generator import get_location_image_path
+from app.api.engine import EngineVersion, ENGINE_INFO, DEFAULT_ENGINE
 
 router = APIRouter()
 
@@ -18,8 +21,16 @@ router = APIRouter()
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 WORLDS_DIR = PROJECT_ROOT / "worlds"
 
+
+class GameSession(NamedTuple):
+    """Session data including engine version (kept out-of-band from GameState)."""
+
+    manager: GameStateManager
+    engine: EngineVersion
+
+
 # In-memory game sessions (for prototype - would use Redis/DB in production)
-game_sessions: dict[str, GameStateManager] = {}
+game_sessions: dict[str, GameSession] = {}
 
 
 class NewGameRequest(BaseModel):
@@ -27,6 +38,7 @@ class NewGameRequest(BaseModel):
 
     world_id: str = "cursed-manor"
     debug: bool = False  # Enable LLM debug info in responses
+    engine: EngineVersion = DEFAULT_ENGINE  # Engine version for migration testing
 
 
 class NewGameResponse(BaseModel):
@@ -35,6 +47,7 @@ class NewGameResponse(BaseModel):
     session_id: str
     narrative: str
     state: GameState
+    engine_version: EngineVersion  # Confirm which engine is being used
     llm_debug: LLMDebugInfo | None = None  # Debug info when debug mode enabled
 
 
@@ -44,9 +57,15 @@ async def new_game(request: NewGameRequest):
     try:
         manager = GameStateManager(request.world_id)
         session_id = manager.session_id
-        game_sessions[session_id] = manager
+
+        # Store session with engine version (out-of-band from GameState)
+        game_sessions[session_id] = GameSession(
+            manager=manager,
+            engine=request.engine,
+        )
 
         # Generate initial narrative
+        # TODO: Use request.engine to select processor in Phase 1+
         processor = ActionProcessor(manager, debug=request.debug)
         initial_narrative, debug_info = await processor.get_initial_narrative()
 
@@ -54,6 +73,7 @@ async def new_game(request: NewGameRequest):
             session_id=session_id,
             narrative=initial_narrative,
             state=manager.get_state(),
+            engine_version=request.engine,
             llm_debug=debug_info,
         )
     except FileNotFoundError:
@@ -73,8 +93,9 @@ async def process_action(request: ActionRequest):
     if request.session_id not in game_sessions:
         raise HTTPException(status_code=404, detail="Game session not found")
 
-    manager = game_sessions[request.session_id]
-    processor = ActionProcessor(manager, debug=request.debug)
+    session = game_sessions[request.session_id]
+    # TODO: Use session.engine to select processor in Phase 1+
+    processor = ActionProcessor(session.manager, debug=request.debug)
 
     try:
         response = await processor.process(request.action)
@@ -89,8 +110,8 @@ async def get_state(session_id: str):
     if session_id not in game_sessions:
         raise HTTPException(status_code=404, detail="Game session not found")
 
-    manager = game_sessions[session_id]
-    return {"state": manager.get_state()}
+    session = game_sessions[session_id]
+    return {"state": session.manager.get_state()}
 
 
 @router.get("/debug/{session_id}")
@@ -103,7 +124,8 @@ async def debug_state(session_id: str):
     if session_id not in game_sessions:
         raise HTTPException(status_code=404, detail="Game session not found")
 
-    manager = game_sessions[session_id]
+    session = game_sessions[session_id]
+    manager = session.manager
     state = manager.get_state()
     world_data = manager.get_world_data()
 
@@ -264,7 +286,8 @@ async def get_location_image_for_session(session_id: str, location_id: str):
     if session_id not in game_sessions:
         raise HTTPException(status_code=404, detail="Game session not found")
 
-    manager = game_sessions[session_id]
+    session = game_sessions[session_id]
+    manager = session.manager
     world_id = manager.world_id
 
     # Get visible NPCs at this location
@@ -305,7 +328,21 @@ async def get_current_location_image(session_id: str):
     if session_id not in game_sessions:
         raise HTTPException(status_code=404, detail="Game session not found")
 
-    manager = game_sessions[session_id]
-    current_location = manager.get_state().current_location
+    session = game_sessions[session_id]
+    current_location = session.manager.get_state().current_location
 
     return await get_location_image_for_session(session_id, current_location)
+
+
+@router.get("/engines")
+async def list_engines():
+    """
+    List available game engine versions.
+
+    Returns the available engines for frontend discovery. Engine selection
+    is primarily for migration testing between classic and two-phase engines.
+    """
+    return {
+        "engines": ENGINE_INFO,
+        "default": DEFAULT_ENGINE.value,
+    }

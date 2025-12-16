@@ -24,7 +24,7 @@ interface GameContextValue {
   error: string | null;
   
   // Actions
-  startNewGame: (worldId?: string, worldName?: string) => Promise<void>;
+  startNewGame: (worldId?: string, worldName?: string, engine?: string) => Promise<void>;
   sendAction: (action: string) => Promise<void>;
   clearError: () => void;
   resetGame: () => void;
@@ -103,7 +103,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, [sessionId, worldId, worldName]);
 
   // Start a new game - always request debug info
-  const startNewGame = useCallback(async (selectedWorldId?: string, selectedWorldName?: string) => {
+  const startNewGame = useCallback(async (
+    selectedWorldId?: string,
+    selectedWorldName?: string,
+    engine?: string
+  ) => {
     // Use provided worldId, or fall back to current world, or default to 'cursed-manor'
     const effectiveWorldId = selectedWorldId ?? worldId ?? 'cursed-manor';
     
@@ -113,7 +117,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     
     try {
       // Always request debug info (debug: true)
-      const response = await gameAPI.newGame(effectiveWorldId, true);
+      const response = await gameAPI.newGame(effectiveWorldId, true, engine);
       setSessionId(response.session_id);
       setWorldId(effectiveWorldId);
       setWorldName(selectedWorldName ?? null);

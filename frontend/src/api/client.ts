@@ -59,6 +59,7 @@ export interface NewGameResponse {
   session_id: string;
   narrative: string;
   state: GameState;
+  engine_version: string;
   llm_debug?: LLMDebugInfo;
 }
 
@@ -69,15 +70,35 @@ export interface WorldInfo {
   description?: string;
 }
 
+export interface EngineInfo {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface EnginesResponse {
+  engines: EngineInfo[];
+  default: string;
+}
+
 class GameAPIClient {
   /**
    * Start a new game session
    */
-  async newGame(worldId: string = 'cursed-manor', debug: boolean = false): Promise<NewGameResponse> {
+  async newGame(
+    worldId: string = 'cursed-manor',
+    debug: boolean = false,
+    engine?: string
+  ): Promise<NewGameResponse> {
+    const body: Record<string, unknown> = { world_id: worldId, debug };
+    if (engine) {
+      body.engine = engine;
+    }
+
     const response = await fetch(`${API_BASE}/game/new`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ world_id: worldId, debug }),
+      body: JSON.stringify(body),
     });
     
     if (!response.ok) {
@@ -142,6 +163,26 @@ class GameAPIClient {
     if (!response.ok) {
       // Return empty list on error - audio is non-critical
       return { tracks: [] };
+    }
+    
+    return response.json();
+  }
+
+  /**
+   * List available game engine versions
+   * 
+   * Engine selection is primarily for migration testing between
+   * classic and two-phase engines.
+   */
+  async listEngines(): Promise<EnginesResponse> {
+    const response = await fetch(`${API_BASE}/game/engines`);
+    
+    if (!response.ok) {
+      // Return default engine on error
+      return {
+        engines: [{ id: 'classic', name: 'Classic Engine', description: 'Default engine' }],
+        default: 'classic',
+      };
     }
     
     return response.json();
