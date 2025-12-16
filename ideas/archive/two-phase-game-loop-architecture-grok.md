@@ -1,3 +1,7 @@
+> **⚠️ SUPERSEDED**: This document has been merged into the authoritative specification at [`planning/two-phase-game-loop-spec.md`](../../planning/two-phase-game-loop-spec.md). Kept for historical reference.
+
+---
+
 # Two-Phase Game Loop Architecture
 
 ## Overview
@@ -976,3 +980,4 @@ The hybrid approach ensures a smooth transition, allowing us to compare and refi
 *Created: December 2025*  
 *Status: Ready for implementation*  
 *Branch: cursor/grok-code-fast-1/two-phase-game-loop-architecture*
+

@@ -1,7 +1,11 @@
+> **⚠️ SUPERSEDED**: This document has been merged into the authoritative specification at [`planning/two-phase-game-loop-spec.md`](../../planning/two-phase-game-loop-spec.md). Kept for historical reference.
+
+---
+
 # Evented Game Loop Spec (ActionIntents + Events + Narration)
 
 > **Status**: Draft specification — December 2025  
-> **Context**: Extends the “Two‑Phase LLM” section in `ideas/game-mechanics-design.md` and aligns with `docs/VISION.md` (story-first, guided freedom, no unwinnable states, in-world explanations).
+> **Context**: Extends the "Two‑Phase LLM" section in `ideas/game-mechanics-design.md` and aligns with `docs/VISION.md` (story-first, guided freedom, no unwinnable states, in-world explanations).
 
 This document specifies a **new gameplay loop** where:
 
@@ -9,7 +13,7 @@ This document specifies a **new gameplay loop** where:
 - A deterministic **game engine** validates and applies the intent, producing **`ActionEvent`s** (and/or **`ValidationFault`s**).
 - A **Narrator AI** generates prose strictly from the **validated outcome + player-visible state**, never inventing state changes.
 
-The new loop should **co-exist** with the current “single LLM does mechanics + prose” loop to compare gameplay.
+The new loop should **co-exist** with the current "single LLM does mechanics + prose" loop to compare gameplay.
 
 ---
 
@@ -17,7 +21,7 @@ The new loop should **co-exist** with the current “single LLM does mechanics +
 
 - **Natural UX**: Players can type natural language, not rigid commands.
 - **Rules enforcement**: World/engine rules must be enforced deterministically.
-- **Immersion-preserving failures**: When an action can’t happen, the player gets an **in-world** explanation (not “Error:”).
+- **Immersion-preserving failures**: When an action can't happen, the player gets an **in-world** explanation (not "Error:").
 - **No unwinnable states**: Engine prevents game-breaking actions (e.g. destroying critical items).
 - **Debuggable**: We can log: input → intent → validation → events → narration.
 
@@ -27,7 +31,7 @@ The new loop should **co-exist** with the current “single LLM does mechanics +
 
 - Full general natural-language understanding for all verbs.
 - Modeling physics, continuous simulation, combat systems, or RPG stats.
-- Perfect “commonsense” reasoning (we’ll use affordances + authored interactions).
+- Perfect "commonsense" reasoning (we'll use affordances + authored interactions).
 
 ---
 
@@ -76,7 +80,7 @@ Common fields:
 **Perception**
 
 - `LookIntent`
-  - `target: str | None` (none = “look around”)
+  - `target: str | None` (none = "look around")
 - `ExamineIntent`
   - `target: str` (entity ref or player text span)
 
@@ -93,7 +97,7 @@ Common fields:
 - `UseIntent`
   - `item: str`
   - `target: str | None`
-  - `instrument: str | None` (rare; e.g. “light candle with matches” ⇒ item=matches target=candle)
+  - `instrument: str | None` (rare; e.g. "light candle with matches" ⇒ item=matches target=candle)
 
 **Social**
 
@@ -101,7 +105,7 @@ Common fields:
   - `npc: str`
   - `topic: str | None`
 
-**Richer verbs / “anything else”**
+**Richer verbs / "anything else"**
 
 To keep the UX natural *without* letting the LLM invent mechanics, we funnel most freeform verbs into one of these:
 
@@ -115,14 +119,14 @@ To keep the UX natural *without* letting the LLM invent mechanics, we funnel mos
   - `prepositional_object: str | None`
   - `notes: str | None`
 
-**Rule**: If the engine doesn’t recognize or authorize the intent, it must become either:
+**Rule**: If the engine doesn't recognize or authorize the intent, it must become either:
 
 - a **rejected** action with an in-world explanation, or
 - a **FlavorIntent** (no state change; narrator makes it fun and consistent).
 
 ### `ValidationFault`
 
-**Purpose**: machine-readable reasons an intent can’t be applied.
+**Purpose**: machine-readable reasons an intent can't be applied.
 
 Fields:
 
@@ -138,11 +142,11 @@ Recommended `code` set (expand over time):
 - `EXIT_LOCKED` — locked
 - `EXIT_BLOCKED` — blocked (rubble, fire, etc.)
 - `PRECONDITION_FAILED` — missing flag/item/light/etc.
-- `ITEM_NOT_VISIBLE` — can’t take/use what you can’t see
+- `ITEM_NOT_VISIBLE` — can't take/use what you can't see
 - `ITEM_NOT_PORTABLE` — fixed in place
 - `ITEM_TOO_HEAVY` — portable but too heavy
-- `TOOL_INSUFFICIENT` — e.g. “knife too dull”
-- `AMBIGUOUS_TARGET` — multiple matches (“take key” but two keys)
+- `TOOL_INSUFFICIENT` — e.g. "knife too dull"
+- `AMBIGUOUS_TARGET` — multiple matches ("take key" but two keys)
 - `ALREADY_DONE` — repeated one-time interaction
 - `SAFETY_GUARDRAIL` — would create unwinnable state / violates design rules
 
@@ -229,7 +233,7 @@ Fields (minimum viable):
 - `location`
   - `id`, `name`, `atmosphere_prompt`
 - `visible_details[]` *(optional but recommended)*
-  - `id`, `label`, `description` (examinable “features” like `desk`, `portrait`, `drawer`)
+  - `id`, `label`, `description` (examinable "features" like `desk`, `portrait`, `drawer`)
 - `visible_exits[]`
   - `direction`, `destination_name`, `description`
 - `visible_items[]`
@@ -260,7 +264,7 @@ Fields (minimum viable):
    - `intent`
    - `events`
    - **post-action** `PerceptionSnapshot`
-   - optional **pre-action** snapshot for contrast (useful for “newly revealed”)
+   - optional **pre-action** snapshot for contrast (useful for "newly revealed")
 6. Narrator outputs prose (and optional UI metadata)
 
 ### Validation-fault path (generic)
@@ -276,36 +280,36 @@ Fields (minimum viable):
    - unchanged `PerceptionSnapshot`
 5. Narrator produces an **in-world** explanation + optional gentle suggestion.
 
-**Important**: On failure, the narrator must not describe changes that didn’t happen.
+**Important**: On failure, the narrator must not describe changes that didn't happen.
 
 ---
 
 ## Richer Verbs: How we keep UX natural *and* rules strict
 
-We support player language like “play piano”, “jump around”, “eat apple”, “light candle with matches” by combining:
+We support player language like "play piano", "jump around", "eat apple", "light candle with matches" by combining:
 
 1. **Canonical intents** for common mechanics (move/take/open/use/talk/look).
 2. **World-defined interactions (affordances)** for bespoke verbs:
    - Authors define an `interaction_id` (e.g. `play_piano`) with triggers and deterministic effects.
 3. **Flavor actions** as a safety valve:
-   - If it’s not a real mechanic but is harmless, treat it as `FlavorIntent` and narrate it without state change.
+   - If it's not a real mechanic but is harmless, treat it as `FlavorIntent` and narrate it without state change.
 
 ### Authoring rule of thumb
 
 - If an action should **change state** or unlock progress ⇒ define a deterministic **interaction** (producing events).
-- If it’s just immersion ⇒ allow as **FlavorIntent**.
+- If it's just immersion ⇒ allow as **FlavorIntent**.
 
 ### Example mappings
 
-- “play piano”
+- "play piano"
   - If location has interaction `play_piano` ⇒ `PerformInteractionIntent(interaction_id="play_piano")`
   - Else ⇒ `FlavorIntent(verb="play", direct_object="piano")`
 
-- “light candle with matches”
+- "light candle with matches"
   - If both items exist and rules allow ⇒ `UseIntent(item="matches", target="candle")`
   - Validation may yield `PRECONDITION_FAILED` (no matches), `TOOL_INSUFFICIENT` (matches are wet), etc.
 
-- “eat apple”
+- "eat apple"
   - If apple is consumable and in inventory ⇒ `UseIntent(item="apple", target=None)` with deterministic effect `ItemRemovedFromInventory`
   - Else ⇒ `ITEM_NOT_VISIBLE` / `PRECONDITION_FAILED`
 
@@ -371,7 +375,7 @@ Narrator receives a `PerceptionSnapshot` that includes:
 
 Narrator output: describes the room, mentions the desk/drawer **without** revealing the key.
 
-#### 2) Player: “open drawer”
+#### 2) Player: "open drawer"
 
 Intent:
 
@@ -396,7 +400,7 @@ Narrator receives **post-action** snapshot where:
 
 Narrator output: describes opening the drawer and noticing the key.
 
-#### 3) Player: “take key”
+#### 3) Player: "take key"
 
 Intent:
 
@@ -519,7 +523,7 @@ This enables qualitative comparison and automated regression checks later.
 ### Phase 1 — expanded movement language
 
 - Add heuristics and/or Interaction AI for:
-  - “leave”, “go back”, “head outside”, “return”, “enter”
+  - "leave", "go back", "head outside", "return", "enter"
 - Keep the engine deterministic.
 
 ### Phase 2 — interactions & object verbs
@@ -533,5 +537,4 @@ This enables qualitative comparison and automated regression checks later.
   - canonical intents, or
   - known affordances (`interaction_id`), or
   - `FlavorIntent` (no state change)
-
 

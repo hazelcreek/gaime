@@ -1,3 +1,7 @@
+> **⚠️ SUPERSEDED**: This document has been merged into the authoritative specification at [`planning/two-phase-game-loop-spec.md`](../../planning/two-phase-game-loop-spec.md). Kept for historical reference.
+
+---
+
 # Event-Driven Game Loop Architecture
 
 This document details the architectural shift from a monolithic LLM game loop to a structured, event-driven pipeline. It fleshes out the concepts introduced in `game-mechanics-design.md` and aligns with the immersive goals of `docs/VISION.md`.
