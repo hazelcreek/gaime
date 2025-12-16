@@ -7,7 +7,6 @@ Tests cover:
 - RejectionCode enum values
 """
 
-
 from app.models.event import Event, EventType, RejectionCode, RejectionEvent
 
 
