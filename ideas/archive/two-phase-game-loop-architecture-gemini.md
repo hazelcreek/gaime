@@ -7,7 +7,7 @@
 This document details the architectural shift from a monolithic LLM game loop to a structured, event-driven pipeline. It fleshes out the concepts introduced in `game-mechanics-design.md` and aligns with the immersive goals of `docs/VISION.md`.
 
 > **Status**: Idea / Proposal  
-> **Related**: [Game Mechanics Design](game-mechanics-design.md), [Vision](../docs/VISION.md)
+> **Related**: [Game Mechanics Design](../game-mechanics-design.md), [Vision](../../docs/VISION.md)
 
 ---
 

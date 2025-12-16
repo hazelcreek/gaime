@@ -4,7 +4,7 @@ This document outlines a comprehensive approach to adding music and sound effect
 
 ## Table of Contents
 
-1. [Overview & Goals](#overview--goals)
+1. [Overview & Goals](#overview-goals)
 2. [Music System](#music-system)
    - [World-Based Background Music](#world-based-background-music)
    - [Dynamic Music Layers (Stems)](#dynamic-music-layers-stems)
@@ -17,7 +17,7 @@ This document outlines a comprehensive approach to adding music and sound effect
    - [Frontend Audio Engine](#frontend-audio-engine)
    - [Backend Audio Metadata](#backend-audio-metadata)
    - [YAML Schema Extensions](#yaml-schema-extensions)
-5. [Asset Creation & Sourcing](#asset-creation--sourcing)
+5. [Asset Creation & Sourcing](#asset-creation-sourcing)
    - [AI-Generated Audio](#ai-generated-audio)
    - [DAW Production](#daw-production)
    - [Royalty-Free Sources](#royalty-free-sources)

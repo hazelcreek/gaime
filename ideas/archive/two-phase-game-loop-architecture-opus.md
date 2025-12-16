@@ -7,7 +7,7 @@
 A comprehensive specification for separating action parsing from narrative generation, enabling deterministic state management with AI-powered prose.
 
 > **Status**: Design Specification - December 2025  
-> **Related**: [Game Mechanics Design](game-mechanics-design.md) | [Vision](../docs/VISION.md) | [Architecture](../docs/ARCHITECTURE.md)  
+> **Related**: [Game Mechanics Design](../game-mechanics-design.md) | [Vision](../../docs/VISION.md) | [Architecture](../../docs/ARCHITECTURE.md)  
 > **Implementation Branch**: `feature/two-phase-game-loop-claude-opus-4`
 
 ---

@@ -5,7 +5,7 @@
 # Evented Game Loop Spec (ActionIntents + Events + Narration)
 
 > **Status**: Draft specification — December 2025  
-> **Context**: Extends the "Two‑Phase LLM" section in `ideas/game-mechanics-design.md` and aligns with `docs/VISION.md` (story-first, guided freedom, no unwinnable states, in-world explanations).
+> **Context**: Extends the "Two‑Phase LLM" section in `../game-mechanics-design.md` and aligns with `../../docs/VISION.md` (story-first, guided freedom, no unwinnable states, in-world explanations).
 
 This document specifies a **new gameplay loop** where:
 

@@ -9,7 +9,7 @@
 This document outlines the architecture for evolving GAIME from a single LLM call to a sophisticated two-phase game loop with separate parsing and narration stages. The new architecture addresses the limitations of the current monolithic LLM approach while maintaining the core vision of immersive, story-driven gameplay.
 
 > **Status**: Design Specification - December 2025  
-> **Related**: [Vision Document](../docs/VISION.md) | [Game Mechanics Design](game-mechanics-design.md) | [Architecture](../docs/ARCHITECTURE.md)
+> **Related**: [Vision Document](../../docs/VISION.md) | [Game Mechanics Design](../game-mechanics-design.md) | [Architecture](../../docs/ARCHITECTURE.md)
 
 ---
 
@@ -59,7 +59,7 @@ This enables:
 
 ### Alignment with Vision
 
-This architecture supports the [Vision](../docs/VISION.md) principles:
+This architecture supports the [Vision](../../docs/VISION.md) principles:
 - **"Short story you played through"**: Maintains narrative focus while adding mechanical reliability
 - **"No unwinnable states"**: Validation layer prevents game-breaking actions
 - **"Guided freedom"**: Allows natural input while enforcing world rules
