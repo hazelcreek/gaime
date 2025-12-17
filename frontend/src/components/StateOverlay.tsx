@@ -1,16 +1,19 @@
 /**
  * StateOverlay - Modal overlay displaying current game state
- * Shows location, inventory, flags, discoveries, NPC trust, and narrative memory
+ * Supports both classic and two-phase engine states
  */
 
-import { GameState } from '../api/client';
+import { AnyGameState, GameState, TwoPhaseGameState, isTwoPhaseGameState } from '../api/client';
 
 interface StateOverlayProps {
-  gameState: GameState;
+  gameState: AnyGameState;
+  engineVersion: string | null;
   onClose: () => void;
 }
 
-export default function StateOverlay({ gameState, onClose }: StateOverlayProps) {
+export default function StateOverlay({ gameState, engineVersion, onClose }: StateOverlayProps) {
+  const isTwoPhase = isTwoPhaseGameState(gameState);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
@@ -27,12 +30,23 @@ export default function StateOverlay({ gameState, onClose }: StateOverlayProps) 
             <span className="text-terminal-accent">◈</span>
             <h2 className="font-display text-terminal-accent tracking-wider">Game State</h2>
           </div>
-          <button
-            onClick={onClose}
-            className="text-terminal-dim hover:text-terminal-text transition-colors text-lg leading-none"
-          >
-            ×
-          </button>
+          <div className="flex items-center gap-3">
+            {engineVersion && (
+              <span className={`text-xs px-2 py-0.5 rounded ${
+                isTwoPhase
+                  ? 'bg-terminal-accent/20 text-terminal-accent'
+                  : 'bg-terminal-dim/20 text-terminal-dim'
+              }`}>
+                {engineVersion === 'two_phase' ? 'Two-Phase' : 'Classic'}
+              </span>
+            )}
+            <button
+              onClick={onClose}
+              className="text-terminal-dim hover:text-terminal-text transition-colors text-lg leading-none"
+            >
+              ×
+            </button>
+          </div>
         </div>
 
         {/* Content */}
@@ -42,6 +56,7 @@ export default function StateOverlay({ gameState, onClose }: StateOverlayProps) 
             <div className="grid grid-cols-2 gap-4">
               <InfoItem label="Location" value={formatLocationId(gameState.current_location)} />
               <InfoItem label="Turn" value={gameState.turn_count.toString()} />
+              <InfoItem label="Status" value={gameState.status} />
             </div>
           </Section>
 
@@ -84,113 +99,12 @@ export default function StateOverlay({ gameState, onClose }: StateOverlayProps) 
             )}
           </Section>
 
-          {/* Discovered Locations */}
-          <Section title="Discovered Locations">
-            {gameState.discovered_locations.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {gameState.discovered_locations.map((loc) => (
-                  <span
-                    key={loc}
-                    className={`px-2 py-1 rounded text-xs border ${
-                      loc === gameState.current_location
-                        ? 'bg-terminal-success/10 border-terminal-success/30 text-terminal-success'
-                        : 'bg-terminal-bg border-terminal-border text-terminal-dim'
-                    }`}
-                  >
-                    {formatLocationId(loc)}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <span className="text-terminal-dim text-sm italic">None yet</span>
-            )}
-          </Section>
-
-          {/* NPC Trust */}
-          {gameState.npc_trust && Object.keys(gameState.npc_trust).length > 0 && (
-            <Section title="NPC Trust">
-              <div className="space-y-2">
-                {Object.entries(gameState.npc_trust).map(([npc, trust]) => (
-                  <div key={npc} className="flex items-center gap-3">
-                    <span className="text-terminal-text text-sm min-w-[100px]">
-                      {formatNpcId(npc)}
-                    </span>
-                    <div className="flex-1 h-2 bg-terminal-bg rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all ${getTrustColor(trust as number)}`}
-                        style={{ width: `${Math.max(0, Math.min(100, ((trust as number) + 100) / 2))}%` }}
-                      />
-                    </div>
-                    <span className="text-terminal-dim text-xs w-8 text-right">{trust}</span>
-                  </div>
-                ))}
-              </div>
-            </Section>
+          {/* Engine-specific sections */}
+          {isTwoPhase ? (
+            <TwoPhaseStateContent gameState={gameState} />
+          ) : (
+            <ClassicStateContent gameState={gameState as GameState} />
           )}
-
-          {/* Narrative Memory Summary */}
-          <Section title="Narrative Memory">
-            <div className="space-y-3">
-              {/* Recent Exchanges */}
-              <div>
-                <h4 className="text-terminal-dim text-xs uppercase tracking-wider mb-1">
-                  Recent Exchanges ({gameState.narrative_memory.recent_exchanges.length})
-                </h4>
-                {gameState.narrative_memory.recent_exchanges.length > 0 ? (
-                  <div className="space-y-1 max-h-32 overflow-y-auto">
-                    {gameState.narrative_memory.recent_exchanges.slice(-5).map((ex, i) => (
-                      <div key={i} className="text-xs">
-                        <span className="text-terminal-accent">Turn {ex.turn}:</span>{' '}
-                        <span className="text-terminal-dim">{truncate(ex.player_action, 50)}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <span className="text-terminal-dim text-xs italic">None</span>
-                )}
-              </div>
-
-              {/* Discoveries */}
-              <div>
-                <h4 className="text-terminal-dim text-xs uppercase tracking-wider mb-1">
-                  Discoveries ({gameState.narrative_memory.discoveries.length})
-                </h4>
-                {gameState.narrative_memory.discoveries.length > 0 ? (
-                  <div className="space-y-1 max-h-24 overflow-y-auto">
-                    {gameState.narrative_memory.discoveries.map((d, i) => (
-                      <div key={i} className="text-xs text-terminal-text">• {d}</div>
-                    ))}
-                  </div>
-                ) : (
-                  <span className="text-terminal-dim text-xs italic">None</span>
-                )}
-              </div>
-
-              {/* NPC Interactions */}
-              {Object.keys(gameState.narrative_memory.npc_memory).length > 0 && (
-                <div>
-                  <h4 className="text-terminal-dim text-xs uppercase tracking-wider mb-1">
-                    NPC Interactions
-                  </h4>
-                  <div className="space-y-2">
-                    {Object.entries(gameState.narrative_memory.npc_memory).map(([npcId, mem]) => (
-                      <div key={npcId} className="text-xs bg-terminal-bg/50 p-2 rounded">
-                        <div className="text-terminal-accent font-medium">{formatNpcId(npcId)}</div>
-                        <div className="text-terminal-dim">
-                          Met {mem.encounter_count}× at {formatLocationId(mem.first_met_location || 'unknown')}
-                        </div>
-                        {mem.topics_discussed.length > 0 && (
-                          <div className="text-terminal-dim mt-1">
-                            Topics: {mem.topics_discussed.slice(-3).join(', ')}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </Section>
         </div>
 
         {/* Footer */}
@@ -201,6 +115,183 @@ export default function StateOverlay({ gameState, onClose }: StateOverlayProps) 
         </div>
       </div>
     </div>
+  );
+}
+
+// =============================================================================
+// Two-Phase Engine State Content
+// =============================================================================
+
+function TwoPhaseStateContent({ gameState }: { gameState: TwoPhaseGameState }) {
+  const visitedLocations = Array.isArray(gameState.visited_locations)
+    ? gameState.visited_locations
+    : Array.from(gameState.visited_locations);
+
+  return (
+    <>
+      {/* Visited Locations */}
+      <Section title="Visited Locations">
+        {visitedLocations.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {visitedLocations.map((loc) => (
+              <span
+                key={loc}
+                className={`px-2 py-1 rounded text-xs border ${
+                  loc === gameState.current_location
+                    ? 'bg-terminal-success/10 border-terminal-success/30 text-terminal-success'
+                    : 'bg-terminal-bg border-terminal-border text-terminal-dim'
+                }`}
+              >
+                {formatLocationId(loc)}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span className="text-terminal-dim text-sm italic">None yet</span>
+        )}
+      </Section>
+
+      {/* Container States */}
+      <Section title="Container States">
+        {Object.keys(gameState.container_states).length > 0 ? (
+          <div className="space-y-1">
+            {Object.entries(gameState.container_states)
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([container, isOpen]) => (
+                <div key={container} className="flex items-center gap-2 text-sm">
+                  <span className={isOpen ? 'text-terminal-success' : 'text-terminal-dim'}>
+                    {isOpen ? '◑' : '◐'}
+                  </span>
+                  <span className="text-terminal-text">{formatItemId(container)}</span>
+                  <span className="text-terminal-dim text-xs">
+                    ({isOpen ? 'open' : 'closed'})
+                  </span>
+                </div>
+              ))}
+          </div>
+        ) : (
+          <span className="text-terminal-dim text-sm italic">No containers interacted with</span>
+        )}
+      </Section>
+    </>
+  );
+}
+
+// =============================================================================
+// Classic Engine State Content
+// =============================================================================
+
+function ClassicStateContent({ gameState }: { gameState: GameState }) {
+  return (
+    <>
+      {/* Discovered Locations */}
+      <Section title="Discovered Locations">
+        {gameState.discovered_locations.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {gameState.discovered_locations.map((loc) => (
+              <span
+                key={loc}
+                className={`px-2 py-1 rounded text-xs border ${
+                  loc === gameState.current_location
+                    ? 'bg-terminal-success/10 border-terminal-success/30 text-terminal-success'
+                    : 'bg-terminal-bg border-terminal-border text-terminal-dim'
+                }`}
+              >
+                {formatLocationId(loc)}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span className="text-terminal-dim text-sm italic">None yet</span>
+        )}
+      </Section>
+
+      {/* NPC Trust */}
+      {gameState.npc_trust && Object.keys(gameState.npc_trust).length > 0 && (
+        <Section title="NPC Trust">
+          <div className="space-y-2">
+            {Object.entries(gameState.npc_trust).map(([npc, trust]) => (
+              <div key={npc} className="flex items-center gap-3">
+                <span className="text-terminal-text text-sm min-w-[100px]">
+                  {formatNpcId(npc)}
+                </span>
+                <div className="flex-1 h-2 bg-terminal-bg rounded-full overflow-hidden">
+                  <div
+                    className={`h-full transition-all ${getTrustColor(trust as number)}`}
+                    style={{ width: `${Math.max(0, Math.min(100, ((trust as number) + 100) / 2))}%` }}
+                  />
+                </div>
+                <span className="text-terminal-dim text-xs w-8 text-right">{trust}</span>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Narrative Memory Summary */}
+      <Section title="Narrative Memory">
+        <div className="space-y-3">
+          {/* Recent Exchanges */}
+          <div>
+            <h4 className="text-terminal-dim text-xs uppercase tracking-wider mb-1">
+              Recent Exchanges ({gameState.narrative_memory.recent_exchanges.length})
+            </h4>
+            {gameState.narrative_memory.recent_exchanges.length > 0 ? (
+              <div className="space-y-1 max-h-32 overflow-y-auto">
+                {gameState.narrative_memory.recent_exchanges.slice(-5).map((ex, i) => (
+                  <div key={i} className="text-xs">
+                    <span className="text-terminal-accent">Turn {ex.turn}:</span>{' '}
+                    <span className="text-terminal-dim">{truncate(ex.player_action, 50)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <span className="text-terminal-dim text-xs italic">None</span>
+            )}
+          </div>
+
+          {/* Discoveries */}
+          <div>
+            <h4 className="text-terminal-dim text-xs uppercase tracking-wider mb-1">
+              Discoveries ({gameState.narrative_memory.discoveries.length})
+            </h4>
+            {gameState.narrative_memory.discoveries.length > 0 ? (
+              <div className="space-y-1 max-h-24 overflow-y-auto">
+                {gameState.narrative_memory.discoveries.map((d, i) => (
+                  <div key={i} className="text-xs text-terminal-text">• {d}</div>
+                ))}
+              </div>
+            ) : (
+              <span className="text-terminal-dim text-xs italic">None</span>
+            )}
+          </div>
+
+          {/* NPC Interactions */}
+          {Object.keys(gameState.narrative_memory.npc_memory).length > 0 && (
+            <div>
+              <h4 className="text-terminal-dim text-xs uppercase tracking-wider mb-1">
+                NPC Interactions
+              </h4>
+              <div className="space-y-2">
+                {Object.entries(gameState.narrative_memory.npc_memory).map(([npcId, mem]) => (
+                  <div key={npcId} className="text-xs bg-terminal-bg/50 p-2 rounded">
+                    <div className="text-terminal-accent font-medium">{formatNpcId(npcId)}</div>
+                    <div className="text-terminal-dim">
+                      Met {mem.encounter_count}× at {formatLocationId(mem.first_met_location || 'unknown')}
+                    </div>
+                    {mem.topics_discussed.length > 0 && (
+                      <div className="text-terminal-dim mt-1">
+                        Topics: {mem.topics_discussed.slice(-3).join(', ')}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </Section>
+    </>
   );
 }
 

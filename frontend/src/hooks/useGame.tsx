@@ -3,14 +3,19 @@
  */
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { gameAPI, GameState, ActionResponse, LLMDebugInfo } from '../api/client';
+import {
+  gameAPI,
+  AnyGameState,
+  DebugInfo,
+  isTwoPhaseActionResponse,
+} from '../api/client';
 
 export interface NarrativeEntry {
   id: string;
   type: 'narrative' | 'player' | 'system' | 'error';
   content: string;
   timestamp: Date;
-  debugInfo?: LLMDebugInfo;
+  debugInfo?: DebugInfo;
 }
 
 interface GameContextValue {
@@ -18,7 +23,8 @@ interface GameContextValue {
   sessionId: string | null;
   worldId: string | null;
   worldName: string | null;
-  gameState: GameState | null;
+  engineVersion: string | null;
+  gameState: AnyGameState | null;
   narrative: NarrativeEntry[];
   isLoading: boolean;
   error: string | null;
@@ -38,7 +44,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [worldId, setWorldId] = useState<string | null>(null);
   const [worldName, setWorldName] = useState<string | null>(null);
-  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [engineVersion, setEngineVersion] = useState<string | null>(null);
+  const [gameState, setGameState] = useState<AnyGameState | null>(null);
   const [narrative, setNarrative] = useState<NarrativeEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +54,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const generateId = () => Math.random().toString(36).substring(2, 9);
 
   // Add a narrative entry with optional debug info
-  const addNarrative = useCallback((type: NarrativeEntry['type'], content: string, debugInfo?: LLMDebugInfo) => {
+  const addNarrative = useCallback((type: NarrativeEntry['type'], content: string, debugInfo?: DebugInfo) => {
     setNarrative(prev => [...prev, {
       id: generateId(),
       type,
@@ -62,12 +69,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        const { sessionId: storedId, worldId: storedWorldId, worldName: storedWorldName } = JSON.parse(stored);
+        const {
+          sessionId: storedId,
+          worldId: storedWorldId,
+          worldName: storedWorldName,
+          engineVersion: storedEngineVersion,
+        } = JSON.parse(stored);
         if (storedId) {
           // Try to restore game state from backend
           setIsLoading(true);
           gameAPI.getState(storedId)
-            .then(({ state }) => {
+            .then(({ state, engine }) => {
               // Session exists, restore state
               setSessionId(storedId);
               if (storedWorldId) {
@@ -76,6 +88,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
               if (storedWorldName) {
                 setWorldName(storedWorldName);
               }
+              // Use engine from backend response, or fall back to stored version
+              setEngineVersion(engine ?? storedEngineVersion ?? null);
               setGameState(state);
               addNarrative('system', 'Game restored. Continue your adventure!');
             })
@@ -96,11 +110,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   // Save session to localStorage
   useEffect(() => {
     if (sessionId) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ sessionId, worldId, worldName }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        sessionId,
+        worldId,
+        worldName,
+        engineVersion,
+      }));
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
-  }, [sessionId, worldId, worldName]);
+  }, [sessionId, worldId, worldName, engineVersion]);
 
   // Start a new game - always request debug info
   const startNewGame = useCallback(async (
@@ -121,8 +140,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       setSessionId(response.session_id);
       setWorldId(effectiveWorldId);
       setWorldName(selectedWorldName ?? null);
+      setEngineVersion(response.engine_version);
       setGameState(response.state);
-      // Attach debug info to the narrative entry
+      // Attach debug info to the narrative entry (opening uses llm_debug for both engines)
       addNarrative('narrative', response.narrative, response.llm_debug);
       addNarrative('system', 'Type your commands below. Try "look around" or "help" to get started.');
     } catch (err) {
@@ -148,13 +168,24 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     try {
       // Always request debug info (debug: true)
-      const response: ActionResponse = await gameAPI.sendAction(sessionId, action, true);
+      const response = await gameAPI.sendAction(sessionId, action, true);
       setGameState(response.state);
-      // Attach debug info to the narrative entry
-      addNarrative('narrative', response.narrative, response.llm_debug);
 
-      // Show hints if any
-      if (response.hints && response.hints.length > 0) {
+      // Extract debug info based on engine type
+      let debugInfo: DebugInfo | undefined;
+      if (isTwoPhaseActionResponse(response)) {
+        // Two-phase engine: use pipeline_debug
+        debugInfo = response.pipeline_debug ?? undefined;
+      } else {
+        // Classic engine: use llm_debug
+        debugInfo = response.llm_debug;
+      }
+
+      // Attach debug info to the narrative entry
+      addNarrative('narrative', response.narrative, debugInfo);
+
+      // Show hints if any (classic engine only)
+      if (!isTwoPhaseActionResponse(response) && response.hints && response.hints.length > 0) {
         response.hints.forEach(hint => {
           addNarrative('system', `💡 ${hint}`);
         });
@@ -178,6 +209,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setSessionId(null);
     setWorldId(null);
     setWorldName(null);
+    setEngineVersion(null);
     setGameState(null);
     setNarrative([]);
     setError(null);
@@ -189,6 +221,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       sessionId,
       worldId,
       worldName,
+      engineVersion,
       gameState,
       narrative,
       isLoading,

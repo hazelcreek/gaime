@@ -16,9 +16,10 @@ from app.engine.validators.movement import MovementValidator
 from app.engine.visibility import DefaultVisibilityResolver
 from app.llm.narrator import NarratorAI
 from app.models.event import Event, EventType
-from app.models.intent import ActionType
-from app.models.two_phase_state import TwoPhaseActionResponse
+from app.models.intent import ActionIntent, ActionType
+from app.models.two_phase_state import TwoPhaseActionResponse, TwoPhaseDebugInfo
 from app.models.game import LLMDebugInfo
+from app.models.validation import ValidationResult
 
 if TYPE_CHECKING:
     from app.engine.two_phase_state import TwoPhaseStateManager
@@ -137,28 +138,53 @@ class TwoPhaseProcessor:
 
         if intent is None:
             # Action not recognized - return simple message (no LLM)
+            # Build minimal debug info if debug mode enabled
+            pipeline_debug = None
+            if self.debug:
+                pipeline_debug = TwoPhaseDebugInfo(
+                    raw_input=action,
+                    parser_type="rule_based",
+                    parsed_intent=None,
+                    events=[],
+                )
+
             return TwoPhaseActionResponse(
                 narrative=self.UNSUPPORTED_ACTION_MESSAGE,
                 state=state,
                 events=[],
+                pipeline_debug=pipeline_debug,
             )
 
         # Phase 2: Validate & Execute based on action type
         if intent.action_type == ActionType.MOVE:
-            return await self._process_movement(intent)
+            return await self._process_movement(intent, action)
         else:
             # Action type not yet supported in Phase 1
+            # Build debug info for unsupported action type
+            pipeline_debug = None
+            if self.debug:
+                pipeline_debug = TwoPhaseDebugInfo(
+                    raw_input=action,
+                    parser_type="rule_based",
+                    parsed_intent=intent.model_dump(),
+                    events=[],
+                )
+
             return TwoPhaseActionResponse(
                 narrative=self.UNSUPPORTED_ACTION_MESSAGE,
                 state=state,
                 events=[],
+                pipeline_debug=pipeline_debug,
             )
 
-    async def _process_movement(self, intent) -> TwoPhaseActionResponse:
+    async def _process_movement(
+        self, intent: ActionIntent, raw_input: str
+    ) -> TwoPhaseActionResponse:
         """Process a movement action.
 
         Args:
             intent: The parsed MOVE ActionIntent
+            raw_input: The original player input string (for debug info)
 
         Returns:
             TwoPhaseActionResponse with movement result
@@ -178,16 +204,25 @@ class TwoPhaseProcessor:
             snapshot = self.visibility_resolver.build_snapshot(state, world)
 
             # Generate rejection narrative
-            narrative, debug_info = await self.narrator.narrate(events, snapshot)
+            narrative, narrator_debug = await self.narrator.narrate(events, snapshot)
 
             # Increment turn even for failed actions
             self.state_manager.increment_turn()
+
+            # Build pipeline debug info
+            pipeline_debug = self._build_pipeline_debug(
+                raw_input=raw_input,
+                intent=intent,
+                validation_result=result,
+                events=events,
+                narrator_debug=narrator_debug,
+            )
 
             return TwoPhaseActionResponse(
                 narrative=narrative,
                 state=self.state_manager.get_state(),
                 events=[e.model_dump() for e in events],
-                llm_debug=debug_info,
+                pipeline_debug=pipeline_debug,
             )
 
         # Movement valid - execute
@@ -213,10 +248,19 @@ class TwoPhaseProcessor:
         )
 
         # Generate success narrative
-        narrative, debug_info = await self.narrator.narrate(events, snapshot)
+        narrative, narrator_debug = await self.narrator.narrate(events, snapshot)
 
         # Increment turn
         self.state_manager.increment_turn()
+
+        # Build pipeline debug info
+        pipeline_debug = self._build_pipeline_debug(
+            raw_input=raw_input,
+            intent=intent,
+            validation_result=result,
+            events=events,
+            narrator_debug=narrator_debug,
+        )
 
         # Check for victory
         is_victory, ending_narrative = self.state_manager.check_victory()
@@ -229,12 +273,60 @@ class TwoPhaseProcessor:
                 events=[e.model_dump() for e in events],
                 game_complete=True,
                 ending_narrative=ending_narrative,
-                llm_debug=debug_info,
+                pipeline_debug=pipeline_debug,
             )
 
         return TwoPhaseActionResponse(
             narrative=narrative,
             state=self.state_manager.get_state(),
             events=[e.model_dump() for e in events],
-            llm_debug=debug_info,
+            pipeline_debug=pipeline_debug,
+        )
+
+    def _build_pipeline_debug(
+        self,
+        raw_input: str,
+        intent: ActionIntent | None,
+        validation_result: ValidationResult | None,
+        events: list[Event],
+        narrator_debug: LLMDebugInfo | None,
+    ) -> TwoPhaseDebugInfo | None:
+        """Build pipeline debug info if debug mode is enabled.
+
+        Args:
+            raw_input: Original player input
+            intent: Parsed ActionIntent (or None)
+            validation_result: ValidationResult from validator
+            events: List of events generated
+            narrator_debug: LLM debug info from narrator
+
+        Returns:
+            TwoPhaseDebugInfo if debug mode enabled, else None
+        """
+        if not self.debug:
+            return None
+
+        # Serialize validation result if present
+        validation_dict = None
+        if validation_result:
+            validation_dict = {
+                "valid": validation_result.valid,
+                "rejection_code": (
+                    validation_result.rejection_code.value
+                    if validation_result.rejection_code
+                    else None
+                ),
+                "rejection_reason": validation_result.rejection_reason,
+                "context": validation_result.context,
+                "hint": validation_result.hint,
+            }
+
+        return TwoPhaseDebugInfo(
+            raw_input=raw_input,
+            parser_type="rule_based",  # Currently only rule-based parser
+            parsed_intent=intent.model_dump() if intent else None,
+            interactor_debug=None,  # Future: InteractorAI debug info
+            validation_result=validation_dict,
+            events=[e.model_dump() for e in events],
+            narrator_debug=narrator_debug,
         )

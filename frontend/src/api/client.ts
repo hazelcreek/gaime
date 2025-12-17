@@ -48,11 +48,96 @@ export interface LLMDebugInfo {
   timestamp: string;
 }
 
+// =============================================================================
+// Two-Phase Engine Types
+// =============================================================================
+
+/**
+ * Game state for the two-phase engine.
+ * Different structure from classic GameState.
+ */
+export interface TwoPhaseGameState {
+  session_id: string;
+  current_location: string;
+  inventory: string[];
+  flags: Record<string, boolean>;
+  visited_locations: string[];  // Backend sends set as list
+  container_states: Record<string, boolean>;
+  turn_count: number;
+  status: string;
+}
+
+/**
+ * Pipeline debug info for the two-phase engine.
+ * Captures debug info at each stage: Parser -> Validator -> Narrator
+ */
+export interface TwoPhaseDebugInfo {
+  raw_input: string;
+  parser_type: string;  // "rule_based" or "interactor_ai"
+  parsed_intent: Record<string, unknown> | null;
+  interactor_debug: LLMDebugInfo | null;
+  validation_result: Record<string, unknown> | null;
+  events: Record<string, unknown>[];
+  narrator_debug: LLMDebugInfo | null;
+}
+
+/**
+ * Union type for debug info - can be classic or two-phase
+ */
+export type DebugInfo = LLMDebugInfo | TwoPhaseDebugInfo;
+
+/**
+ * Type guard to check if debug info is from two-phase engine
+ */
+export function isTwoPhaseDebugInfo(info: DebugInfo): info is TwoPhaseDebugInfo {
+  return 'parser_type' in info && 'events' in info;
+}
+
+/**
+ * Union type for game state - can be classic or two-phase
+ */
+export type AnyGameState = GameState | TwoPhaseGameState;
+
+/**
+ * Type guard to check if state is from two-phase engine
+ */
+export function isTwoPhaseGameState(state: AnyGameState): state is TwoPhaseGameState {
+  return 'visited_locations' in state && !('narrative_memory' in state);
+}
+
+// =============================================================================
+// Response Types
+// =============================================================================
+
 export interface ActionResponse {
   narrative: string;
   state: GameState;
   hints?: string[];
   llm_debug?: LLMDebugInfo;
+}
+
+/**
+ * Response from two-phase engine action processing
+ */
+export interface TwoPhaseActionResponse {
+  narrative: string;
+  state: TwoPhaseGameState;
+  events: Record<string, unknown>[];
+  game_complete: boolean;
+  ending_narrative?: string | null;
+  pipeline_debug?: TwoPhaseDebugInfo | null;
+}
+
+/**
+ * Union type for action responses
+ */
+export type AnyActionResponse = ActionResponse | TwoPhaseActionResponse;
+
+/**
+ * Type guard to check if response is from two-phase engine
+ */
+export function isTwoPhaseActionResponse(response: AnyActionResponse): response is TwoPhaseActionResponse {
+  return 'pipeline_debug' in response || ('events' in response && Array.isArray(response.events));
 }
 
 export interface NewGameResponse {
@@ -62,6 +147,22 @@ export interface NewGameResponse {
   engine_version: string;
   llm_debug?: LLMDebugInfo;
 }
+
+/**
+ * Response from starting a two-phase engine game
+ */
+export interface TwoPhaseNewGameResponse {
+  session_id: string;
+  narrative: string;
+  state: TwoPhaseGameState;
+  engine_version: string;
+  llm_debug?: LLMDebugInfo;  // Opening narrative uses simple debug info
+}
+
+/**
+ * Union type for new game responses
+ */
+export type AnyNewGameResponse = NewGameResponse | TwoPhaseNewGameResponse;
 
 export interface WorldInfo {
   id: string;
@@ -84,12 +185,16 @@ export interface EnginesResponse {
 class GameAPIClient {
   /**
    * Start a new game session
+   *
+   * Returns different response types based on engine:
+   * - classic: NewGameResponse with GameState
+   * - two_phase: TwoPhaseNewGameResponse with TwoPhaseGameState
    */
   async newGame(
     worldId: string = 'cursed-manor',
     debug: boolean = false,
     engine?: string
-  ): Promise<NewGameResponse> {
+  ): Promise<AnyNewGameResponse> {
     const body: Record<string, unknown> = { world_id: worldId, debug };
     if (engine) {
       body.engine = engine;
@@ -111,8 +216,12 @@ class GameAPIClient {
 
   /**
    * Send a player action and get the narrative response
+   *
+   * Returns different response types based on engine:
+   * - classic: ActionResponse with llm_debug
+   * - two_phase: TwoPhaseActionResponse with pipeline_debug
    */
-  async sendAction(sessionId: string, action: string, debug: boolean = false): Promise<ActionResponse> {
+  async sendAction(sessionId: string, action: string, debug: boolean = false): Promise<AnyActionResponse> {
     const response = await fetch(`${API_BASE}/game/action`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -129,8 +238,10 @@ class GameAPIClient {
 
   /**
    * Get current game state
+   *
+   * Returns state for either engine type.
    */
-  async getState(sessionId: string): Promise<{ state: GameState }> {
+  async getState(sessionId: string): Promise<{ state: AnyGameState; engine?: string }> {
     const response = await fetch(`${API_BASE}/game/state/${sessionId}`);
 
     if (!response.ok) {

@@ -15,6 +15,41 @@ from pydantic import BaseModel, Field
 from app.models.game import LLMDebugInfo
 
 
+class TwoPhaseDebugInfo(BaseModel):
+    """Debug info capturing the full two-phase pipeline.
+
+    This model captures debug information at each stage of the two-phase
+    action processing pipeline: Parser -> Validator -> Narrator.
+
+    Attributes:
+        raw_input: The original player input string
+        parser_type: Which parser handled the input ("rule_based" or "interactor_ai")
+        parsed_intent: The ActionIntent produced by parsing (or None if not recognized)
+        interactor_debug: LLM debug info if InteractorAI was used (future)
+        validation_result: The ValidationResult from the validator
+        events: List of events generated (serialized dicts)
+        narrator_debug: LLM debug info from the Narrator call
+    """
+
+    raw_input: str
+
+    # Parser stage
+    parser_type: str  # "rule_based" or "interactor_ai"
+    parsed_intent: dict | None = None  # ActionIntent.model_dump() or None
+
+    # InteractorAI (future - will be None for rule-based)
+    interactor_debug: LLMDebugInfo | None = None
+
+    # Validation stage
+    validation_result: dict | None = None  # ValidationResult data
+
+    # Events generated
+    events: list[dict] = Field(default_factory=list)
+
+    # Narrator stage
+    narrator_debug: LLMDebugInfo | None = None
+
+
 class TwoPhaseGameState(BaseModel):
     """Game state for the two-phase engine.
 
@@ -56,7 +91,7 @@ class TwoPhaseActionResponse(BaseModel):
         events: List of events that occurred (serialized)
         game_complete: True if the game has ended
         ending_narrative: Final narrative if game completed
-        llm_debug: Debug info when debug mode is enabled
+        pipeline_debug: Full pipeline debug info when debug mode is enabled
     """
 
     narrative: str
@@ -64,4 +99,4 @@ class TwoPhaseActionResponse(BaseModel):
     events: list[dict] = Field(default_factory=list)
     game_complete: bool = False
     ending_narrative: str | None = None
-    llm_debug: LLMDebugInfo | None = None
+    pipeline_debug: TwoPhaseDebugInfo | None = None
