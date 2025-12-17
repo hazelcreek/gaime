@@ -35,8 +35,8 @@ The roadmap is organized around **experience goals** from the Vision document:
 |-------|-------|--------|
 | 0 | Foundation (data models, engine selection) | ✅ Complete |
 | 1 | Simple Movement | ✅ Complete |
-| 2 | Examination & Taking | ⚪ Planned |
-| 3 | Interactor AI | ⚪ Planned |
+| 2 | Examination & Taking | ✅ Complete |
+| 3 | Interactions & USE Actions | ⚪ Planned |
 | 4 | Full Narrator | ⚪ Planned |
 | 5 | Containers & Visibility | ⚪ Planned |
 | 6 | Polish & Comparison | ⚪ Planned |
@@ -75,19 +75,22 @@ Separating action parsing from narrative generation enables deterministic state 
 - [x] `DefaultVisibilityResolver` for PerceptionSnapshot building
 - [x] Unit tests (79 tests) and integration tests (16 tests)
 
-### Phase 2: Examination & Taking
-- [ ] Extend parser for examine/take patterns
-- [ ] `ExamineValidator` and `TakeValidator`
-- [ ] `DETAIL_EXAMINED`, `ITEM_TAKEN` events
-- [ ] Visibility resolution for hidden items
-- [ ] Rejection events for locked containers
+### Phase 2: Examination & Taking ✅
+- [x] `InteractorAI` for LLM-based entity resolution
+- [x] `ExamineValidator` for items, details, and inventory
+- [x] `TakeValidator` with visibility and portability checks
+- [x] `ITEM_EXAMINED`, `DETAIL_EXAMINED`, `ITEM_TAKEN` events
+- [x] `FlavorIntent` with `action_hint` for graduated parsing
+- [x] Narrator handlers for new event types
+- [x] Unit tests for validators and Interactor (33 new tests)
 
-### Phase 3: Interactor AI
-- [ ] LLM-based parsing for freeform inputs
-- [ ] "use X on Y" parsing
-- [ ] NPC communication parsing
-- [ ] `FlavorIntent` detection
-- [ ] Integration with validation pipeline
+### Phase 3: Interactions & USE
+- [ ] Location/detail interactions with flag setting
+- [ ] "use X on Y" parsing in InteractorAI
+- [ ] USE action validation with `use_actions` lookup
+- [ ] NPC communication parsing (TALK, ASK)
+- [ ] Dialogue topic resolution (defined vs improvised)
+- [ ] `INTERACTION_TRIGGERED`, `FLAG_SET` events
 
 ### Phase 4: Full Narrator
 - [ ] Rich, context-aware narration
@@ -104,7 +107,8 @@ Separating action parsing from narrative generation enables deterministic state 
 - [ ] PerceptionSnapshot respects visibility
 
 ### Phase 6: Polish & Comparison
-- [ ] Remaining action types (GIVE, SHOW, etc.)
+- [ ] INVENTORY meta action
+- [ ] Remaining action types (GIVE, SHOW, DROP, etc.)
 - [ ] A/B testing framework
 - [ ] Performance optimization
 - [ ] Edge case handling
@@ -361,6 +365,7 @@ See [ideas/features.md](../ideas/features.md) for full descriptions.
 
 | Date | Change |
 |------|--------|
+| 2025-12-17 | Two-Phase Engine Phase 2 complete: InteractorAI, ExamineValidator, TakeValidator, 33 new tests, 214 total tests passing |
 | 2025-12-17 | Two-Phase Engine Phase 1 complete: movement-only engine with complete separation from classic, 95 new tests |
 | 2025-12-17 | Two-Phase Engine Phase 0 complete: data models, engine selection API, frontend selector |
 | 2025-12-15 | World validation system: schema generator, deprecated pattern detection, hybrid fixer (rule + LLM), migrated 5 existing worlds |

@@ -74,9 +74,13 @@ All prompts are stored as text files in `backend/app/llm/prompts/` and organized
 
 ```
 backend/app/llm/prompts/
-├── game_master/          # Game engine prompts
+├── game_master/          # Classic game engine prompts
 │   ├── system_prompt.txt      # Main system prompt for game master
 │   └── opening_prompt.txt      # Prompt for generating opening narrative
+├── narrator/             # Two-phase engine: narrative generation
+│   └── system_prompt.txt      # Narrator prompt for prose generation
+├── interactor/           # Two-phase engine: action parsing
+│   └── system_prompt.txt      # Interactor prompt for entity resolution
 └── image_generator/      # Image generation prompts
     ├── image_prompt_template.txt      # Template for scene image generation
     ├── edit_prompt_template.txt       # Template for editing images (NPC variants)
@@ -124,8 +128,10 @@ reload_category("game_master")
 
 | Component | Prompt File | Used In | Purpose |
 |-----------|-------------|---------|---------|
-| Game Master | `system_prompt.txt` | `game_master.py` | Main system prompt for all game actions |
-| Game Master | `opening_prompt.txt` | `game_master.py` | Generates opening narrative for new games |
+| Game Master (Classic) | `game_master/system_prompt.txt` | `game_master.py` | Main system prompt for all game actions |
+| Game Master (Classic) | `game_master/opening_prompt.txt` | `game_master.py` | Generates opening narrative for new games |
+| Interactor (Two-Phase) | `interactor/system_prompt.txt` | `interactor.py` | Parses player input, resolves entities |
+| Narrator (Two-Phase) | `narrator/system_prompt.txt` | `narrator.py` | Generates prose from confirmed events |
 | World Builder (TUI) | `world_builder_prompt.txt` | `gaime_builder/` | Generates world YAML from design brief |
 | World Builder (TUI) | `design_brief_prompt.txt` | `gaime_builder/` | First pass: creates design brief from description |
 | World Builder (TUI) | `fix_error_prompt.txt` | `gaime_builder/` | LLM-assisted fixes for creative validation errors |

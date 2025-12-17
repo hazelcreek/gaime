@@ -574,7 +574,7 @@ The two-phase engine is an alternative action processing architecture that separ
 | State Changes | LLM determines | Validators determine |
 | Narrative | Generated with state changes | Generated from confirmed events |
 | Testability | Harder (LLM-dependent) | Easier (deterministic validation) |
-| Current Status | Full featured | Movement only (Phase 1) |
+| Current Status | Full featured | Move, Examine, Take (Phase 2) |
 
 ### Two-Phase Components
 
@@ -583,30 +583,34 @@ The two-phase engine is an alternative action processing architecture that separ
 │                        Two-Phase Engine Flow                            │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│   Player Input: "go north"                                              │
+│   Player Input: "examine the letter" / "go north"                       │
 │         │                                                               │
 │         ▼                                                               │
-│   ┌─────────────────┐                                                   │
-│   │ RuleBasedParser │  ──► ActionIntent(type=MOVE, target_id="north")   │
-│   └────────┬────────┘                                                   │
+│   ┌─────────────────┐   Movement?   ┌──────────────┐                    │
+│   │ RuleBasedParser │──────────────►│ ActionIntent │                    │
+│   └────────┬────────┘               └──────────────┘                    │
+│            │ Not movement                                               │
+│            ▼                                                            │
+│   ┌─────────────────┐               ┌──────────────────────────────┐    │
+│   │  InteractorAI   │──────────────►│ ActionIntent or FlavorIntent │    │
+│   │  (LLM parsing)  │               │ (resolved entity IDs)        │    │
+│   └────────┬────────┘               └──────────────────────────────┘    │
 │            │                                                            │
 │            ▼                                                            │
-│   ┌─────────────────────┐                                               │
-│   │ MovementValidator   │  ──► ValidationResult(valid=true, ...)        │
-│   │ - Check exit exists │                                               │
-│   │ - Check requirements│                                               │
-│   └────────┬────────────┘                                               │
+│   ┌─────────────────────────────────┐                                   │
+│   │ Validators (Movement/Examine/   │                                   │
+│   │ Take based on action_type)      │──► ValidationResult               │
+│   └────────┬────────────────────────┘                                   │
 │            │                                                            │
 │            ▼                                                            │
-│   ┌────────────────────────┐                                            │
-│   │ TwoPhaseStateManager   │  ──► Event(type=LOCATION_CHANGED)          │
-│   │ - Apply state change   │                                            │
-│   └────────┬───────────────┘                                            │
+│   ┌────────────────────────┐        ┌────────────────────────────────┐  │
+│   │ TwoPhaseStateManager   │───────►│ Event (LOCATION_CHANGED,       │  │
+│   │ - Apply state change   │        │ ITEM_EXAMINED, ITEM_TAKEN, etc)│  │
+│   └────────┬───────────────┘        └────────────────────────────────┘  │
 │            │                                                            │
 │            ▼                                                            │
 │   ┌───────────────────────┐                                             │
 │   │ VisibilityResolver    │  ──► PerceptionSnapshot                     │
-│   │ - Build what's visible│                                             │
 │   └────────┬──────────────┘                                             │
 │            │                                                            │
 │            ▼                                                            │
@@ -622,7 +626,8 @@ The two-phase engine is an alternative action processing architecture that separ
 | Model | Location | Purpose |
 |-------|----------|---------|
 | `TwoPhaseGameState` | `models/two_phase_state.py` | Game state (separate from classic) |
-| `ActionIntent` | `models/intent.py` | Parsed player action |
+| `ActionIntent` | `models/intent.py` | Parsed state-changing action |
+| `FlavorIntent` | `models/intent.py` | Atmospheric action (no state change) |
 | `Event` | `models/event.py` | Confirmed game occurrence |
 | `PerceptionSnapshot` | `models/perception.py` | What player can see |
 | `ValidationResult` | `models/validation.py` | Validation outcome |
@@ -633,8 +638,11 @@ The two-phase engine is an alternative action processing architecture that separ
 |-------|----------|---------|
 | `TwoPhaseStateManager` | `engine/two_phase_state.py` | State management |
 | `TwoPhaseProcessor` | `engine/two_phase.py` | Main orchestrator |
-| `RuleBasedParser` | `engine/parser.py` | Rule-based parsing |
+| `RuleBasedParser` | `engine/parser.py` | Rule-based parsing (movement) |
+| `InteractorAI` | `llm/interactor.py` | LLM-based entity resolution |
 | `MovementValidator` | `engine/validators/movement.py` | Movement validation |
+| `ExamineValidator` | `engine/validators/examine.py` | Examine validation |
+| `TakeValidator` | `engine/validators/take.py` | Take validation |
 | `DefaultVisibilityResolver` | `engine/visibility.py` | Visibility computation |
 | `NarratorAI` | `llm/narrator.py` | Narrative generation |
 

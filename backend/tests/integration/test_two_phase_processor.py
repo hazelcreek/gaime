@@ -120,37 +120,82 @@ class TestTwoPhaseProcessorIntegration:
         assert response.narrative is not None
         manager.move_to.assert_not_called()
 
-    # Unsupported action tests
+    # Phase 2: Examine and take are now supported
 
     @pytest.mark.asyncio
-    async def test_unsupported_action(self, processor_with_mock) -> None:
-        """Non-movement actions return unsupported message."""
+    async def test_examine_action_processed(self, processor_with_mock) -> None:
+        """Examine actions are processed through InteractorAI in Phase 2."""
         processor, manager = processor_with_mock
 
-        response = await processor.process("examine painting")
+        # Mock the interactor response
+        async def mock_interactor_parse(raw_input, snapshot):
+            from app.models.intent import ActionIntent, ActionType
 
-        assert "don't understand" in response.narrative.lower()
-        assert response.events == []
-        manager.move_to.assert_not_called()
-        manager.increment_turn.assert_not_called()
+            return (
+                ActionIntent(
+                    action_type=ActionType.EXAMINE,
+                    raw_input=raw_input,
+                    verb="examine",
+                    target_id="nonexistent_item",
+                ),
+                None,
+            )
+
+        processor.interactor.parse = AsyncMock(side_effect=mock_interactor_parse)
+
+        _response = await processor.process("examine painting")
+
+        # Should be processed (may result in "don't see that" rejection)
+        # but not "don't understand"
+        manager.increment_turn.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_take_action_unsupported(self, processor_with_mock) -> None:
-        """Take actions are not supported in Phase 1."""
+    async def test_take_action_processed(self, processor_with_mock) -> None:
+        """Take actions are processed through InteractorAI in Phase 2."""
         processor, manager = processor_with_mock
 
-        response = await processor.process("take key")
+        async def mock_interactor_parse(raw_input, snapshot):
+            from app.models.intent import ActionIntent, ActionType
 
-        assert "don't understand" in response.narrative.lower()
+            return (
+                ActionIntent(
+                    action_type=ActionType.TAKE,
+                    raw_input=raw_input,
+                    verb="take",
+                    target_id="nonexistent_item",
+                ),
+                None,
+            )
+
+        processor.interactor.parse = AsyncMock(side_effect=mock_interactor_parse)
+
+        _response = await processor.process("take key")
+
+        # Should be processed (may result in rejection) but turn increments
+        manager.increment_turn.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_empty_action_unsupported(self, processor_with_mock) -> None:
-        """Empty actions return unsupported message."""
+    async def test_empty_action_processed_as_flavor(self, processor_with_mock) -> None:
+        """Empty actions are processed through InteractorAI as flavor."""
         processor, manager = processor_with_mock
 
-        response = await processor.process("")
+        async def mock_interactor_parse(raw_input, snapshot):
+            from app.models.intent import FlavorIntent
 
-        assert "don't understand" in response.narrative.lower()
+            return (
+                FlavorIntent(
+                    verb="do nothing",
+                    raw_input=raw_input,
+                ),
+                None,
+            )
+
+        processor.interactor.parse = AsyncMock(side_effect=mock_interactor_parse)
+
+        _response = await processor.process("")
+
+        # Flavor action still increments turn
+        manager.increment_turn.assert_called_once()
 
     # Opening narrative tests
 

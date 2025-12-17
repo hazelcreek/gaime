@@ -12,13 +12,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from app.engine.parser import RuleBasedParser
+from app.engine.validators.examine import ExamineValidator
 from app.engine.validators.movement import MovementValidator
+from app.engine.validators.take import TakeValidator
 from app.engine.visibility import DefaultVisibilityResolver
+from app.llm.interactor import InteractorAI
 from app.llm.narrator import NarratorAI
 from app.models.event import Event, EventType
-from app.models.intent import ActionIntent, ActionType
-from app.models.two_phase_state import TwoPhaseActionResponse, TwoPhaseDebugInfo
 from app.models.game import LLMDebugInfo
+from app.models.intent import ActionIntent, ActionType, FlavorIntent, Intent
+from app.models.two_phase_state import TwoPhaseActionResponse, TwoPhaseDebugInfo
 from app.models.validation import ValidationResult
 
 if TYPE_CHECKING:
@@ -29,26 +32,20 @@ class TwoPhaseProcessor:
     """Two-phase game loop processor.
 
     Coordinates the complete action processing pipeline:
-        1. Parse: Rule-based parser extracts ActionIntent
+        1. Parse: Rule-based parser for movement, InteractorAI for others
         2. Validate: Validators check against world rules
         3. Execute: State changes are applied
         4. Narrate: NarratorAI generates prose
 
-    Phase 1 supports only movement actions. Unsupported actions
-    return a simple "command not understood" response without LLM.
+    Phase 2 supports movement, examine, and take actions.
+    FlavorIntents go directly to the narrator for atmospheric responses.
 
     Example:
         >>> manager = TwoPhaseStateManager("cursed-manor")
         >>> processor = TwoPhaseProcessor(manager)
-        >>> response = await processor.process("go north")
+        >>> response = await processor.process("examine the letter")
         >>> print(response.narrative)
     """
-
-    # Response for unsupported actions (no LLM call)
-    UNSUPPORTED_ACTION_MESSAGE = (
-        "I don't understand that command. "
-        "Try movement commands like 'north', 'go east', or 'back'."
-    )
 
     def __init__(
         self,
@@ -66,8 +63,19 @@ class TwoPhaseProcessor:
 
         # Initialize components
         self.parser = RuleBasedParser()
-        self.movement_validator = MovementValidator()
         self.visibility_resolver = DefaultVisibilityResolver()
+
+        # Validators
+        self.movement_validator = MovementValidator()
+        self.examine_validator = ExamineValidator()
+        self.take_validator = TakeValidator()
+
+        # LLM components
+        self.interactor = InteractorAI(
+            world_data=state_manager.world_data,
+            session_id=state_manager.session_id,
+            debug=debug,
+        )
         self.narrator = NarratorAI(
             world_data=state_manager.world_data,
             session_id=state_manager.session_id,
@@ -108,9 +116,9 @@ class TwoPhaseProcessor:
         """Process a player action through the two-phase pipeline.
 
         Pipeline:
-            1. Parse action into ActionIntent
-            2. If None, return "command not understood"
-            3. Validate intent against world rules
+            1. Parse action: rule-based for movement, InteractorAI for others
+            2. If FlavorIntent, generate atmospheric narrative
+            3. Validate ActionIntent against world rules
             4. If invalid, generate rejection narrative
             5. If valid, execute state changes and generate success narrative
 
@@ -134,51 +142,37 @@ class TwoPhaseProcessor:
             )
 
         # Phase 1: Parse
-        intent = self.parser.parse(action, state, world)
+        # Try rule-based parser first (fast path for movement)
+        intent: Intent | None = self.parser.parse(action, state, world)
+        interactor_debug = None
 
         if intent is None:
-            # Action not recognized - return simple message (no LLM)
-            # Build minimal debug info if debug mode enabled
-            pipeline_debug = None
-            if self.debug:
-                pipeline_debug = TwoPhaseDebugInfo(
-                    raw_input=action,
-                    parser_type="rule_based",
-                    parsed_intent=None,
-                    events=[],
-                )
+            # Use InteractorAI for non-movement actions
+            snapshot = self.visibility_resolver.build_snapshot(state, world)
+            intent, interactor_debug = await self.interactor.parse(action, snapshot)
 
-            return TwoPhaseActionResponse(
-                narrative=self.UNSUPPORTED_ACTION_MESSAGE,
-                state=state,
-                events=[],
-                pipeline_debug=pipeline_debug,
-            )
-
-        # Phase 2: Validate & Execute based on action type
-        if intent.action_type == ActionType.MOVE:
-            return await self._process_movement(intent, action)
+        # Phase 2: Validate & Execute based on intent type
+        if isinstance(intent, FlavorIntent):
+            return await self._process_flavor(intent, action, interactor_debug)
+        elif isinstance(intent, ActionIntent):
+            if intent.action_type == ActionType.MOVE:
+                return await self._process_movement(intent, action, interactor_debug)
+            elif intent.action_type == ActionType.EXAMINE:
+                return await self._process_examine(intent, action, interactor_debug)
+            elif intent.action_type == ActionType.TAKE:
+                return await self._process_take(intent, action, interactor_debug)
+            else:
+                # Action type not yet supported
+                return await self._process_unsupported(intent, action, interactor_debug)
         else:
-            # Action type not yet supported in Phase 1
-            # Build debug info for unsupported action type
-            pipeline_debug = None
-            if self.debug:
-                pipeline_debug = TwoPhaseDebugInfo(
-                    raw_input=action,
-                    parser_type="rule_based",
-                    parsed_intent=intent.model_dump(),
-                    events=[],
-                )
-
-            return TwoPhaseActionResponse(
-                narrative=self.UNSUPPORTED_ACTION_MESSAGE,
-                state=state,
-                events=[],
-                pipeline_debug=pipeline_debug,
-            )
+            # Shouldn't happen, but handle gracefully
+            return await self._process_unsupported(None, action, interactor_debug)
 
     async def _process_movement(
-        self, intent: ActionIntent, raw_input: str
+        self,
+        intent: ActionIntent,
+        raw_input: str,
+        interactor_debug: LLMDebugInfo | None = None,
     ) -> TwoPhaseActionResponse:
         """Process a movement action.
 
@@ -216,6 +210,7 @@ class TwoPhaseProcessor:
                 validation_result=result,
                 events=events,
                 narrator_debug=narrator_debug,
+                interactor_debug=interactor_debug,
             )
 
             return TwoPhaseActionResponse(
@@ -260,6 +255,7 @@ class TwoPhaseProcessor:
             validation_result=result,
             events=events,
             narrator_debug=narrator_debug,
+            interactor_debug=interactor_debug,
         )
 
         # Check for victory
@@ -283,6 +279,296 @@ class TwoPhaseProcessor:
             pipeline_debug=pipeline_debug,
         )
 
+    async def _process_examine(
+        self,
+        intent: ActionIntent,
+        raw_input: str,
+        interactor_debug: LLMDebugInfo | None = None,
+    ) -> TwoPhaseActionResponse:
+        """Process an examine action.
+
+        Args:
+            intent: The parsed EXAMINE ActionIntent
+            raw_input: The original player input string
+            interactor_debug: Debug info from Interactor (if used)
+
+        Returns:
+            TwoPhaseActionResponse with examine result
+        """
+        state = self.state_manager.get_state()
+        world = self.state_manager.world_data
+
+        # Validate examine
+        result = self.examine_validator.validate(intent, state, world)
+
+        if not result.valid:
+            # Examine rejected
+            event = result.to_rejection_event(subject=intent.target_id)
+            events = [event]
+
+            snapshot = self.visibility_resolver.build_snapshot(state, world)
+            narrative, narrator_debug = await self.narrator.narrate(events, snapshot)
+
+            self.state_manager.increment_turn()
+
+            pipeline_debug = self._build_pipeline_debug(
+                raw_input=raw_input,
+                intent=intent,
+                validation_result=result,
+                events=events,
+                narrator_debug=narrator_debug,
+                interactor_debug=interactor_debug,
+            )
+
+            return TwoPhaseActionResponse(
+                narrative=narrative,
+                state=self.state_manager.get_state(),
+                events=[e.model_dump() for e in events],
+                pipeline_debug=pipeline_debug,
+            )
+
+        # Examine valid - determine event type
+        entity_type = result.context.get("entity_type", "item")
+        if entity_type == "detail":
+            event_type = EventType.DETAIL_EXAMINED
+        else:
+            event_type = EventType.ITEM_EXAMINED
+
+        event = Event(
+            type=event_type,
+            subject=result.context.get("entity_id"),
+            context={
+                "entity_name": result.context.get("entity_name"),
+                "description": result.context.get("description"),
+                "in_inventory": result.context.get("in_inventory", False),
+                "found_description": result.context.get("found_description"),
+            },
+        )
+        events = [event]
+
+        snapshot = self.visibility_resolver.build_snapshot(state, world)
+        narrative, narrator_debug = await self.narrator.narrate(events, snapshot)
+
+        self.state_manager.increment_turn()
+
+        pipeline_debug = self._build_pipeline_debug(
+            raw_input=raw_input,
+            intent=intent,
+            validation_result=result,
+            events=events,
+            narrator_debug=narrator_debug,
+            interactor_debug=interactor_debug,
+        )
+
+        return TwoPhaseActionResponse(
+            narrative=narrative,
+            state=self.state_manager.get_state(),
+            events=[e.model_dump() for e in events],
+            pipeline_debug=pipeline_debug,
+        )
+
+    async def _process_take(
+        self,
+        intent: ActionIntent,
+        raw_input: str,
+        interactor_debug: LLMDebugInfo | None = None,
+    ) -> TwoPhaseActionResponse:
+        """Process a take action.
+
+        Args:
+            intent: The parsed TAKE ActionIntent
+            raw_input: The original player input string
+            interactor_debug: Debug info from Interactor (if used)
+
+        Returns:
+            TwoPhaseActionResponse with take result
+        """
+        state = self.state_manager.get_state()
+        world = self.state_manager.world_data
+
+        # Validate take
+        result = self.take_validator.validate(intent, state, world)
+
+        if not result.valid:
+            # Take rejected
+            event = result.to_rejection_event(subject=intent.target_id)
+            events = [event]
+
+            snapshot = self.visibility_resolver.build_snapshot(state, world)
+            narrative, narrator_debug = await self.narrator.narrate(events, snapshot)
+
+            self.state_manager.increment_turn()
+
+            pipeline_debug = self._build_pipeline_debug(
+                raw_input=raw_input,
+                intent=intent,
+                validation_result=result,
+                events=events,
+                narrator_debug=narrator_debug,
+                interactor_debug=interactor_debug,
+            )
+
+            return TwoPhaseActionResponse(
+                narrative=narrative,
+                state=self.state_manager.get_state(),
+                events=[e.model_dump() for e in events],
+                pipeline_debug=pipeline_debug,
+            )
+
+        # Take valid - add to inventory
+        item_id = result.context.get("item_id")
+        self.state_manager.add_item(item_id)
+
+        event = Event(
+            type=EventType.ITEM_TAKEN,
+            subject=item_id,
+            context={
+                "item_name": result.context.get("item_name"),
+                "take_description": result.context.get("take_description"),
+                "from_location": result.context.get("from_location"),
+            },
+        )
+        events = [event]
+
+        snapshot = self.visibility_resolver.build_snapshot(
+            self.state_manager.get_state(), world
+        )
+        narrative, narrator_debug = await self.narrator.narrate(events, snapshot)
+
+        self.state_manager.increment_turn()
+
+        pipeline_debug = self._build_pipeline_debug(
+            raw_input=raw_input,
+            intent=intent,
+            validation_result=result,
+            events=events,
+            narrator_debug=narrator_debug,
+            interactor_debug=interactor_debug,
+        )
+
+        # Check for victory (might be item-based)
+        is_victory, ending_narrative = self.state_manager.check_victory()
+
+        if is_victory:
+            full_narrative = narrative + "\n\n---\n\n" + ending_narrative
+            return TwoPhaseActionResponse(
+                narrative=full_narrative,
+                state=self.state_manager.get_state(),
+                events=[e.model_dump() for e in events],
+                game_complete=True,
+                ending_narrative=ending_narrative,
+                pipeline_debug=pipeline_debug,
+            )
+
+        return TwoPhaseActionResponse(
+            narrative=narrative,
+            state=self.state_manager.get_state(),
+            events=[e.model_dump() for e in events],
+            pipeline_debug=pipeline_debug,
+        )
+
+    async def _process_flavor(
+        self,
+        intent: FlavorIntent,
+        raw_input: str,
+        interactor_debug: LLMDebugInfo | None = None,
+    ) -> TwoPhaseActionResponse:
+        """Process a flavor action (atmospheric, no state change).
+
+        Args:
+            intent: The FlavorIntent
+            raw_input: The original player input string
+            interactor_debug: Debug info from Interactor
+
+        Returns:
+            TwoPhaseActionResponse with flavor narrative
+        """
+        state = self.state_manager.get_state()
+        world = self.state_manager.world_data
+
+        # Create flavor event
+        event = Event(
+            type=EventType.FLAVOR_ACTION,
+            context={
+                "verb": intent.verb,
+                "action_hint": intent.action_hint.value if intent.action_hint else None,
+                "target": intent.target,
+                "target_id": intent.target_id,
+                "topic": intent.topic,
+                "manner": intent.manner,
+            },
+        )
+        events = [event]
+
+        snapshot = self.visibility_resolver.build_snapshot(state, world)
+        narrative, narrator_debug = await self.narrator.narrate(events, snapshot)
+
+        self.state_manager.increment_turn()
+
+        pipeline_debug = self._build_pipeline_debug(
+            raw_input=raw_input,
+            intent=None,  # FlavorIntent doesn't have model_dump compatible with ActionIntent
+            validation_result=None,
+            events=events,
+            narrator_debug=narrator_debug,
+            interactor_debug=interactor_debug,
+            flavor_intent=intent,
+        )
+
+        return TwoPhaseActionResponse(
+            narrative=narrative,
+            state=self.state_manager.get_state(),
+            events=[e.model_dump() for e in events],
+            pipeline_debug=pipeline_debug,
+        )
+
+    async def _process_unsupported(
+        self,
+        intent: ActionIntent | None,
+        raw_input: str,
+        interactor_debug: LLMDebugInfo | None = None,
+    ) -> TwoPhaseActionResponse:
+        """Process an unsupported action type.
+
+        Args:
+            intent: The ActionIntent (if parsed)
+            raw_input: The original player input string
+            interactor_debug: Debug info from Interactor
+
+        Returns:
+            TwoPhaseActionResponse with helpful message
+        """
+        state = self.state_manager.get_state()
+
+        # Generate a helpful message based on the action type
+        if intent and intent.action_type:
+            message = (
+                f"The '{intent.action_type.value}' action is not yet supported. "
+                "Try examining objects, taking items, or moving around."
+            )
+        else:
+            message = (
+                "I don't understand that command. "
+                "Try examining objects, taking items, or moving around."
+            )
+
+        pipeline_debug = None
+        if self.debug:
+            pipeline_debug = TwoPhaseDebugInfo(
+                raw_input=raw_input,
+                parser_type="interactor" if interactor_debug else "rule_based",
+                parsed_intent=intent.model_dump() if intent else None,
+                interactor_debug=interactor_debug,
+                events=[],
+            )
+
+        return TwoPhaseActionResponse(
+            narrative=message,
+            state=state,
+            events=[],
+            pipeline_debug=pipeline_debug,
+        )
+
     def _build_pipeline_debug(
         self,
         raw_input: str,
@@ -290,6 +576,8 @@ class TwoPhaseProcessor:
         validation_result: ValidationResult | None,
         events: list[Event],
         narrator_debug: LLMDebugInfo | None,
+        interactor_debug: LLMDebugInfo | None = None,
+        flavor_intent: FlavorIntent | None = None,
     ) -> TwoPhaseDebugInfo | None:
         """Build pipeline debug info if debug mode is enabled.
 
@@ -299,6 +587,8 @@ class TwoPhaseProcessor:
             validation_result: ValidationResult from validator
             events: List of events generated
             narrator_debug: LLM debug info from narrator
+            interactor_debug: LLM debug info from interactor
+            flavor_intent: FlavorIntent if this was a flavor action
 
         Returns:
             TwoPhaseDebugInfo if debug mode enabled, else None
@@ -321,11 +611,22 @@ class TwoPhaseProcessor:
                 "hint": validation_result.hint,
             }
 
+        # Determine parser type
+        parser_type = "interactor" if interactor_debug else "rule_based"
+
+        # Get parsed intent dict
+        if intent:
+            parsed_intent = intent.model_dump()
+        elif flavor_intent:
+            parsed_intent = flavor_intent.model_dump()
+        else:
+            parsed_intent = None
+
         return TwoPhaseDebugInfo(
             raw_input=raw_input,
-            parser_type="rule_based",  # Currently only rule-based parser
-            parsed_intent=intent.model_dump() if intent else None,
-            interactor_debug=None,  # Future: InteractorAI debug info
+            parser_type=parser_type,
+            parsed_intent=parsed_intent,
+            interactor_debug=interactor_debug,
             validation_result=validation_dict,
             events=[e.model_dump() for e in events],
             narrator_debug=narrator_debug,

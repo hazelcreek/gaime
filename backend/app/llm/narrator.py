@@ -215,6 +215,14 @@ class NarratorAI:
             return self._describe_location_changed(event, snapshot)
         elif event.type == EventType.ACTION_REJECTED:
             return self._describe_rejection(event)
+        elif event.type == EventType.ITEM_EXAMINED:
+            return self._describe_item_examined(event)
+        elif event.type == EventType.DETAIL_EXAMINED:
+            return self._describe_detail_examined(event)
+        elif event.type == EventType.ITEM_TAKEN:
+            return self._describe_item_taken(event)
+        elif event.type == EventType.FLAVOR_ACTION:
+            return self._describe_flavor_action(event, snapshot)
         else:
             # Generic event description
             return f"Event: {event.type.value} - {event.subject or 'unknown'}"
@@ -299,5 +307,156 @@ class NarratorAI:
 
         if would_have:
             lines.append(f"- Hint at what might work: {would_have}")
+
+        return "\n".join(lines)
+
+    def _describe_item_examined(self, event: Event) -> str:
+        """Describe an ITEM_EXAMINED event.
+
+        Args:
+            event: The examine event
+
+        Returns:
+            Event description
+        """
+        context = event.context
+        entity_name = context.get("entity_name", event.subject or "something")
+        description = context.get("description", "")
+        in_inventory = context.get("in_inventory", False)
+
+        lines = [
+            f"### ITEM_EXAMINED: Player examined {entity_name}",
+            f"- Description: {description}",
+        ]
+
+        if in_inventory:
+            lines.append("- The item is in the player's inventory")
+            lines.append("- Narrate as if they're holding and studying it")
+        else:
+            lines.append("- The item is at the current location")
+            lines.append("- Narrate as if they're looking at it closely")
+
+        lines.append("- Keep the tone consistent with the location atmosphere")
+
+        return "\n".join(lines)
+
+    def _describe_detail_examined(self, event: Event) -> str:
+        """Describe a DETAIL_EXAMINED event.
+
+        Args:
+            event: The examine event
+
+        Returns:
+            Event description
+        """
+        context = event.context
+        entity_name = context.get("entity_name", event.subject or "something")
+        description = context.get("description", "")
+
+        lines = [
+            f"### DETAIL_EXAMINED: Player examined {entity_name} (scenery/detail)",
+            f"- Description: {description}",
+            "- This is part of the location scenery, not an item",
+            "- Provide an atmospheric description fitting the location",
+            "- Keep the response focused on this detail",
+        ]
+
+        return "\n".join(lines)
+
+    def _describe_item_taken(self, event: Event) -> str:
+        """Describe an ITEM_TAKEN event.
+
+        Args:
+            event: The take event
+
+        Returns:
+            Event description
+        """
+        context = event.context
+        item_name = context.get("item_name", event.subject or "something")
+        take_description = context.get("take_description", "")
+
+        lines = [
+            f"### ITEM_TAKEN: Player picked up {item_name}",
+        ]
+
+        if take_description:
+            lines.append(f"- Author's description: {take_description}")
+            lines.append("- Use or expand on this description")
+        else:
+            lines.append("- No specific take description provided")
+            lines.append("- Generate a brief, atmospheric description of picking it up")
+
+        lines.append("- Keep the response brief (1-2 sentences)")
+        lines.append("- End with the item now being in their possession")
+
+        return "\n".join(lines)
+
+    def _describe_flavor_action(
+        self,
+        event: Event,
+        snapshot: "PerceptionSnapshot",
+    ) -> str:
+        """Describe a FLAVOR_ACTION event.
+
+        Args:
+            event: The flavor event
+            snapshot: Current perception snapshot
+
+        Returns:
+            Event description
+        """
+        context = event.context
+        verb = context.get("verb", "do something")
+        action_hint = context.get("action_hint")
+        target = context.get("target")
+        target_id = context.get("target_id")
+        topic = context.get("topic")
+        manner = context.get("manner")
+
+        lines = ["### FLAVOR_ACTION: Atmospheric action (no state change)"]
+
+        if action_hint == "examine":
+            # Improvised examine - target not in world
+            lines.append(f'- Player tried to examine: "{target or "something"}"')
+            lines.append("- This target is NOT a defined entity")
+            lines.append("- Improvise a brief, atmospheric description")
+            lines.append("- Keep it to 1-2 sentences")
+            lines.append("- Do NOT invent important items or clues")
+            lines.append(
+                f"- Match the location atmosphere: {snapshot.location_atmosphere or 'unspecified'}"
+            )
+        elif action_hint == "take":
+            # Improvised take - target not in world
+            lines.append(f'- Player tried to take: "{target or "something"}"')
+            lines.append("- This target cannot be taken (not a defined item)")
+            lines.append("- Gently explain why this can't be taken")
+            lines.append("- Keep the response natural, not an error message")
+        elif action_hint == "talk" or action_hint == "ask":
+            # Improvised dialogue
+            if target_id:
+                npc = self.world_data.get_npc(target_id)
+                npc_name = npc.name if npc else target_id
+                lines.append(f"- Player is speaking to: {npc_name}")
+            else:
+                lines.append(f'- Player is speaking to: "{target or "someone"}"')
+
+            if topic:
+                lines.append(f'- Topic: "{topic}"')
+                lines.append("- This topic is NOT defined in the NPC's knowledge")
+                lines.append(
+                    "- The NPC should respond in-character but without spoilers"
+                )
+                lines.append("- Keep the response brief and atmospheric")
+        else:
+            # Generic flavor action (dance, jump, etc.)
+            lines.append(f'- Verb: "{verb}"')
+            if manner:
+                lines.append(f'- Manner: "{manner}"')
+            if target:
+                lines.append(f'- Target: "{target}"')
+            lines.append("- This is purely atmospheric")
+            lines.append("- Generate a brief, fitting response (1-2 sentences)")
+            lines.append("- Match the location mood")
 
         return "\n".join(lines)

@@ -1414,33 +1414,47 @@ FLAVOR_ACTION: Atmospheric action (no state change)
 - Unsupported actions return a simple message without LLM call
 - Opening narrative uses NarratorAI with `LOCATION_CHANGED` event (is_opening=True)
 
-### Phase 2: Examination & Taking
+### Phase 2: Examination & Taking ✅
 
-**Goal**: Add examine and take with rule-based parsing
+**Goal**: Add examine and take with InteractorAI for entity resolution
 
-- [ ] Extend `RuleBasedParser` for examine/take patterns
-- [ ] Implement `ExamineValidator` and `TakeValidator`
-- [ ] Generate `DETAIL_EXAMINED`, `ITEM_TAKEN` events
-- [ ] Handle visibility resolution for hidden items
-- [ ] Wire rejection events for locked containers, hidden items
+- [x] Implement `InteractorAI` with LLM-based entity resolution
+- [x] Add `action_hint` and `target_id` fields to `FlavorIntent` for partial parsing
+- [x] Implement `ExamineValidator` for items, details, and inventory
+- [x] Implement `TakeValidator` with visibility and portability checks
+- [x] Add `ITEM_EXAMINED` event type
+- [x] Add Narrator handlers for `ITEM_EXAMINED`, `DETAIL_EXAMINED`, `ITEM_TAKEN`, `FLAVOR_ACTION`
+- [x] Wire `TwoPhaseProcessor` to use Interactor and new validators
+- [x] Unit tests for validators and Interactor
 
-### Phase 3: Interactor AI
+**Implementation Notes** (completed):
+- InteractorAI receives PerceptionSnapshot and resolves player descriptions to entity IDs
+- FlavorIntent with `action_hint` enables graduated parsing (verb known, target not found)
+- Movement uses fast-path rule-based parser, everything else goes to InteractorAI
+- Narrator generates contextual descriptions for flavor actions (examine ceiling, dance, etc.)
 
-**Goal**: Add LLM-based parsing for freeform inputs
+**Deferred to later phases**:
+- Location interactions that set flags (e.g., "examine portrait" → `sets_flag: examined_painting`) → Phase 3
+- Container mechanics (open drawer → reveal items) → Phase 5
+- INVENTORY meta command → Phase 6
 
-- [ ] Implement `InteractorAI` with parser prompt
-- [ ] Handle "use X on Y" parsing
-- [ ] Handle NPC communication parsing
-- [ ] Implement `FlavorIntent` detection
-- [ ] Integrate with validation pipeline
+### Phase 3: Interactions & USE Actions
+
+**Goal**: Add world interactions, item use, and NPC dialogue
+
+- [ ] Implement location/detail interactions with flag setting
+- [ ] Handle "use X on Y" parsing in InteractorAI
+- [ ] Add USE action validation with `use_actions` lookup
+- [ ] Handle NPC communication parsing (TALK, ASK)
+- [ ] Implement dialogue topic resolution (defined vs improvised)
+- [ ] Generate `INTERACTION_TRIGGERED`, `FLAG_SET` events
 
 ### Phase 4: Full Narrator
 
 **Goal**: Rich, context-aware narration
 
-- [ ] Implement full Narrator with style guidance
 - [ ] Event-specific narration templates
-- [ ] NPC dialogue generation
+- [ ] NPC dialogue generation with personality
 - [ ] Discovery moment narration
 - [ ] Rejection narration (natural, in-world)
 
@@ -1458,7 +1472,8 @@ FLAVOR_ACTION: Atmospheric action (no state change)
 
 **Goal**: Feature parity and quality comparison
 
-- [ ] Implement remaining action types (GIVE, SHOW, etc.)
+- [ ] Implement INVENTORY meta action
+- [ ] Implement remaining action types (GIVE, SHOW, DROP, etc.)
 - [ ] A/B testing framework for engine comparison
 - [ ] Performance optimization
 - [ ] Edge case handling

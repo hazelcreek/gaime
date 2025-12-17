@@ -32,7 +32,7 @@ class EventType(str, Enum):
 
     Categories:
         Movement: LOCATION_CHANGED
-        Items: ITEM_TAKEN, ITEM_DROPPED, ITEM_USED, ITEM_REVEALED, ITEM_CONSUMED
+        Items: ITEM_EXAMINED, ITEM_TAKEN, ITEM_DROPPED, ITEM_USED, ITEM_REVEALED, ITEM_CONSUMED
         Containers: CONTAINER_OPENED, CONTAINER_CLOSED
         Discovery: DETAIL_EXAMINED, SECRET_DISCOVERED, EXIT_REVEALED
         NPCs: NPC_GREETED, NPC_CONVERSATION, NPC_ITEM_GIVEN, NPC_ITEM_RECEIVED
@@ -44,6 +44,7 @@ class EventType(str, Enum):
     LOCATION_CHANGED = "location_changed"
 
     # Items
+    ITEM_EXAMINED = "item_examined"
     ITEM_TAKEN = "item_taken"
     ITEM_DROPPED = "item_dropped"
     ITEM_USED = "item_used"

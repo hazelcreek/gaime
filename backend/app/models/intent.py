@@ -143,31 +143,48 @@ class FlavorIntent(BaseModel):
     FlavorIntent is used for:
         - Physical expressions: "jump around", "dance", "sing", "wave"
         - Improvised dialogue: "ask Jenkins about football" (undefined topic)
+        - Partial matches: "examine ceiling" (verb recognized, target not found)
 
     FlavorIntents undergo lightweight validation (target presence check)
     before being sent to the narrator for prose generation.
+
+    The `action_hint` field enables graduated parsing:
+        - Unknown verb → action_hint=None, verb="dance"
+        - Known verb, unknown target → action_hint=EXAMINE, target="ceiling"
+        - Known verb, resolved entity → action_hint=TALK, target_id="butler_jenkins"
 
     Attributes:
         type: Discriminator literal for union typing
         verb: The action verb ("dance", "wave", "ask")
         raw_input: The original player input string
-        target: Optional entity reference (may be ID or raw description)
+        action_hint: Recognized action type (for richer narrator response)
+        target: Unresolved target description (raw player text)
+        target_id: Resolved entity ID (when partially matched)
         topic: For ASK: unresolved dialogue topic
         manner: Adverbial modifier ("gracefully", "loudly")
 
     Example:
-        >>> # "dance gracefully"
+        >>> # Generic flavor: "dance gracefully"
         >>> flavor = FlavorIntent(
         ...     verb="dance",
         ...     raw_input="dance gracefully",
         ...     manner="gracefully",
         ... )
 
-        >>> # "ask Jenkins about football" (undefined topic)
+        >>> # Partial match: "examine the ceiling" (not in world)
+        >>> flavor = FlavorIntent(
+        ...     verb="examine",
+        ...     raw_input="examine the ceiling",
+        ...     action_hint=ActionType.EXAMINE,
+        ...     target="the ceiling",
+        ... )
+
+        >>> # Improvised dialogue: "ask Jenkins about football"
         >>> flavor = FlavorIntent(
         ...     verb="ask",
         ...     raw_input="ask Jenkins about football",
-        ...     target="butler_jenkins",
+        ...     action_hint=ActionType.ASK,
+        ...     target_id="butler_jenkins",
         ...     topic="football",
         ... )
     """
@@ -176,8 +193,12 @@ class FlavorIntent(BaseModel):
     verb: str
     raw_input: str
 
-    # Optional context (may be entity ID or raw description)
-    target: str | None = None  # Entity reference or description
+    # Recognized action type (helps Narrator generate appropriate response)
+    action_hint: ActionType | None = None
+
+    # Partially resolved context
+    target: str | None = None  # Unresolved target description
+    target_id: str | None = None  # Resolved entity ID (when available)
     topic: str | None = None  # Unresolved dialogue topic
     manner: str | None = None  # Adverbial modifier ("dance GRACEFULLY")
 
