@@ -10,11 +10,11 @@ Tests cover:
 """
 
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 from app.engine.two_phase import TwoPhaseProcessor
 from app.engine.two_phase_state import TwoPhaseStateManager
-from app.models.two_phase_state import TwoPhaseGameState, TwoPhaseActionResponse
+from app.models.two_phase_state import TwoPhaseGameState
 from app.models.event import EventType
 
 
@@ -311,4 +311,3 @@ class TestTwoPhaseProcessorDirectionParsing:
         # Should attempt movement (even if rejected due to requirements)
         # The important thing is it wasn't treated as unsupported
         assert "don't understand" not in response.narrative.lower()
-

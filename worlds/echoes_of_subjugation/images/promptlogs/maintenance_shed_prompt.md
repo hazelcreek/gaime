@@ -12,9 +12,9 @@ Interactive Elements to Include:
 Visible pathways: an opening or exit behind, perhaps suggested by light or shadows; stairs descending, a trapdoor, or a passage leading below
 Objects in the scene: UV Flashlight has rolled beneath a dusty workbench, its military-grade casing barely visible in the gloom
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Sci-Fi Dystopia, Oppressive, Desperate, Synthetic

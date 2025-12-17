@@ -241,4 +241,3 @@ class TwoPhaseStateManager:
             True,
             victory.narrative or "Congratulations! You have completed the adventure.",
         )
-

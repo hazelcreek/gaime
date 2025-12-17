@@ -7,9 +7,6 @@ Tests cover:
 - Field validation
 """
 
-import pytest
-from pydantic import ValidationError
-
 from app.models.two_phase_state import TwoPhaseGameState, TwoPhaseActionResponse
 from app.models.game import LLMDebugInfo
 
@@ -192,4 +189,3 @@ class TestTwoPhaseActionResponse:
 
         assert response.llm_debug is not None
         assert response.llm_debug.model == "gemini-1.5-flash"
-

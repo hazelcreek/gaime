@@ -135,7 +135,9 @@ class NarratorAI:
             if exit.description:
                 exit_desc += f" ({exit.description})"
             exits_lines.append(exit_desc)
-        exits_description = "\n".join(exits_lines) if exits_lines else "No visible exits"
+        exits_description = (
+            "\n".join(exits_lines) if exits_lines else "No visible exits"
+        )
 
         # Format visible items
         items_lines = []
@@ -146,9 +148,7 @@ class NarratorAI:
             if item.is_new:
                 item_desc += " [NEWLY DISCOVERED]"
             items_lines.append(item_desc)
-        items_description = (
-            "\n".join(items_lines) if items_lines else "Nothing of note"
-        )
+        items_description = "\n".join(items_lines) if items_lines else "Nothing of note"
 
         # Format inventory
         inventory_lines = [item.name for item in snapshot.inventory]
@@ -239,7 +239,9 @@ class NarratorAI:
         from_location = context.get("from_location")
         direction = context.get("direction")
 
-        lines = [f"### LOCATION_CHANGED: Player {'arrives at' if is_opening else 'moved to'} {snapshot.location_name}"]
+        lines = [
+            f"### LOCATION_CHANGED: Player {'arrives at' if is_opening else 'moved to'} {snapshot.location_name}"
+        ]
 
         if is_opening:
             lines.append("- This is the OPENING of the game")
@@ -282,7 +284,9 @@ class NarratorAI:
             would_have = event.would_have
         else:
             rejection_code = event.context.get("rejection_code", "unknown")
-            rejection_reason = event.context.get("rejection_reason", "The action failed.")
+            rejection_reason = event.context.get(
+                "rejection_reason", "The action failed."
+            )
             would_have = event.context.get("would_have")
 
         lines = [
@@ -297,4 +301,3 @@ class NarratorAI:
             lines.append(f"- Hint at what might work: {would_have}")
 
         return "\n".join(lines)
-

@@ -37,4 +37,3 @@ test_npc:
   behavior: |
     Watches the player with interest.
     Offers hints when asked, based on trust level.
-

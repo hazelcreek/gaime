@@ -13,9 +13,9 @@ Visible pathways: a doorway or passage visible ahead in the distance
 Objects in the scene: Nutrient Block sits half-eaten on a metal tray beside your bed slab, the grey cube barely touched
 Characters visible in the scene: A figure - Old Marcus, Prison Elder, lies on the bed slab in the adjacent cell, his weathered face pressed against the flickering barrier, whispering urgently
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Sci-Fi Dystopia, Oppressive, Desperate, Synthetic

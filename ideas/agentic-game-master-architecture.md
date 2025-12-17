@@ -227,7 +227,7 @@ Player: "prepare the ritual"
 
 LLM:
 → check_inventory("candles")     ← has: true
-→ check_inventory("chalk")       ← has: true  
+→ check_inventory("chalk")       ← has: true
 → check_flag("altar_cleaned")    ← value: true
 → set_flag("ritual_prepared")    ← success
 → modify_stat("sanity", -10)     ← new_value: 65
@@ -309,18 +309,18 @@ The system becomes more complex:
 ```python
 async def process_action_agentic(action: str) -> str:
     messages = build_initial_messages(action)
-    
+
     for iteration in range(MAX_ITERATIONS):
         response = await llm.completion(messages, tools=GAME_TOOLS)
-        
+
         if response.finish_reason == "stop":
             return extract_narrative(response)
-        
+
         if response.tool_calls:
             for tool_call in response.tool_calls:
                 result = execute_tool(tool_call)
                 messages.append({"role": "tool", "content": result})
-    
+
     raise AgentLoopError("Max iterations exceeded")
 ```
 
@@ -391,7 +391,7 @@ Keep the JSON response for state changes, but add *read-only* tools for the LLM 
 # Read-only query tools
 query_tools = [
     get_item_details,
-    get_npc_knowledge,  
+    get_npc_knowledge,
     check_item_at_location,
     get_exit_details
 ]
@@ -430,31 +430,31 @@ class TakeItemResult(BaseModel):
     success: bool
     error: str | None = None
     item_name: str | None = None
-    
+
 def take_item(item_id: str, state_manager: GameStateManager) -> TakeItemResult:
     """Pick up an item at the current location."""
     location = state_manager.get_current_location()
     state = state_manager.get_state()
-    
+
     # Check item exists
     item = state_manager.world_data.get_item(item_id)
     if not item:
         return TakeItemResult(success=False, error=f"Unknown item: {item_id}")
-    
+
     # Check item is at location
     if item_id not in location.items:
         return TakeItemResult(
-            success=False, 
+            success=False,
             error=f"{item.name} is not here"
         )
-    
+
     # Check not already in inventory
     if item_id in state.inventory:
         return TakeItemResult(
             success=False,
             error=f"You already have the {item.name}"
         )
-    
+
     # Success
     state.inventory.append(item_id)
     return TakeItemResult(success=True, item_name=item.name)
@@ -475,7 +475,7 @@ def generate_narrative(text: str) -> None:
 ```python
 class NarrativeBuilder:
     parts: list[str] = []
-    
+
 def add_narrative(text: str, builder: NarrativeBuilder) -> None:
     """Add a paragraph to the narrative. Can call multiple times."""
     builder.parts.append(text)
@@ -547,6 +547,6 @@ The future of GAIME is agentic.
 
 ---
 
-*Document created: December 2024*  
-*Author: AI Research Assistant*  
+*Document created: December 2024*
+*Author: AI Research Assistant*
 *Status: Proposal / Discussion Document*

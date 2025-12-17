@@ -11,7 +11,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.api.engine import EngineVersion, ENGINE_INFO, DEFAULT_ENGINE
-from app.api.game import NewGameRequest, NewGameResponse
+from app.api.game import NewGameRequest
 from app.main import app
 
 
@@ -137,4 +137,3 @@ class TestEnginesEndpoint:
             assert "id" in engine
             assert "name" in engine
             assert "description" in engine
-

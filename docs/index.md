@@ -82,4 +82,3 @@ This gives you **control** over the story while letting AI handle **detail and v
 | LLM | LiteLLM | Provider-agnostic AI |
 | Data | YAML | World definitions |
 | Styling | Tailwind CSS | UI theming |
-

@@ -12,9 +12,9 @@ Interactive Elements to Include:
 Visible pathways: a doorway or passage visible ahead in the distance; a passage or doorway visible to the right side of the scene; a passage leading toward Wrecked Cabin
 Objects in the scene: Dry Driftwood A pile of sun-bleached timber sits high on the dunes.
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Steampunk Survival, Melancholy yet Wondrous

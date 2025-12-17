@@ -304,7 +304,7 @@ random_sounds:
       - entrance_hall
       - upper_landing
       - any_exterior
-  
+
   wood_creak:
     file: "effects/wood-creak.mp3"
     min_interval: 20000
@@ -390,23 +390,23 @@ interface AudioState {
 class AudioManager {
   private config: AudioConfig;
   private state: AudioState;
-  
+
   // Howler.js instances for each audio type
   private musicPlayer: Howl | null;
   private ambiencePool: Map<string, Howl>;
   private effectsPool: Map<string, Howl>;
-  
+
   // Core methods
   playMusic(worldId: string): void;
   setMusicStem(stem: string, volume: number): void;
   playAmbience(locationId: string): void;
   playEffect(effectId: string): void;
   playRandomSound(config: RandomSoundConfig): void;
-  
+
   // Transitions
   crossfadeMusic(from: string, to: string, duration: number): void;
   fadeOutAll(duration: number): void;
-  
+
   // State management
   onLocationChange(locationId: string): void;
   onGameStateChange(state: GameState): void;
@@ -439,12 +439,12 @@ interface UseAudioReturn {
   playMusic: (worldId: string) => void;
   playAmbience: (locationId: string) => void;
   playEffect: (effectId: string) => void;
-  
+
   // Volume controls
   setMasterVolume: (volume: number) => void;
   setMusicVolume: (volume: number) => void;
   toggleMute: () => void;
-  
+
   // State
   isLoading: boolean;
   isMuted: boolean;
@@ -488,7 +488,7 @@ interface ActionResponse {
   narrative: string;
   state: GameState;
   // ... existing fields ...
-  
+
   // NEW: Audio hints
   audio_hints?: {
     play_effect?: string;       // Effect to play (e.g., "door_open")
@@ -558,13 +558,13 @@ audio:
       tension: "music/stems/tension-strings.mp3"
       melody: "music/stems/melody-piano.mp3"
       accent: "music/stems/accent-choir.mp3"
-  
+
   # Global sound effects
   effects:
     game_start: "effects/thunder-crash.mp3"
     discovery: "effects/discovery.mp3"
     victory: "effects/victory.mp3"
-  
+
   # Default random sounds (can be overridden per-location)
   random_sounds:
     - id: thunder
@@ -584,7 +584,7 @@ entrance_hall:
   name: "Entrance Hall"
   atmosphere: |
     Grand but decayed entrance hall...
-  
+
   # NEW: Location audio
   audio:
     ambience:
@@ -592,17 +592,17 @@ entrance_hall:
         volume: 0.5
       - file: "ambience/clock-tick.mp3"
         volume: 0.3
-    
+
     # Override world random sounds
     random_sounds:
       - thunder      # Use world-defined thunder
       - id: door_rattle
         file: "effects/door-rattle.mp3"
         interval: [20, 60]
-    
+
     # Music mood for dynamic mixing
     music_mood: "uneasy"    # affects stem volumes
-  
+
   interactions:
     examine_portraits:
       triggers: ["examine portraits"]
@@ -619,7 +619,7 @@ iron_key:
   portable: true
   examine: "An old iron key..."
   found_description: "A heavy key glints in the shadows"
-  
+
   # NEW: Item sounds
   audio:
     take: "effects/key-jingle.mp3"
@@ -629,7 +629,7 @@ iron_key:
 piano:
   name: "Grand Piano"
   portable: false
-  
+
   audio:
     interact: "effects/piano-haunting-melody.mp3"  # 5-10 second clip
 ```
@@ -639,16 +639,16 @@ piano:
 ```yaml
 ghost_child:
   name: "The Whisper"
-  
+
   # NEW: NPC sounds
   audio:
     appear: "effects/ghost-materialize.mp3"
     disappear: "effects/ghost-fade.mp3"
     interact: "effects/child-whisper.mp3"
-    
+
 butler_jenkins:
   name: "Jenkins"
-  
+
   audio:
     greet: "effects/butler-greeting.mp3"
     reveal_secret: "effects/dramatic-revelation.mp3"
@@ -954,10 +954,10 @@ class AudioManager {
     // Load preferences
     const savedVolume = localStorage.getItem('audio_volume');
     const savedMuted = localStorage.getItem('audio_muted');
-    
+
     if (savedVolume) this.volume = parseFloat(savedVolume);
     if (savedMuted) this.isMuted = savedMuted === 'true';
-    
+
     // Initialize menu music
     this.menuMusic = new Howl({
       src: ['/audio/menu-theme.mp3', '/audio/menu-theme.ogg'],
@@ -1043,7 +1043,7 @@ import { useAudio } from './hooks/useAudio';
 
 function GameContent({ setView }) {
   const { isMuted, toggleMute, playMenuMusic, stopMenuMusic } = useAudio();
-  
+
   // Play menu music when no game active
   useEffect(() => {
     if (!sessionId) {
@@ -1118,25 +1118,25 @@ The world definition files contain rich descriptive text that can be parsed to g
 **For Location Ambience:**
 
 ```
-Template: "[WEATHER/ATMOSPHERE] sounds in a [LOCATION TYPE] with [KEY FEATURES], 
+Template: "[WEATHER/ATMOSPHERE] sounds in a [LOCATION TYPE] with [KEY FEATURES],
           [MOOD from world.tone], seamless 45-second loop"
 
 Example Input (from locations.yaml):
   entrance_hall:
     atmosphere: |
-      Rain hammers against the windows, and occasional lightning 
+      Rain hammers against the windows, and occasional lightning
       illuminates the decay. The air smells of old wood and dust.
 
 Generated Prompt:
-  "Heavy rain against old glass windows with distant thunder rumbles, 
-   inside a grand Victorian entrance hall with high ceilings, 
+  "Heavy rain against old glass windows with distant thunder rumbles,
+   inside a grand Victorian entrance hall with high ceilings,
    atmospheric and eerie, seamless 45-second loop"
 ```
 
 **For Interaction Sounds:**
 
 ```
-Template: "[OBJECT] [ACTION] in [ENVIRONMENT], [MATERIAL] texture, 
+Template: "[OBJECT] [ACTION] in [ENVIRONMENT], [MATERIAL] texture,
           [MOOD], [DURATION] one-shot"
 
 Example Input (from locations.yaml):
@@ -1145,15 +1145,15 @@ Example Input (from locations.yaml):
       narrative_hint: "A mechanical click. A section of bookshelf swings inward"
 
 Generated Prompt:
-  "Old book being pulled from wooden shelf triggering hidden mechanism, 
-   followed by heavy bookcase section swinging open on rusty hinges, 
+  "Old book being pulled from wooden shelf triggering hidden mechanism,
+   followed by heavy bookcase section swinging open on rusty hinges,
    dusty library environment, suspenseful, 4-second one-shot"
 ```
 
 **For Item Sounds:**
 
 ```
-Template: "[ITEM MATERIAL] [ITEM TYPE] being [ACTION], [QUALITIES from examine], 
+Template: "[ITEM MATERIAL] [ITEM TYPE] being [ACTION], [QUALITIES from examine],
           [DURATION]"
 
 Example Input (from items.yaml):
@@ -1162,16 +1162,16 @@ Example Input (from items.yaml):
     examine: "An old iron key, heavy and cold. The head is shaped like a serpent."
 
 Generated Prompts:
-  Take: "Heavy antique iron key picked up from stone surface, 
+  Take: "Heavy antique iron key picked up from stone surface,
          metallic clinking and jingling, 1.5 seconds"
-  Use:  "Old iron key inserted into rusty lock mechanism and turned with effort, 
+  Use:  "Old iron key inserted into rusty lock mechanism and turned with effort,
          satisfying mechanical click at end, 3 seconds"
 ```
 
 **For NPC Sounds:**
 
 ```
-Template: "[NPC TYPE] [ACTION/STATE], [APPEARANCE QUALITIES], 
+Template: "[NPC TYPE] [ACTION/STATE], [APPEARANCE QUALITIES],
           [PERSONALITY TRAITS as audio qualities], [DURATION]"
 
 Example Input (from npcs.yaml):
@@ -1182,9 +1182,9 @@ Example Input (from npcs.yaml):
       traits: [innocent, helpful, sad]
 
 Generated Prompts:
-  Appear: "Ghostly child materializing with soft ethereal shimmer, 
+  Appear: "Ghostly child materializing with soft ethereal shimmer,
            gentle and melancholic, slight reverb, 2 seconds"
-  Ambient: "Faint child-like humming, distant and sad, 
+  Ambient: "Faint child-like humming, distant and sad,
             with subtle otherworldly reverb, 8-second loop"
 ```
 
@@ -1197,57 +1197,57 @@ The World Builder could include an audio prompt generator that analyzes YAML fil
 
 class AudioPromptGenerator:
     """Generates text-to-SFX prompts from world definition data."""
-    
+
     def __init__(self, world_data: WorldDefinition):
         self.world = world_data
         self.mood_keywords = self._extract_mood_keywords()
-    
+
     def _extract_mood_keywords(self) -> list[str]:
         """Extract mood words from theme and tone."""
         # Parse world.theme and world.tone for audio-relevant adjectives
         # "Victorian gothic horror" → ["old", "dark", "creaky", "dusty"]
         # "atmospheric, mysterious" → ["eerie", "unsettling", "ambient"]
         pass
-    
+
     def generate_location_ambience_prompt(self, location_id: str) -> str:
         """Generate ambient loop prompt for a location."""
         location = self.world.locations[location_id]
-        
+
         # Extract key elements from atmosphere text
         elements = self._parse_atmosphere(location.atmosphere)
-        
+
         prompt = f"{elements['weather']} sounds in a {elements['space_type']}"
         prompt += f" with {elements['features']}"
         prompt += f", {', '.join(self.mood_keywords[:2])}"
         prompt += ", seamless 45-second loop"
-        
+
         return prompt
-    
+
     def generate_interaction_prompt(
-        self, 
-        location_id: str, 
+        self,
+        location_id: str,
         interaction_id: str
     ) -> str:
         """Generate one-shot sound prompt for an interaction."""
         interaction = self.world.locations[location_id].interactions[interaction_id]
-        
+
         # Parse the narrative_hint for action verbs and objects
         action_data = self._parse_narrative_hint(interaction.narrative_hint)
-        
+
         prompt = f"{action_data['object']} {action_data['action']}"
         prompt += f" in {self._get_location_type(location_id)}"
         prompt += f", {action_data['material']} texture"
         prompt += f", {self.mood_keywords[0]}, {action_data['duration']}"
-        
+
         return prompt
-    
+
     def generate_item_prompts(self, item_id: str) -> dict[str, str]:
         """Generate prompts for item take/use/examine sounds."""
         item = self.world.items[item_id]
-        
+
         # Extract material and qualities from examine text
         properties = self._parse_item_description(item.examine)
-        
+
         return {
             "take": f"{properties['material']} {item.name} picked up, "
                    f"{properties['qualities']}, 1.5 seconds",
@@ -1257,7 +1257,7 @@ class AudioPromptGenerator:
                       f"turning it over, subtle {properties['material']} sounds, "
                       f"2 seconds"
         }
-    
+
     def generate_all_prompts(self) -> dict:
         """Generate complete audio prompt manifest for the world."""
         manifest = {
@@ -1268,22 +1268,22 @@ class AudioPromptGenerator:
             "npcs": {},
             "random_sounds": []
         }
-        
+
         # Generate for all locations
         for loc_id in self.world.locations:
             manifest["ambience"][loc_id] = self.generate_location_ambience_prompt(loc_id)
-            
+
             for int_id in self.world.locations[loc_id].interactions:
                 key = f"{loc_id}/{int_id}"
                 manifest["interactions"][key] = self.generate_interaction_prompt(loc_id, int_id)
-        
+
         # Generate for all items
         for item_id in self.world.items:
             manifest["items"][item_id] = self.generate_item_prompts(item_id)
-        
+
         # Generate random sound prompts based on theme
         manifest["random_sounds"] = self._generate_thematic_random_sounds()
-        
+
         return manifest
 ```
 
@@ -1325,39 +1325,39 @@ mood_keywords: [eerie, gothic, Victorian, decayed, supernatural, melancholic]
 
 ambience:
   entrance_hall: |
-    Heavy rain against tall grimy windows with distant thunder, 
-    inside a grand decayed Victorian entrance hall with marble floors 
-    and dusty chandelier, wind whistling through gaps, 
+    Heavy rain against tall grimy windows with distant thunder,
+    inside a grand decayed Victorian entrance hall with marble floors
+    and dusty chandelier, wind whistling through gaps,
     eerie and melancholic, seamless 60-second loop
-  
+
   library: |
-    Gentle fire crackling in stone fireplace, old pages occasionally 
-    rustling in cold draft, distant wind outside, large room with 
-    tall bookshelves absorbing sound, contemplative and unsettling, 
+    Gentle fire crackling in stone fireplace, old pages occasionally
+    rustling in cold draft, distant wind outside, large room with
+    tall bookshelves absorbing sound, contemplative and unsettling,
     seamless 45-second loop
-  
+
   basement: |
     Slow water dripping onto stone, faint scratching of rats in walls,
-    distant metallic groaning of old pipes, cold damp basement with 
+    distant metallic groaning of old pipes, cold damp basement with
     echo, oppressive and claustrophobic, seamless 40-second loop
-  
+
   ritual_chamber: |
-    Low ominous drone or hum, subtle otherworldly whispers at edge 
-    of hearing, candle flames flickering, ancient underground stone 
+    Low ominous drone or hum, subtle otherworldly whispers at edge
+    of hearing, candle flames flickering, ancient underground stone
     chamber, deeply unsettling and supernatural, seamless 50-second loop
 
 interactions:
   library/pull_red_book: |
-    Old leather-bound book being pulled from wooden shelf, 
-    hidden mechanical click and grinding of stone mechanism, 
+    Old leather-bound book being pulled from wooden shelf,
+    hidden mechanical click and grinding of stone mechanism,
     heavy bookcase section slowly swinging open on ancient hinges,
     dusty library, suspenseful, 4-second one-shot
-  
+
   sitting_room/play_piano: |
     Ghostly piano playing melancholic Victorian melody by itself,
     slightly out of tune, keys pressing without visible cause,
     grand piano in dusty parlor, haunting and sad, 8-second clip
-  
+
   master_bedroom/examine_mirror: |
     Supernatural shimmer and distortion, brief ghostly whisper,
     cold wind from nowhere, unsettling revelation sound,
@@ -1369,10 +1369,10 @@ items:
       Heavy antique iron key picked up from wooden surface,
       cold metallic jingle, weighty and solid, 1.5 seconds
     use: |
-      Large iron key inserted into old lock, rusty mechanism 
+      Large iron key inserted into old lock, rusty mechanism
       turning with resistance, satisfying heavy clunk as lock opens,
       3 seconds
-  
+
   candlestick:
     take: |
       Tarnished silver candlestick lifted from mantelpiece,
@@ -1380,7 +1380,7 @@ items:
     use_with_matches: |
       Match striking and flaring, candlewick catching flame,
       gentle whoosh of fire taking hold, warm crackling, 2.5 seconds
-  
+
   grimoire:
     take: |
       Ancient leather tome lifted from stone pedestal,
@@ -1402,7 +1402,7 @@ npcs:
       Soft childlike whisper at edge of hearing, words unclear,
       accompanied by slight temperature drop sound (subtle wind),
       3 seconds
-  
+
   butler_jenkins:
     greet: |
       Formal throat clearing, old man's tired sigh,
@@ -1413,24 +1413,24 @@ npcs:
 
 random_sounds:
   - prompt: |
-      Sudden crack of thunder, not too close, followed by 
+      Sudden crack of thunder, not too close, followed by
       rumbling echo, Victorian manor during storm, 4 seconds
     suggested_name: thunder_rumble
     frequency: occasional
-  
+
   - prompt: |
       Old wooden floorboards creaking under unseen weight,
       as if someone invisible walking slowly,
       old house settling but unsettling, 2 seconds
     suggested_name: phantom_footsteps
     frequency: rare
-  
+
   - prompt: |
       Clock striking single chime, deep resonant grandfather clock,
       with metallic reverberations fading, 3 seconds
     suggested_name: clock_chime
     frequency: regular
-  
+
   - prompt: |
       Sudden cold wind gust from nowhere indoors,
       papers or curtains rustling, supernatural presence hint,
@@ -1466,7 +1466,7 @@ async function generateSoundEffect(prompt: string): Promise<Blob> {
       prompt_influence: 0.5
     })
   });
-  
+
   return response.blob();
 }
 
@@ -1523,7 +1523,7 @@ A complete music creative brief should include:
 
 class MusicBriefGenerator:
     """Generates music creative briefs from world definition."""
-    
+
     # Mapping from theme keywords to musical suggestions
     THEME_TO_MUSIC = {
         "gothic": {
@@ -1557,23 +1557,23 @@ class MusicBriefGenerator:
             "references": ["The Shawshank Redemption OST", "Escape from Butcher Bay OST"]
         }
     }
-    
+
     def generate_brief(self, world: WorldDefinition) -> str:
         """Generate complete creative brief as formatted text."""
-        
+
         # Analyze world for musical direction
         themes = self._extract_themes(world.theme)
         musical_style = self._derive_musical_style(themes)
         locations_analysis = self._analyze_locations(world.locations)
         emotional_arc = self._map_emotional_journey(world)
-        
+
         brief = self._format_brief(
             world=world,
             style=musical_style,
             locations=locations_analysis,
             emotions=emotional_arc
         )
-        
+
         return brief
 ```
 
@@ -1658,7 +1658,7 @@ The player progresses through distinct emotional phases:
 - Able to play together as full mix OR independently
 - Loop-ready (seamless at loop point)
 
-**File Format**: 
+**File Format**:
 - WAV 44.1kHz 24-bit (for editing)
 - MP3 192kbps + OGG Vorbis (for game delivery)
 
@@ -1804,7 +1804,7 @@ A seamless loop has **no audible discontinuity** when playback reaches the end a
 
 ```
 Perfect Loop:
-                                                    
+
    Start                                      End → Start
      │                                             │
      ▼                                             ▼
@@ -1815,7 +1815,7 @@ Perfect Loop:
      └─────────────── Seamless Transition ─────────┘
 
 Bad Loop (amplitude discontinuity):
-                                                    
+
      ╱╲    ╱╲    ╱╲    ╱╲    ╱╲    ╱╲    ╱╲  ╲     ╱╲
     ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╲   ╱  ╲
    ╱    ╲╱    ╲╱    ╲╱    ╲╱    ╲╱    ╲╱    ╲  ───╱    ╲
@@ -1849,7 +1849,7 @@ Crossfading overlaps the end and beginning, creating a smooth transition even if
    ```
    Track 1: |████████████████████████████████████░░░░░| (fade out)
    Track 2: |░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█████| (fade in, copied from start)
-   
+
    Timeline: |─────────────────────────────────────────|
              0                                        60 sec
    ```
@@ -2040,7 +2040,7 @@ Here's a specific Logic Pro workflow that handles reverb properly:
    - Let the reverb tail from the end decay into these extra bars
    - Bounce bars 5-37 (skipping the original start, using the tail-infused end)
    - Result: the "start" of your file already has appropriate reverb
-   
+
 4. For stems, export each stem with its own reverb tail handled the same way
 ```
 
@@ -2062,7 +2062,7 @@ STEP 4 - Export the SECOND half (bars 5 through end):
                     |────────────────────────────────[Bars 29-32]~~~~[Bars 1-4]|
                     ▲                                                          ▲
                     └─────────── This is your final loop file ────────────────┘
-                    
+
 When this loops, bars 1-4 (with tail) connects to bars 5+, which is musically correct.
 ```
 
@@ -2075,7 +2075,7 @@ For music, the ideal approach is composing with looping in mind from the start.
 1. **Choose a loop-friendly structure**
    ```
    |: Intro → A → B → A :| (returns to Intro)
-   
+
    NOT:
    Intro → A → B → C → Outro (nowhere to return)
    ```
@@ -2090,7 +2090,7 @@ For music, the ideal approach is composing with looping in mind from the start.
    ```
    If the piece starts on beat 1 of a measure,
    it should end on beat 4 of the previous measure.
-   
+
    |1   2   3   4  |1   2   3   4  |  ...  |1   2   3   4  |1
     ▲ Start                                              ▲ End returns here
    ```
@@ -2237,25 +2237,25 @@ from scipy.io import wavfile
 def test_loop_continuity(wav_path, boundary_samples=100):
     """Check if a WAV file loops seamlessly."""
     rate, data = wavfile.read(wav_path)
-    
+
     # Handle stereo
     if len(data.shape) > 1:
         data = data.mean(axis=1)
-    
+
     # Get boundary regions
     start = data[:boundary_samples]
     end = data[-boundary_samples:]
-    
+
     # Check amplitude match
     start_rms = np.sqrt(np.mean(start**2))
     end_rms = np.sqrt(np.mean(end**2))
     amplitude_diff = abs(start_rms - end_rms) / max(start_rms, end_rms)
-    
+
     # Check zero-crossing alignment
     start_crosses_up = start[0] < 0 and start[1] >= 0
     end_crosses_up = end[-2] < 0 and end[-1] >= 0
     crossing_match = start_crosses_up == end_crosses_up
-    
+
     return {
         'amplitude_difference': f"{amplitude_diff:.2%}",
         'amplitude_ok': amplitude_diff < 0.1,  # <10% difference

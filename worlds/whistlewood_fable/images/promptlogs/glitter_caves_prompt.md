@@ -14,9 +14,9 @@ Characters visible in the scene:
 
 - Monty the Mole, Excavator, digs frantically at a wall with a tiny silver shovel
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Quaint Fairy Tale, Whimsical, Gentle, Slightly Melancholic

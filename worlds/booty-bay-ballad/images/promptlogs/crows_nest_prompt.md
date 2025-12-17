@@ -15,9 +15,9 @@ Characters visible in the scene:
 
 - Weeping Lookout (Clue Giver), Curled up in a ball, sobbing into his spyglass.: A young pirate with red, puffy eyes and a runny nose.
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Humorous Pirate Adventure, Silly, satirical, salty

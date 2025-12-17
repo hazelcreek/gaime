@@ -213,11 +213,11 @@ Each model should have:
 ```python
 class MockLLMClient:
     """Mock LLM client for deterministic testing"""
-    
+
     def __init__(self, responses: dict[str, str]):
         self.responses = responses
         self.call_history: list[dict] = []
-    
+
     async def complete(self, prompt: str) -> str:
         self.call_history.append({"prompt": prompt})
         # Match prompt patterns to canned responses
@@ -244,20 +244,20 @@ flowchart TD
         B --> C[Create test fixtures - minimal world]
         C --> D[Add mypy configuration]
     end
-    
+
     subgraph Phase2[Phase 2: Interfaces]
         E[Define protocols.py] --> F[Create model stubs with docstrings]
         F --> G[Write first unit tests for models]
     end
-    
+
     subgraph Phase3[Phase 3: CI]
         H[Create GitHub Actions workflow] --> I[Verify CI passes]
     end
-    
+
     subgraph Phase4[Phase 4: Mocks]
         J[Create LLM mock infrastructure] --> K[Write integration test skeleton]
     end
-    
+
     Phase0 --> Phase1
     Phase1 --> Phase2
     Phase2 --> Phase3
@@ -380,7 +380,7 @@ The game engine uses a two-phase action processing loop. See `planning/two-phase
 
 ### Key Models (in `backend/app/models/`)
 - `intent.py`: ActionIntent, FlavorIntent, ActionType
-- `event.py`: Event, RejectionEvent, EventType  
+- `event.py`: Event, RejectionEvent, EventType
 - `perception.py`: PerceptionSnapshot, VisibleEntity
 - `validation.py`: ValidationResult, RejectionCode
 ```

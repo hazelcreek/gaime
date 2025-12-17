@@ -8,7 +8,7 @@
 
 This document outlines the architecture for evolving GAIME from a single LLM call to a sophisticated two-phase game loop with separate parsing and narration stages. The new architecture addresses the limitations of the current monolithic LLM approach while maintaining the core vision of immersive, story-driven gameplay.
 
-> **Status**: Design Specification - December 2025  
+> **Status**: Design Specification - December 2025
 > **Related**: [Vision Document](../../docs/VISION.md) | [Game Mechanics Design](../game-mechanics-design.md) | [Architecture](../../docs/ARCHITECTURE.md)
 
 ---
@@ -977,7 +977,6 @@ The hybrid approach ensures a smooth transition, allowing us to compare and refi
 
 ---
 
-*Created: December 2025*  
-*Status: Ready for implementation*  
+*Created: December 2025*
+*Status: Ready for implementation*
 *Branch: cursor/grok-code-fast-1/two-phase-game-loop-architecture*
-

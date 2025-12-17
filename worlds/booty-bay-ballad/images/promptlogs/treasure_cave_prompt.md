@@ -11,9 +11,9 @@ A massive cavern illuminated by glowing moss. In the center, a pile of gold glit
 Interactive Elements to Include:
 Visible pathways: stairs leading upward, or a visible upper level or balcony
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Humorous Pirate Adventure, Silly, satirical, salty

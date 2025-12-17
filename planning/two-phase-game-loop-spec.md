@@ -2,8 +2,8 @@
 
 A comprehensive specification for separating action parsing from narrative generation, enabling deterministic state management with AI-powered prose.
 
-> **Status**: Authoritative Specification — December 2025  
-> **Related**: [Game Mechanics Design](../ideas/game-mechanics-design.md) | [Vision](../docs/VISION.md) | [Architecture](../docs/ARCHITECTURE.md)  
+> **Status**: Authoritative Specification — December 2025
+> **Related**: [Game Mechanics Design](../ideas/game-mechanics-design.md) | [Vision](../docs/VISION.md) | [Architecture](../docs/ARCHITECTURE.md)
 > **Supersedes**: Four exploratory documents now archived in `ideas/archive/`
 
 ---
@@ -78,7 +78,7 @@ sequenceDiagram
     participant E as Engine
     participant LLM as Single LLM
     participant S as State
-    
+
     P->>E: "open the drawer"
     E->>LLM: Action + Full World Context
     Note over LLM: Interprets intent<br/>AND generates narrative<br/>AND determines state changes
@@ -104,13 +104,13 @@ sequenceDiagram
     participant N as Narrator
 
     P->>E: "open the drawer"
-    
+
     rect rgb(230, 240, 255)
         Note over E,I: Phase 1: Parse Intent
         E->>I: Action + Available Context
         I-->>E: ActionIntent{action_type: OPEN, target_id: "desk"}
     end
-    
+
     rect rgb(255, 240, 230)
         Note over E,V: Phase 2: Validate & Execute
         E->>V: Intent + World Rules
@@ -121,13 +121,13 @@ sequenceDiagram
             E->>S: Apply Events
         end
     end
-    
+
     rect rgb(230, 255, 240)
         Note over E,N: Phase 3: Narrate
         E->>N: Events + PerceptionSnapshot
         N-->>E: Rich narrative prose
     end
-    
+
     E-->>P: Display narrative
 ```
 
@@ -146,10 +146,10 @@ from pydantic import BaseModel, Field
 
 class ActionType(str, Enum):
     """Primary categories of player actions"""
-    
+
     # Movement
     MOVE = "move"              # Navigate between locations
-    
+
     # Object Interaction
     EXAMINE = "examine"        # Look at something closely (includes "look at X")
     TAKE = "take"              # Pick up an item
@@ -157,22 +157,22 @@ class ActionType(str, Enum):
     USE = "use"                # Use item (standalone or on target)
     OPEN = "open"              # Open container/door
     CLOSE = "close"            # Close container/door
-    
+
     # Communication
     TALK = "talk"              # Speak to NPC
     ASK = "ask"                # Ask NPC about topic
     GIVE = "give"              # Give item to NPC
     SHOW = "show"              # Show item to NPC
-    
+
     # Environment
     LISTEN = "listen"          # Listen for sounds
     SEARCH = "search"          # Search area/container
-    
+
     # Meta
     WAIT = "wait"              # Pass time
     INVENTORY = "inventory"    # Check inventory
     HELP = "help"              # Show help
-    
+
     # Note: "look around" / "look" without a target is handled as re-narration
     # of the current location, not as a separate ActionType. "look at X" is
     # treated as EXAMINE.
@@ -180,51 +180,51 @@ class ActionType(str, Enum):
 
 class ActionIntent(BaseModel):
     """Structured representation of player intent.
-    
+
     All entity references use the `_id` suffix to indicate resolved IDs
     from the world model. The Interactor is responsible for resolving
     player descriptions ("the shiny key") to entity IDs ("brass_key").
     """
-    
+
     type: Literal["action_intent"] = "action_intent"
     action_type: ActionType
-    
+
     # Original player input
     raw_input: str
-    
+
     # Original verb used (for rich narration)
     verb: str
-    
+
     # Primary target (resolved entity ID: item_id, npc_id, detail_id, or direction)
     target_id: str
-    
+
     # Action-specific secondary fields (all resolved IDs, mutually exclusive):
     instrument_id: str | None = None   # USE: "use INSTRUMENT on target"
     topic_id: str | None = None        # ASK: resolved conversation topic
     recipient_id: str | None = None    # GIVE/SHOW: "give item to RECIPIENT"
-    
+
     # Confidence score (0.0-1.0) when AI-parsed
     confidence: float = 1.0
-    
+
     # Alternative interpretations (for disambiguation)
     alternatives: list["ActionIntent"] = Field(default_factory=list)
 
 
 class FlavorIntent(BaseModel):
     """Actions that add atmosphere but don't change game state.
-    
+
     FlavorIntent is used for:
     - Physical expressions: "jump around", "dance", "sing", "wave"
     - Improvised dialogue: "ask Jenkins about football" (undefined topic)
-    
+
     References may be unresolved (raw descriptions) or resolved IDs.
     FlavorIntents still undergo lightweight validation for target presence.
     """
-    
+
     type: Literal["flavor_intent"] = "flavor_intent"
     verb: str
     raw_input: str
-    
+
     # Optional context (may be entity ID or raw description)
     target: str | None = None          # Entity reference or description
     topic: str | None = None           # Unresolved dialogue topic
@@ -260,37 +260,37 @@ Events represent **what happened** as a result of a validated action. They are t
 ```python
 class EventType(str, Enum):
     """Types of events that can occur"""
-    
+
     # Movement
     LOCATION_CHANGED = "location_changed"
-    
+
     # Items
     ITEM_TAKEN = "item_taken"
     ITEM_DROPPED = "item_dropped"
     ITEM_USED = "item_used"
     ITEM_REVEALED = "item_revealed"
     ITEM_CONSUMED = "item_consumed"
-    
+
     # Containers
     CONTAINER_OPENED = "container_opened"
     CONTAINER_CLOSED = "container_closed"
-    
+
     # Discovery
     DETAIL_EXAMINED = "detail_examined"
     SECRET_DISCOVERED = "secret_discovered"
     EXIT_REVEALED = "exit_revealed"
-    
+
     # NPCs
     NPC_GREETED = "npc_greeted"
     NPC_CONVERSATION = "npc_conversation"
     NPC_ITEM_GIVEN = "npc_item_given"
     NPC_ITEM_RECEIVED = "npc_item_received"
-    
+
     # Game State
     FLAG_SET = "flag_set"
     INTERACTION_TRIGGERED = "interaction_triggered"
     VICTORY_ACHIEVED = "victory_achieved"
-    
+
     # Meta
     ACTION_REJECTED = "action_rejected"
     NOTHING_HAPPENED = "nothing_happened"
@@ -299,34 +299,34 @@ class EventType(str, Enum):
 
 class Event(BaseModel):
     """Represents something that happened in the game world"""
-    
+
     type: EventType
-    
+
     # What was involved
     subject: str | None = None      # Primary entity (item_id, npc_id, location_id)
     target: str | None = None       # Secondary entity
-    
+
     # State changes to apply
     state_changes: dict = Field(default_factory=dict)
-    
+
     # Context for narration
     context: dict = Field(default_factory=dict)
-    
+
     # Was this the primary outcome or a side effect?
     primary: bool = True
 
 
 class RejectionEvent(Event):
     """Event for rejected/failed actions with in-world explanation."""
-    
+
     type: EventType = EventType.ACTION_REJECTED
-    
+
     # Machine-readable rejection code
     rejection_code: str
-    
+
     # Human-readable reason (seed for Narrator)
     rejection_reason: str
-    
+
     # What would have happened if successful (for hints)
     would_have: str | None = None
 ```
@@ -373,28 +373,28 @@ class VisibleEntity(BaseModel):
 
 class PerceptionSnapshot(BaseModel):
     """What the Narrator is allowed to know about the current state.
-    
+
     CRITICAL: Hidden items must NEVER appear in this snapshot.
     """
-    
+
     # Current location
     location_id: str
     location_name: str
     location_atmosphere: str | None = None
-    
+
     # Visible entities (filtered by visibility rules)
     visible_items: list[VisibleEntity] = Field(default_factory=list)
     visible_details: list[VisibleEntity] = Field(default_factory=list)
     visible_exits: list[dict] = Field(default_factory=list)  # {direction, destination_name, description}
     visible_npcs: list[VisibleEntity] = Field(default_factory=list)
-    
+
     # Player state
     inventory: list[VisibleEntity] = Field(default_factory=list)
-    
+
     # Contextual hints (spoiler-safe)
     affordances: dict = Field(default_factory=dict)
     # Example: {"openable_containers": ["desk_drawer"], "usable_tools": ["matches"]}
-    
+
     # Known facts from flags/discoveries (not spoilers)
     known_facts: list[str] = Field(default_factory=list)
 ```
@@ -410,21 +410,21 @@ class PerceptionSnapshot(BaseModel):
 ```mermaid
 flowchart TD
     A[Player Input] --> B{Simple Pattern?}
-    
+
     B -->|Yes| C[Rule-Based Parser]
     B -->|No| D[Interactor AI]
-    
+
     C --> E[ActionIntent]
     D --> E
     D --> F[FlavorIntent]
-    
+
     subgraph FastPath["Fast Path (No LLM)"]
         C1["north, n, go north"]
         C2["take X, pick up X"]
         C3["examine X, look at X, study X"]
         C4["inventory, help"]
     end
-    
+
     subgraph AIPath["AI Path (Interactor)"]
         D1["play the piano softly"]
         D2["light the candle"]
@@ -442,7 +442,7 @@ For common patterns, parse without LLM:
 ```python
 class RuleBasedParser:
     """Parse common actions without LLM"""
-    
+
     DIRECTION_PATTERNS = {
         r'^(go\s+)?(north|n)$': ('north', 'go'),
         r'^(go\s+)?(south|s)$': ('south', 'go'),
@@ -454,23 +454,23 @@ class RuleBasedParser:
         r'^leave$': ('back', 'leave'),
         r'^exit$': ('back', 'exit'),
     }
-    
+
     EXAMINE_PATTERNS = [
         r'^(examine|look at|inspect|study|check)\s+(?:the\s+)?(.+)$',
         r'^x\s+(.+)$',  # Shorthand
     ]
-    
+
     TAKE_PATTERNS = [
         r'^(take|get|grab|pick up)\s+(?:the\s+)?(.+)$',
     ]
-    
+
     def __init__(self, world: WorldData):
         self.world = world
-    
+
     def parse(self, raw_input: str, state: GameState) -> ActionIntent | None:
         """Try rule-based parsing. Returns None if LLM needed."""
         normalized = raw_input.lower().strip()
-        
+
         # Check movement
         for pattern, (direction, verb) in self.DIRECTION_PATTERNS.items():
             if re.match(pattern, normalized):
@@ -481,7 +481,7 @@ class RuleBasedParser:
                     raw_input=raw_input,
                     confidence=1.0
                 )
-        
+
         # Check examine patterns
         for pattern in self.EXAMINE_PATTERNS:
             match = re.match(pattern, normalized)
@@ -497,34 +497,34 @@ class RuleBasedParser:
                         confidence=0.95
                     )
                 # Could not resolve - fall through to Interactor AI
-        
+
         # ... more patterns ...
-        
+
         return None  # Needs Interactor AI
-    
+
     def _resolve_target(self, target_text: str, state: GameState) -> str | None:
         """Try to resolve target text to entity ID"""
         location = self.world.get_location(state.current_location)
         resolver = VisibilityResolver(self.world, state)
-        
+
         # Check visible items
         for item in self.world.get_items_at_location(location.id):
             if resolver.is_item_visible(item.id):
                 if self._matches(target_text, item):
                     return item.id
-        
+
         # Check details
         for detail_id, detail in location.details.items():
             if self._matches(target_text, detail):
                 return detail_id
-        
+
         # Check NPCs
         for npc in self.world.get_npcs_at_location(location.id):
             if self._matches(target_text, npc):
                 return npc.id
-        
+
         return None
-    
+
     def _matches(self, text: str, entity) -> bool:
         """Check if text matches entity name or aliases"""
         text = text.lower()
@@ -540,13 +540,13 @@ For ambiguous or freeform input, use LLM-powered Interactor:
 ```python
 class InteractorAI:
     """LLM-powered action parser for complex inputs"""
-    
+
     async def parse(self, raw_input: str, context: ParserContext) -> ActionIntent | FlavorIntent:
         """Parse complex player input into structured intent"""
-        
+
         prompt = self._build_interactor_prompt(raw_input, context)
         response = await get_completion(prompt, response_format="json")
-        
+
         return self._parse_response(response, raw_input)
 ```
 
@@ -555,22 +555,22 @@ class InteractorAI:
 ```mermaid
 flowchart TD
     A[Intent] --> B{FlavorIntent?}
-    
+
     B -->|Yes| C[Flavor Validator]
     B -->|No| D[Action Validator]
-    
+
     C --> C1{Target present?}
     C1 -->|Yes or No Target| J[FLAVOR_ACTION Event]
     C1 -->|No| G[RejectionEvent]
-    
+
     D --> E{Valid?}
-    
+
     E -->|Yes| F[Execute]
     E -->|No| G
-    
+
     F --> H[Apply State Changes]
     H --> I[Generate Events]
-    
+
     G --> K[Event List]
     I --> K
     J --> K
@@ -583,46 +583,46 @@ FlavorIntents undergo lightweight validation to ensure targets are present:
 ```python
 class FlavorValidator:
     """Lightweight validation for flavor actions"""
-    
+
     def validate(self, intent: FlavorIntent, state: GameState, world: WorldData) -> ValidationResult:
         # If no target, always valid (pure atmosphere)
         if not intent.target:
             return ValidationResult(valid=True)
-        
+
         # Try to resolve target to an entity
         entity = self._resolve_target(intent.target, state, world)
-        
+
         if entity:
             return ValidationResult(valid=True, context={"resolved_target": entity.id})
-        
+
         # Target specified but not found
         return ValidationResult(
             valid=False,
             rejection_code="TARGET_NOT_PRESENT",
             rejection_reason=f"You don't see '{intent.target}' here."
         )
-    
+
     def _resolve_target(self, target: str, state: GameState, world: WorldData) -> Entity | None:
         """Try to find target among visible entities"""
         location = world.get_location(state.current_location)
-        
+
         # Check NPCs
         for npc in world.get_npcs_at_location(location.id):
             if target.lower() in [npc.id, npc.name.lower()] + [a.lower() for a in npc.aliases]:
                 return npc
-        
+
         # Check visible items
         resolver = VisibilityResolver(world, state)
         for item in world.get_items_at_location(location.id):
             if resolver.is_item_visible(item.id):
                 if target.lower() in [item.id, item.name.lower()] + [a.lower() for a in item.aliases]:
                     return item
-        
+
         # Check details
         for detail_id, detail in location.details.items():
             if target.lower() in [detail_id, detail.name.lower()] + [a.lower() for a in detail.aliases]:
                 return detail
-        
+
         return None
 ```
 
@@ -633,15 +633,15 @@ This ensures "wave at Jenkins" fails if Jenkins isn't present, while "dance grac
 ```python
 class ActionValidator:
     """Validates actions against world rules"""
-    
+
     def __init__(self, world: WorldData):
         self.world = world
-    
+
     def validate_move(self, intent: ActionIntent, state: GameState) -> ValidationResult:
         """Validate movement action"""
         location = self.world.get_location(state.current_location)
         direction = intent.target_id
-        
+
         # Check exit exists
         if direction not in location.exits:
             return ValidationResult(
@@ -649,10 +649,10 @@ class ActionValidator:
                 rejection_code="NO_EXIT",
                 rejection_reason=f"There's no way to go {direction} from here."
             )
-        
+
         destination_id = location.exits[direction]
         exit_info = location.exit_details.get(direction)
-        
+
         # Check if locked
         if exit_info and exit_info.locked:
             return ValidationResult(
@@ -661,7 +661,7 @@ class ActionValidator:
                 rejection_reason=exit_info.locked_description or "The way is locked.",
                 context={"requires_key": exit_info.requires_key}
             )
-        
+
         # Check if blocked
         if exit_info and exit_info.blocked:
             return ValidationResult(
@@ -669,34 +669,34 @@ class ActionValidator:
                 rejection_code="EXIT_BLOCKED",
                 rejection_reason=exit_info.blocked_reason or "The way is blocked."
             )
-        
+
         return ValidationResult(valid=True, context={"destination": destination_id})
-    
+
     def validate_take(self, intent: ActionIntent, state: GameState) -> ValidationResult:
         """Validate take action"""
         item = self.world.get_item(intent.target_id)
-        
+
         if not item:
             return ValidationResult(
                 valid=False,
                 rejection_code="ITEM_NOT_VISIBLE",
                 rejection_reason=f"You don't see any '{intent.target_id}' here."
             )
-        
+
         if intent.target_id in state.inventory:
             return ValidationResult(
                 valid=False,
                 rejection_code="ALREADY_HAVE",
                 rejection_reason=f"You already have the {item.name}."
             )
-        
+
         if not item.portable:
             return ValidationResult(
                 valid=False,
                 rejection_code="ITEM_NOT_PORTABLE",
                 rejection_reason=item.not_portable_reason or f"You can't take the {item.name}."
             )
-        
+
         # Check visibility using resolver
         resolver = VisibilityResolver(self.world, state)
         if not resolver.is_item_visible(intent.target_id):
@@ -705,7 +705,7 @@ class ActionValidator:
                 rejection_code="ITEM_NOT_VISIBLE",
                 rejection_reason=f"You don't see any '{intent.target_id}'."
             )
-        
+
         return ValidationResult(valid=True)
 ```
 
@@ -719,7 +719,7 @@ flowchart LR
     C[PerceptionSnapshot] --> B
     D[World Style] --> B
     E[Recent Context] --> B
-    
+
     B --> F[Rich Prose]
 ```
 
@@ -739,7 +739,7 @@ Rejections should feel natural, not like error messages:
 "You try the handle, but the heavy oak door is locked tight. It won't budge."
 
 # ✅ GOOD: With subtle hint
-"Your fingers brush the desk drawer's brass handle. It rattles but 
+"Your fingers brush the desk drawer's brass handle. It rattles but
 doesn't open. Something inside clinks faintly."
 ```
 
@@ -762,7 +762,7 @@ rejection = RejectionEvent(
 )
 
 # Narrator receives rejection event + PerceptionSnapshot
-# Generates: "You push against the basement door, but it doesn't budge. 
+# Generates: "You push against the basement door, but it doesn't budge.
 # A heavy iron padlock—old but sturdy—secures it firmly shut."
 ```
 
@@ -828,7 +828,7 @@ grand_piano:
   name: "Grand Piano"
   portable: false
   location: sitting_room
-  
+
   use_actions:
     play:
       triggers: ["play piano", "play the piano"]
@@ -850,13 +850,13 @@ When processing ASK actions, the Interactor checks the NPC's defined topics:
 butler_jenkins:
   name: "Jenkins"
   aliases: ["the butler", "Mr. Jenkins"]
-  
+
   topics:
     family_curse:
       triggers: ["the curse", "family curse", "the old curse"]
       knowledge: "The curse began in 1823 when..."
       sets_flag: learned_about_curse
-    
+
     manor_secrets:
       triggers: ["secrets", "hidden rooms"]
       knowledge: "There are passages behind the walls..."
@@ -891,17 +891,17 @@ flowchart LR
         W2[Container relationships]
         W3[Visibility rules]
     end
-    
+
     subgraph GameState["Game State (Mutable)"]
         S1[container_states]
         S2[flags]
         S3[inventory]
     end
-    
+
     subgraph Derived["Derived at Runtime"]
         D1["is_item_visible()"]
     end
-    
+
     WorldModel --> Derived
     GameState --> Derived
 ```
@@ -956,7 +956,7 @@ class GameState(BaseModel):
     flags: set[str] = set()                      # Triggered conditions
     container_states: dict[str, bool] = {}       # container_id -> is_open
     visited_locations: set[str] = set()          # For first-visit detection
-    
+
     # NOT stored: item visibility (derived from above)
 ```
 
@@ -965,58 +965,58 @@ class GameState(BaseModel):
 ```python
 class VisibilityResolver:
     """Determines what the player can see RIGHT NOW"""
-    
+
     def __init__(self, world: WorldData, state: GameState):
         self.world = world
         self.state = state
-    
+
     def is_item_visible(self, item_id: str) -> bool:
         """Can the player see this item?"""
         item = self.world.get_item(item_id)
         if not item:
             return False
-        
+
         # Item in inventory is always "visible" (accessible)
         if item_id in self.state.inventory:
             return True
-        
+
         # Item must be at player's location
         if item.location != self.state.current_location:
             return False
-        
+
         # Check visibility based on initial state
         match item.initial_visibility:
             case ItemVisibility.VISIBLE:
                 return True
-            
+
             case ItemVisibility.CONCEALED:
                 # Must be in an open container
                 if not item.container_id:
                     return True  # Misconfigured, default visible
                 return self._is_container_open(item.container_id)
-            
+
             case ItemVisibility.HIDDEN:
                 # Must meet reveal condition
                 if not item.reveal_condition:
                     return False  # Stays hidden without condition
                 return self._check_reveal_condition(item.reveal_condition)
-    
+
     def _is_container_open(self, container_id: str) -> bool:
         """Check if container is currently open"""
         container = self.world.get_item(container_id)
         initially_open = container.initially_open if container else False
         return self.state.container_states.get(container_id, initially_open)
-    
+
     def _check_reveal_condition(self, condition: RevealCondition) -> bool:
         """Check if reveal condition is satisfied"""
         if condition.requires_flag:
             if condition.requires_flag not in self.state.flags:
                 return False
-        
+
         if condition.requires_container_open:
             if not self._is_container_open(condition.requires_container_open):
                 return False
-        
+
         return True
 ```
 
@@ -1029,7 +1029,7 @@ desk:
   portable: false
   examine: "A heavy oak desk with brass handles on its single drawer."
   location: study
-  
+
   container:
     initially_open: false
     locked: false
@@ -1065,7 +1065,7 @@ Locations can define examinable scenery that isn't a portable item:
 entrance_hall:
   name: "Entrance Hall"
   atmosphere: "A grand hall with portraits lining the walls..."
-  
+
   details:
     family_portrait:
       name: "Family Portrait"
@@ -1076,7 +1076,7 @@ entrance_hall:
           triggers: ["adjust portrait", "move painting", "straighten frame"]
           sets_flag: examined_painting
           narrative: "As you adjust the frame, something clinks behind it."
-    
+
     chandelier:
       name: "Crystal Chandelier"
       aliases: ["chandelier", "light fixture"]
@@ -1336,9 +1336,9 @@ Generate the narrative for these events."""
 ```python
 def build_event_guidance(events: list[Event], world: WorldData) -> str:
     """Build specific guidance for each event type"""
-    
+
     guidance = []
-    
+
     for event in events:
         if event.type == EventType.LOCATION_CHANGED:
             loc = world.get_location(event.context.get("destination"))
@@ -1349,7 +1349,7 @@ LOCATION_CHANGED: Player moved to {loc.name}
 - Describe the atmosphere: {loc.atmosphere}
 - Mention visible exits naturally
 """)
-        
+
         elif event.type == EventType.ACTION_REJECTED:
             guidance.append(f"""
 ACTION_REJECTED: Player's action was blocked
@@ -1358,7 +1358,7 @@ ACTION_REJECTED: Player's action was blocked
 - Make this feel natural, NOT like an error message
 - Optionally hint at what might work
 """)
-        
+
         elif event.type == EventType.ITEM_REVEALED:
             item = world.get_item(event.subject)
             guidance.append(f"""
@@ -1367,7 +1367,7 @@ ITEM_REVEALED: {item.name} is now visible
 - Found description: {item.found_description or 'N/A'}
 - Make it feel earned
 """)
-        
+
         elif event.type == EventType.FLAVOR_ACTION:
             guidance.append(f"""
 FLAVOR_ACTION: Atmospheric action (no state change)
@@ -1376,7 +1376,7 @@ FLAVOR_ACTION: Atmospheric action (no state change)
 - Match location mood
 - This is just flavor - no mechanics
 """)
-    
+
     return "\n---\n".join(guidance)
 ```
 
@@ -1473,7 +1473,7 @@ FLAVOR_ACTION: Atmospheric action (no state change)
 ```python
 class EngineVersion(str, Enum):
     """Available game engine versions"""
-    
+
     CLASSIC = "classic"      # Current single-LLM architecture
     TWO_PHASE = "two_phase"  # New separated architecture
 ```
@@ -1483,7 +1483,7 @@ class EngineVersion(str, Enum):
 ```python
 class EngineFactory:
     """Factory for creating game engines"""
-    
+
     @staticmethod
     def create_processor(
         state_manager: GameStateManager,
@@ -1491,13 +1491,13 @@ class EngineFactory:
         debug: bool = False
     ) -> ActionProcessor:
         """Create the appropriate action processor"""
-        
+
         if engine_version == EngineVersion.CLASSIC:
             return ClassicActionProcessor(state_manager, debug=debug)
-        
+
         elif engine_version == EngineVersion.TWO_PHASE:
             return TwoPhaseActionProcessor(state_manager, debug=debug)
-        
+
         raise ValueError(f"Unknown engine version: {engine_version}")
 ```
 
@@ -1506,35 +1506,35 @@ class EngineFactory:
 ```python
 class TwoPhaseActionProcessor:
     """Two-phase game loop processor"""
-    
+
     def __init__(self, state_manager: GameStateManager, debug: bool = False):
         self.state_manager = state_manager
         self.debug = debug
-        
+
         world = state_manager.get_world()
-        
+
         # Phase 1: Parsing
         self.rule_parser = RuleBasedParser(world)
         self.interactor = InteractorAI(world, debug=debug)
-        
+
         # Phase 2: Validation
         self.action_validator = ActionValidator(world)
         self.flavor_validator = FlavorValidator(world)
-        
+
         # Phase 3: Narration
         self.narrator = NarratorAI(world, debug=debug)
-    
+
     async def process(self, action: str) -> ActionResponse:
         """Process action through two-phase pipeline"""
-        
+
         state = self.state_manager.get_state()
         world = self.state_manager.get_world()
-        
+
         # Phase 1: Parse Intent
         intent = self.rule_parser.parse(action, state)
         if intent is None:
             intent = await self.interactor.parse(action, state)
-        
+
         # Phase 2: Validate & Execute
         if isinstance(intent, FlavorIntent):
             # Lightweight validation for flavor actions
@@ -1554,20 +1554,20 @@ class TwoPhaseActionProcessor:
         else:
             # Full validation for action intents
             validation = self.action_validator.validate(intent, state)
-            
+
             if validation.valid:
                 events = self.action_validator.execute(intent, state)
                 self._apply_events(events, state)
             else:
                 events = [validation.to_rejection_event()]
-        
+
         # Build perception snapshot (uses VisibilityResolver)
         resolver = VisibilityResolver(world, state)
         snapshot = self._build_perception_snapshot(state, world, resolver, events)
-        
+
         # Phase 3: Narrate
         narrative = await self.narrator.narrate(events, snapshot)
-        
+
         return ActionResponse(
             narrative=narrative,
             state=state,
@@ -1625,13 +1625,13 @@ async def list_engines():
 ```python
 class GameState(BaseModel):
     # ... existing fields ...
-    
+
     engine_version: EngineVersion = EngineVersion.CLASSIC
-    
+
     # New fields for two-phase engine
     container_states: dict[str, bool] = Field(default_factory=dict)  # container_id -> is_open
     visited_locations: set[str] = Field(default_factory=set)         # For first-visit detection
-    
+
     # Note: Item visibility is DERIVED from container_states + flags, not stored directly.
     # See VisibilityResolver in "Visibility & Discovery Model" section.
 ```
@@ -1674,10 +1674,10 @@ This specification defines a **two-phase game loop architecture** that:
 
 ---
 
-*Document Version: 1.1*  
-*Created: December 2025*  
-*Last Updated: December 2025*  
-*Status: Authoritative Specification*  
+*Document Version: 1.1*
+*Created: December 2025*
+*Last Updated: December 2025*
+*Status: Authoritative Specification*
 *Supersedes: four exploratory documents in `ideas/archive/`*
 
 ### Version 1.1 Changes
@@ -1690,4 +1690,3 @@ This specification defines a **two-phase game loop architecture** that:
 - Added Details/Scenery support in locations.yaml
 - Added FlavorIntent lightweight validation for target presence
 - Updated all examples with new field names
-

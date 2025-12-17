@@ -38,7 +38,7 @@ todos:
 The current single-LLM approach in [`backend/app/llm/game_master.py`](backend/app/llm/game_master.py) generates narrative before state validation, causing:
 
 - Narratives describing movements that get rejected
-- No destination location details in movement narratives  
+- No destination location details in movement narratives
 - Hallucinated locations/actions that don't exist in world data
 
 ## Proposed Architecture
@@ -49,22 +49,22 @@ flowchart TD
         TextInput["Text Input<br/>'go north'"]
         DirectAction["Direct Action<br/>(future: UI buttons)"]
     end
-    
+
     subgraph phase1 [Phase 1: Intent Parsing]
         MechanicsAI["Mechanics AI<br/>(LLM Call #1)"]
     end
-    
+
     subgraph phase2 [Phase 2: Execution]
         ActionExecutor["Action Executor<br/>(deterministic)"]
         Validator["Validator"]
         StateManager["State Manager"]
         Persistence["Persistence Hook<br/>(future: save state)"]
     end
-    
+
     subgraph phase3 [Phase 3: Narration]
         NarratorAI["Narrator AI<br/>(LLM Call #2)"]
     end
-    
+
     TextInput --> MechanicsAI
     DirectAction --> ActionExecutor
     MechanicsAI --> ActionExecutor
@@ -103,7 +103,7 @@ class GameState(BaseModel):
     created_at: datetime | None = None  # ADD
     last_played_at: datetime | None = None  # ADD
     play_time_seconds: int = 0  # ADD
-    
+
     # === Core State (already exists, ensure serializable) ===
     current_location: str
     inventory: list[str] = []
@@ -114,7 +114,7 @@ class GameState(BaseModel):
     npc_locations: dict[str, str] = {}  # Delta from world definition
     status: str = "playing"
     narrative_memory: NarrativeMemory = NarrativeMemory()
-    
+
     # === World Delta (ADD: track changes from world definition) ===
     # FUTURE_PERSISTENCE: These fields enable reconstructing state from save
     items_moved: dict[str, str | None] = {}  # item_id -> new_location (None = inventory)
@@ -142,7 +142,7 @@ def execute(self, intent: ActionIntent) -> ActionOutcome:
 
 ```python
 # FUTURE: backend/app/api/saves.py
-# 
+#
 # POST /api/game/{session_id}/save
 #   - Serializes current GameState to storage
 #   - Returns save_id, timestamp
@@ -179,14 +179,14 @@ class ActionOutcome(BaseModel):
     action_type: str
     description: str  # Brief factual description of what happened
     rejection_reason: str | None = None
-    
+
     # Context for narrator (what changed):
     location_changed: bool = False
     new_location: dict | None = None  # Full location details if moved
     items_changed: list[str] = []  # item_ids added/removed/used
     npcs_involved: list[str] = []  # npc_ids interacted with
     flags_changed: dict[str, bool] = {}  # flags that changed
-    
+
     # FUTURE_PERSISTENCE: State snapshots for debugging/replay
     # state_before_hash: str | None = None
     # state_after_hash: str | None = None
@@ -205,7 +205,7 @@ Update [`backend/app/models/game.py`](backend/app/models/game.py) `GameState`:
 
 Create [`backend/app/llm/mechanics.py`](backend/app/llm/mechanics.py):
 
-- New class `MechanicsInterpreter` 
+- New class `MechanicsInterpreter`
 - Simple prompt that outputs `ActionIntent` JSON
 - MVP: Focus on movement parsing, basic pass-through for other actions
 
@@ -238,14 +238,14 @@ Update [`backend/app/engine/actions.py`](backend/app/engine/actions.py):
 async def process(self, action: str) -> ActionResponse:
     # Phase 1: Parse intent (for text input)
     intent = await self.mechanics.parse_intent(action)
-    
+
     # Phase 2: Execute (validates + applies state)
     outcome = self.executor.execute(intent)
     # FUTURE_PERSISTENCE: State is auto-saved here
-    
+
     # Phase 3: Narrate
     narrative = await self.narrator.narrate(outcome)
-    
+
     return ActionResponse(...)
 
 # FUTURE: Direct action endpoint

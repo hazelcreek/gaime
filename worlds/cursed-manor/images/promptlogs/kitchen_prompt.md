@@ -12,9 +12,9 @@ Interactive Elements to Include:
 Visible pathways: an opening or exit behind, perhaps suggested by light or shadows; stairs descending, a trapdoor, or a passage leading below, but secured with a heavy lock or barrier
 Objects in the scene: Kitchen Knife lies on the stone preparation counter near the hearth, its blade stained dark
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Victorian gothic horror, atmospheric, mysterious, unsettling yet compelling

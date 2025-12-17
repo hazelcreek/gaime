@@ -100,12 +100,12 @@ class GameAPIClient {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.detail || 'Failed to start new game');
     }
-    
+
     return response.json();
   }
 
@@ -118,12 +118,12 @@ class GameAPIClient {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ session_id: sessionId, action, debug }),
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.detail || 'Failed to process action');
     }
-    
+
     return response.json();
   }
 
@@ -132,12 +132,12 @@ class GameAPIClient {
    */
   async getState(sessionId: string): Promise<{ state: GameState }> {
     const response = await fetch(`${API_BASE}/game/state/${sessionId}`);
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.detail || 'Failed to get game state');
     }
-    
+
     return response.json();
   }
 
@@ -146,11 +146,11 @@ class GameAPIClient {
    */
   async listWorlds(): Promise<{ worlds: WorldInfo[] }> {
     const response = await fetch(`${API_BASE}/worlds`);
-    
+
     if (!response.ok) {
       throw new Error('Failed to load worlds');
     }
-    
+
     return response.json();
   }
 
@@ -159,24 +159,24 @@ class GameAPIClient {
    */
   async getMenuTracks(): Promise<{ tracks: string[] }> {
     const response = await fetch(`${API_BASE}/audio/menu-tracks`);
-    
+
     if (!response.ok) {
       // Return empty list on error - audio is non-critical
       return { tracks: [] };
     }
-    
+
     return response.json();
   }
 
   /**
    * List available game engine versions
-   * 
+   *
    * Engine selection is primarily for migration testing between
    * classic and two-phase engines.
    */
   async listEngines(): Promise<EnginesResponse> {
     const response = await fetch(`${API_BASE}/game/engines`);
-    
+
     if (!response.ok) {
       // Return default engine on error
       return {
@@ -184,7 +184,7 @@ class GameAPIClient {
         default: 'classic',
       };
     }
-    
+
     return response.json();
   }
 }

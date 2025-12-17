@@ -1,7 +1,7 @@
 # World Builder Strategy: Dual-Tool Approach
 
-**Status**: Planning Document  
-**Created**: December 2025  
+**Status**: Planning Document
+**Created**: December 2025
 **Related**: [World Builder Agent Refactor](../ideas/world-builder-agent-refactor.md)
 
 ---
@@ -27,17 +27,17 @@ graph TB
         Images[Image Generation]
         Enhance[Enhance Existing]
     end
-    
+
     subgraph "Tool Coverage"
         TUI[TUI Tool]
         Agent[Cursor Agent]
     end
-    
+
     Quick --> TUI
     Images --> TUI
     Deep --> Agent
     Enhance --> Agent
-    
+
     style TUI fill:#e6f3ff
     style Agent fill:#ffe6f3
 ```
@@ -110,26 +110,26 @@ graph TB
     subgraph "Developer"
         Dev[Developer in Cursor]
     end
-    
+
     subgraph "Cursor Agent"
         Rules[.cursorrules Knowledge]
         Context[Codebase Context]
         Tools[MCP Tools Optional]
     end
-    
+
     subgraph "GAIME Codebase"
         Validator[validator.py]
         WorldFiles[World YAML Files]
         Docs[WORLD_AUTHORING.md]
     end
-    
+
     Dev <--> Rules
     Rules --> Context
     Context --> WorldFiles
     Context --> Docs
     Rules --> Tools
     Tools --> Validator
-    
+
     style Rules fill:#ffe6f3
 ```
 
@@ -276,7 +276,7 @@ Agent: "Great concept! A few questions to shape this:
    - Medium (7-10): Speakeasy plus surrounding neighborhood?
    - Expansive (11+): Across the city?"
 
-Developer: "Detective investigating a singer's disappearance. Hard-boiled noir. 
+Developer: "Detective investigating a singer's disappearance. Hard-boiled noir.
            Let's do 8 locations - speakeasy plus some neighborhood spots."
 
 Agent: "Perfect. Let me start with world.yaml:
@@ -286,25 +286,25 @@ name: "Midnight at the Blue Note"
 theme: "1920s Prohibition-era noir mystery"
 tone: "Hard-boiled detective story; cynical but with glimmers of hope"
 premise: |
-  The Blue Note speakeasy. Smoke, jazz, and secrets. Last night, 
-  Violet Crane—the best singer in Chicago—walked out mid-set and 
-  vanished. Her gangster boyfriend wants answers. The police want 
-  an excuse to raid the place. And you, a down-on-your-luck private 
+  The Blue Note speakeasy. Smoke, jazz, and secrets. Last night,
+  Violet Crane—the best singer in Chicago—walked out mid-set and
+  vanished. Her gangster boyfriend wants answers. The police want
+  an excuse to raid the place. And you, a down-on-your-luck private
   eye, just took the case because rent is due.
 
 starting_situation: |
-  You've been hired to find Violet. The club owner, Mickey Donovan, 
-  gave you until tomorrow night before he calls in "favors" you don't 
-  want to think about. The speakeasy is still open, pretending nothing 
-  happened. You have access to the club and a few leads: Violet's 
-  dressing room, the bartender who saw her leave, and a cryptic note 
+  You've been hired to find Violet. The club owner, Mickey Donovan,
+  gave you until tomorrow night before he calls in "favors" you don't
+  want to think about. The speakeasy is still open, pretending nothing
+  happened. You have access to the club and a few leads: Violet's
+  dressing room, the bartender who saw her leave, and a cryptic note
   found in the trash.
 
 victory:
   location: warehouse_district
   flag: discovered_truth
   narrative: |
-    You've uncovered what really happened to Violet. Now you can 
+    You've uncovered what really happened to Violet. Now you can
     expose the truth—or keep it buried for the right price.
 ```
 
@@ -336,7 +336,7 @@ Should I proceed with these 8, or would you like to adjust?"
 ### Workflow 2: Enhancing an Existing World
 
 ```
-Developer: "I have the cursed-manor world but the ghost NPCs feel flat. 
+Developer: "I have the cursed-manor world but the ghost NPCs feel flat.
            Can you make them more compelling?"
 
 Agent: "Let me read the current NPC definitions..."
@@ -365,14 +365,14 @@ Here's what's missing that would make them compelling:
 4. **Motivation**: What do they want from the player?
 5. **Connection to victory**: How do they relate to breaking the curse?
 
-Shall we develop this together? Tell me about how the child died 
+Shall we develop this together? Tell me about how the child died
 and I'll build a rich character definition."
 
-Developer: "The child's name was Emily. She died trying to save her 
-           siblings when their father Edmund performed the ritual. 
+Developer: "The child's name was Emily. She died trying to save her
+           siblings when their father Edmund performed the ritual.
            She communicates by manipulating candle flames."
 
-Agent: "That's powerful—and it ties beautifully into the mansion's 
+Agent: "That's powerful—and it ties beautifully into the mansion's
 candlelight aesthetic. Let me rebuild ghost_child:
 
 ```yaml
@@ -382,76 +382,76 @@ ghost_child:
   full_name: "Emily Rose Thornwood"
   age_at_death: 9
   role: "Eldest child; trying to protect siblings; trapped by grief and guilt"
-  
+
   # Appearance
   appearance:
     summary: |
-      A translucent figure of a young girl in a Victorian nightgown. 
-      Her form flickers like candlelight—sometimes solid, sometimes 
+      A translucent figure of a young girl in a Victorian nightgown.
+      Her form flickers like candlelight—sometimes solid, sometimes
       barely visible. Burn marks are faintly visible on her hands.
-    
+
     distinguishing_features:
       - "Nightgown singed at the hem"
       - "Burn scars on her small hands"
       - "Ribbon in her hair, half-burned away"
       - "Eyes that reflect candle flames even when no candle is near"
-  
+
   # Personality & Backstory
   backstory:
     life: |
-      Emily was the eldest of three Thornwood children. She loved her 
-      siblings fiercely and felt responsible for them. On the night 
-      of the ritual, she sensed something was wrong and tried to get 
+      Emily was the eldest of three Thornwood children. She loved her
+      siblings fiercely and felt responsible for them. On the night
+      of the ritual, she sensed something was wrong and tried to get
       her brother and sister out of the ritual chamber.
-    
+
     death: |
-      When the ritual went catastrophically wrong, fire erupted. Emily 
-      managed to push her siblings toward a window, but the flames 
-      overtook her. She died from burns and smoke, knowing she'd failed 
+      When the ritual went catastrophically wrong, fire erupted. Emily
+      managed to push her siblings toward a window, but the flames
+      overtook her. She died from burns and smoke, knowing she'd failed
       to save them all.
-    
+
     why_trapped: |
-      Emily's spirit remains because she believes her siblings are still 
-      in danger. She doesn't understand they're also ghosts. She thinks 
+      Emily's spirit remains because she believes her siblings are still
+      in danger. She doesn't understand they're also ghosts. She thinks
       if she can warn someone—anyone—they might save her family.
-  
+
   personality:
     traits: [protective, brave, desperate, innocent, traumatized]
-    emotional_state: "Perpetual panic mixed with hope. Every living 
+    emotional_state: "Perpetual panic mixed with hope. Every living
                       person is a chance to finally save her family."
-    
+
     quirks:
       - Appears most often near candles and fireplaces
       - Becomes more visible when the player shows kindness
       - Vanishes if someone threatens fire/flames
       - Tries to lead player toward important locations
-  
+
   # Communication (CRITICAL - she can't speak)
   communication:
     methods:
       candle_manipulation: |
-        Emily can make candles flicker, flare up, or go out. This is 
-        her primary way of saying "yes" (flare), "no" (dim), or showing 
+        Emily can make candles flicker, flare up, or go out. This is
+        her primary way of saying "yes" (flare), "no" (dim), or showing
         distress (rapid flickering).
-      
+
       cold_spots: |
-        Where she stands, the air turns frigid. Players can follow 
+        Where she stands, the air turns frigid. Players can follow
         cold trails.
-      
+
       object_arrangement: |
-        She moves small objects—a ribbon, a toy, a letter—to point 
+        She moves small objects—a ribbon, a toy, a letter—to point
         toward important things.
-      
+
       writing_in_ash: |
-        In desperate moments, she'll write simple words in fireplace 
-        ash or dusty surfaces. Usually just names: "Thomas" "Catherine" 
+        In desperate moments, she'll write simple words in fireplace
+        ash or dusty surfaces. Usually just names: "Thomas" "Catherine"
         "Father" "Help"
-    
+
     interpretation_rules:
       - "NPCs cannot understand her. Only the player can."
       - "She gets frustrated when not understood, candles flare wildly"
       - "Building trust makes her manifestation stronger, clearer"
-  
+
   # Knowledge (what she knows that can help)
   knowledge:
     facts:
@@ -459,12 +459,12 @@ ghost_child:
       - "What her father was trying to achieve"
       - "The location of the grimoire (she saw it)"
       - "The ritual chamber's layout"
-    
+
     reveals_when:
       - "Player shows they want to help: points to nursery (brother)"
       - "Player brings up the ritual: writes 'FATHER' in ash angrily"
       - "Player has all three artifacts: leads to ritual chamber"
-  
+
   # Victory Connection
   victory_role: |
     Emily is key to breaking the curse. The player must:
@@ -472,38 +472,38 @@ ghost_child:
     2. Gather the ritual artifacts
     3. Let Emily lead them to the ritual chamber
     4. Use the artifacts to free the children
-    
-    When freed, Emily finally understands her siblings are safe. The 
+
+    When freed, Emily finally understands her siblings are safe. The
     three spirits ascend together.
-  
+
   # Appearance Conditions & Location
   location: nursery  # Default location
   appears_when:
     - {type: always_visible}  # Unlike mother, Emily appears to everyone
-  
+
   roaming:
     locations: [nursery, hallway, ritual_chamber, anywhere_with_candles]
     behavior: |
-      Emily follows candles. If the player carries a lit candle, she 
-      may follow them from room to room. She'll avoid the library 
+      Emily follows candles. If the player carries a lit candle, she
+      may follow them from room to room. She'll avoid the library
       (where father spent time) and the master_bedroom (bad memories).
-  
+
   # Interactions
   interactions:
     approach_with_candle:
       triggers: ["approach emily", "show candle to emily"]
       requires: {item: lit_candle}
       narrative_prompt: |
-        Emily's ghost becomes more solid, drawn to the candle's flame. 
-        She reaches out as if to warm her burned hands, then looks at 
+        Emily's ghost becomes more solid, drawn to the candle's flame.
+        She reaches out as if to warm her burned hands, then looks at
         you with desperate, hopeful eyes.
       effects:
         - npc_trust: {ghost_child: +1}
-    
+
     speak_siblings_names:
       triggers: ["ask about Thomas", "ask about Catherine", "mention siblings"]
       narrative_prompt: |
-        At the sound of her siblings' names, Emily's form flickers 
+        At the sound of her siblings' names, Emily's form flickers
         intensely. She writes in the dust: "SAVE THEM PLEASE"
       effects:
         - set_flag: emily_wants_siblings_freed
@@ -525,7 +525,7 @@ Want me to do the same for ghost_mother and Edmund's ghost?"
 ### Workflow 3: Puzzle Design Assistance
 
 ```
-Developer: "I want to add a multi-step puzzle to unlock the ritual chamber. 
+Developer: "I want to add a multi-step puzzle to unlock the ritual chamber.
            Something with the three artifacts."
 
 Agent: "Great! Let's design this together. First, a few questions:
@@ -543,7 +543,7 @@ Also, I see you already have:
 
 Should I work with these three?"
 
-Developer: "Yes, those three. The grimoire tells you that the amulet 
+Developer: "Yes, those three. The grimoire tells you that the amulet
            and dagger must be placed together in the ritual chamber."
 
 Agent: "Perfect. Here's a structured puzzle design:
@@ -588,24 +588,24 @@ Should I proceed?"
 ```mermaid
 graph TD
     Start[Need to create/modify world]
-    
+
     Start --> Q1{Starting from scratch?}
     Q1 -->|Yes| Q2{Simple test world?}
     Q1 -->|No| Enhance[Enhancing existing]
-    
+
     Q2 -->|Yes, quick test| TUI1[Use TUI]
     Q2 -->|No, real world| Q3{Want to discuss design?}
-    
+
     Q3 -->|Yes, need feedback| Agent1[Use Agent]
     Q3 -->|No, just generate| TUI1
-    
+
     Enhance --> Q4{What type of change?}
     Q4 -->|Generate/regenerate images| TUI2[Use TUI]
     Q4 -->|Add depth to NPCs| Agent2[Use Agent]
     Q4 -->|Fix validation errors| Agent3[Use Agent]
     Q4 -->|Add new locations| Agent4[Use Agent]
     Q4 -->|Design puzzles| Agent5[Use Agent]
-    
+
     TUI1 --> Generate[Generate world quickly]
     Agent1 --> Discuss[Discuss and design]
     TUI2 --> Images[Batch image ops]
@@ -671,7 +671,7 @@ graph TD
 ## Open Questions
 
 1. **Image generation in agent**: Should agent be able to trigger TUI for images, or always manual?
-   
+
 2. **Agent memory**: Should agent remember previous conversations about a world?
 
 3. **Templates**: Should we provide "starter templates" (noir detective, sci-fi ship, haunted house) that agent customizes?
@@ -696,4 +696,3 @@ Next steps:
 2. Create agent rules (high-value, low-effort)
 3. Gather feedback and iterate
 4. Deprecate web UI when both tools are stable
-

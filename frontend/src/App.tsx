@@ -57,19 +57,19 @@ function GameContent() {
           <nav className="flex items-center gap-3">
             <button
               onClick={toggleMute}
-              className="p-1.5 text-terminal-dim hover:text-terminal-accent 
+              className="p-1.5 text-terminal-dim hover:text-terminal-accent
                        transition-colors"
               title={isMuted ? 'Unmute' : 'Mute'}
             >
               {isMuted ? (
-                <svg 
-                  width="18" 
-                  height="18" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="1.5" 
-                  strokeLinecap="round" 
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <path d="M11 5L6 9H2v6h4l5 4V5z" />
@@ -77,14 +77,14 @@ function GameContent() {
                   <line x1="16" y1="9" x2="22" y2="15" />
                 </svg>
               ) : (
-                <svg 
-                  width="18" 
-                  height="18" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="1.5" 
-                  strokeLinecap="round" 
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <path d="M11 5L6 9H2v6h4l5 4V5z" />
@@ -95,10 +95,10 @@ function GameContent() {
             </button>
           </nav>
         </header>
-        
+
         {/* Main Menu */}
         <main className="flex-1 min-h-0 overflow-hidden">
-          <MainMenu 
+          <MainMenu
             onStartGame={startNewGame}
             isLoading={isLoading}
           />
@@ -106,7 +106,7 @@ function GameContent() {
       </div>
     );
   }
-  
+
   return (
     <div className="h-screen bg-terminal-bg flex flex-col overflow-hidden">
       {/* Header */}
@@ -128,39 +128,39 @@ function GameContent() {
           <button
             onClick={() => startNewGame(worldId ?? undefined, worldName ?? undefined)}
             disabled={isLoading}
-            className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-accent 
-                     border border-terminal-border/50 hover:border-terminal-accent/50 
+            className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-accent
+                     border border-terminal-border/50 hover:border-terminal-accent/50
                      rounded transition-colors disabled:opacity-50"
           >
             New Game
           </button>
           <button
             onClick={resetGame}
-            className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-text 
-                     border border-terminal-border/50 hover:border-terminal-dim 
+            className="text-xs px-2 py-1 text-terminal-dim hover:text-terminal-text
+                     border border-terminal-border/50 hover:border-terminal-dim
                      rounded transition-colors"
           >
             ← Home
           </button>
         </nav>
       </header>
-      
+
       {/* Main game area */}
       <main className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0 w-full overflow-hidden">
         {/* Scene image */}
         <div className="lg:w-2/3 lg:h-full shrink-0 lg:shrink">
-          <SceneImage 
+          <SceneImage
             onStateClick={() => setStateOverlayOpen(true)}
           />
         </div>
-        
+
         {/* Terminal + Input */}
         <div className="flex-1 flex flex-col min-h-0 gap-2 overflow-hidden lg:w-1/3">
           {/* Terminal - scrollable */}
           <div className="flex-1 min-h-0 overflow-hidden">
             <Terminal />
           </div>
-          
+
           {/* Command input */}
           <div className="flex-shrink-0">
             <CommandInput />
@@ -170,9 +170,9 @@ function GameContent() {
 
       {/* State Overlay */}
       {stateOverlayOpen && gameState && (
-        <StateOverlay 
-          gameState={gameState} 
-          onClose={() => setStateOverlayOpen(false)} 
+        <StateOverlay
+          gameState={gameState}
+          onClose={() => setStateOverlayOpen(false)}
         />
       )}
     </div>

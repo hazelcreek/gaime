@@ -13,7 +13,6 @@ import pytest
 
 from app.engine.visibility import DefaultVisibilityResolver
 from app.models.two_phase_state import TwoPhaseGameState
-from app.models.perception import PerceptionSnapshot, VisibleExit, VisibleEntity
 
 
 class TestDefaultVisibilityResolver:
@@ -47,9 +46,7 @@ class TestDefaultVisibilityResolver:
         assert snapshot.location_name == "Starting Room"
         assert snapshot.location_atmosphere is not None
 
-    def test_build_snapshot_exits(
-        self, resolver, state, sample_world_data
-    ) -> None:
+    def test_build_snapshot_exits(self, resolver, state, sample_world_data) -> None:
         """Snapshot includes visible exits."""
         snapshot = resolver.build_snapshot(state, sample_world_data)
 
@@ -80,9 +77,7 @@ class TestDefaultVisibilityResolver:
         item_ids = [i.id for i in snapshot.visible_items]
         assert "container_box" in item_ids
 
-    def test_hidden_items_excluded(
-        self, resolver, state, sample_world_data
-    ) -> None:
+    def test_hidden_items_excluded(self, resolver, state, sample_world_data) -> None:
         """Hidden items are not in visible_items."""
         snapshot = resolver.build_snapshot(state, sample_world_data)
 
@@ -94,15 +89,15 @@ class TestDefaultVisibilityResolver:
         self, resolver, state, sample_world_data
     ) -> None:
         """Hidden items become visible when condition met.
-        
+
         Note: This test verifies the is_item_visible() logic, not build_snapshot().
         The hidden_gem in the fixture has location="start_room" but is NOT in
         the location.items list, so it won't appear in visible_items.
-        
+
         For items to appear in build_snapshot(), they must be in location.items.
         """
         state.flags["box_opened"] = True
-        
+
         # Verify the item IS visible via is_item_visible()
         assert resolver.is_item_visible("hidden_gem", state, sample_world_data)
 
@@ -116,18 +111,14 @@ class TestDefaultVisibilityResolver:
         visible_ids = [i.id for i in snapshot.visible_items]
         assert "test_key" not in visible_ids
 
-    def test_inventory_in_snapshot(
-        self, resolver, state, sample_world_data
-    ) -> None:
+    def test_inventory_in_snapshot(self, resolver, state, sample_world_data) -> None:
         """Snapshot includes inventory items."""
         snapshot = resolver.build_snapshot(state, sample_world_data)
 
         inventory_ids = [i.id for i in snapshot.inventory]
         assert "test_key" in inventory_ids
 
-    def test_inventory_item_details(
-        self, resolver, state, sample_world_data
-    ) -> None:
+    def test_inventory_item_details(self, resolver, state, sample_world_data) -> None:
         """Inventory items have name and description."""
         snapshot = resolver.build_snapshot(state, sample_world_data)
 
@@ -137,9 +128,7 @@ class TestDefaultVisibilityResolver:
 
     # First visit detection
 
-    def test_first_visit_true(
-        self, resolver, sample_world_data
-    ) -> None:
+    def test_first_visit_true(self, resolver, sample_world_data) -> None:
         """first_visit is True for unvisited location."""
         state = TwoPhaseGameState(
             session_id="test-session",
@@ -150,9 +139,7 @@ class TestDefaultVisibilityResolver:
         snapshot = resolver.build_snapshot(state, sample_world_data)
         assert snapshot.first_visit is True
 
-    def test_first_visit_false(
-        self, resolver, state, sample_world_data
-    ) -> None:
+    def test_first_visit_false(self, resolver, state, sample_world_data) -> None:
         """first_visit is False for visited location."""
         # state.visited_locations already includes start_room
         snapshot = resolver.build_snapshot(state, sample_world_data)
@@ -160,9 +147,7 @@ class TestDefaultVisibilityResolver:
 
     # Details / scenery
 
-    def test_details_in_snapshot(
-        self, resolver, state, sample_world_data
-    ) -> None:
+    def test_details_in_snapshot(self, resolver, state, sample_world_data) -> None:
         """Snapshot includes location details."""
         snapshot = resolver.build_snapshot(state, sample_world_data)
 
@@ -210,13 +195,13 @@ class TestDefaultVisibilityResolver:
         self, resolver, state, sample_world_data
     ) -> None:
         """Non-existent items are not visible."""
-        assert not resolver.is_item_visible("nonexistent_item", state, sample_world_data)
+        assert not resolver.is_item_visible(
+            "nonexistent_item", state, sample_world_data
+        )
 
     # Edge cases
 
-    def test_snapshot_missing_location(
-        self, resolver, sample_world_data
-    ) -> None:
+    def test_snapshot_missing_location(self, resolver, sample_world_data) -> None:
         """Handles missing location gracefully."""
         state = TwoPhaseGameState(
             session_id="test-session",
@@ -228,9 +213,7 @@ class TestDefaultVisibilityResolver:
         assert snapshot.location_id == "nonexistent_room"
         assert snapshot.location_name == "Unknown Location"
 
-    def test_empty_inventory(
-        self, resolver, sample_world_data
-    ) -> None:
+    def test_empty_inventory(self, resolver, sample_world_data) -> None:
         """Handles empty inventory."""
         state = TwoPhaseGameState(
             session_id="test-session",
@@ -240,4 +223,3 @@ class TestDefaultVisibilityResolver:
 
         snapshot = resolver.build_snapshot(state, sample_world_data)
         assert snapshot.inventory == []
-

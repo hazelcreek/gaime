@@ -92,8 +92,8 @@ Key components include:
 To establish **style dominance** in Nano Banana Pro, use explicit priority language:
 
 ```
-The artistic style is the most important aspect of this image: digital painting 
-with rich textures and painterly brushstrokes. This style must be maintained 
+The artistic style is the most important aspect of this image: digital painting
+with rich textures and painterly brushstrokes. This style must be maintained
 consistently throughout the entire image.
 ```
 
@@ -113,8 +113,8 @@ This layer serves as a powerful instrument for visual storytelling. The engine c
 For **Nano Banana Pro**, camera and lens specifications are understood naturally:
 
 ```
-Shot composition: Medium wide shot from eye level, as if viewing the scene 
-through a 35mm lens. Shallow depth of field with the foreground object in 
+Shot composition: Medium wide shot from eye level, as if viewing the scene
+through a 35mm lens. Shallow depth of field with the foreground object in
 sharp focus.
 ```
 
@@ -133,7 +133,7 @@ Nano Banana Pro and similar API-based models (DALL-E, Gemini) do not have a sepa
 ```
 Critical constraints - the image must NOT include:
 - Any photorealistic or hyperrealistic rendering
-- 3D CGI or Unreal Engine aesthetics  
+- 3D CGI or Unreal Engine aesthetics
 - Watermarks, signatures, or text overlays
 - Blurry or low-quality artifacts
 - Distorted anatomy or architectural proportions
@@ -168,8 +168,8 @@ For **Nano Banana Pro**, the recommended approach is to use **explicit priority 
 # Instead of: ((Digital painting):1.4), spooky, (dramatic lighting:1.2)
 
 # Use:
-The artistic style is paramount: this must be a digital painting with 
-visible brushstrokes and rich textures. The mood is deeply spooky with 
+The artistic style is paramount: this must be a digital painting with
+visible brushstrokes and rich textures. The mood is deeply spooky with
 dramatic, high-contrast lighting that creates long shadows.
 ```
 
@@ -187,9 +187,9 @@ To achieve style dominance without numeric weighting, employ these natural langu
 **Example priority declaration:**
 
 ```
-Create a scene illustration. The artistic style is the defining characteristic: 
-this is a digital painting in the style of detailed concept art, with visible 
-brushwork, rich color saturation, and painterly atmosphere. Every element 
+Create a scene illustration. The artistic style is the defining characteristic:
+this is a digital painting in the style of detailed concept art, with visible
+brushwork, rich color saturation, and painterly atmosphere. Every element
 must adhere to this digital painting aesthetic.
 ```
 
@@ -233,7 +233,7 @@ style_block:
   l2_context: "Victorian era, old wood, dusty and crooked but not broken, lit by candles"
   l3_mood: "atmospheric, mysterious, unsettling yet compelling"
   l4_style: "digital painting, detailed concept art, painterly brushstrokes, rich textures"
-  l6_anti_styles: 
+  l6_anti_styles:
     - "photorealistic"
     - "3D CGI"
     - "anime"
@@ -254,21 +254,21 @@ def build_mpa_prompt(
 ) -> str:
     """
     Assemble a complete MPA prompt from game state.
-    
-    GAIME Integration: This function could replace the current 
+
+    GAIME Integration: This function could replace the current
     get_image_prompt() implementation in image_generator.py
     """
-    
+
     # L0: Meta-Context (fixed per world)
     l0 = f"Create a dramatic, atmospheric scene illustration for a text adventure game. "
     l0 += f"High-resolution production asset in 16:9 widescreen format."
-    
+
     # L1: Content (dynamic per location)
     l1 = f"Location: {location.name}. {location.atmosphere}"
-    
+
     # L2: Context (fixed per world)
     l2 = f"World context: {world.style_block.l2_context}"
-    
+
     # L3: Mood (can be dynamic based on game state)
     base_mood = world.style_block.l3_mood
     if game_state.flags.get("in_danger"):
@@ -277,19 +277,19 @@ def build_mpa_prompt(
         l3 = f"Mood: {base_mood}, with a subtle sense of hope emerging"
     else:
         l3 = f"Mood: {base_mood}"
-    
+
     # L4: Style (fixed per world, with emphasis)
     l4 = f"Artistic style (most important): {world.style_block.l4_style}. "
     l4 += "This style must be maintained consistently throughout the image."
-    
+
     # L5: Technical (mostly fixed)
     l5 = "First-person perspective, medium wide shot, 8K resolution."
-    
+
     # L6: Negative constraints (embedded)
     anti_styles = ", ".join(world.style_block.l6_anti_styles)
     l6 = f"Critical: The image must NOT include {anti_styles}, "
     l6 += "watermarks, text, blurry artifacts, or distorted proportions."
-    
+
     # Assemble in optimal order for Nano Banana Pro
     return f"{l0}\n\n{l1}\n\n{l2}\n\n{l3}\n\n{l4}\n\n{l5}\n\n{l6}"
 ```
@@ -379,8 +379,8 @@ Critical constraints - the image must NOT include:
 **Pattern 2: JSON-Style Structured Format**
 ```json
 {
-  "negative_prompt": "no photorealism, no 3D CGI, no blurry face, 
-    no distorted hands, no extra limbs, no watermark, no low resolution, 
+  "negative_prompt": "no photorealism, no 3D CGI, no blurry face,
+    no distorted hands, no extra limbs, no watermark, no low resolution,
     no muted colors, no AI artifacts"
 }
 ```
@@ -408,25 +408,25 @@ The following examples demonstrate the full application of the MPA structure, op
 Create a dramatic, atmospheric scene illustration for a text adventure game.
 High-resolution production asset in 16:9 widescreen format.
 
-Location: Library room with floor-to-ceiling bookshelves lining every wall. 
-A heavy oak desk dominates the center of the room, with an open book that 
-seems to emit a faint, otherworldly glow. Ancient tomes are packed tightly 
+Location: Library room with floor-to-ceiling bookshelves lining every wall.
+A heavy oak desk dominates the center of the room, with an open book that
+seems to emit a faint, otherworldly glow. Ancient tomes are packed tightly
 on the shelves, their leather spines cracked with age.
 
-World context: Victorian era, old wood paneling, dusty and crooked but not 
+World context: Victorian era, old wood paneling, dusty and crooked but not
 broken, lit by flickering candles that cast dancing shadows.
 
-Mood: The atmosphere is deeply spooky and melancholic. High contrast lighting 
-creates dramatic chiaroscuro effects, with pools of candlelight surrounded by 
+Mood: The atmosphere is deeply spooky and melancholic. High contrast lighting
+creates dramatic chiaroscuro effects, with pools of candlelight surrounded by
 oppressive darkness. The mood is hyper-detailed and unsettling.
 
-Artistic style (most important): This must be a digital painting in the style 
-of detailed concept art. Rich textures, visible painterly brushstrokes, and 
-artistic color saturation. The digital painting aesthetic is paramount and 
+Artistic style (most important): This must be a digital painting in the style
+of detailed concept art. Rich textures, visible painterly brushstrokes, and
+artistic color saturation. The digital painting aesthetic is paramount and
 must be maintained throughout the entire image.
 
-Composition: Medium wide shot from eye level, first-person perspective as if 
-the viewer has just entered the room. Soft focus draws attention to the 
+Composition: Medium wide shot from eye level, first-person perspective as if
+the viewer has just entered the room. Soft focus draws attention to the
 glowing book on the desk. 8K resolution quality.
 
 Critical constraints - the image must NOT include:
@@ -451,26 +451,26 @@ Critical constraints - the image must NOT include:
 Create a dramatic, atmospheric scene illustration for a text adventure game.
 High-resolution production asset in 21:9 ultra-widescreen cinematic format.
 
-Location: A narrow, rain-slicked alleyway between towering megastructures. 
-Neon signs flicker erratically, their reflections fragmenting across wet 
-pavement. Discarded data chips and tech debris litter the ground. Steam 
+Location: A narrow, rain-slicked alleyway between towering megastructures.
+Neon signs flicker erratically, their reflections fragmenting across wet
+pavement. Discarded data chips and tech debris litter the ground. Steam
 rises from grates, diffusing the harsh neon glow.
 
-World context: Near-future cyberpunk metropolis, rainy night, high-tech 
-urban sprawl with visible decay. Chrome and rust coexist. The air feels 
+World context: Near-future cyberpunk metropolis, rainy night, high-tech
+urban sprawl with visible decay. Chrome and rust coexist. The air feels
 thick with humidity and the buzz of electronics.
 
-Mood: The atmosphere is gritty and intensely cinematic. Ultra-vibrant neon 
-colors—magenta, cyan, electric blue—cut through deep, inky shadows. The 
+Mood: The atmosphere is gritty and intensely cinematic. Ultra-vibrant neon
+colors—magenta, cyan, electric blue—cut through deep, inky shadows. The
 mood is noir-inspired with palpable tension and urban alienation.
 
-Artistic style (most important): This must be cinematic photorealism with 
-the quality of a high-budget film still. 35mm film grain effect, V-Ray 
-render quality, detailed reflections on wet surfaces. The photorealistic 
+Artistic style (most important): This must be cinematic photorealism with
+the quality of a high-budget film still. 35mm film grain effect, V-Ray
+render quality, detailed reflections on wet surfaces. The photorealistic
 cinematic quality is the defining characteristic of this image.
 
-Composition: Low angle shot emphasizing the towering buildings, taken with 
-a 35mm wide-angle lens. Shallow depth of field with rain droplets in soft 
+Composition: Low angle shot emphasizing the towering buildings, taken with
+a 35mm wide-angle lens. Shallow depth of field with rain droplets in soft
 focus in the foreground. Detailed reflections on every wet surface.
 
 Critical constraints - the image must NOT include:
@@ -491,26 +491,26 @@ Critical constraints - the image must NOT include:
 Create a retro video game scene for a classic RPG dungeon crawler.
 Output in 1:1 square format, optimized for pixel art rendering.
 
-Location: A stone dungeon corridor with mossy walls carved with ancient 
-runes. A single torch mounted on the wall provides the only light source. 
+Location: A stone dungeon corridor with mossy walls carved with ancient
+runes. A single torch mounted on the wall provides the only light source.
 A wooden treasure chest sits in a shadowy corner, its iron bands rusted.
 
-World context: Medieval fantasy setting with a damp, underground atmosphere. 
-The dungeon feels ancient and forgotten, with water seeping through cracks 
+World context: Medieval fantasy setting with a damp, underground atmosphere.
+The dungeon feels ancient and forgotten, with water seeping through cracks
 in the stonework.
 
-Mood: Dark ambient lighting with warm torch glow against cool stone. Muted 
-earth tones—browns, grays, mossy greens—create a mysterious and slightly 
+Mood: Dark ambient lighting with warm torch glow against cool stone. Muted
+earth tones—browns, grays, mossy greens—create a mysterious and slightly
 ominous atmosphere. Low color saturation maintains the retro aesthetic.
 
-Artistic style (most important): This MUST be low-resolution pixel art in 
-the authentic 16-bit retro RPG aesthetic. Visible pixels, limited color 
-palette, dithering techniques for shading, 2D sprite art style. The pixel 
-art aesthetic is absolutely essential—this should look like a scene from 
+Artistic style (most important): This MUST be low-resolution pixel art in
+the authentic 16-bit retro RPG aesthetic. Visible pixels, limited color
+palette, dithering techniques for shading, 2D sprite art style. The pixel
+art aesthetic is absolutely essential—this should look like a scene from
 a classic SNES or Genesis RPG. No smooth gradients or high-resolution details.
 
-Composition: Birds-eye-view, top-down perspective typical of classic RPGs. 
-Small scale showing the dungeon tile grid. The composition should feel like 
+Composition: Birds-eye-view, top-down perspective typical of classic RPGs.
+Small scale showing the dungeon tile grid. The composition should feel like
 a game screenshot.
 
 Critical constraints - the image must NOT include:
@@ -532,27 +532,27 @@ Critical constraints - the image must NOT include:
 Create an atmospheric scene illustration for a comedic text adventure game.
 High-resolution production asset in 16:9 widescreen format.
 
-Location: A high school cafeteria with folding tables pushed against the 
-walls. The serving counter gleams under fluorescent lights. Dust motes 
-dance in sunbeams hitting the stainless steel surfaces. The lingering 
+Location: A high school cafeteria with folding tables pushed against the
+walls. The serving counter gleams under fluorescent lights. Dust motes
+dance in sunbeams hitting the stainless steel surfaces. The lingering
 scent of mystery meat seems almost visible in the air.
 
-World context: 1990s American high school, nostalgic and slightly absurd. 
-Everything has that institutional quality—linoleum floors, plastic chairs, 
-bulletin boards with outdated posters. The atmosphere balances mundane 
+World context: 1990s American high school, nostalgic and slightly absurd.
+Everything has that institutional quality—linoleum floors, plastic chairs,
+bulletin boards with outdated posters. The atmosphere balances mundane
 reality with comedic exaggeration.
 
-Mood: The atmosphere is awkward, rebellious, and deeply nostalgic. Warm, 
-slightly overexposed lighting suggests memory or daydream. Colors are 
+Mood: The atmosphere is awkward, rebellious, and deeply nostalgic. Warm,
+slightly overexposed lighting suggests memory or daydream. Colors are
 saturated but not garish—the palette of a coming-of-age film.
 
-Artistic style (most important): Stylized digital illustration with a 
-warm, inviting quality. Slightly exaggerated proportions for comedic effect. 
-Rich, saturated colors with soft lighting. The style should evoke indie 
+Artistic style (most important): Stylized digital illustration with a
+warm, inviting quality. Slightly exaggerated proportions for comedic effect.
+Rich, saturated colors with soft lighting. The style should evoke indie
 animation or graphic novel aesthetics—expressive and character-driven.
 
-Composition: Medium shot at eye level, first-person perspective of someone 
-entering the cafeteria. Natural lighting from large windows mixing with 
+Composition: Medium shot at eye level, first-person perspective of someone
+entering the cafeteria. Natural lighting from large windows mixing with
 harsh fluorescents. 8K resolution.
 
 Critical constraints - the image must NOT include:
@@ -631,25 +631,25 @@ image_config:
   model: "nano-banana-pro"  # or "stable-diffusion", "midjourney"
   quality_tier: "production"  # or "draft", "concept"
   aspect_ratio: "16:9"
-  
+
 # Style Block (L2 + L3 + L4 + L6 combined)
 style_block:
   # L2: World Context (reused for every location)
   context: |
     Victorian era, old wood paneling, dusty and crooked but not broken,
     lit by flickering candles that cast dancing shadows.
-  
+
   # L3: Base Mood (can be modified by game state)
   mood:
     base: "atmospheric, mysterious, unsettling yet compelling"
     danger_modifier: "intensely threatening, urgent"
     victory_modifier: "hopeful, with light breaking through"
-  
+
   # L4: Style Definition
   style: |
     Digital painting in the style of detailed concept art. Rich textures,
     visible painterly brushstrokes, and artistic color saturation.
-  
+
   # L6: Anti-Style List
   anti_styles:
     - "photorealistic"
@@ -657,7 +657,7 @@ style_block:
     - "anime"
     - "cartoon"
     - "hyperrealism"
-  
+
   # L6: Quality Constraints (boilerplate)
   quality_constraints:
     - "watermarks"
@@ -683,36 +683,36 @@ def build_mpa_prompt(
 ) -> str:
     """
     Build a complete MPA-structured prompt for image generation.
-    
+
     This replaces the current get_image_prompt() function with a more
     modular, configurable approach based on the MPA framework.
     """
     layers = []
-    
+
     # L0: Meta-Context
     layers.append(build_l0_meta(world_config.image_config))
-    
+
     # L1: Content (dynamic per location)
     layers.append(build_l1_content(location_name, atmosphere, context))
-    
+
     # L2: World Context (fixed per world)
     layers.append(f"World context: {world_config.style_block.context}")
-    
+
     # L3: Mood (can be dynamic)
     layers.append(build_l3_mood(world_config.style_block.mood, game_state))
-    
+
     # L4: Style (fixed per world, with emphasis)
     layers.append(build_l4_style(world_config.style_block.style))
-    
+
     # L5: Technical (from image_config)
     layers.append(build_l5_technical(world_config.image_config))
-    
+
     # L6: Negative Constraints (embedded for Nano Banana Pro)
     layers.append(build_l6_negatives(
         world_config.style_block.anti_styles,
         world_config.style_block.quality_constraints
     ))
-    
+
     return "\n\n".join(layers)
 ```
 

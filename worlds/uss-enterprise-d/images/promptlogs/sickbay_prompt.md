@@ -15,9 +15,9 @@ Characters visible in the scene:
 
 - Dr. Beverly Crusher (Chief Medical Officer; protects crew wellbeing), stands near a biobed, eyes focused, posture simultaneously warm and formidable: A Starfleet physician with an alert, focused gaze and an unmistakable authority that comes from competence. Her calm is active — not passive — and her concern is practical, not sentimental.
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Star Trek: The Next Generation — life aboard a Federation starship on the frontier, philosophical, optimistic, ethical, adventurous, and grounded in teamwork under pressure

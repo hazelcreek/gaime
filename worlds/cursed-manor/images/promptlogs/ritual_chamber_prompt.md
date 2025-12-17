@@ -12,9 +12,9 @@ Interactive Elements to Include:
 Subtle environmental details: shadows on the ceiling that hint at an unseen passage
 Significant objects: a notable object (Thornwood Grimoire) rests upon the central pedestal, its pale leather binding seeming to glow faintly in the darkness, drawing the eye with subtle presence
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Victorian gothic horror, atmospheric, mysterious, unsettling yet compelling

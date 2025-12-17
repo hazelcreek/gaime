@@ -43,16 +43,16 @@ WORLDS_TO_MIGRATE = [
 def parse_personality_string(personality_str: str) -> dict:
     """
     Convert personality string to structured object.
-    
+
     Example:
-        "Gruff, suspicious, superstitious." 
+        "Gruff, suspicious, superstitious."
         -> {traits: ["gruff", "suspicious", "superstitious"], speech_style: "...", quirks: []}
     """
     # Extract traits from comma-separated string
     # Remove trailing period and split
     clean = personality_str.rstrip(".").strip()
     raw_traits = [t.strip().lower() for t in clean.split(",") if t.strip()]
-    
+
     return {
         "traits": raw_traits,
         "speech_style": f"Speaks with a {', '.join(raw_traits)} manner",
@@ -63,7 +63,7 @@ def parse_personality_string(personality_str: str) -> dict:
 def convert_dialogue_hints_to_rules(dialogue_hints: dict) -> list[str]:
     """
     Convert dialogue_hints dict to dialogue_rules list.
-    
+
     Example:
         {greeting: "'Ay? Who are you?'", refusal: "'I don't talk to strangers.'"}
         -> ["Greets with: 'Ay? Who are you?'", "Refuses with: 'I don't talk to strangers.'"]
@@ -79,36 +79,36 @@ def convert_dialogue_hints_to_rules(dialogue_hints: dict) -> list[str]:
 def migrate_npc(npc_id: str, npc_data: dict, dry_run: bool = False) -> tuple[dict, list[str]]:
     """
     Migrate a single NPC to the new schema.
-    
+
     Returns:
         Tuple of (migrated_data, list of changes made)
     """
     changes = []
     migrated = dict(npc_data)  # Shallow copy
-    
+
     # Migrate personality string -> object
     if "personality" in migrated and isinstance(migrated["personality"], str):
         old_personality = migrated["personality"]
         migrated["personality"] = parse_personality_string(old_personality)
         changes.append(f"  personality: '{old_personality[:50]}...' -> structured object")
-    
+
     # Migrate dialogue_hints -> dialogue_rules
     if "dialogue_hints" in migrated:
         old_hints = migrated.pop("dialogue_hints")
         migrated["dialogue_rules"] = convert_dialogue_hints_to_rules(old_hints)
         changes.append(f"  dialogue_hints ({len(old_hints)} entries) -> dialogue_rules list")
-    
+
     return migrated, changes
 
 
 def parse_locked_exit_constraint(constraint: str) -> tuple[str | None, str | None]:
     """
     Parse a locked_exit constraint string.
-    
+
     Example:
         "locked_exit: north requires code_revealed flag"
         -> ("north", "code_revealed")
-    
+
     Returns:
         Tuple of (direction, flag_name) or (None, None) if not a locked_exit constraint
     """
@@ -122,18 +122,18 @@ def parse_locked_exit_constraint(constraint: str) -> tuple[str | None, str | Non
 def migrate_location(loc_id: str, loc_data: dict, dry_run: bool = False) -> tuple[dict, list[str]]:
     """
     Migrate a single location to the new schema.
-    
+
     Returns:
         Tuple of (migrated_data, list of changes made)
     """
     changes = []
     migrated = dict(loc_data)
-    
+
     # Migrate constraints with locked_exit patterns -> requires
     if "constraints" in migrated:
         constraints = migrated.get("constraints", [])
         remaining_constraints = []
-        
+
         for constraint in constraints:
             direction, flag = parse_locked_exit_constraint(constraint)
             if direction and flag:
@@ -144,13 +144,13 @@ def migrate_location(loc_id: str, loc_data: dict, dry_run: bool = False) -> tupl
                 changes.append(f"  constraint '{constraint}' -> requires.flag: {flag}")
             else:
                 remaining_constraints.append(constraint)
-        
+
         # Remove constraints if all were converted
         if not remaining_constraints:
             del migrated["constraints"]
         else:
             migrated["constraints"] = remaining_constraints
-    
+
     return migrated, changes
 
 
@@ -159,24 +159,24 @@ def migrate_npcs_file(world_path: Path, dry_run: bool = False) -> list[str]:
     npcs_file = world_path / "npcs.yaml"
     if not npcs_file.exists():
         return [f"  No npcs.yaml found in {world_path.name}"]
-    
+
     with open(npcs_file) as f:
         npcs = yaml.safe_load(f) or {}
-    
+
     all_changes = []
     migrated_npcs = {}
-    
+
     for npc_id, npc_data in npcs.items():
         migrated, changes = migrate_npc(npc_id, npc_data, dry_run)
         migrated_npcs[npc_id] = migrated
         if changes:
             all_changes.append(f"NPC '{npc_id}':")
             all_changes.extend(changes)
-    
+
     if all_changes and not dry_run:
         with open(npcs_file, "w") as f:
             yaml.dump(migrated_npcs, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
-    
+
     return all_changes
 
 
@@ -185,24 +185,24 @@ def migrate_locations_file(world_path: Path, dry_run: bool = False) -> list[str]
     locations_file = world_path / "locations.yaml"
     if not locations_file.exists():
         return [f"  No locations.yaml found in {world_path.name}"]
-    
+
     with open(locations_file) as f:
         locations = yaml.safe_load(f) or {}
-    
+
     all_changes = []
     migrated_locations = {}
-    
+
     for loc_id, loc_data in locations.items():
         migrated, changes = migrate_location(loc_id, loc_data, dry_run)
         migrated_locations[loc_id] = migrated
         if changes:
             all_changes.append(f"Location '{loc_id}':")
             all_changes.extend(changes)
-    
+
     if all_changes and not dry_run:
         with open(locations_file, "w") as f:
             yaml.dump(migrated_locations, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
-    
+
     return all_changes
 
 
@@ -217,19 +217,19 @@ def backup_world(world_path: Path) -> Path:
 def migrate_world(world_name: str, dry_run: bool = False, skip_backup: bool = False) -> None:
     """Migrate a single world to the new schema."""
     world_path = WORLDS_DIR / world_name
-    
+
     if not world_path.exists():
         print(f"❌ World '{world_name}' not found at {world_path}")
         return
-    
+
     print(f"\n{'[DRY RUN] ' if dry_run else ''}Migrating: {world_name}")
     print("=" * 50)
-    
+
     # Create backup unless skipped or dry run
     if not dry_run and not skip_backup:
         backup_path = backup_world(world_path)
         print(f"📦 Backup created: {backup_path.name}")
-    
+
     # Migrate NPCs
     npc_changes = migrate_npcs_file(world_path, dry_run)
     if npc_changes:
@@ -238,7 +238,7 @@ def migrate_world(world_name: str, dry_run: bool = False, skip_backup: bool = Fa
             print(f"  {change}")
     else:
         print("\n✅ NPCs: No changes needed")
-    
+
     # Migrate locations
     loc_changes = migrate_locations_file(world_path, dry_run)
     if loc_changes:
@@ -247,7 +247,7 @@ def migrate_world(world_name: str, dry_run: bool = False, skip_backup: bool = Fa
             print(f"  {change}")
     else:
         print("\n✅ Locations: No changes needed")
-    
+
     if not npc_changes and not loc_changes:
         print("\n✅ World already compliant with schema")
 
@@ -284,27 +284,27 @@ Examples:
         action="store_true",
         help="Migrate all worlds, not just known problematic ones",
     )
-    
+
     args = parser.parse_args()
-    
+
     print("🔧 World Schema Migration Tool")
     print("=" * 50)
-    
+
     if args.world:
         worlds = [args.world]
     elif args.all:
         worlds = [d.name for d in WORLDS_DIR.iterdir() if d.is_dir()]
     else:
         worlds = WORLDS_TO_MIGRATE
-    
+
     print(f"Worlds to process: {', '.join(worlds)}")
-    
+
     if args.dry_run:
         print("\n⚠️  DRY RUN MODE - No files will be modified\n")
-    
+
     for world_name in worlds:
         migrate_world(world_name, dry_run=args.dry_run, skip_backup=args.skip_backup)
-    
+
     print("\n" + "=" * 50)
     if args.dry_run:
         print("✅ Dry run complete. Run without --dry-run to apply changes.")

@@ -12,9 +12,9 @@ Interactive Elements to Include:
 Visible pathways: a passage or doorway visible to the left side of the scene
 Objects in the scene: Janitor's Key Ring dangle from a hook on locker 13, their massive key ring jangling softly with the building's vibrations
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: High School Comedy, Awkward, Rebellious, Nostalgic

@@ -13,9 +13,9 @@ Visible pathways: an opening or exit behind, perhaps suggested by light or shado
 Objects in the scene: Blue Security Card lies carelessly on the main console desk, left behind by whoever last manned this station
 Characters visible in the scene: A figure - Rin, Hacker, crouches beneath the monitor bank, fingers flying over exposed circuitry, glancing nervously at the door every few seconds
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Sci-Fi Dystopia, Oppressive, Desperate, Synthetic

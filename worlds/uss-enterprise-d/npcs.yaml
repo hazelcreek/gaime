@@ -273,7 +273,7 @@ elysian_echo:
     between coherent forms: layered fabric, then something like environmental suit material, then back
     again. Their eyes catch the light with sudden, startling presence… and sometimes go distant, as if
     seeing a sky that is no longer there.
-    
+
     When they move, the holodeck doesn’t merely animate; it hesitates, then commits — like a memory
     forcing itself into the present.
   personality:
@@ -290,7 +290,7 @@ elysian_echo:
       end in another — calm description turning suddenly into urgent sensory detail. They speak like
       someone translating trauma into language in real time: “light… pressure… the singing in the
       dark… then silence.” When treated gently, they can steady and speak with surprising wonder.
-      
+
       When threatened or dismissed, their voice becomes clipped and defensive, as if bracing for
       extinction.
     quirks:
@@ -311,5 +311,3 @@ elysian_echo:
   appears_when:
     - condition: "has_flag"
       value: holodeck_access_granted
-
-

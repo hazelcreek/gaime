@@ -110,14 +110,14 @@ Add:
 
 ```yaml
 starting_situation: |
-  The power grid stutters, and for a precious few seconds, the energy barrier 
+  The power grid stutters, and for a precious few seconds, the energy barrier
   to your cell flickers and dies. Old Marcus catches your eye and nods...
 
 victory:
   location: old_sewers
   item: resistance_map
   narrative: |
-    You emerge from the tunnels into a moonlit chamber. A figure steps from 
+    You emerge from the tunnels into a moonlit chamber. A figure steps from
     the shadows - the Resistance has found you. You're finally free...
 ```
 

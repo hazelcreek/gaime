@@ -11,7 +11,7 @@ Static location images show conditional NPCs (like ghost_child) regardless of wh
 
 Generate multiple image variants for locations where conditional NPCs can appear, then serve the correct variant based on current game state.
 
-### 2. NPC Location Triggers  
+### 2. NPC Location Triggers
 
 Add support for NPCs to change their location when specific flags are set.
 

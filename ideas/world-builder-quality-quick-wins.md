@@ -239,4 +239,3 @@ If any of these fail, the builder should regenerate (or the enrichment pass shou
 4) **Tone preference for test worlds**: Do you want “serious, compelling” even for test packs, or is “functional but coherent” acceptable as long as puzzles are deep?
 
 5) **Constraint strictness**: Should the builder *always* generate at least one alternative solution for the main gate, or only in “rich mode”?
-

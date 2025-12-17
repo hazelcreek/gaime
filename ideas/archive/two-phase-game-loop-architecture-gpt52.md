@@ -4,7 +4,7 @@
 
 # Evented Game Loop Spec (ActionIntents + Events + Narration)
 
-> **Status**: Draft specification — December 2025  
+> **Status**: Draft specification — December 2025
 > **Context**: Extends the "Two‑Phase LLM" section in `../game-mechanics-design.md` and aligns with `../../docs/VISION.md` (story-first, guided freedom, no unwinnable states, in-world explanations).
 
 This document specifies a **new gameplay loop** where:
@@ -319,7 +319,7 @@ We support player language like "play piano", "jump around", "eat apple", "light
 
 ### Design decision
 
-To prevent accidental spoilers, the Narrator should **not** receive hidden entities at all.  
+To prevent accidental spoilers, the Narrator should **not** receive hidden entities at all.
 Instead, the deterministic engine reveals entities by modifying **world state / perception state**, which then appears in subsequent narrator prompts.
 
 ### Minimal state needed (conceptual)
@@ -537,4 +537,3 @@ This enables qualitative comparison and automated regression checks later.
   - canonical intents, or
   - known affordances (`interaction_id`), or
   - `FlavorIntent` (no state change)
-

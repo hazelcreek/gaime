@@ -11,9 +11,9 @@ A narrow stone corridor stretches into darkness beyond the bookshelf. Cobwebs ha
 Interactive Elements to Include:
 Visible pathways: the way you came, perhaps a doorway with light streaming through; stairs descending, a trapdoor, or a passage leading below
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Victorian gothic horror, atmospheric, mysterious, unsettling yet compelling

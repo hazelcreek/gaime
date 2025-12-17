@@ -112,7 +112,7 @@ name: "The Cursed Manor"
 premise: |
   A violent storm has driven you to seek shelter...
 
-# items.yaml  
+# items.yaml
 rusty_key:
   name: "Rusty Key"
   description: "An old iron key, covered in rust..."
@@ -156,7 +156,7 @@ rusty_key:
 - More complex YAML schema
 - Not scalable to more languages
 
-**Estimated Effort**: 
+**Estimated Effort**:
 - Schema changes: 2-3 days
 - Frontend i18n: 1-2 days
 - Translating cursed-manor: 2-3 days of translator work
@@ -238,7 +238,7 @@ item_names:
     en: "Rusty Key"
     de: "Rostiger Schlüssel"
   iron_key:
-    en: "Iron Key"  
+    en: "Iron Key"
     de: "Eiserner Schlüssel"
 
 location_names:
@@ -293,10 +293,10 @@ Maintain consistent German prose matching the tone: {tone}
 
 **Risk**: Without explicit translation tables, LLM might call the same item different things:
 - Turn 1: "Der rostige Schlüssel"
-- Turn 5: "Der verrostete Schlüssel"  
+- Turn 5: "Der verrostete Schlüssel"
 - Turn 10: "Der alte Eisenschlüssel"
 
-**Mitigation**: 
+**Mitigation**:
 - Option C's translation table ensures "rusty_key" is always "Rostiger Schlüssel"
 - Include recent narrative in context to reinforce terminology
 
@@ -333,7 +333,7 @@ Modern frontier models (GPT-4o, Gemini Pro, Claude) produce German prose that is
 
 **Challenge**: German has richer morphology:
 - "untersuche" (examine - imperative)
-- "untersuchen" (examine - infinitive)  
+- "untersuchen" (examine - infinitive)
 - "untersuchst" (you examine - 2nd person)
 
 **LLM Advantage**: Modern LLMs understand German morphology and intent naturally:
@@ -341,7 +341,7 @@ Modern frontier models (GPT-4o, Gemini Pro, Claude) produce German prose that is
 - "geh Richtung Norden" → go north
 - "nimm den Schlüssel" → take key
 
-**Recommended Approach**: 
+**Recommended Approach**:
 1. Map common command stems for reliability
 2. Let LLM handle natural language variations
 3. Include German command examples in system prompt
@@ -431,22 +431,22 @@ class TranslationManager:
     def __init__(self, language: str, world_id: str):
         self.language = language
         self.translations = self._load_translations(world_id)
-    
+
     def _load_translations(self, world_id: str) -> dict:
         # Load from worlds/{world_id}/translations.yaml
         # Fall back to global translations if not found
         ...
-    
+
     def get_item_name(self, item_id: str) -> str:
         return self.translations.get("items", {}).get(item_id, {}).get(
             self.language, item_id
         )
-    
+
     def get_location_name(self, location_id: str) -> str:
         return self.translations.get("locations", {}).get(location_id, {}).get(
             self.language, location_id
         )
-    
+
     def build_terminology_prompt(self) -> str:
         """Build prompt section with official translations"""
         ...
@@ -463,7 +463,7 @@ Based on the analysis, we recommend **Option C (Hybrid Approach)** with the foll
 2. **Frontend i18n** - Implement react-i18next for all UI strings
 3. **Language selector** - Add to welcome screen
 
-### Phase 2: LLM Integration  
+### Phase 2: LLM Integration
 1. **System prompt language instruction** - Dynamic section based on language
 2. **Translation table structure** - Create `translations.yaml` schema
 3. **Command vocabulary mapping** - Expand normalization for German

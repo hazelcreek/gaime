@@ -11,7 +11,7 @@ import LLMDebugModal from './LLMDebugModal';
 export default function Terminal() {
   const { narrative, isLoading } = useGame();
   const scrollRef = useRef<HTMLDivElement>(null);
-  
+
   // LLM Debug modal state
   const [selectedDebugInfo, setSelectedDebugInfo] = useState<LLMDebugInfo | null>(null);
 
@@ -35,19 +35,19 @@ export default function Terminal() {
 
   return (
     <>
-      <div 
+      <div
         ref={scrollRef}
-        className="h-full bg-terminal-surface border border-terminal-border rounded-lg p-3 
+        className="h-full bg-terminal-surface border border-terminal-border rounded-lg p-3
                    overflow-y-auto space-y-2.5"
       >
         {narrative.map((entry) => (
-          <NarrativeEntryRow 
+          <NarrativeEntryRow
             key={entry.id}
             entry={entry}
             onDebugClick={() => entry.debugInfo && setSelectedDebugInfo(entry.debugInfo)}
           />
         ))}
-        
+
         {isLoading && (
           <div className="flex items-center gap-2 text-terminal-dim text-sm">
             <span className="animate-pulse">●</span>
@@ -58,7 +58,7 @@ export default function Terminal() {
 
       {/* LLM Debug Modal */}
       {selectedDebugInfo && (
-        <LLMDebugModal 
+        <LLMDebugModal
           debugInfo={selectedDebugInfo}
           onClose={() => setSelectedDebugInfo(null)}
         />
@@ -81,7 +81,7 @@ function NarrativeEntryRow({ entry, onDebugClick }: NarrativeEntryRowProps) {
         )}
         <span className="whitespace-pre-wrap break-words">{entry.content}</span>
       </div>
-      
+
       {/* Debug icon - only show for entries with debug info */}
       {entry.debugInfo && (
         <button

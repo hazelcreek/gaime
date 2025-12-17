@@ -22,9 +22,9 @@ Characters visible in the scene:
 
 - Counselor Deanna Troi (Ship’s counselor; emotional intelligence and ethical grounding), stands slightly apart, attentive to the room's emotional weather as much as the ship's: A calm presence with a warm, attentive expression. She watches people the way others watch readouts — not to judge, but to understand. When she speaks, the words feel like they make room for others to be human.
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Star Trek: The Next Generation — life aboard a Federation starship on the frontier, philosophical, optimistic, ethical, adventurous, and grounded in teamwork under pressure

@@ -167,7 +167,7 @@ When making code changes, **always check if documentation needs updating**:
 ```
 backend/tests/
 ├── unit/          # Test components in isolation
-├── integration/   # Test component interactions  
+├── integration/   # Test component interactions
 ├── e2e/           # Real LLM tests (marked @pytest.mark.slow)
 └── fixtures/      # Shared test data
 ```
@@ -204,7 +204,7 @@ The game engine uses a two-phase action processing loop. See `planning/two-phase
 
 ### Key Models (in `backend/app/models/`)
 - `intent.py`: ActionIntent, FlavorIntent, ActionType
-- `event.py`: Event, RejectionEvent, EventType  
+- `event.py`: Event, RejectionEvent, EventType
 - `perception.py`: PerceptionSnapshot, VisibleEntity
 - `validation.py`: ValidationResult, RejectionCode
 
@@ -280,4 +280,3 @@ if TYPE_CHECKING:
 - **Testable by Design**: If a function is hard to test, it needs refactoring
 - **No Hidden State**: Avoid module-level mutable state
 - **Deterministic**: Functions with same input should produce same output (except LLM)
-

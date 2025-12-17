@@ -45,9 +45,9 @@ premise: |
 
 # IMPORTANT: Explain WHY the player can act NOW
 starting_situation: |
-  The heavy front door has just slammed shut behind you. Lightning flashes 
-  through the grimy windows. The storm rages outside - there's no leaving 
-  tonight. The butler, Jenkins, has retreated into the shadows. You have 
+  The heavy front door has just slammed shut behind you. Lightning flashes
+  through the grimy windows. The storm rages outside - there's no leaving
+  tonight. The butler, Jenkins, has retreated into the shadows. You have
   until dawn to uncover the manor's secrets.
 
 # Victory condition - defines how to win/end the game
@@ -58,7 +58,7 @@ victory:
   narrative: |
     With trembling hands, you place the final artifact upon its pedestal.
     The symbols on the floor blaze with ethereal light. The curse is broken.
-    
+
     CONGRATULATIONS - You have completed the adventure!
 
 # Player starting state
@@ -101,36 +101,36 @@ Defines the game map and interactive elements.
 ```yaml
 entrance_hall:
   name: "Entrance Hall"
-  
+
   # Hints for AI narrative generation
   atmosphere: |
     Grand but decayed. A crystal chandelier hangs dark and dusty.
     Faded portraits line the walls. The air smells of old wood and secrets.
-  
+
   # Connected locations
   exits:
     north: library
     east: dining_room
     up: upper_landing
-  
+
   # Items found here (reference items.yaml)
   items:
     - old_letter
     - candlestick
-  
+
   # WHERE items are placed in this specific location (improves images and narration)
   item_placements:
     old_letter: "lies crumpled on the dusty side table near the door"
     candlestick: "sits on the fireplace mantel, cold and unlit"
-  
+
   # NPCs present (reference npcs.yaml)
   npcs:
     - butler_jenkins
-  
+
   # WHERE NPCs are positioned in this location
   npc_placements:
     butler_jenkins: "stands rigidly by the grandfather clock, pale hands clasped"
-  
+
   # Interactive elements (things player can examine)
   details:
     portraits: "Five family portraits: parents and three children"
@@ -140,31 +140,31 @@ entrance_hall:
     north: "An archway leads north to the library, its darkness beckoning"
     east: "Double doors to the east open into what appears to be a dining room"
     up: "A grand staircase climbs upward into shadow"
-  
+
   # Special interactions
   interactions:
     examine_portraits:
       triggers: ["examine portraits", "look at portraits", "study paintings"]
       narrative_hint: "One portrait has been slashed across the face"
       sets_flag: examined_portraits
-    
+
 library:
   name: "The Library"
   atmosphere: |
     Floor-to-ceiling bookshelves stuffed with ancient tomes.
     A cold draft suggests hidden passages. Dust motes drift in pale moonlight.
-  
+
   exits:
     south: entrance_hall
     hidden: secret_passage  # Only available when discovered
-  
+
   items:
     - dusty_tome
     - reading_glasses
-  
+
   # Conditional access
   requires: null  # No requirements
-  
+
   interactions:
     pull_red_book:
       triggers: ["pull red book", "examine red book", "tug red book"]
@@ -177,11 +177,11 @@ secret_passage:
   atmosphere: |
     A narrow corridor behind the bookshelf. Cobwebs thick as curtains.
     The walls are stone, older than the manor itself.
-  
+
   exits:
     back: library
     down: ritual_chamber
-  
+
   requires:
     flag: found_secret_passage
 ```
@@ -194,15 +194,15 @@ Defines characters and their behavior.
 butler_jenkins:
   name: "Jenkins"
   role: "The elderly butler, last remaining servant"
-  
+
   # Where they can be found
   location: entrance_hall  # Can move based on story
-  
+
   # Physical description for AI
   appearance: |
     Gaunt and pale, impeccably dressed in dated formal wear.
     His hands tremble slightly. Dark circles under watchful eyes.
-  
+
   # Personality for dialogue generation
   personality:
     traits:
@@ -214,20 +214,20 @@ butler_jenkins:
     quirks:
       - "Glances nervously at the basement door"
       - "Changes subject when family is mentioned"
-  
+
   # What they know (for AI context)
   knowledge:
     - "Knows the truth about the curse and the family tragedy"
     - "Was present the night of the ritual"
     - "Believes he failed to protect the children"
     - "Knows where artifacts are hidden"
-  
+
   # Dialogue constraints
   dialogue_rules:
     - "Never directly answers questions about the curse"
     - "Speaks cryptically about 'that terrible night'"
     - "Shows warmth if player mentions helping the spirits"
-  
+
   # Trust/relationship mechanics
   trust:
     initial: 0
@@ -240,29 +240,29 @@ butler_jenkins:
 ghost_child:
   name: "The Whisper"
   role: "Spirit of the youngest child"
-  
+
   # Appears in multiple locations
   locations:
     - nursery
     - upper_landing
     - library
-  
+
   appearance: |
     A translucent figure of a young girl, perhaps eight years old.
     Her form flickers like candlelight. She points but cannot speak.
-  
+
   personality:
     traits:
       - innocent
       - helpful
       - sad
     speech_style: "Does not speak - communicates through gestures and leading"
-  
+
   # Appearance conditions
   appears_when:
     - condition: "has_flag"
       value: "examined_nursery"
-  
+
   behavior: |
     Points toward clues, leads to hidden areas.
     Disappears when approached too quickly.
@@ -272,10 +272,10 @@ ghost_child:
 mansion_guard:
   name: "The Guard"
   role: "Security patrol"
-  
+
   # Default location
   location: front_gate
-  
+
   # Location changes based on flags (checked in order, last match wins)
   location_changes:
     - when_flag: alarm_triggered
@@ -291,29 +291,29 @@ Defines interactive objects.
 ```yaml
 old_letter:
   name: "Crumpled Letter"
-  
+
   # Can player carry it?
   portable: true
-  
+
   # Description when examined
   examine: |
     A yellowed letter, hastily crumpled then smoothed out again.
     The elegant handwriting reads:
-    
+
     "My dearest Margaret,
-    
+
     The ritual must never be completed. I have hidden the final
     component where the children played their secret games.
-    
+
     Forgive me.
     - Edmund"
-  
+
   # CRITICAL: How the item appears in the room scene
   # This is used when player "looks around" - without it, items are invisible!
   found_description: "A crumpled letter lies on the side table"
-  
+
   take_description: "You pocket the fragile letter carefully"
-  
+
   # Puzzle connections
   clues:
     - hint_for: nursery_puzzle
@@ -322,14 +322,14 @@ old_letter:
 iron_key:
   name: "Heavy Iron Key"
   portable: true
-  
+
   examine: |
     An old iron key, heavy and cold. The head is shaped like a
     serpent eating its tail. It feels significant.
-  
+
   # What it does
   unlocks: basement_door
-  
+
   # Where to find it
   location: library
   hidden: true
@@ -339,27 +339,27 @@ iron_key:
 ancient_amulet:
   name: "The Thornwood Amulet"
   portable: true
-  
+
   examine: |
     A silver amulet on a tarnished chain. The pendant shows a
     thorn-wrapped tree. It hums faintly when held.
-  
+
   # Special properties
   properties:
     artifact: true  # One of three needed to break curse
-  
+
   # Interactions
   use_actions:
     wear:
       description: "You clasp the amulet around your neck. A calming warmth spreads through you."
       sets_flag: wearing_amulet
-    
+
 candlestick:
   name: "Silver Candlestick"
   portable: true
-  
+
   examine: "A heavy silver candlestick, unlit. Could serve as a light source... or a weapon."
-  
+
   use_actions:
     light:
       requires_item: matches
@@ -376,7 +376,7 @@ The `starting_situation` explains why the player can begin acting. This prevents
 ```yaml
 # Good - explains the enabling event
 starting_situation: |
-  The power grid has failed. For a few precious seconds, the energy 
+  The power grid has failed. For a few precious seconds, the energy
   barrier sealing your cell flickers and dies. This is your chance.
 
 # Bad - doesn't explain why player can act
@@ -419,7 +419,7 @@ Add details for each exit direction to help the AI describe them narratively:
 details:
   # Scene elements
   portraits: "Five family portraits line the walls"
-  
+
   # Exit descriptions (match your exits keys)
   north: "An archway leads north into darkness"
   east: "Heavy oak doors stand closed to the east"
@@ -460,7 +460,7 @@ Constraints prevent the AI from breaking game logic:
 constraints:
   - "The basement door cannot be opened without the iron key"
   - "Jenkins will not discuss the ritual until trust reaches 3"
-  
+
 # Bad - vague, unenforceable
 constraints:
   - "Keep the story interesting"
@@ -479,7 +479,7 @@ knowledge:
   - "The amulet is beneath a floorboard in the nursery"
   - "The grimoire is in the ritual chamber on the central pedestal"
   - "Will NOT reveal artifact locations until trust is maxed"
-  
+
 dialogue_rules:
   - "Speaks of 'dark days' but never names the curse directly"
   - "If asked about children, becomes visibly upset and changes subject"
@@ -636,7 +636,7 @@ NPCs can move between locations based on story flags using `location_changes`:
 ```yaml
 butler_jenkins:
   location: dining_room  # Default location
-  
+
   location_changes:
     - when_flag: heard_noise_upstairs
       move_to: upper_landing
@@ -661,7 +661,7 @@ ghost_child:
     - nursery
     - upper_landing
     - library
-  
+
   location_changes:
     - when_flag: curse_broken
       move_to: null  # Ghost is freed - disappears from all locations
@@ -735,4 +735,3 @@ Returns information about conditional NPCs and existing variants.
 | NPC won't leave the game | Use `move_to: null` in `location_changes` to remove NPC entirely |
 | Flag mismatch errors | Run `python -m app.engine.validator` to find inconsistencies |
 | Item can't be found | Check `find_condition.requires_flag` matches a `sets_flag` somewhere |
-

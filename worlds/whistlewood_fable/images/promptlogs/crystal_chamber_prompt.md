@@ -12,9 +12,9 @@ Interactive Elements to Include:
 Visible pathways: a passage or doorway visible to the left side of the scene
 Objects in the scene: The Golden Acorn rests atop a pedestal of pure quartz, pulsing with warm light
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Quaint Fairy Tale, Whimsical, Gentle, Slightly Melancholic

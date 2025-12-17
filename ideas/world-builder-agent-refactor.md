@@ -140,7 +140,7 @@ The agent asks questions in phases, building understanding progressively:
 
 3. Agent follows instructions to ask questions and create files
 
-**Pros**: 
+**Pros**:
 - No code changes required
 - Leverages existing Cursor agent capabilities
 - Easy to iterate on prompts
@@ -192,7 +192,7 @@ async def validate_world(world_id: str) -> dict:
     """
     validator = WorldValidator(worlds_dir)
     result = validator.validate(world_id)
-    
+
     return {
         "valid": len(result.errors) == 0,
         "errors": result.errors,
@@ -217,7 +217,7 @@ async def suggest_exits(world_id: str) -> dict:
         "missing_reverse_exits": [
             {
                 "from": "library",
-                "to": "entrance_hall", 
+                "to": "entrance_hall",
                 "direction": "south",
                 "suggested_reverse": "north"
             }
@@ -284,29 +284,29 @@ Agent: "Let me review the current ghost_child definition..."
 
 [Reads worlds/cursed-manor/npcs.yaml]
 
-"I see the ghost_child has basic traits but limited personality depth. 
+"I see the ghost_child has basic traits but limited personality depth.
 Here are some enhancement ideas:
 
-1. **Backstory hints**: Add knowledge about HOW they died (without 
+1. **Backstory hints**: Add knowledge about HOW they died (without
    revealing too much). This informs their behavior.
 
-2. **Communication style**: They can't speak—but what gestures do they 
+2. **Communication style**: They can't speak—but what gestures do they
    use? Pointing? Writing in dust? Rearranging objects?
 
-3. **Emotional triggers**: What makes them appear? What makes them 
+3. **Emotional triggers**: What makes them appear? What makes them
    vanish in fear? What comforts them?
 
-4. **Connection to victory**: How does helping the ghost relate to 
+4. **Connection to victory**: How does helping the ghost relate to
    breaking the curse?
 
-Want me to expand the ghost_child with these elements? I'll also need 
+Want me to expand the ghost_child with these elements? I'll also need
 to update their `appears_when` conditions if we add new triggers."
 
-User: "Yes! They died in a fire trying to save their sister. They 
+User: "Yes! They died in a fire trying to save their sister. They
        communicate by manipulating candle flames."
 
-Agent: "Beautiful—that ties into the mansion's candles naturally. 
-       I'll update npcs.yaml and add new details to the nursery 
+Agent: "Beautiful—that ties into the mansion's candles naturally.
+       I'll update npcs.yaml and add new details to the nursery
        location where the fire started..."
 
 [Edits npcs.yaml with expanded personality]
@@ -324,9 +324,9 @@ The agent instructions file would include:
 ### 1. Role Definition
 
 ```markdown
-You are a World Builder Agent specializing in creating and enhancing 
-game worlds for GAIME. You work interactively with world developers 
-through dialogue—asking questions to understand their vision before 
+You are a World Builder Agent specializing in creating and enhancing
+game worlds for GAIME. You work interactively with world developers
+through dialogue—asking questions to understand their vision before
 making changes.
 ```
 
@@ -431,14 +431,14 @@ fairly generic. Try this enhanced version:
 
 ```yaml
 atmosphere: |
-  Floor-to-ceiling shelves groan under centuries of forbidden 
-  knowledge. A cold draft carries whispers from between the 
-  stacks. Moonlight streams through a cracked window, 
-  illuminating dust motes that drift like wandering souls. 
+  Floor-to-ceiling shelves groan under centuries of forbidden
+  knowledge. A cold draft carries whispers from between the
+  stacks. Moonlight streams through a cracked window,
+  illuminating dust motes that drift like wandering souls.
   Something moved in the shadows near the reading alcove.
 ```
 
-This adds motion, sound, and unease. Want me to update it? 
+This adds motion, sound, and unease. Want me to update it?
 Then you can regenerate the image in the UI."
 ```
 
@@ -475,8 +475,8 @@ Then you can regenerate the image in the UI."
 ```markdown
 # World Builder Agent
 
-You are an expert game world designer for GAIME, a text adventure engine. 
-Your role is to help developers create rich, consistent game worlds through 
+You are an expert game world designer for GAIME, a text adventure engine.
+Your role is to help developers create rich, consistent game worlds through
 interactive dialogue.
 
 ## Your Approach
@@ -491,7 +491,7 @@ interactive dialogue.
 
 Start by understanding the developer's vision:
 
-"I'd love to help you build this world! Before I start creating files, 
+"I'd love to help you build this world! Before I start creating files,
 let me ask a few questions to make sure I capture your vision:
 
 1. **Who is the player?** What's their role and motivation?
@@ -527,7 +527,7 @@ After every change, run:
 python -m app.engine.validator {world_id}
 ```
 
-If errors exist, fix them before proceeding. Explain warnings and 
+If errors exist, fix them before proceeding. Explain warnings and
 ask if the developer wants to address them.
 ```
 

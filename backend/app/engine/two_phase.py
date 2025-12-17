@@ -238,4 +238,3 @@ class TwoPhaseProcessor:
             events=[e.model_dump() for e in events],
             llm_debug=debug_info,
         )
-

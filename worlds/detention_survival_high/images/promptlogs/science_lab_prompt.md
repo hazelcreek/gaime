@@ -13,9 +13,9 @@ Visible pathways: a passage or doorway visible to the right side of the scene
 Objects in the scene: Box of Baking Soda sits on the black countertop next to a collection of beakers, its orange box faded from years of science fair volcanoes
 Characters visible in the scene: A figure - Neil the Science Club President, The Hint Giver, crouches behind the teacher's desk, peeking out nervously, his thick glasses catching the fluorescent light
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: High School Comedy, Awkward, Rebellious, Nostalgic

@@ -18,7 +18,7 @@ Update [`worlds/cursed-manor/npcs.yaml`](worlds/cursed-manor/npcs.yaml) - Lady M
 # Before
 - "Knows where she hid the dagger to prevent the ritual's completion"
 
-# After  
+# After
 - "She hid the ritual dagger in the basement, among debris in the corner"
 ```
 

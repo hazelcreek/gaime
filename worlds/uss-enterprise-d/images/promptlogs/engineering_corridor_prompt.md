@@ -11,9 +11,9 @@ The air here is warmer, the hum louder — less like background ambience and mor
 Interactive Elements to Include:
 Visible pathways: stairs leading upward, or a visible upper level or balcony; a doorway or passage visible ahead in the distance
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Star Trek: The Next Generation — life aboard a Federation starship on the frontier, philosophical, optimistic, ethical, adventurous, and grounded in teamwork under pressure

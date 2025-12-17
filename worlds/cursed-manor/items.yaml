@@ -4,19 +4,19 @@ old_letter:
   examine: |
     A yellowed letter, hastily crumpled and then smoothed out again.
     The elegant handwriting is slightly smudged, as if by tears:
-    
+
     "My dearest Margaret,
-    
+
     The ritual must never be completed. I have hidden the final
     component where the children played their secret games. Edmund
     believes immortality is worth any price, but I have seen what
     waits on the other side. It hungers.
-    
+
     If you find this, know that I tried to stop it. Find the artifacts.
     Destroy them if you can, or at least keep them separated.
-    
+
     Forgive me for not being stronger.
-    
+
     - Your loving sister, Catherine"
   found_description: "A crumpled letter lies on the side table, as if dropped in haste"
   take_description: "You carefully pocket the fragile letter"
@@ -189,7 +189,7 @@ grimoire:
     text and diagrams. This is the Thornwood family grimoire,
     containing the ritual of immortality. The final pages are
     stained with blood. This is the third and final artifact.
-    
+
     A note in the margin reads: "Three must die so one may live
     forever. But what is immortality if all you love is gone?"
   found_description: "On the central pedestal, the grimoire waits"
@@ -197,4 +197,3 @@ grimoire:
   location: ritual_chamber
   properties:
     artifact: true
-

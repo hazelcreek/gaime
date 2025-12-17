@@ -195,4 +195,3 @@ iron_key:
 3. Inventory, location, and flags update correctly
 4. World builder can generate new worlds from prompts
 5. Documentation enables new developers to contribute
-

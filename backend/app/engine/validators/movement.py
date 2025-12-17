@@ -17,7 +17,7 @@ from app.models.validation import ValidationResult, valid_result, invalid_result
 
 if TYPE_CHECKING:
     from app.models.two_phase_state import TwoPhaseGameState
-    from app.models.world import WorldData
+    from app.models.world import Location, LocationRequirement, WorldData
 
 
 class MovementValidator:
@@ -86,7 +86,7 @@ class MovementValidator:
         if not destination:
             return invalid_result(
                 code=RejectionCode.TARGET_NOT_FOUND,
-                reason=f"The path leads somewhere undefined.",
+                reason="The path leads somewhere undefined.",
             )
 
         # Check destination access requirements
@@ -112,7 +112,7 @@ class MovementValidator:
         self,
         state: "TwoPhaseGameState",
         world: "WorldData",
-        location: "app.models.world.Location",
+        location: "Location",
     ) -> ValidationResult:
         """Handle the 'back' direction.
 
@@ -181,7 +181,7 @@ class MovementValidator:
 
     def _check_requirements(
         self,
-        requires: "app.models.world.LocationRequirement",
+        requires: "LocationRequirement",
         state: "TwoPhaseGameState",
         world: "WorldData",
         destination_name: str,
@@ -219,4 +219,3 @@ class MovementValidator:
                 )
 
         return valid_result()
-

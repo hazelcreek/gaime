@@ -11,9 +11,9 @@ A heavy blast door separates the interior from the exercise yard. A security kio
 Interactive Elements to Include:
 Visible pathways: a passage or doorway visible to the right side of the scene; a doorway or passage visible ahead in the distance; a passage or doorway visible to the left side of the scene
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Sci-Fi Dystopia, Oppressive, Desperate, Synthetic

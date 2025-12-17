@@ -11,9 +11,9 @@ A long hallway on the upper floor, lit by flickering wall sconces that shouldn't
 Interactive Elements to Include:
 Visible pathways: stairs descending, a trapdoor, or a passage leading below; a doorway or passage visible ahead in the distance; an opening or exit behind, perhaps suggested by light or shadows; a passage or doorway visible to the right side of the scene
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Victorian gothic horror, atmospheric, mysterious, unsettling yet compelling

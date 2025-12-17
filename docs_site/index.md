@@ -9,4 +9,3 @@ Welcome to the GAIME docs site. It brings together the key developer docs in `do
 - **Repository README**: Quick start and project overview.
 
 Use the left navigation or the search box to jump to any topic. For local preview, install the docs dependencies and run `mkdocs serve`.
-

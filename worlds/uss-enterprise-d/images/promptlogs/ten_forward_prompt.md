@@ -15,9 +15,9 @@ Characters visible in the scene:
 
 - Guinan (Bartender and confidante; offers perspective beyond rank), stands behind the bar, composed and watchful, as if she can hear decisions forming before they're spoken: Poised and observant, with a calm that feels older than the ship. She watches people the way a navigator watches a star — not because she controls them, but because she understands their trajectories. Her presence makes honesty feel possible.
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Star Trek: The Next Generation — life aboard a Federation starship on the frontier, philosophical, optimistic, ethical, adventurous, and grounded in teamwork under pressure

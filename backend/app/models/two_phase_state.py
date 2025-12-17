@@ -65,4 +65,3 @@ class TwoPhaseActionResponse(BaseModel):
     game_complete: bool = False
     ending_narrative: str | None = None
     llm_debug: LLMDebugInfo | None = None
-

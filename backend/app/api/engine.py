@@ -38,4 +38,3 @@ ENGINE_INFO = [
 ]
 
 DEFAULT_ENGINE = EngineVersion.CLASSIC
-

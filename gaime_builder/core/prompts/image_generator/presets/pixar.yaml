@@ -49,4 +49,3 @@ quality_constraints:
   - "flat lighting or harsh shadows"
   - "low-resolution textures"
   - "visible polygon edges or rendering artifacts"
-

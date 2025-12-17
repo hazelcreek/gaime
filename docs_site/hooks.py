@@ -34,4 +34,3 @@ def sync_docs(config) -> None:  # noqa: D401
 
     readme_dest = DEST / "project-readme.md"
     shutil.copyfile(ROOT / "README.md", readme_dest)
-

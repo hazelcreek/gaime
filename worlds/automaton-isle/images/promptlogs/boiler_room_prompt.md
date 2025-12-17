@@ -14,9 +14,9 @@ Characters visible in the scene:
 
 - Furnace Keeper (Atmosphere), A soot-covered bot shovels nothing into the cold furnace, stuck in a loop.: Bulky, covered in layers of soot and ash. One arm is a shovel.
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Steampunk Survival, Melancholy yet Wondrous

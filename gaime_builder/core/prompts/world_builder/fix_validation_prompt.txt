@@ -65,7 +65,7 @@ Return the fixed YAML files as JSON. Include ONLY the files that need changes:
 }}
 ```
 
-CRITICAL: 
+CRITICAL:
 - Use standard JSON escaping: \n for newlines, \" for quotes
 - Ensure all YAML is valid when parsed
 - Only return fields that needed fixes (you can omit unchanged files)

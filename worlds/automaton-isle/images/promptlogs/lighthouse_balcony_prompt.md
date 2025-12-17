@@ -12,9 +12,9 @@ Interactive Elements to Include:
 Visible pathways: a passage leading toward Soot-Stained Sands
 Subtle environmental details: a barely visible crack in the floor or subtle depression
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Steampunk Survival, Melancholy yet Wondrous

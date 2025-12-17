@@ -90,4 +90,3 @@ class RuleBasedParser:
 
         # No pattern matched - return None to indicate unrecognized input
         return None
-

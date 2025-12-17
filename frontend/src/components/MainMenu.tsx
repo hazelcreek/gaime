@@ -17,7 +17,7 @@ function MenuCinematicEffects() {
       {/* Raven fly-bys (subtle, slow, low-contrast) */}
       <Raven className="gaime-raven gaime-raven--a" />
       <Raven className="gaime-raven gaime-raven--b" />
-      
+
       {/* Drifting fog layers around the gate */}
       <div className="gaime-fog gaime-fog--1" aria-hidden="true" />
       <div className="gaime-fog gaime-fog--2" aria-hidden="true" />
@@ -66,7 +66,7 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
   const [worlds, setWorlds] = useState<WorldInfo[]>([]);
   const [selectedWorld, setSelectedWorld] = useState<string>('');
   const [loadingWorlds, setLoadingWorlds] = useState(true);
-  
+
   // Engine selection (advanced option)
   const [engines, setEngines] = useState<EngineInfo[]>([]);
   const [selectedEngine, setSelectedEngine] = useState<string>('');
@@ -75,7 +75,7 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
   // Load available worlds and engines on mount
   useEffect(() => {
     setLoadingWorlds(true);
-    
+
     // Load worlds and engines in parallel
     Promise.all([
       gameAPI.listWorlds(),
@@ -87,7 +87,7 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
         if (worldsResponse.worlds.length > 0 && !selectedWorld) {
           setSelectedWorld(worldsResponse.worlds[0].id);
         }
-        
+
         // Set engines
         setEngines(enginesResponse.engines);
         setDefaultEngine(enginesResponse.default);
@@ -115,7 +115,7 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
   const selectedWorldInfo = worlds.find(w => w.id === selectedWorld);
 
   return (
-    <div 
+    <div
       className="h-full w-full bg-cover bg-center bg-no-repeat relative"
       style={{ backgroundImage: "url('/menu-bg.jpg')" }}
     >
@@ -128,7 +128,7 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
       {/* Lightning flashes (behind UI, above dark overlay) */}
       <div className="absolute inset-0 z-20 pointer-events-none gaime-lightning gaime-lightning--a" aria-hidden="true" />
       <div className="absolute inset-0 z-20 pointer-events-none gaime-lightning gaime-lightning--b" aria-hidden="true" />
-      
+
       {/* Content container - left sidebar layout */}
       <div className="relative z-30 h-full flex">
         {/* Left sidebar panel */}
@@ -191,13 +191,13 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
               {/* Advanced Options - Collapsible */}
               {engines.length > 1 && (
                 <details className="flex-shrink-0 group">
-                  <summary className="text-terminal-dim text-xs uppercase tracking-wider cursor-pointer 
+                  <summary className="text-terminal-dim text-xs uppercase tracking-wider cursor-pointer
                                     hover:text-terminal-text transition-colors select-none
                                     list-none flex items-center gap-1">
-                    <svg 
-                      className="w-3 h-3 transition-transform group-open:rotate-90" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
+                    <svg
+                      className="w-3 h-3 transition-transform group-open:rotate-90"
+                      fill="none"
+                      viewBox="0 0 24 24"
                       stroke="currentColor"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -211,7 +211,7 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
                     <select
                       value={selectedEngine}
                       onChange={(e) => setSelectedEngine(e.target.value)}
-                      className="w-full px-3 py-2 bg-terminal-bg border border-terminal-border/50 
+                      className="w-full px-3 py-2 bg-terminal-bg border border-terminal-border/50
                                rounded text-terminal-text text-sm
                                focus:outline-none focus:border-terminal-accent
                                cursor-pointer"
@@ -236,8 +236,8 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
                 <button
                   onClick={handleStartGame}
                   disabled={isLoading || !selectedWorld}
-                  className="w-full px-6 py-3 bg-terminal-accent/20 border-2 border-terminal-accent 
-                           text-terminal-accent rounded-lg hover:bg-terminal-accent/30 
+                  className="w-full px-6 py-3 bg-terminal-accent/20 border-2 border-terminal-accent
+                           text-terminal-accent rounded-lg hover:bg-terminal-accent/30
                            transition-all disabled:opacity-50 disabled:cursor-not-allowed
                            font-display tracking-widest text-sm uppercase
                            shadow-lg shadow-terminal-accent/20 hover:shadow-terminal-accent/30"
@@ -262,4 +262,3 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
     </div>
   );
 }
-

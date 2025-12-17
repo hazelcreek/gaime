@@ -49,4 +49,3 @@ Respond with a JSON object:
 }}
 
 Do NOT include any text outside the JSON object.
-

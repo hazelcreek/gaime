@@ -13,9 +13,9 @@ Visible pathways: a passage or doorway visible to the right side of the scene; a
 Subtle environmental details: shadows on the ceiling that hint at an unseen passage; a barely visible crack in the floor or subtle depression
 Objects in the scene: Tricorder rests in a wall-mounted diagnostic cradle beneath a small LCARS label; Insulated Gloves are tucked into an emergency kit compartment with a yellow hazard stripe
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Star Trek: The Next Generation — life aboard a Federation starship on the frontier, philosophical, optimistic, ethical, adventurous, and grounded in teamwork under pressure

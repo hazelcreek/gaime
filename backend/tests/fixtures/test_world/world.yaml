@@ -1,5 +1,5 @@
 # Test World - Minimal world definition for unit testing
-# 
+#
 # This world provides:
 # - 3 rooms with different access requirements
 # - A container with hidden contents
@@ -44,4 +44,3 @@ victory:
   narrative: |
     Congratulations! You have successfully completed all test scenarios.
     The game engine is functioning correctly.
-

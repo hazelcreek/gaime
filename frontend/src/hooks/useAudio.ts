@@ -12,7 +12,7 @@ export function useAudio() {
   // Initialize audio manager on mount (async)
   useEffect(() => {
     let mounted = true;
-    
+
     audioManager.init().then(() => {
       if (mounted) {
         // Sync state in case init loaded from localStorage

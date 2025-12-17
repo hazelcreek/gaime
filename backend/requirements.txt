@@ -25,4 +25,3 @@ python-dotenv>=1.0.0
 
 # Development
 httpx>=0.25.0  # For testing
-

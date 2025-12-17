@@ -109,9 +109,7 @@ class TestTwoPhaseStateManagerWithFixtures:
     """Integration-style tests using test fixtures."""
 
     @pytest.fixture
-    def manager_state(
-        self, sample_world_data, sample_game_state
-    ) -> TwoPhaseGameState:
+    def manager_state(self, sample_world_data, sample_game_state) -> TwoPhaseGameState:
         """Create state that mirrors test world setup."""
         return TwoPhaseGameState(
             session_id="test-session",
@@ -149,4 +147,3 @@ class TestTwoPhaseStateManagerWithFixtures:
         # Revisit to known location
         is_first = "start_room" not in manager_state.visited_locations
         assert is_first is False
-

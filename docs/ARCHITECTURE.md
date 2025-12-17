@@ -493,7 +493,7 @@ NPCs can move between locations based on game state:
      - Check each location_change trigger
      - Last matching trigger wins
      - Return current location (or None if NPC has left)
-   
+
    get_present_npcs():
      - Skip NPCs with location = None (they've left the game)
      - For triggered NPCs, only check the specific move_to location
@@ -667,4 +667,3 @@ See `planning/two-phase-game-loop-spec.md` for the full specification.
 - Save/load game files
 - Voice input/output
 - Multi-NPC variant combinations (currently single-NPC only)
-

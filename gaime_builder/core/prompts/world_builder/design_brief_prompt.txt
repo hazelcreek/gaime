@@ -95,4 +95,3 @@ Respond with valid JSON containing the world design brief. DO NOT generate YAML 
 6. **Constraints**: Be specific! "The basement is locked" is vague. "The basement door requires the iron key and cannot be broken" is enforceable.
 
 Think carefully about how the puzzle threads interweave and create a satisfying exploration experience.
-

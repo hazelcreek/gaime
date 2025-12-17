@@ -401,7 +401,7 @@ def _debug_classic_state(session: ClassicGameSession) -> dict:
     }
 
     return {
-        "session_id": session_id,
+        "session_id": manager.session_id,
         "engine": "classic",
         "current_location": state.current_location,
         "turn_count": state.turn_count,

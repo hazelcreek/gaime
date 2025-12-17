@@ -8,4 +8,3 @@ Each validator implements the IntentValidator protocol.
 from app.engine.validators.movement import MovementValidator
 
 __all__ = ["MovementValidator"]
-

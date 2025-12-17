@@ -13,11 +13,11 @@ logger = logging.getLogger(__name__)
 
 class PromptLoader:
     """Loads and caches prompts from text files."""
-    
+
     def __init__(self, prompts_dir: Optional[Path] = None):
         """
         Initialize the prompt loader.
-        
+
         Args:
             prompts_dir: Directory containing prompt files. If None, uses
                         local prompts directory bundled with gaime_builder.
@@ -25,59 +25,59 @@ class PromptLoader:
         if prompts_dir is None:
             # Use prompts bundled with gaime_builder package
             prompts_dir = Path(__file__).parent / "prompts"
-        
+
         self.prompts_dir = Path(prompts_dir)
         self._cache: Dict[str, str] = {}
         self._file_timestamps: Dict[str, float] = {}
-        
+
         # Load all prompts at startup
         self.reload_all()
-    
+
     def _get_prompt_path(self, category: str, filename: str) -> Path:
         """Get the full path to a prompt file."""
         return self.prompts_dir / category / filename
-    
+
     def _read_prompt_file(self, category: str, filename: str) -> str:
         """Read a prompt file and cache its timestamp."""
         path = self._get_prompt_path(category, filename)
-        
+
         if not path.exists():
             raise FileNotFoundError(
                 f"Prompt file not found: {path}\n"
                 f"Expected location: {self.prompts_dir}/{category}/{filename}"
             )
-        
+
         content = path.read_text(encoding='utf-8')
         cache_key = f"{category}/{filename}"
         self._file_timestamps[cache_key] = path.stat().st_mtime
-        
+
         return content
-    
+
     def get_prompt(self, category: str, filename: str, reload: bool = False) -> str:
         """
         Get a prompt from cache or file.
-        
+
         Args:
             category: Subdirectory name (e.g., 'game_master', 'world_builder')
             filename: Prompt filename (e.g., 'system_prompt.txt')
             reload: If True, force reload from file even if cached
-        
+
         Returns:
             Prompt content as string
         """
         cache_key = f"{category}/{filename}"
         path = self._get_prompt_path(category, filename)
-        
+
         # Determine if we need to load/reload
         needs_reload = reload or cache_key not in self._cache
-        
+
         # Hot reload: check if file has been modified since last load
         if not needs_reload and path.exists():
             current_mtime = path.stat().st_mtime
             cached_mtime = self._file_timestamps.get(cache_key, 0)
             if current_mtime > cached_mtime:
                 needs_reload = True
-        
+
         if needs_reload:
             if path.exists():
                 self._cache[cache_key] = self._read_prompt_file(category, filename)
@@ -87,18 +87,18 @@ class PromptLoader:
                 raise FileNotFoundError(
                     f"Prompt file not found: {path}"
                 )
-        
+
         return self._cache[cache_key]
-    
+
     def reload_all(self):
         """Reload all prompts from files."""
         self._cache.clear()
         self._file_timestamps.clear()
-        
+
         if not self.prompts_dir.exists():
             logger.warning(f"Prompts directory does not exist: {self.prompts_dir}")
             return
-        
+
         loaded_count = 0
         for category_dir in self.prompts_dir.iterdir():
             if category_dir.is_dir():
@@ -111,7 +111,7 @@ class PromptLoader:
                         loaded_count += 1
                     except Exception as e:
                         logger.error(f"Failed to load prompt {category}/{filename}: {e}")
-        
+
         logger.debug(f"Loaded {loaded_count} prompt file(s)")
 
 
@@ -130,4 +130,3 @@ def get_loader() -> PromptLoader:
 def reload_prompts():
     """Reload all prompts."""
     get_loader().reload_all()
-

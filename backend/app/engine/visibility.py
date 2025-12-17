@@ -19,7 +19,7 @@ from app.models.perception import (
 
 if TYPE_CHECKING:
     from app.models.two_phase_state import TwoPhaseGameState
-    from app.models.world import WorldData
+    from app.models.world import Location, WorldData
 
 
 class DefaultVisibilityResolver:
@@ -100,7 +100,7 @@ class DefaultVisibilityResolver:
 
     def _get_visible_exits(
         self,
-        location: "app.models.world.Location",
+        location: "Location",
         world: "WorldData",
     ) -> list[VisibleExit]:
         """Get all visible exits from the current location.
@@ -137,7 +137,7 @@ class DefaultVisibilityResolver:
         self,
         state: "TwoPhaseGameState",
         world: "WorldData",
-        location: "app.models.world.Location",
+        location: "Location",
     ) -> list[VisibleEntity]:
         """Get all visible items at the location.
 
@@ -189,7 +189,7 @@ class DefaultVisibilityResolver:
 
     def _get_visible_details(
         self,
-        location: "app.models.world.Location",
+        location: "Location",
     ) -> list[VisibleEntity]:
         """Get all examinable details (scenery) at the location.
 
@@ -302,4 +302,3 @@ class DefaultVisibilityResolver:
                 return False
 
         return True
-

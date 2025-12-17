@@ -12,9 +12,9 @@ Interactive Elements to Include:
 Visible pathways: an opening or exit behind, perhaps suggested by light or shadows; a passage or doorway visible to the right side of the scene; a passage or doorway visible to the left side of the scene
 Characters visible in the scene: A figure - Unit 88, Collaborator Android, stands at the dispensing station with an unsettling smile, mechanically distributing grey paste to a queue of hollow-eyed inmates
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Sci-Fi Dystopia, Oppressive, Desperate, Synthetic

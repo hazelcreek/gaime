@@ -27,12 +27,12 @@ export default function LLMDebugModal({ debugInfo, onClose }: LLMDebugModalProps
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
       onClick={onClose}
     >
-      <div 
-        className="bg-terminal-surface border border-terminal-warning/30 rounded-lg max-w-3xl w-full mx-4 
+      <div
+        className="bg-terminal-surface border border-terminal-warning/30 rounded-lg max-w-3xl w-full mx-4
                    max-h-[85vh] overflow-hidden flex flex-col animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
@@ -132,7 +132,7 @@ function CollapsibleSection({ title, isExpanded, onToggle, badge, children }: Co
     <div className="border border-terminal-border/50 rounded overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between px-2 py-1.5 
+        className="w-full flex items-center justify-between px-2 py-1.5
                    bg-terminal-bg/30 hover:bg-terminal-bg/50 transition-colors"
       >
         <span className="text-terminal-dim text-xs font-medium">{title}</span>
@@ -153,4 +153,3 @@ function CollapsibleSection({ title, isExpanded, onToggle, badge, children }: Co
     </div>
   );
 }
-

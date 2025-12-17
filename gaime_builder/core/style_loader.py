@@ -56,20 +56,20 @@ class StyleBlock:
 
 class StylePresets:
     """Manages loading and caching of style presets from YAML files."""
-    
+
     def __init__(self, presets_dir: Optional[Path] = None):
         self.presets_dir = presets_dir or _get_presets_dir()
         self._presets: dict[str, dict] = {}
         self._loaded = False
-    
+
     def _ensure_loaded(self) -> None:
         """Lazily load all presets on first access."""
         if self._loaded:
             return
-        
+
         if not self.presets_dir.exists():
             raise FileNotFoundError(f"Presets directory not found: {self.presets_dir}")
-        
+
         for preset_file in self.presets_dir.glob("*.yaml"):
             preset_name = preset_file.stem
             try:
@@ -77,24 +77,24 @@ class StylePresets:
                     self._presets[preset_name] = yaml.safe_load(f)
             except Exception as e:
                 print(f"Warning: Failed to load preset {preset_name}: {e}")
-        
+
         self._loaded = True
-    
+
     def list_presets(self) -> list[str]:
         """Return list of available preset names."""
         self._ensure_loaded()
         return list(self._presets.keys())
-    
+
     def get_preset(self, name: str) -> Optional[dict]:
         """Get raw preset data by name."""
         self._ensure_loaded()
         return self._presets.get(name)
-    
+
     def has_preset(self, name: str) -> bool:
         """Check if a preset exists."""
         self._ensure_loaded()
         return name in self._presets
-    
+
     def reload(self) -> None:
         """Force reload all presets from disk."""
         self._loaded = False
@@ -128,7 +128,7 @@ def _deep_merge(base: dict, override: dict) -> dict:
 def resolve_style(style_config: Any) -> StyleBlock:
     """
     Resolve a style configuration into a complete StyleBlock.
-    
+
     Args:
         style_config: Can be:
             - str: Preset name (e.g., "noir")
@@ -137,18 +137,18 @@ def resolve_style(style_config: Any) -> StyleBlock:
             - None: Use default preset
     """
     presets = get_presets()
-    
+
     # Handle None - use default
     if style_config is None:
         style_config = DEFAULT_PRESET
-    
+
     # Handle string - just a preset name
     if isinstance(style_config, str):
         preset_data = presets.get_preset(style_config)
         if preset_data is None:
             preset_data = presets.get_preset(DEFAULT_PRESET) or {}
         return _dict_to_style_block(preset_data)
-    
+
     # Handle dict
     if isinstance(style_config, dict):
         if "preset" in style_config:
@@ -156,13 +156,13 @@ def resolve_style(style_config: Any) -> StyleBlock:
             preset_data = presets.get_preset(preset_name)
             if preset_data is None:
                 preset_data = presets.get_preset(DEFAULT_PRESET) or {}
-            
+
             overrides = style_config.get("overrides", {})
             merged_data = _deep_merge(preset_data, overrides)
             return _dict_to_style_block(merged_data)
-        
+
         return _dict_to_style_block(style_config)
-    
+
     # Fallback to default
     preset_data = presets.get_preset(DEFAULT_PRESET) or {}
     return _dict_to_style_block(preset_data)
@@ -176,7 +176,7 @@ def _dict_to_style_block(data: dict) -> StyleBlock:
         lighting=mood_data.get("lighting", "dramatic lighting"),
         color_palette=mood_data.get("color_palette", "rich and natural colors")
     )
-    
+
     tech_data = data.get("technical", {})
     technical = TechnicalConfig(
         perspective=tech_data.get("perspective", "first-person"),
@@ -184,18 +184,18 @@ def _dict_to_style_block(data: dict) -> StyleBlock:
         camera=tech_data.get("camera", "eye level"),
         effects=tech_data.get("effects", "")
     )
-    
+
     style = data.get("style", "")
     if isinstance(style, str):
         style = style.strip()
-    
+
     anti_styles = data.get("anti_styles", [])
     quality_constraints = data.get("quality_constraints", [
         "watermarks or signatures",
         "blurry or low-quality artifacts",
         "distorted proportions"
     ])
-    
+
     return StyleBlock(
         mood=mood,
         style=style,
@@ -217,16 +217,16 @@ def build_mpa_prompt(
     """Build a complete MPA-structured prompt for image generation."""
     loader = get_loader()
     template = loader.get_prompt("image_generator", "mpa_template.txt")
-    
+
     anti_styles_text = "\n".join(f"- {item}" for item in style_block.anti_styles)
     quality_text = "\n".join(f"- {item}" for item in style_block.quality_constraints)
-    
+
     effects_text = style_block.technical.effects
     if effects_text:
         effects_text = f" {effects_text}"
     else:
         effects_text = ""
-    
+
     prompt = template.format(
         location_name=location_name,
         atmosphere=atmosphere.strip(),
@@ -243,7 +243,7 @@ def build_mpa_prompt(
         anti_styles=anti_styles_text,
         quality_constraints=quality_text
     )
-    
+
     return prompt
 
 
@@ -255,18 +255,18 @@ def build_mpa_edit_prompt(
     """Build an MPA-structured prompt for NPC variant generation."""
     loader = get_loader()
     template = loader.get_prompt("image_generator", "mpa_edit_template.txt")
-    
+
     style_summary = style_block.style.split('\n')[0] if style_block.style else "the original visual style"
     brief_anti_styles = style_block.anti_styles[:4] if style_block.anti_styles else []
     anti_styles_text = "\n".join(f"- {item}" for item in brief_anti_styles)
-    
+
     prompt = template.format(
         npc_description=npc_description,
         npc_placement=npc_placement or "positioned naturally in the scene",
         style_summary=style_summary,
         anti_styles_brief=anti_styles_text
     )
-    
+
     return prompt
 
 
@@ -278,4 +278,3 @@ def get_world_context(theme: str, tone: str) -> str:
     if tone:
         parts.append(tone)
     return ", ".join(parts) if parts else "fantasy setting"
-

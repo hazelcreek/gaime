@@ -14,7 +14,6 @@ from app.engine.validators.movement import MovementValidator
 from app.models.intent import ActionIntent, ActionType
 from app.models.event import RejectionCode
 from app.models.two_phase_state import TwoPhaseGameState
-from app.models.world import WorldData
 
 
 class TestMovementValidator:
@@ -240,4 +239,3 @@ class TestMovementValidator:
 
         assert result.valid is False
         assert result.rejection_code == RejectionCode.TARGET_NOT_FOUND
-

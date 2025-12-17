@@ -11,7 +11,7 @@ Tests cover:
 import pytest
 
 from app.engine.parser import RuleBasedParser
-from app.models.intent import ActionIntent, ActionType
+from app.models.intent import ActionType
 from app.models.two_phase_state import TwoPhaseGameState
 
 
@@ -196,4 +196,3 @@ class TestRuleBasedParser:
         intent = parser.parse("north", state, world)
         assert intent is not None
         assert intent.confidence == 1.0
-

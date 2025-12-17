@@ -78,4 +78,3 @@ secret_room:
         - "solve puzzle"
       narrative_hint: "The gem glows and the puzzle is complete"
       sets_flag: puzzle_solved
-

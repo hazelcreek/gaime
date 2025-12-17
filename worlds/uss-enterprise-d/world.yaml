@@ -10,10 +10,10 @@ premise: |
   You are a Starfleet cadet on your very first assignment aboard the USS Enterprise (NCC-1701-D).
   Officially, you are here to observe and learn. Unofficially, you are about to learn how fast
   theory becomes practice when the ship faces an unexpected problem.
-  
+
   The Enterprise is not just metal and forcefields — it is a community that tries to be worthy of
   its own ideals. Out here, those ideals will be tested.
-  
+
   You grew up on a quiet Federation outpost where “the frontier” meant long-range sensor pings and
   supply ships that arrived late more often than on time. You joined Starfleet for the same reason
   most people do when they’re honest: to find out what kind of person you become when the universe
@@ -26,7 +26,7 @@ starting_situation: |
   “unusual subspace resonance” and recommends diagnostic teams to report. Around you, the crew
   moves with practiced purpose — no panic, no theatrics — but the ship is clearly not running as
   she should.
-  
+
   Your combadge chirps. You are being called to assist with a problem that the senior staff is
   already dividing between departments. You have a narrow window to help stabilize the situation
   before it spreads from an inconvenience into a danger.
@@ -38,24 +38,24 @@ victory:
     Ten Forward is brighter than it was earlier — or maybe the ship’s hum is simply steady again,
     making everything feel easier to breathe. The windows curve the stars into a slow, elegant drift,
     and for the first time since your combadge chirped, you can feel the crew’s tension drain away.
-    
+
     Someone has commandeered a corner table. There are mugs of synthehol coffee and plates of
     replicated food arranged with informal ceremony. Laughter arrives in small bursts — not relief
     at surviving, but satisfaction at doing the job the right way.
-    
+
     Commander Riker raises a glass in your direction, not loudly, but where you can’t pretend you
     didn’t see it. “To the newest member of the team,” he says, and the table answers in chorus.
-    
+
     Guinan’s smile is subtle and knowing. “Looks like you chose the hard option,” she says quietly,
     “and lived with it.”
-    
+
     Captain Picard appears only briefly — long enough to offer a nod that feels like a medal without
     the weight of metal. “Well done, Cadet,” he says. “You handled uncertainty with discipline — and
     compassion.”
-    
+
     For a moment, the Enterprise feels exactly like what you imagined when you first applied to the
     Academy: not a weapon, not a machine, but a place where people decide to be better together.
-    
+
     CONGRATULATIONS — You completed your first mission aboard the Enterprise-D.
 
 player:
@@ -87,5 +87,3 @@ commands:
   take: "Pick up an item"
   use: "Use an item from your inventory"
   go: "Move in a direction (north, south, east, west, up, down, back)"
-
-

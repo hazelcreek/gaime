@@ -14,12 +14,12 @@ victory:
   location: old_sewers
   item: resistance_map
   narrative: |
-    You clutch the hand-drawn map as you emerge from the forgotten tunnels into a dimly lit chamber. The graffiti on the walls reads "THEY BLEED LIKE US" - the mark of the Resistance. 
-    
+    You clutch the hand-drawn map as you emerge from the forgotten tunnels into a dimly lit chamber. The graffiti on the walls reads "THEY BLEED LIKE US" - the mark of the Resistance.
+
     A figure steps from the shadows, weapon lowered. "You made it. We've been watching Omega-9 for months, waiting for someone to break free." They extend a hand. "Welcome to Sector 4. Welcome to the fight."
-    
+
     Behind you, the tunnels echo with distant sirens from the prison above. But ahead lies something you haven't felt in thirty years: hope.
-    
+
     CONGRATULATIONS - You have escaped Detention Camp Omega-9!
 
 player:

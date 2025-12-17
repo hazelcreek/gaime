@@ -10,7 +10,7 @@ premise: |
   The elderly butler who answered the door seemed troubled, his eyes
   darting to shadows that weren't there. Something is deeply wrong
   in this house, and now the storm has trapped you here for the night.
-  
+
   Perhaps, in helping the restless spirits of this place, you might
   find a way to survive until dawn.
 
@@ -22,13 +22,13 @@ victory:
   flag: has_all_artifacts
   narrative: |
     With trembling hands, you place the final artifact upon its pedestal. The Thornwood Amulet, the Ritual Dagger, and the Grimoire - reunited at last in the ritual chamber.
-    
+
     The symbols on the floor blaze with ethereal light. You feel them before you see them - the spirits of the Thornwood children, finally released from their eternal torment. A young girl's voice whispers in your ear: "Thank you. We can rest now."
-    
+
     The oppressive weight that hung over the manor lifts. Through the high window, you see the first pale light of dawn breaking through the storm clouds.
-    
+
     Jenkins finds you in the morning, tears streaming down his weathered face. "You've done it," he says. "After all these years... they're free. WE'RE free."
-    
+
     CONGRATULATIONS - You have broken the Thornwood Curse!
 
 player:
@@ -54,4 +54,3 @@ commands:
   take: "Pick up an item"
   use: "Use an item from your inventory"
   go: "Move in a direction (north, south, east, west, up, down)"
-

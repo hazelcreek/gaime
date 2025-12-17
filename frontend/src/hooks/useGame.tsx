@@ -22,7 +22,7 @@ interface GameContextValue {
   narrative: NarrativeEntry[];
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   startNewGame: (worldId?: string, worldName?: string, engine?: string) => Promise<void>;
   sendAction: (action: string) => Promise<void>;
@@ -110,11 +110,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   ) => {
     // Use provided worldId, or fall back to current world, or default to 'cursed-manor'
     const effectiveWorldId = selectedWorldId ?? worldId ?? 'cursed-manor';
-    
+
     setIsLoading(true);
     setError(null);
     setNarrative([]);
-    
+
     try {
       // Always request debug info (debug: true)
       const response = await gameAPI.newGame(effectiveWorldId, true, engine);
@@ -152,7 +152,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       setGameState(response.state);
       // Attach debug info to the narrative entry
       addNarrative('narrative', response.narrative, response.llm_debug);
-      
+
       // Show hints if any
       if (response.hints && response.hints.length > 0) {
         response.hints.forEach(hint => {

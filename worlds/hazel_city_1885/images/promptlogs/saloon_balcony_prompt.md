@@ -12,23 +12,23 @@ Interactive Elements to Include:
 Visible pathways: stairs descending, a trapdoor, or a passage leading below; a passage or doorway visible to the left side of the scene; a passage or doorway visible to the right side of the scene
 Objects in the scene: Winchester Rifle leans against the railing, forgotten by a drunken outlaw
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Spaghetti Western, Gritty, tense, sun-bleached
 
 Mood: The atmosphere is tense, operatic, sun-baked, morally ambiguous, stoic, fatalistic. harsh midday sun casting deep black shadows, silhouettes against blazing sky, golden dust motes floating in shafts of light, dark interiors with slits of blinding daylight. The color palette features sun-bleached earth tones, dusty ochre and sienna, burnt orange sunsets, weathered browns, occasional blood red, deep shadows approaching black, washed-out blues for distant sky.
 
-Artistic style (most important): Cinematic style faithfully recreating 1960s Italian Spaghetti Western films, 
-specifically evoking Sergio Leone's visual language. Techniscope widescreen 
-framing with extreme depth of field. Harsh desert lighting creates stark 
-contrast between blinding sun and pitch-black shadows. Every surface is 
-weathered, dusty, and sun-damaged - cracked wood, rusted metal, sweat-stained 
-leather. Visible dust particles drift through sunbeams. Heat shimmer distorts 
-distant horizons. Faces are lined, stubbled, sun-darkened. The artistic style 
-is paramount and must evoke the gritty authenticity of The Good, The Bad and 
+Artistic style (most important): Cinematic style faithfully recreating 1960s Italian Spaghetti Western films,
+specifically evoking Sergio Leone's visual language. Techniscope widescreen
+framing with extreme depth of field. Harsh desert lighting creates stark
+contrast between blinding sun and pitch-black shadows. Every surface is
+weathered, dusty, and sun-damaged - cracked wood, rusted metal, sweat-stained
+leather. Visible dust particles drift through sunbeams. Heat shimmer distorts
+distant horizons. Faces are lined, stubbled, sun-darkened. The artistic style
+is paramount and must evoke the gritty authenticity of The Good, The Bad and
 The Ugly, For a Few Dollars More, and Once Upon a Time in the West.
 This style must be maintained consistently throughout the entire image.
 

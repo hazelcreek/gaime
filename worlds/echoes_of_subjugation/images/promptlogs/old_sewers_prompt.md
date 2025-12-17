@@ -12,9 +12,9 @@ Interactive Elements to Include:
 Visible pathways: stairs leading upward, or a visible upper level or balcony; an opening or exit behind, perhaps suggested by light or shadows
 Objects in the scene: Hand-drawn Map is wedged into a crack in the crumbling brick wall, folded tight and stained with damp
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Sci-Fi Dystopia, Oppressive, Desperate, Synthetic

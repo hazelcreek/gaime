@@ -36,21 +36,21 @@ from app.models.world import (
 def get_placeholder_value(field_name: str, field_type: type, is_optional: bool = False) -> Any:
     """
     Generate a theme-neutral placeholder value for a field.
-    
+
     Returns a generic example that works for any world theme.
     """
     # Handle None for optional fields
     origin = get_origin(field_type)
     if origin is type(None) or field_type is type(None):
         return None
-    
+
     # Handle Union types (e.g., str | None)
     if origin is type(None.__class__):
         args = get_args(field_type)
         if len(args) == 2 and type(None) in args:
             # It's Optional[X], get the non-None type
             field_type = args[0] if args[1] is type(None) else args[1]
-    
+
     # Common field name patterns
     placeholder_map = {
         # World fields
@@ -61,29 +61,29 @@ def get_placeholder_value(field_name: str, field_type: type, is_optional: bool =
         "hero_name": "the protagonist",
         "starting_situation": "Describe WHY the player can act NOW.",
         "style": "visual-style-preset",
-        
+
         # Location fields
         "atmosphere": "Atmospheric description of this location.",
-        
+
         # NPC fields
         "role": "Their role in the story",
         "appearance": "Physical description of the character.",
         "behavior": "How they act and react.",
-        
+
         # Item fields
         "examine": "Description when the player examines this item.",
         "found_description": "How the item appears naturally in the scene.",
         "take_description": "Message shown when the item is taken.",
-        
+
         # Generic fields
         "description": "A description of this element.",
         "narrative": "The narrative text to display.",
         "narrative_hint": "What happens when this interaction is triggered.",
     }
-    
+
     if field_name in placeholder_map:
         return placeholder_map[field_name]
-    
+
     # Handle specific types
     if field_type is str:
         return f"{field_name}_value"
@@ -93,7 +93,7 @@ def get_placeholder_value(field_name: str, field_type: type, is_optional: bool =
         return False
     elif field_type is float:
         return 0.0
-    
+
     # Handle list types
     if origin is list:
         args = get_args(field_type)
@@ -104,7 +104,7 @@ def get_placeholder_value(field_name: str, field_type: type, is_optional: bool =
             elif issubclass(inner_type, BaseModel):
                 # For nested models, return empty list with comment
                 return []
-    
+
     # Handle dict types
     if origin is dict:
         args = get_args(field_type)
@@ -114,11 +114,11 @@ def get_placeholder_value(field_name: str, field_type: type, is_optional: bool =
                 return {f"{field_name}_key": f"{field_name}_value"}
             elif key_type is str and issubclass(value_type, BaseModel):
                 return {}
-    
+
     # Handle nested Pydantic models
     if isinstance(field_type, type) and issubclass(field_type, BaseModel):
         return generate_model_example(field_type)
-    
+
     return None
 
 
@@ -127,14 +127,14 @@ def generate_model_example(model: type[BaseModel], indent: int = 0) -> dict[str,
     Generate a theme-neutral example dict from a Pydantic model.
     """
     result = {}
-    
+
     for field_name, field_info in model.model_fields.items():
         field_type = field_info.annotation
-        
+
         # Check if optional
         origin = get_origin(field_type)
         is_optional = False
-        
+
         # Handle Union types for Optional
         if origin is type(None.__class__) or str(origin) == "typing.Union":
             args = get_args(field_type)
@@ -144,15 +144,15 @@ def generate_model_example(model: type[BaseModel], indent: int = 0) -> dict[str,
                 non_none_types = [a for a in args if a is not type(None)]
                 if non_none_types:
                     field_type = non_none_types[0]
-        
+
         # Skip optional fields with None defaults for cleaner output
         if is_optional and field_info.default is None:
             continue
-        
+
         value = get_placeholder_value(field_name, field_type, is_optional)
         if value is not None:
             result[field_name] = value
-    
+
     return result
 
 
@@ -270,7 +270,7 @@ commands:
 def generate_full_schema_reference() -> str:
     """
     Generate a complete schema reference document.
-    
+
     This can be used to validate prompts or as documentation.
     """
     sections = [
@@ -284,7 +284,7 @@ def generate_full_schema_reference() -> str:
         generate_world_yaml_example(),
         "```",
         "",
-        "## locations.yaml", 
+        "## locations.yaml",
         "```yaml",
         generate_location_yaml_example(),
         "```",
@@ -305,24 +305,24 @@ def generate_full_schema_reference() -> str:
 def validate_prompt_schema(prompt_content: str) -> list[str]:
     """
     Validate that a prompt uses correct schema.
-    
+
     Returns a list of issues found.
     """
     issues = []
-    
+
     # Check for incorrect NPC fields
     if "dialogue_hints:" in prompt_content:
         issues.append("Found 'dialogue_hints:' - should be 'dialogue_rules:'")
-    
+
     if 'personality: \\"' in prompt_content or "personality: '" in prompt_content:
         # Check if it's a string pattern (not object)
         if "personality:" in prompt_content and "traits:" not in prompt_content:
             issues.append("Found 'personality' as string - should be object with traits/speech_style/quirks")
-    
+
     # Check for incorrect location fields
     if "constraints:" in prompt_content and "locked_exit:" in prompt_content:
         issues.append("Found 'constraints' with 'locked_exit:' pattern - should use 'requires:' field")
-    
+
     return issues
 
 

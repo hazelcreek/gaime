@@ -14,9 +14,9 @@ Characters visible in the scene:
 
 - Barnaby the Badger, Timekeeper of the Forest, sits on a toadstool, grumbling at a pocket watch
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Quaint Fairy Tale, Whimsical, Gentle, Slightly Melancholic

@@ -108,8 +108,8 @@ mood:
 
 # L4: Style (MOST IMPORTANT)
 style: |
-  Film noir cinematography. High contrast black and white aesthetic with 
-  selective color accents. Dramatic shadows, chiaroscuro lighting, rain-slicked 
+  Film noir cinematography. High contrast black and white aesthetic with
+  selective color accents. Dramatic shadows, chiaroscuro lighting, rain-slicked
   surfaces reflecting neon signs. The artistic style is paramount.
 
 # L5: Technical

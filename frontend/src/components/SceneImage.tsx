@@ -23,7 +23,7 @@ export default function SceneImage({ onStateClick }: SceneImageProps) {
   // Get flag count to detect when NPCs might have appeared/disappeared
   const flagCount = gameState?.flags ? Object.keys(gameState.flags).length : 0;
   const turnCount = gameState?.turn_count ?? 0;
-  
+
   useEffect(() => {
     if (!currentLocation || !sessionId) {
       setImageUrl(null);
@@ -33,9 +33,9 @@ export default function SceneImage({ onStateClick }: SceneImageProps) {
     // Use the state-aware game endpoint to get the correct image variant
     const cacheBuster = `t=${turnCount}&f=${flagCount}`;
     const url = `/api/game/image/${sessionId}/${currentLocation}?${cacheBuster}`;
-    
+
     setIsLoading(true);
-    
+
     const img = new Image();
     img.onload = () => {
       setImageUrl(url);
@@ -58,15 +58,15 @@ export default function SceneImage({ onStateClick }: SceneImageProps) {
   return (
     <>
       {/* Scene Image Container - Full height on desktop with Ambilight effect */}
-      <div 
-        className="relative overflow-hidden rounded-lg border border-terminal-border 
+      <div
+        className="relative overflow-hidden rounded-lg border border-terminal-border
                    h-64 lg:h-full lg:min-h-[400px] cursor-pointer group
                    bg-terminal-bg"
         onClick={() => setIsFullscreen(true)}
       >
         {/* Ambilight layer - blurred, scaled image creates ambient glow */}
         {imageUrl && (
-          <div 
+          <div
             className={`absolute inset-0 transition-opacity duration-1000
                        ${showPlaceholder ? 'opacity-0' : 'opacity-100'}`}
           >
@@ -74,24 +74,24 @@ export default function SceneImage({ onStateClick }: SceneImageProps) {
               src={imageUrl}
               alt=""
               aria-hidden="true"
-              className="absolute w-[140%] h-[140%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+              className="absolute w-[140%] h-[140%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
                          object-cover blur-[60px] saturate-[1.3] opacity-60"
             />
             {/* Darken edges for depth */}
-            <div 
+            <div
               className="absolute inset-0"
               style={{
-                background: `radial-gradient(ellipse 80% 70% at 50% 50%, 
-                  transparent 30%, 
+                background: `radial-gradient(ellipse 80% 70% at 50% 50%,
+                  transparent 30%,
                   rgba(10, 10, 15, 0.7) 70%,
                   rgba(10, 10, 15, 0.95) 100%)`
               }}
             />
           </div>
         )}
-        
+
         {/* Placeholder state when no image */}
-        <div 
+        <div
           className={`absolute inset-0 z-10 flex items-center justify-center
                       transition-opacity duration-500 ${showPlaceholder ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         >
@@ -125,13 +125,13 @@ export default function SceneImage({ onStateClick }: SceneImageProps) {
         )}
 
         {/* Cinematic vignette - subtle for in-game view */}
-        <div 
+        <div
           className="absolute inset-0 pointer-events-none z-20"
           style={{
             boxShadow: 'inset 0 0 50px 15px rgba(0, 0, 0, 0.35)',
           }}
         />
-        
+
         {/* Gradient overlay for text legibility - bottom area */}
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none z-20" />
 
@@ -143,7 +143,7 @@ export default function SceneImage({ onStateClick }: SceneImageProps) {
         </div>
 
         {/* Expand hint - shows on hover */}
-        <div className="absolute top-3 right-3 text-terminal-dim/0 group-hover:text-terminal-dim/70 
+        <div className="absolute top-3 right-3 text-terminal-dim/0 group-hover:text-terminal-dim/70
                         text-xs transition-all duration-300 pointer-events-none z-30">
           Click to expand
         </div>
@@ -157,9 +157,9 @@ export default function SceneImage({ onStateClick }: SceneImageProps) {
                 e.stopPropagation();
                 onStateClick();
               }}
-              className="bg-terminal-bg/90 backdrop-blur-sm border border-terminal-border 
+              className="bg-terminal-bg/90 backdrop-blur-sm border border-terminal-border
                         rounded-lg w-9 h-9 flex items-center justify-center
-                        hover:bg-terminal-surface/50 hover:border-terminal-warning/50 
+                        hover:bg-terminal-surface/50 hover:border-terminal-warning/50
                         text-terminal-dim hover:text-terminal-warning transition-colors"
               title="View game state"
             >
@@ -169,13 +169,13 @@ export default function SceneImage({ onStateClick }: SceneImageProps) {
 
           {/* Inventory Badge - expands upward */}
           {inventory.length > 0 && (
-            <div 
+            <div
               onClick={(e) => {
                 e.stopPropagation();
                 setInventoryExpanded(!inventoryExpanded);
               }}
             >
-              <div className="bg-terminal-bg/90 backdrop-blur-sm border border-terminal-border 
+              <div className="bg-terminal-bg/90 backdrop-blur-sm border border-terminal-border
                             rounded-lg overflow-hidden min-w-[140px] transition-all duration-200">
                 {/* Expanded items list - appears above the header */}
                 {inventoryExpanded && (
@@ -188,9 +188,9 @@ export default function SceneImage({ onStateClick }: SceneImageProps) {
                     ))}
                   </ul>
                 )}
-                
+
                 {/* Always visible header/button - 34px so with 2px container border = 36px total */}
-                <button 
+                <button
                   className="w-full h-[34px] px-3 flex items-center justify-between gap-3
                             hover:bg-terminal-surface/50 transition-colors"
                   onClick={(e) => {
@@ -209,7 +209,7 @@ export default function SceneImage({ onStateClick }: SceneImageProps) {
 
       {/* Fullscreen overlay for zoom viewing - with Ambilight effect */}
       {isFullscreen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 bg-terminal-bg flex items-center justify-center cursor-pointer overflow-hidden"
           onClick={() => setIsFullscreen(false)}
         >
@@ -220,22 +220,22 @@ export default function SceneImage({ onStateClick }: SceneImageProps) {
                 src={imageUrl}
                 alt=""
                 aria-hidden="true"
-                className="absolute w-[150%] h-[150%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+                className="absolute w-[150%] h-[150%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
                            object-cover blur-[80px] saturate-[1.4] opacity-50"
               />
               {/* Darken edges for depth and focus on center */}
-              <div 
+              <div
                 className="absolute inset-0"
                 style={{
-                  background: `radial-gradient(ellipse 70% 60% at 50% 50%, 
-                    transparent 20%, 
+                  background: `radial-gradient(ellipse 70% 60% at 50% 50%,
+                    transparent 20%,
                     rgba(10, 10, 15, 0.6) 60%,
                     rgba(10, 10, 15, 0.9) 100%)`
                 }}
               />
             </div>
           )}
-          
+
           <div className="relative max-w-7xl max-h-[95vh] w-full h-full flex items-center justify-center p-4 z-10">
             {imageUrl ? (
               <img
@@ -253,20 +253,20 @@ export default function SceneImage({ onStateClick }: SceneImageProps) {
                 </p>
               </div>
             )}
-            
+
             {/* Subtle vignette for extra depth */}
-            <div 
+            <div
               className="absolute inset-0 pointer-events-none"
               style={{
                 boxShadow: 'inset 0 0 150px 50px rgba(0, 0, 0, 0.4)',
               }}
             />
-            
+
             {/* Close hint - top right */}
             <div className="absolute top-6 right-6 text-terminal-dim/60 text-sm tracking-wide">
               Press anywhere to close
             </div>
-            
+
             {/* Location info - centered bottom */}
             <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/60 to-transparent">
               <h2 className="font-display text-3xl text-terminal-accent text-center tracking-wide drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">

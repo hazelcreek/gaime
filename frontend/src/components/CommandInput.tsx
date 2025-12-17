@@ -62,7 +62,7 @@ export default function CommandInput() {
     <div className="bg-terminal-surface border border-terminal-border rounded-lg p-3 flex items-center gap-2">
       {/* Command prompt */}
       <span className="text-terminal-accent font-bold">›</span>
-      
+
       {/* Input field */}
       <input
         ref={inputRef}
@@ -76,12 +76,12 @@ export default function CommandInput() {
         autoComplete="off"
         spellCheck="false"
       />
-      
+
       {/* Send button */}
       <button
         onClick={handleSubmit}
         disabled={isLoading || !input.trim()}
-        className="px-3 py-1 text-sm text-terminal-dim hover:text-terminal-accent 
+        className="px-3 py-1 text-sm text-terminal-dim hover:text-terminal-accent
                    disabled:opacity-50 disabled:hover:text-terminal-dim transition-colors"
       >
         Send

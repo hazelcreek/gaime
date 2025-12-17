@@ -41,7 +41,7 @@ class AudioManager {
   async init(): Promise<void> {
     // If already initialized, return immediately
     if (this.initialized) return;
-    
+
     // If currently initializing, return the existing promise
     if (this.initPromise) return this.initPromise;
 
@@ -68,12 +68,12 @@ class AudioManager {
    */
   private createMenuMusic(): void {
     if (this.menuTracks.length === 0) return;
-    
+
     // Unload previous track if exists
     if (this.menuMusic) {
       this.menuMusic.unload();
     }
-    
+
     const randomTrack = this.menuTracks[Math.floor(Math.random() * this.menuTracks.length)];
     this.menuMusic = new Howl({
       src: [randomTrack],
@@ -95,11 +95,11 @@ class AudioManager {
    */
   playMenuMusic(): void {
     if (this.menuTracks.length === 0) return;
-    
+
     // If we're in the middle of a fade-out, cancel it and restore music
     if (this.isStopping && this.menuMusic) {
       this.isStopping = false;
-      
+
       if (!this.isMuted) {
         // Fade back up to normal volume
         this.fadeVolume(0.5, 200);
@@ -109,10 +109,10 @@ class AudioManager {
       }
       return;
     }
-    
+
     // Reset stopping flag if we're starting to play
     this.isStopping = false;
-    
+
     // If currently muted, defer playback until user unmutes to avoid clicks
     if (this.isMuted) {
       return;
@@ -120,10 +120,10 @@ class AudioManager {
 
     // If already playing, don't interrupt
     if (this.menuMusic?.playing()) return;
-    
+
     // Create a new track (random selection)
     this.createMenuMusic();
-    
+
     if (this.menuMusic) {
       // Start from 0 and fade up to target for smooth start
       this.menuMusic.volume(0);
@@ -137,30 +137,30 @@ class AudioManager {
    */
   stopMenuMusic(): void {
     if (!this.menuMusic) return;
-    
+
     // Prevent multiple stop calls from interrupting the fade
     if (this.isStopping) return;
     this.isStopping = true;
-    
+
     // Get current volume for fade
     const currentVolume = this.menuMusic.volume();
-    
+
     // If volume is already 0 or very low, just stop immediately
     if (currentVolume < 0.01) {
       this.menuMusic.stop();
       this.isStopping = false;
       return;
     }
-    
+
     // Fade out over 5 seconds
     this.menuMusic.fade(currentVolume, 0, 5000);
-    
+
     // Use Howler's onfade event to stop cleanly after fade completes
     this.menuMusic.once('fade', () => {
       // Only stop if we're still in stopping mode
       // (playMenuMusic may have been called during the fade, cancelling the stop)
       if (!this.isStopping) return;
-      
+
       if (this.menuMusic) {
         this.menuMusic.stop();
         // Restore volume for next play (if not muted)
@@ -178,7 +178,7 @@ class AudioManager {
    */
   toggleMute(): boolean {
     this.isMuted = !this.isMuted;
-    
+
     // Apply to menu music
     if (!this.isMuted) {
       // Unmuting: ensure music is playing, even if previously deferred

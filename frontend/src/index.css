@@ -6,20 +6,20 @@
   body {
     @apply bg-terminal-bg text-terminal-text font-mono antialiased;
   }
-  
+
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
   }
-  
+
   ::-webkit-scrollbar-track {
     @apply bg-terminal-bg;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     @apply bg-terminal-border rounded-full;
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-terminal-dim;
   }
@@ -29,11 +29,11 @@
   .terminal-text {
     @apply text-terminal-text leading-relaxed;
   }
-  
+
   .terminal-highlight {
     @apply text-terminal-accent;
   }
-  
+
   .terminal-dim {
     @apply text-terminal-dim;
   }
@@ -169,7 +169,7 @@
     height: 150px;
     bottom: 15%;
     left: 45%;
-    background: 
+    background:
       radial-gradient(ellipse 80% 70% at 35% 55%, rgba(180, 195, 205, 0.42), transparent 45%),
       radial-gradient(ellipse 60% 90% at 65% 40%, rgba(170, 185, 198, 0.38), transparent 50%),
       radial-gradient(ellipse 90% 60% at 50% 70%, rgba(160, 175, 190, 0.32), transparent 48%),
@@ -183,7 +183,7 @@
     height: 170px;
     bottom: 18%;
     left: 58%;
-    background: 
+    background:
       radial-gradient(ellipse 75% 85% at 60% 45%, rgba(185, 200, 210, 0.4), transparent 48%),
       radial-gradient(ellipse 85% 65% at 30% 60%, rgba(175, 190, 205, 0.36), transparent 52%),
       radial-gradient(ellipse 65% 95% at 55% 35%, rgba(165, 180, 195, 0.33), transparent 50%),
@@ -198,7 +198,7 @@
     height: 140px;
     bottom: 20%;
     left: 52%;
-    background: 
+    background:
       radial-gradient(ellipse 70% 80% at 40% 50%, rgba(190, 205, 215, 0.38), transparent 46%),
       radial-gradient(ellipse 85% 60% at 60% 65%, rgba(180, 195, 208, 0.35), transparent 49%),
       radial-gradient(ellipse 60% 90% at 50% 35%, rgba(170, 185, 200, 0.32), transparent 51%),
@@ -213,7 +213,7 @@
     height: 160px;
     bottom: 16%;
     left: 40%;
-    background: 
+    background:
       radial-gradient(ellipse 65% 88% at 55% 42%, rgba(182, 198, 208, 0.41), transparent 47%),
       radial-gradient(ellipse 88% 68% at 35% 58%, rgba(172, 188, 202, 0.37), transparent 51%),
       radial-gradient(ellipse 72% 82% at 62% 30%, rgba(162, 178, 193, 0.34), transparent 49%),
@@ -304,4 +304,3 @@
     }
   }
 }
-

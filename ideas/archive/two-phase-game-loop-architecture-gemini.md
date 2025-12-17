@@ -6,7 +6,7 @@
 
 This document details the architectural shift from a monolithic LLM game loop to a structured, event-driven pipeline. It fleshes out the concepts introduced in `game-mechanics-design.md` and aligns with the immersive goals of `docs/VISION.md`.
 
-> **Status**: Idea / Proposal  
+> **Status**: Idea / Proposal
 > **Related**: [Game Mechanics Design](../game-mechanics-design.md), [Vision](../../docs/VISION.md)
 
 ---
@@ -229,4 +229,3 @@ In `App.tsx` or a new startup screen, allow the user to toggle:
 *   [ ] Use Experimental Engine (Event-Driven)
 
 This allows us to ship, test, and compare the "feel" of the two engines side-by-side.
-

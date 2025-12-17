@@ -18,9 +18,9 @@ Characters visible in the scene:
 
 - Chief Miles O’Brien (Operations specialist; practical support and systems troubleshooting), moves between panels with practical speed, hands steady and unglamorous in their competence: A sturdy Starfleet officer with hands that look like they’ve fixed more problems than they’ve talked about. He’s efficient and unpretentious, the sort of person who can make a miracle look like routine maintenance.
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Star Trek: The Next Generation — life aboard a Federation starship on the frontier, philosophical, optimistic, ethical, adventurous, and grounded in teamwork under pressure

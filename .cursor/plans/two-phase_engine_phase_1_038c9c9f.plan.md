@@ -133,13 +133,13 @@ New state manager class for the two-phase engine:
 ```python
 class TwoPhaseStateManager:
     """Manages game state for two-phase engine sessions."""
-    
+
     def __init__(self, world_id: str):
         self.session_id = str(uuid.uuid4())
         self.world_id = world_id
         self.world_data: WorldData = WorldLoader().load_world(world_id)  # Shared loading
         self._state = TwoPhaseGameState(...)
-    
+
     def get_state(self) -> TwoPhaseGameState: ...
     def get_current_location(self) -> Location: ...
     def move_to(self, location_id: str) -> bool: ...
@@ -183,18 +183,18 @@ Main orchestrator:
 ```python
 class TwoPhaseProcessor:
     """Two-phase game loop processor."""
-    
+
     def __init__(self, state_manager: TwoPhaseStateManager, debug: bool = False):
         self.state_manager = state_manager
         self.parser = RuleBasedParser()
         self.movement_validator = MovementValidator()
         self.visibility_resolver = DefaultVisibilityResolver()
         self.narrator = NarratorAI(state_manager.world_data, debug=debug)
-    
+
     async def get_initial_narrative(self) -> tuple[str, LLMDebugInfo | None]:
         """Generate opening using NarratorAI with LOCATION_CHANGED event."""
         ...
-    
+
     async def process(self, action: str) -> TwoPhaseActionResponse:
         """Process action through two-phase pipeline."""
         ...

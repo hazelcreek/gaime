@@ -12,12 +12,12 @@ interface StateOverlayProps {
 
 export default function StateOverlay({ gameState, onClose }: StateOverlayProps) {
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
       onClick={onClose}
     >
-      <div 
-        className="bg-terminal-surface border border-terminal-border rounded-lg max-w-2xl w-full mx-4 
+      <div
+        className="bg-terminal-surface border border-terminal-border rounded-lg max-w-2xl w-full mx-4
                    max-h-[85vh] overflow-hidden flex flex-col animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
@@ -50,9 +50,9 @@ export default function StateOverlay({ gameState, onClose }: StateOverlayProps) 
             {gameState.inventory.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {gameState.inventory.map((item) => (
-                  <span 
+                  <span
                     key={item}
-                    className="px-2 py-1 bg-terminal-accent/10 border border-terminal-accent/30 
+                    className="px-2 py-1 bg-terminal-accent/10 border border-terminal-accent/30
                              rounded text-terminal-accent text-xs"
                   >
                     {formatItemId(item)}
@@ -89,7 +89,7 @@ export default function StateOverlay({ gameState, onClose }: StateOverlayProps) 
             {gameState.discovered_locations.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {gameState.discovered_locations.map((loc) => (
-                  <span 
+                  <span
                     key={loc}
                     className={`px-2 py-1 rounded text-xs border ${
                       loc === gameState.current_location
@@ -116,7 +116,7 @@ export default function StateOverlay({ gameState, onClose }: StateOverlayProps) 
                       {formatNpcId(npc)}
                     </span>
                     <div className="flex-1 h-2 bg-terminal-bg rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className={`h-full transition-all ${getTrustColor(trust as number)}`}
                         style={{ width: `${Math.max(0, Math.min(100, ((trust as number) + 100) / 2))}%` }}
                       />
@@ -248,4 +248,3 @@ function getTrustColor(trust: number): string {
   if (trust >= -50) return 'bg-terminal-warning';
   return 'bg-terminal-error';
 }
-

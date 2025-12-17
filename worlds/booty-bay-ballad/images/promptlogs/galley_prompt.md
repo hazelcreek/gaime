@@ -12,9 +12,9 @@ Interactive Elements to Include:
 Visible pathways: stairs leading upward, or a visible upper level or balcony
 Objects in the scene: Ladle of Infinite Scooping Stuck into a pot of solidified oatmeal.
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Humorous Pirate Adventure, Silly, satirical, salty

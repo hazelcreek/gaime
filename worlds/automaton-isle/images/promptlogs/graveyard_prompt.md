@@ -14,9 +14,9 @@ Characters visible in the scene:
 
 - Deep Blue (Gatekeeper), A multi-armed robot sits motionless before a stone chess table.: An elegant, albeit tarnished, android with a velvet tuxedo jacket.
 
-Important: These elements should be integrated naturally into the scene, not highlighted 
-or labelled. They should reward careful observation - exits should look like real 
-architectural features, items should be placed where they would naturally be found, 
+Important: These elements should be integrated naturally into the scene, not highlighted
+or labelled. They should reward careful observation - exits should look like real
+architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
 World Context: Steampunk Survival, Melancholy yet Wondrous

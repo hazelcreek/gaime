@@ -17,7 +17,7 @@ An AI-powered text adventure game engine that combines classic text-based gamepl
    ```bash
    # Copy environment template
    cp env.example .env
-   
+
    # Edit .env and add your Gemini API key
    # GEMINI_API_KEY=your_key_here
    ```
@@ -26,14 +26,14 @@ An AI-powered text adventure game engine that combines classic text-based gamepl
 
    ```bash
    cd backend
-   
+
    # Create and activate virtual environment
    python3 -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
-   
+
    # Install dependencies
    pip install -r requirements.txt
-   
+
    # Run the server
    uvicorn app.main:app --reload
    ```
@@ -123,6 +123,37 @@ gaime-builder
 | `Esc` | Go back |
 
 See [World Authoring](docs/WORLD_AUTHORING.md) for detailed TUI usage instructions.
+
+## Development
+
+### Pre-commit Hooks
+
+This project uses [pre-commit](https://pre-commit.com/) to catch formatting and linting issues before they reach CI.
+
+**Setup (one-time):**
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+**What it checks:**
+
+| Hook | Description |
+|------|-------------|
+| `trailing-whitespace` | Removes trailing whitespace |
+| `end-of-file-fixer` | Ensures files end with a newline |
+| `check-yaml` | Validates YAML syntax |
+| `check-added-large-files` | Prevents committing files > 1MB |
+| `check-merge-conflict` | Catches leftover merge conflict markers |
+| `black` | Python code formatting |
+| `ruff` | Python linting with auto-fix |
+
+The hooks run automatically on `git commit`. To run manually:
+
+```bash
+pre-commit run --all-files
+```
 
 ## License
 

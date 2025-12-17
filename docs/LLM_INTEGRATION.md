@@ -44,14 +44,14 @@ from litellm import completion
 def get_completion(messages: list, model: str = None) -> str:
     """Get completion from configured LLM provider."""
     model = model or get_model_string()
-    
+
     response = completion(
         model=model,
         messages=messages,
         temperature=0.7,
         response_format={"type": "json_object"}
     )
-    
+
     return response.choices[0].message.content
 ```
 
@@ -214,7 +214,7 @@ The LLM response is parsed as JSON:
 def parse_response(response: str) -> ActionResult:
     """Parse LLM JSON response into structured result."""
     data = json.loads(response)
-    
+
     return ActionResult(
         narrative=data["narrative"],
         state_changes=StateChanges(
@@ -247,7 +247,7 @@ The `memory_updates` field helps the LLM track context:
 
 **new_discoveries**: Mark first descriptions using typed format
 - `item:rusty_key` - first time examining/finding an item
-- `npc:ghost_child` - first time meeting an NPC  
+- `npc:ghost_child` - first time meeting an NPC
 - `feature:slash_marks` - first time noticing a location feature
 
 The system prompt includes previous memory so the LLM can:
@@ -583,4 +583,3 @@ See `docs/STYLE_AUTHORING.md` for complete documentation on the Modular Prompt A
 7. **Locked Exits**: Exits to locations with `requires: item:` show as locked
 8. **Regenerate As Needed**: Use the single-image endpoint to refine specific locations
 9. **Rate Limiting**: Generation includes delays to avoid API rate limits
-

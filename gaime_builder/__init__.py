@@ -6,4 +6,3 @@ This is a standalone tool that directly modifies world YAML files.
 """
 
 __version__ = "0.1.0"
-
