@@ -7,6 +7,9 @@ Features:
 - Save images to a dedicated directory (not in world folders)
 - Images named as "location_preset.png"
 - Includes promptlogs subfolder for debugging
+- Hash-based outdated image detection
+- "Regenerate missing/outdated" button
+- Selection support for "force regenerate selected" styles
 """
 import asyncio
 from pathlib import Path
@@ -21,6 +24,8 @@ from textual.widgets import (
 )
 from textual.worker import Worker, WorkerState, get_current_worker
 
+from gaime_builder.core.tasks import StyleTestHashTracker
+
 
 # Default output directory for style tests (relative to workspace root)
 DEFAULT_OUTPUT_DIR = Path(__file__).parent.parent.parent / "style_test_output"
@@ -28,6 +33,11 @@ DEFAULT_OUTPUT_DIR = Path(__file__).parent.parent.parent / "style_test_output"
 
 class StyleTesterScreen(Screen):
     """Screen for testing all style presets against a single location."""
+
+    # Store column keys for later reference
+    check_column_key: str = ""
+    status_column_key: str = ""
+    image_column_key: str = ""
 
     CSS = """
     #style-tester-container {
@@ -97,10 +107,17 @@ class StyleTesterScreen(Screen):
         color: $text-muted;
         margin-top: 1;
     }
+
+    .status-outdated {
+        color: $warning;
+    }
     """
 
     BINDINGS = [
         ("escape", "go_back", "Back"),
+        ("a", "select_all", "Select All"),
+        ("n", "select_none", "Select None"),
+        ("r", "regenerate_outdated", "Regen Outdated"),
     ]
 
     def __init__(self):
@@ -109,8 +126,9 @@ class StyleTesterScreen(Screen):
         self._current_location_id: Optional[str] = None
         self._current_location_name: Optional[str] = None
         self._active_worker: Optional[Worker] = None
-        self._preset_statuses: dict[str, str] = {}  # preset_name -> status
-        self._status_column_key = None  # Store column key for updates
+        self._preset_statuses: dict[str, str] = {}  # preset_name -> generation status
+        self._selected_presets: set[str] = set()  # Selected presets for force regeneration
+        self._hash_tracker: Optional[StyleTestHashTracker] = None
 
     def compose(self) -> ComposeResult:
         """Create style tester UI."""
@@ -122,7 +140,8 @@ class StyleTesterScreen(Screen):
 
                 yield Static(
                     "[dim]Generate images for a location using all available style presets. "
-                    "Images are saved to a dedicated output directory for comparison.[/]",
+                    "⚠️ = outdated, ✗ = missing. "
+                    "Press [bold]r[/] to regenerate missing/outdated.[/]",
                     classes="info-text"
                 )
 
@@ -143,8 +162,12 @@ class StyleTesterScreen(Screen):
                 yield DataTable(id="presets-table")
 
                 with Horizontal(classes="button-row"):
-                    yield Button("🚀 Generate All Styles", id="generate", variant="primary", disabled=True)
+                    yield Button("🔄 Generate All", id="generate", variant="primary", disabled=True)
+                    yield Button("⚠️ Regen Missing/Outdated", id="regenerate-outdated", variant="warning", disabled=True)
+                    yield Button("✨ Regen Selected", id="regenerate-selected", variant="success", disabled=True)
                     yield Button("Cancel", id="cancel", variant="error", disabled=True)
+
+                with Horizontal(classes="button-row"):
                     yield Button("Back", id="back", variant="default")
 
                 with Vertical(id="progress-section"):
@@ -157,6 +180,8 @@ class StyleTesterScreen(Screen):
 
     async def on_mount(self) -> None:
         """Initialize screen on mount."""
+        # Initialize hash tracker
+        self._hash_tracker = StyleTestHashTracker(self.app.worlds_dir, DEFAULT_OUTPUT_DIR)
         await self.load_worlds()
         await self.load_presets_table()
 
@@ -179,15 +204,19 @@ class StyleTesterScreen(Screen):
         preset_names = sorted(presets.list_presets())
 
         table = self.query_one("#presets-table", DataTable)
-        # Capture column keys for later cell updates
-        _preset_col, self._status_column_key = table.add_columns("Preset", "Status")
-        table.cursor_type = "none"
+        # Capture column keys for later cell updates - with selection checkbox and image status
+        col_keys = table.add_columns("✓", "Preset", "Status", "Image")
+        self.check_column_key = col_keys[0]
+        self.status_column_key = col_keys[2]
+        self.image_column_key = col_keys[3]
+        table.cursor_type = "row"
 
         for preset_name in preset_names:
             preset_data = presets.get_preset(preset_name)
             display_name = preset_data.get("name", preset_name) if preset_data else preset_name
-            self._preset_statuses[preset_name] = "pending"
-            table.add_row(display_name, "[dim]Pending[/]", key=preset_name)
+            self._preset_statuses[preset_name] = "idle"
+            # Image status will be updated when location is selected
+            table.add_row(" ", display_name, "", "[dim]-[/]", key=preset_name)
 
     async def on_select_changed(self, event: Select.Changed) -> None:
         """Handle selector changes."""
@@ -201,6 +230,11 @@ class StyleTesterScreen(Screen):
 
             # Disable generate until location is selected
             self.query_one("#generate", Button).disabled = True
+            self.query_one("#regenerate-outdated", Button).disabled = True
+            self.query_one("#regenerate-selected", Button).disabled = True
+
+            # Reset preset image statuses
+            await self._reset_preset_image_statuses()
 
         elif event.select.id == "location-select" and event.value:
             self._current_location_id = str(event.value)
@@ -214,13 +248,59 @@ class StyleTesterScreen(Screen):
                     self._current_location_name = loc["name"]
                     break
 
-            # Enable generate button
+            # Enable generate buttons
             self.query_one("#generate", Button).disabled = False
+            self.query_one("#regenerate-outdated", Button).disabled = False
 
             # Update output info
             output_dir = self._get_output_dir()
             output_info = self.query_one("#output-info", Static)
             output_info.update(f"[dim]Output: {output_dir}[/]")
+
+            # Clear selection and update preset statuses
+            self._selected_presets.clear()
+            await self._update_all_preset_statuses()
+
+    async def _reset_preset_image_statuses(self) -> None:
+        """Reset all preset image statuses to default."""
+        table = self.query_one("#presets-table", DataTable)
+        for row_key in table.rows:
+            table.update_cell(row_key, self.image_column_key, "[dim]-[/]")
+            table.update_cell(row_key, self.check_column_key, " ")
+        self._selected_presets.clear()
+
+    async def _update_all_preset_statuses(self) -> None:
+        """Update image status for all presets based on hash tracking."""
+        if not self._current_world_id or not self._current_location_id or not self._hash_tracker:
+            return
+
+        from gaime_builder.core.style_loader import get_presets
+
+        presets = get_presets()
+        preset_names = sorted(presets.list_presets())
+
+        table = self.query_one("#presets-table", DataTable)
+
+        for preset_name in preset_names:
+            status = self._hash_tracker.get_preset_status(
+                self._current_world_id,
+                self._current_location_id,
+                preset_name
+            )
+
+            # Build status display
+            if not status["has_image"]:
+                image_display = "[red]✗ Missing[/]"
+            elif status["is_outdated"]:
+                image_display = "[yellow]⚠️ Outdated[/]"
+            else:
+                image_display = "[green]✓[/]"
+
+            # Find the row and update
+            for row_key in table.rows:
+                if str(row_key.value) == preset_name:
+                    table.update_cell(row_key, self.image_column_key, image_display)
+                    break
 
     async def load_locations(self, world_id: str) -> None:
         """Load locations for the selected world."""
@@ -243,12 +323,62 @@ class StyleTesterScreen(Screen):
         """Go back to previous screen."""
         self.app.pop_screen()
 
+    def action_select_all(self) -> None:
+        """Select all presets."""
+        from gaime_builder.core.style_loader import get_presets
+
+        presets = get_presets()
+        preset_names = presets.list_presets()
+        self._selected_presets = set(preset_names)
+        self._refresh_table_selection()
+        self._update_regenerate_selected_button()
+
+    def action_select_none(self) -> None:
+        """Deselect all presets."""
+        self._selected_presets.clear()
+        self._refresh_table_selection()
+        self._update_regenerate_selected_button()
+
+    def action_regenerate_outdated(self) -> None:
+        """Trigger regeneration of missing/outdated images."""
+        self.query_one("#regenerate-outdated", Button).press()
+
+    def _refresh_table_selection(self) -> None:
+        """Refresh checkmarks in table."""
+        table = self.query_one("#presets-table", DataTable)
+        for row_key in table.rows:
+            preset_name = str(row_key.value)
+            check = "✓" if preset_name in self._selected_presets else " "
+            table.update_cell(row_key, self.check_column_key, check)
+
+    def _update_regenerate_selected_button(self) -> None:
+        """Enable/disable regenerate selected button based on selection."""
+        has_selection = len(self._selected_presets) > 0
+        has_location = self._current_world_id and self._current_location_id
+        self.query_one("#regenerate-selected", Button).disabled = not (has_selection and has_location)
+
+    def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
+        """Toggle preset selection on row click."""
+        preset_name = str(event.row_key.value)
+
+        if preset_name in self._selected_presets:
+            self._selected_presets.remove(preset_name)
+        else:
+            self._selected_presets.add(preset_name)
+
+        self._refresh_table_selection()
+        self._update_regenerate_selected_button()
+
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button clicks."""
         if event.button.id == "back":
             self.app.pop_screen()
         elif event.button.id == "generate":
-            await self.start_generation()
+            await self.start_generation(force_all=True)
+        elif event.button.id == "regenerate-outdated":
+            await self.start_generation(only_outdated=True)
+        elif event.button.id == "regenerate-selected":
+            await self.start_generation(selected_only=True)
         elif event.button.id == "cancel":
             self._cancel_generation()
 
@@ -261,77 +391,128 @@ class StyleTesterScreen(Screen):
     def _set_generation_controls(self, running: bool) -> None:
         """Enable/disable controls based on running state."""
         self.query_one("#generate", Button).disabled = running
+        self.query_one("#regenerate-outdated", Button).disabled = running
+        self.query_one("#regenerate-selected", Button).disabled = running
         self.query_one("#cancel", Button).disabled = not running
         self.query_one("#world-select", Select).disabled = running
         self.query_one("#location-select", Select).disabled = running
 
     def _update_preset_status(self, preset_name: str, status: str) -> None:
-        """Update the status display for a preset in the table."""
+        """Update the generation status display for a preset in the table."""
         self._preset_statuses[preset_name] = status
 
         table = self.query_one("#presets-table", DataTable)
 
         status_display = {
-            "pending": "[dim]Pending[/]",
+            "idle": "",
+            "pending": "[dim]⏳ Pending[/]",
             "generating": "[yellow]🔄 Generating...[/]",
             "done": "[green]✓ Done[/]",
             "error": "[red]✗ Error[/]",
+            "skipped": "[dim]Skipped[/]",
         }.get(status, status)
 
         # Find the row and update status column using stored column key
         for row_key in table.rows:
             if str(row_key.value) == preset_name:
-                table.update_cell(row_key, self._status_column_key, status_display)
+                table.update_cell(row_key, self.status_column_key, status_display)
                 break
 
-    def _reset_preset_statuses(self) -> None:
-        """Reset all preset statuses to pending."""
+    def _reset_preset_statuses(self, preset_names: list[str] | None = None) -> None:
+        """Reset generation statuses to pending for specified presets (or all)."""
+        from gaime_builder.core.style_loader import get_presets
+
         table = self.query_one("#presets-table", DataTable)
+
+        if preset_names is None:
+            presets = get_presets()
+            preset_names = list(presets.list_presets())
+
         for row_key in table.rows:
             preset_name = str(row_key.value)
-            self._preset_statuses[preset_name] = "pending"
-            table.update_cell(row_key, self._status_column_key, "[dim]Pending[/]")
+            if preset_name in preset_names:
+                self._preset_statuses[preset_name] = "pending"
+                table.update_cell(row_key, self.status_column_key, "[dim]⏳ Pending[/]")
+            else:
+                # Mark others as skipped if we're doing selective generation
+                if preset_names:
+                    self._preset_statuses[preset_name] = "idle"
+                    table.update_cell(row_key, self.status_column_key, "")
 
-    async def start_generation(self) -> None:
+    async def start_generation(
+        self,
+        force_all: bool = False,
+        only_outdated: bool = False,
+        selected_only: bool = False
+    ) -> None:
         """Start the batch generation process."""
         if not self._current_world_id or not self._current_location_id:
             self.notify("Please select a world and location first", severity="warning")
             return
 
-        # Reset statuses
-        self._reset_preset_statuses()
+        if selected_only and not self._selected_presets:
+            self.notify("Please select at least one preset", severity="warning")
+            return
+
+        from gaime_builder.core.style_loader import get_presets
+
+        presets = get_presets()
+        all_preset_names = sorted(presets.list_presets())
+
+        # Determine which presets to process
+        if force_all:
+            target_presets = all_preset_names
+            batch_name = "Generate All Styles"
+        elif only_outdated:
+            # Get presets that need generation
+            needs_gen = self._hash_tracker.get_presets_needing_generation(
+                self._current_world_id,
+                self._current_location_id,
+                all_preset_names
+            )
+            if not needs_gen:
+                self.notify("All style images are up to date!", severity="information")
+                return
+            target_presets = [item["preset_name"] for item in needs_gen]
+            batch_name = f"Regenerate {len(target_presets)} Missing/Outdated"
+        else:  # selected_only
+            target_presets = sorted(self._selected_presets)
+            batch_name = f"Regenerate {len(target_presets)} Selected"
+
+        # Reset statuses for target presets
+        self._reset_preset_statuses(target_presets)
 
         # Update controls
         self._set_generation_controls(running=True)
 
         # Start worker
         self._active_worker = self.run_worker(
-            self._generate_all_styles_worker(),
+            self._generate_styles_worker(target_presets, batch_name),
             name="style_test_generation",
             exclusive=True,
         )
 
-    async def _generate_all_styles_worker(self) -> dict[str, bool]:
+    async def _generate_styles_worker(
+        self,
+        target_presets: list[str],
+        batch_name: str
+    ) -> dict[str, bool]:
         """
-        Background worker to generate images for all style presets.
+        Background worker to generate images for specified style presets.
+
+        Args:
+            target_presets: List of preset names to generate
+            batch_name: Display name for progress
 
         Returns dict mapping preset name to success/failure.
         """
-        from gaime_builder.core.style_loader import get_presets, resolve_style
-        from gaime_builder.core.image_generator import (
-            ImageGenerator, LocationContext, ExitInfo, ItemInfo,
-            _save_prompt_markdown, get_image_prompt
-        )
-        from gaime_builder.core.world_generator import WorldGenerator
+        from gaime_builder.core.style_loader import resolve_style
+        from gaime_builder.core.image_generator import ImageGenerator
         import yaml
 
         worker = get_current_worker()
         results = {}
-
-        # Get preset list
-        presets = get_presets()
-        preset_names = sorted(presets.list_presets())
-        total = len(preset_names)
+        total = len(target_presets)
 
         # Load world data
         world_path = self.app.worlds_dir / self._current_world_id
@@ -382,26 +563,24 @@ class StyleTesterScreen(Screen):
         output_dir.mkdir(parents=True, exist_ok=True)
 
         # Update progress display
-        self._update_progress_display(0.0, f"Testing {total} style presets", "Starting...")
+        self._update_progress_display(0.0, batch_name, "Starting...")
 
-        for i, preset_name in enumerate(preset_names):
+        for i, preset_name in enumerate(target_presets):
             if worker.is_cancelled:
-                self._update_preset_status(preset_name, "pending")
+                self._update_preset_status(preset_name, "idle")
                 break
 
             # Update status
             self._update_preset_status(preset_name, "generating")
 
             progress = i / total
-            self._update_progress_display(progress, f"Testing {total} style presets", f"Generating: {preset_name}")
+            self._update_progress_display(progress, batch_name, f"Generating: {preset_name}")
 
             try:
                 # Resolve style for this preset
                 style_block = resolve_style(preset_name)
 
                 # Generate image with this style
-                output_filename = f"{self._current_location_id}_{preset_name}.png"
-
                 await image_gen.generate_location_image(
                     location_id=f"{self._current_location_id}_{preset_name}",
                     location_name=loc_name,
@@ -413,7 +592,18 @@ class StyleTesterScreen(Screen):
                     style_block=style_block
                 )
 
-                # The file is already correctly named since we used the combined ID
+                # Compute and save hash metadata
+                prompt_hash = self._hash_tracker.compute_preset_hash(
+                    self._current_world_id,
+                    self._current_location_id,
+                    preset_name
+                )
+                self._hash_tracker.update_metadata(
+                    self._current_world_id,
+                    self._current_location_id,
+                    preset_name,
+                    prompt_hash
+                )
 
                 results[preset_name] = True
                 self._update_preset_status(preset_name, "done")
@@ -430,7 +620,7 @@ class StyleTesterScreen(Screen):
         success_count = sum(1 for r in results.values() if r)
         final_msg = f"Completed: {success_count}/{len(results)} successful"
 
-        self._update_progress_display(1.0, "Style Test Complete", final_msg)
+        self._update_progress_display(1.0, batch_name, final_msg)
 
         return results
 
@@ -454,6 +644,13 @@ class StyleTesterScreen(Screen):
                 self._active_worker = None
 
                 output_dir = self._get_output_dir()
+
+                # Refresh preset statuses to show updated image states
+                if self._current_world_id and self._current_location_id:
+                    self.run_worker(
+                        self._update_all_preset_statuses(),
+                        name="refresh_statuses"
+                    )
 
                 if event.state == WorkerState.SUCCESS:
                     self.notify(

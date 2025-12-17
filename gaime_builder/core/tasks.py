@@ -593,3 +593,381 @@ class ImageHashTracker:
             "base_reason": base_reason if has_base else "",
             "variants": variants_status,
         }
+
+
+# =============================================================================
+# Style Test Hash Tracking for Outdated Detection
+# =============================================================================
+
+@dataclass
+class StyleTestMetadata:
+    """Metadata for a style test image, including hash for outdated detection."""
+    location_id: str
+    preset_name: str
+    prompt_hash: str
+    generated_at: str  # ISO format
+    generator_version: str = "1.0"
+
+    def to_dict(self) -> dict:
+        return {
+            "location_id": self.location_id,
+            "preset_name": self.preset_name,
+            "prompt_hash": self.prompt_hash,
+            "generated_at": self.generated_at,
+            "generator_version": self.generator_version,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "StyleTestMetadata":
+        return cls(
+            location_id=data.get("location_id", ""),
+            preset_name=data.get("preset_name", ""),
+            prompt_hash=data.get("prompt_hash", ""),
+            generated_at=data.get("generated_at", ""),
+            generator_version=data.get("generator_version", "1.0"),
+        )
+
+
+class StyleTestHashTracker:
+    """
+    Tracks style test image generation parameters via hashes to detect outdated images.
+
+    Similar to ImageHashTracker but works with the style test output directory structure:
+    - Images are stored in: {output_dir}/{world_id}/{location_id}/
+    - Each preset creates: {location_id}_{preset_name}.png
+    - Metadata stored in: {output_dir}/{world_id}/{location_id}/_metadata.json
+    """
+
+    def __init__(self, worlds_dir: Path, output_dir: Path):
+        self.worlds_dir = worlds_dir
+        self.output_dir = output_dir
+
+    def _get_metadata_path(self, world_id: str, location_id: str) -> Path:
+        """Get path to the style test metadata file."""
+        return self.output_dir / world_id / location_id / "_metadata.json"
+
+    def compute_preset_hash(
+        self,
+        world_id: str,
+        location_id: str,
+        preset_name: str
+    ) -> str:
+        """
+        Compute a hash by generating the actual prompt in dry-run mode.
+
+        This uses the exact same code path as real image generation,
+        ensuring ANY change that affects the prompt is detected.
+        """
+        prompt = self._generate_prompt_dry_run(world_id, location_id, preset_name)
+        return hashlib.sha256(prompt.encode()).hexdigest()[:16]
+
+    def _generate_prompt_dry_run(
+        self,
+        world_id: str,
+        location_id: str,
+        preset_name: str
+    ) -> str:
+        """
+        Generate the image prompt without calling the API.
+
+        Includes the preset_name in the hash to differentiate style tests.
+        """
+        from gaime_builder.core.image_generator import (
+            get_image_prompt,
+            LocationContext,
+            ExitInfo,
+            ItemInfo,
+            NPCInfo,
+        )
+        from gaime_builder.core.style_loader import resolve_style
+
+        world_path = self.worlds_dir / world_id
+
+        # Load all world data
+        world_data = self._load_yaml(world_path / "world.yaml")
+        locations_data = self._load_yaml(world_path / "locations.yaml")
+        npcs_data = self._load_yaml(world_path / "npcs.yaml")
+        items_data = self._load_yaml(world_path / "items.yaml")
+
+        loc_data = locations_data.get(location_id, {})
+        if not loc_data:
+            return f"LOCATION_NOT_FOUND:{location_id}:{preset_name}"
+
+        # Extract world parameters
+        theme = world_data.get("theme", "fantasy")
+        tone = world_data.get("tone", "atmospheric")
+
+        # Use the specified preset instead of world's style
+        style_block = resolve_style(preset_name)
+
+        loc_name = loc_data.get("name", location_id)
+        atmosphere = loc_data.get("atmosphere", "")
+
+        # Build context (same logic as ImageGenerator._build_location_context)
+        context = self._build_location_context(
+            location_id, loc_data, locations_data, npcs_data, items_data
+        )
+
+        # Generate the prompt
+        return get_image_prompt(
+            location_name=loc_name,
+            atmosphere=atmosphere,
+            theme=theme,
+            tone=tone,
+            context=context,
+            style_block=style_block
+        )
+
+    def _build_location_context(
+        self,
+        location_id: str,
+        loc_data: dict,
+        locations_data: dict,
+        npcs_data: dict,
+        items_data: dict,
+    ):
+        """Build LocationContext for prompt generation."""
+        from gaime_builder.core.image_generator import (
+            LocationContext,
+            ExitInfo,
+            ItemInfo,
+            NPCInfo,
+        )
+
+        context = LocationContext()
+
+        # Build exits
+        exits_data = loc_data.get("exits", {})
+        for direction, destination_id in exits_data.items():
+            destination_data = locations_data.get(destination_id, {})
+            destination_name = destination_data.get("name", destination_id)
+            dest_requires = destination_data.get("requires", {})
+
+            context.exits.append(ExitInfo(
+                direction=direction,
+                destination_name=destination_name,
+                is_secret=bool(dest_requires.get("flag") if dest_requires else False),
+                requires_key=bool(dest_requires.get("item") if dest_requires else False)
+            ))
+
+        # Build items
+        location_items = loc_data.get("items", [])
+        item_placements = loc_data.get("item_placements", {})
+        for item_id in location_items:
+            item_data = items_data.get(item_id, {})
+            if item_data:
+                context.items.append(ItemInfo(
+                    name=item_data.get("name", item_id),
+                    description=item_data.get("found_description", ""),
+                    is_hidden=item_data.get("hidden", False),
+                    is_artifact=item_data.get("properties", {}).get("artifact", False),
+                    placement=item_placements.get(item_id, "")
+                ))
+
+        # Build NPCs - for style tests, include all unconditional NPCs
+        location_npcs = loc_data.get("npcs", [])
+        npc_placements = loc_data.get("npc_placements", {})
+
+        all_npc_ids = set(location_npcs)
+        for npc_id, npc_data in npcs_data.items():
+            if npc_data.get("location") == location_id:
+                all_npc_ids.add(npc_id)
+            if location_id in npc_data.get("locations", []):
+                all_npc_ids.add(npc_id)
+
+        for npc_id in all_npc_ids:
+            npc_data = npcs_data.get(npc_id, {})
+            if not npc_data:
+                continue
+
+            # Skip conditional NPCs
+            if self._is_npc_conditional(npc_data, location_id):
+                continue
+
+            context.npcs.append(NPCInfo(
+                name=npc_data.get("name", npc_id),
+                appearance=npc_data.get("appearance", ""),
+                role=npc_data.get("role", ""),
+                placement=npc_placements.get(npc_id, "")
+            ))
+
+        return context
+
+    def _is_npc_conditional(self, npc_data: dict, location_id: str) -> bool:
+        """Check if an NPC is conditional at a location."""
+        if npc_data.get("appears_when"):
+            return True
+
+        location_changes = npc_data.get("location_changes", [])
+        if location_changes:
+            starting_location = npc_data.get("location")
+
+            if starting_location == location_id:
+                for change in location_changes:
+                    move_to = change.get("move_to")
+                    if move_to and move_to != starting_location:
+                        return True
+
+            for change in location_changes:
+                move_to = change.get("move_to")
+                if move_to == location_id and starting_location != location_id:
+                    return True
+
+        return False
+
+    def _load_yaml(self, path: Path) -> dict:
+        """Load YAML file, returning empty dict if not found."""
+        if not path.exists():
+            return {}
+        try:
+            with open(path) as f:
+                return yaml.safe_load(f) or {}
+        except Exception:
+            return {}
+
+    def load_metadata(self, world_id: str, location_id: str) -> dict[str, StyleTestMetadata]:
+        """Load all style test metadata for a world/location."""
+        metadata_path = self._get_metadata_path(world_id, location_id)
+        if not metadata_path.exists():
+            return {}
+
+        try:
+            with open(metadata_path) as f:
+                data = json.load(f)
+            return {
+                k: StyleTestMetadata.from_dict(v)
+                for k, v in data.items()
+            }
+        except Exception as e:
+            logger.warning(f"Failed to load style test metadata: {e}")
+            return {}
+
+    def save_metadata(self, world_id: str, location_id: str, metadata: dict[str, StyleTestMetadata]) -> None:
+        """Save style test metadata for a world/location."""
+        metadata_path = self._get_metadata_path(world_id, location_id)
+        metadata_path.parent.mkdir(parents=True, exist_ok=True)
+
+        data = {k: v.to_dict() for k, v in metadata.items()}
+        with open(metadata_path, 'w') as f:
+            json.dump(data, f, indent=2)
+
+    def update_metadata(
+        self,
+        world_id: str,
+        location_id: str,
+        preset_name: str,
+        prompt_hash: str
+    ) -> None:
+        """Update metadata for a single style test image."""
+        metadata = self.load_metadata(world_id, location_id)
+
+        metadata[preset_name] = StyleTestMetadata(
+            location_id=location_id,
+            preset_name=preset_name,
+            prompt_hash=prompt_hash,
+            generated_at=datetime.now().isoformat(),
+            generator_version="dry-run-hash",
+        )
+
+        self.save_metadata(world_id, location_id, metadata)
+
+    def is_outdated(
+        self,
+        world_id: str,
+        location_id: str,
+        preset_name: str
+    ) -> tuple[bool, str]:
+        """
+        Check if a style test image is outdated by comparing prompt hashes.
+
+        Returns:
+            Tuple of (is_outdated, reason)
+        """
+        metadata = self.load_metadata(world_id, location_id)
+        stored = metadata.get(preset_name)
+
+        if not stored:
+            return True, "no metadata"
+
+        # Compute current hash
+        current_hash = self.compute_preset_hash(world_id, location_id, preset_name)
+
+        if stored.prompt_hash != current_hash:
+            return True, "inputs changed"
+
+        return False, ""
+
+    def get_preset_status(
+        self,
+        world_id: str,
+        location_id: str,
+        preset_name: str
+    ) -> dict:
+        """
+        Get status for a specific preset's image.
+
+        Returns:
+            Dict with: has_image, is_outdated, outdated_reason
+        """
+        image_dir = self.output_dir / world_id / location_id
+        image_path = image_dir / f"{location_id}_{preset_name}.png"
+
+        has_image = image_path.exists()
+
+        is_outdated = False
+        outdated_reason = ""
+        if has_image:
+            is_outdated, outdated_reason = self.is_outdated(world_id, location_id, preset_name)
+
+        return {
+            "has_image": has_image,
+            "is_outdated": is_outdated,
+            "outdated_reason": outdated_reason,
+        }
+
+    def get_all_preset_statuses(
+        self,
+        world_id: str,
+        location_id: str,
+        preset_names: list[str]
+    ) -> dict[str, dict]:
+        """
+        Get status for all presets for a location.
+
+        Returns:
+            Dict mapping preset_name to status dict
+        """
+        return {
+            preset_name: self.get_preset_status(world_id, location_id, preset_name)
+            for preset_name in preset_names
+        }
+
+    def get_presets_needing_generation(
+        self,
+        world_id: str,
+        location_id: str,
+        preset_names: list[str]
+    ) -> list[dict]:
+        """
+        Get list of presets that need image generation (missing or outdated).
+
+        Returns:
+            List of dicts with: preset_name, reason
+        """
+        needs_generation = []
+
+        for preset_name in preset_names:
+            status = self.get_preset_status(world_id, location_id, preset_name)
+
+            if not status["has_image"]:
+                needs_generation.append({
+                    "preset_name": preset_name,
+                    "reason": "missing",
+                })
+            elif status["is_outdated"]:
+                needs_generation.append({
+                    "preset_name": preset_name,
+                    "reason": f"outdated ({status['outdated_reason']})",
+                })
+
+        return needs_generation
