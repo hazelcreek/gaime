@@ -118,6 +118,7 @@ class StyleTesterScreen(Screen):
         ("a", "select_all", "Select All"),
         ("n", "select_none", "Select None"),
         ("r", "regenerate_outdated", "Regen Outdated"),
+        ("f5", "refresh_status", "Refresh"),
     ]
 
     def __init__(self):
@@ -168,6 +169,7 @@ class StyleTesterScreen(Screen):
                     yield Button("Cancel", id="cancel", variant="error", disabled=True)
 
                 with Horizontal(classes="button-row"):
+                    yield Button("🔃 Refresh Status", id="refresh-status", variant="default")
                     yield Button("Back", id="back", variant="default")
 
                 with Vertical(id="progress-section"):
@@ -257,9 +259,9 @@ class StyleTesterScreen(Screen):
             output_info = self.query_one("#output-info", Static)
             output_info.update(f"[dim]Output: {output_dir}[/]")
 
-            # Clear selection and update preset statuses
+            # Clear selection and refresh all statuses (reload presets + recalculate hashes)
             self._selected_presets.clear()
-            await self._update_all_preset_statuses()
+            await self._refresh_all_statuses()
 
     async def _reset_preset_image_statuses(self) -> None:
         """Reset all preset image statuses to default."""
@@ -302,6 +304,33 @@ class StyleTesterScreen(Screen):
                     table.update_cell(row_key, self.image_column_key, image_display)
                     break
 
+    async def _refresh_all_statuses(self, show_notification: bool = False) -> None:
+        """
+        Refresh all status information by reloading presets and recalculating hashes.
+
+        This forces a full refresh from disk, catching:
+        - Modified style preset YAML files
+        - Modified world/location YAML files
+        - New or deleted image files
+
+        Args:
+            show_notification: If True, show a notification when refresh completes.
+        """
+        from gaime_builder.core.style_loader import get_presets
+
+        # Reload style presets from disk (clears cache)
+        presets = get_presets()
+        presets.reload()
+
+        # Recreate hash tracker to ensure fresh state
+        self._hash_tracker = StyleTestHashTracker(self.app.worlds_dir, DEFAULT_OUTPUT_DIR)
+
+        # Update status display
+        await self._update_all_preset_statuses()
+
+        if show_notification:
+            self.notify("Status refreshed from disk", severity="information")
+
     async def load_locations(self, world_id: str) -> None:
         """Load locations for the selected world."""
         from gaime_builder.core.world_generator import WorldGenerator
@@ -343,6 +372,10 @@ class StyleTesterScreen(Screen):
         """Trigger regeneration of missing/outdated images."""
         self.query_one("#regenerate-outdated", Button).press()
 
+    def action_refresh_status(self) -> None:
+        """Trigger refresh of preset statuses."""
+        self.query_one("#refresh-status", Button).press()
+
     def _refresh_table_selection(self) -> None:
         """Refresh checkmarks in table."""
         table = self.query_one("#presets-table", DataTable)
@@ -381,6 +414,8 @@ class StyleTesterScreen(Screen):
             await self.start_generation(selected_only=True)
         elif event.button.id == "cancel":
             self._cancel_generation()
+        elif event.button.id == "refresh-status":
+            await self._refresh_all_statuses(show_notification=True)
 
     def _cancel_generation(self) -> None:
         """Cancel the current generation batch."""
