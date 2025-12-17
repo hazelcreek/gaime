@@ -7,8 +7,11 @@ Tests cover:
 - Field validation
 """
 
-from app.models.two_phase_state import TwoPhaseGameState, TwoPhaseActionResponse
-from app.models.game import LLMDebugInfo
+from app.models.two_phase_state import (
+    TwoPhaseGameState,
+    TwoPhaseActionResponse,
+    TwoPhaseDebugInfo,
+)
 
 
 class TestTwoPhaseGameState:
@@ -125,7 +128,7 @@ class TestTwoPhaseActionResponse:
         assert response.events == []
         assert response.game_complete is False
         assert response.ending_narrative is None
-        assert response.llm_debug is None
+        assert response.pipeline_debug is None
 
     def test_response_with_events(self) -> None:
         """Response can include events list."""
@@ -166,26 +169,25 @@ class TestTwoPhaseActionResponse:
         assert response.ending_narrative == "Congratulations, adventurer!"
 
     def test_response_with_debug_info(self) -> None:
-        """Response can include LLM debug info."""
+        """Response can include pipeline debug info."""
         state = TwoPhaseGameState(
             session_id="test-session",
             current_location="start_room",
         )
 
-        debug_info = LLMDebugInfo(
-            system_prompt="You are a narrator.",
-            user_prompt="Describe the room.",
-            raw_response='{"narrative": "A dark room."}',
-            parsed_response={"narrative": "A dark room."},
-            model="gemini-1.5-flash",
-            timestamp="2024-01-01T00:00:00",
+        debug_info = TwoPhaseDebugInfo(
+            raw_input="go north",
+            parser_type="rule_based",
+            parsed_intent={"action_type": "move", "direction": "north"},
+            validation_result={"valid": True},
+            events=[{"type": "location_changed", "subject": "library"}],
         )
 
         response = TwoPhaseActionResponse(
             narrative="A dark room.",
             state=state,
-            llm_debug=debug_info,
+            pipeline_debug=debug_info,
         )
 
-        assert response.llm_debug is not None
-        assert response.llm_debug.model == "gemini-1.5-flash"
+        assert response.pipeline_debug is not None
+        assert response.pipeline_debug.parser_type == "rule_based"

@@ -29,3 +29,15 @@ repos:
       - id: ruff
         args: ['--fix']
         files: ^backend/(app|tests)/
+
+  # Run pytest (unit + integration tests, skip slow e2e tests)
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: bash -c 'cd backend && source venv/bin/activate && python -m pytest tests/ --ignore=tests/e2e/ -q'
+        language: system
+        types: [python]
+        files: ^backend/
+        pass_filenames: false
+        always_run: true

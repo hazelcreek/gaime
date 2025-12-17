@@ -158,6 +158,18 @@ When making code changes, **always check if documentation needs updating**:
 
 ## Testing Requirements
 
+### Pre-commit Hooks (IMPORTANT)
+Pre-commit hooks ensure tests pass before every commit:
+```bash
+# Install pre-commit hooks (one-time setup)
+pip install pre-commit && pre-commit install
+
+# Run all hooks manually
+pre-commit run --all-files
+```
+
+The pytest hook runs automatically on every commit. If tests fail, the commit is blocked.
+
 ### Test Infrastructure
 - All new engine code MUST have corresponding tests in `backend/tests/`
 - Use the test world fixtures in `backend/tests/fixtures/test_world/` for deterministic testing
@@ -177,6 +189,7 @@ backend/tests/
 - Use `@pytest.mark.slow` for tests requiring real LLM calls
 - Use `@pytest.mark.integration` for multi-component tests
 - Run `pytest backend/tests/ -v --ignore=backend/tests/e2e/` for fast feedback
+- **ALWAYS run tests locally before pushing** (pre-commit does this automatically)
 
 ## Two-Phase Engine Architecture
 
