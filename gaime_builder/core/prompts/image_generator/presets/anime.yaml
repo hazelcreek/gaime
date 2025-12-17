@@ -1,44 +1,59 @@
 # anime.yaml - Anime/Manga style preset
-# Japanese animation aesthetic with clean lines and expressive colors
+# Bold Japanese shonen anime aesthetic inspired by One Piece
 
 name: "Anime"
-description: "Japanese animation aesthetic with clean lines, vibrant colors, and expressive atmosphere. Suitable for both serious and lighthearted adventures."
+description: "Bold Japanese shonen anime aesthetic with dynamic linework, exaggerated expressions, and vibrant saturated colors. Captures the energy of adventure manga like One Piece."
 
 # L3: Mood
 mood:
-  tone: "expressive, vibrant, emotionally dynamic"
-  lighting: "clean and clear with dramatic highlights, soft ambient light, occasional dramatic backlighting"
-  color_palette: "vibrant and saturated colors, clear skies, distinct color coding for mood"
+  tone: "adventurous, bold, emotionally expressive, epic"
+  lighting: "dramatic with strong contrast, warm sunlight, intense shadows during confrontations, golden hour glow"
+  color_palette: "bold saturated colors, vivid blues and oranges, warm skin tones, clear bright skies, punchy accent colors"
 
 # L4: Style (MOST IMPORTANT)
 style: |
-  Anime illustration style with clean linework and cel-shaded coloring.
-  Expressive lighting with soft gradients and sharp highlights. Background
-  art in the tradition of Studio Ghibli or Makoto Shinkai - detailed yet
-  stylized environments. The visual style must be consistently anime
-  throughout the entire image.
+  Japanese shonen anime illustration in the style of Eiichiro Oda and One Piece.
+  Bold dynamic linework with thick expressive outlines. Exaggerated proportions
+  and dramatic poses conveying action and emotion. Vibrant cel-shaded coloring
+  with strong color contrasts. Backgrounds range from detailed scenic vistas to
+  explosive action panels. Speed lines and impact effects for dynamic moments.
+  The visual energy and adventurous spirit of classic shonen manga and anime.
+
+  Characters have distinctive anime features: large expressive eyes with detailed
+  highlights and visible iris colors, stylized spiky or flowing hair with bold
+  colors and dynamic movement, clean facial features with small nose and expressive
+  mouth. Exaggerated emotional expressions - wide grins, determined stares, comical
+  shock faces. Athletic or heroic body proportions with dynamic action poses.
+  Distinctive silhouettes and memorable character designs with bold clothing.
+
+  This style must be maintained consistently throughout the entire image.
 
 # L5: Technical
 technical:
-  perspective: "first-person or slight third-person establishing shot"
-  shot: "wide shot for environments, medium for character focus"
-  camera: "eye level or slightly elevated for scenic views"
-  effects: "soft glow on light sources, atmospheric perspective, occasional sparkles or particles"
+  perspective: "dynamic angles, low angle for heroic shots, high angle for scale"
+  shot: "dramatic wide shots for epic moments, intense close-ups for emotion"
+  camera: "dynamic tilted angles, action-focused framing, cinematic composition"
+  effects: "speed lines, impact bursts, dramatic wind effects, lens flares on highlights, aura effects, sparkle highlights in eyes"
 
 # L6: Anti-styles (prevents style drift)
 anti_styles:
   - "photorealistic"
-  - "gritty or dark"
-  - "western comic book"
+  - "muted or desaturated colors"
+  - "western comic book style"
   - "oil painting or classical art"
   - "pixel art"
   - "3D CGI rendering"
-  - "sketch or rough"
+  - "sketch or rough unfinished"
+  - "chibi or super-deformed"
+  - "realistic human proportions"
+  - "small beady eyes"
 
 # L6: Quality constraints
 quality_constraints:
   - "watermarks or signatures"
   - "blurry or low-quality artifacts"
   - "inconsistent line weights"
-  - "muddy or desaturated colors"
-  - "overly complex realistic details"
+  - "flat boring compositions"
+  - "static lifeless poses"
+  - "dull or washed-out colors"
+  - "western cartoon facial features"
