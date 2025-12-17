@@ -250,6 +250,7 @@ Critical constraints - the image must NOT include:
 | `asterix` | Franco-Belgian bande dessinée comics |
 | `adult-animation` | Rick and Morty, BoJack, Archer style |
 | `lego` | LEGO brick scenes with minifigures |
+| `monochromatic-manga` | Traditional black & white manga, printed page aesthetic |
 
 ## How Layers Combine
 

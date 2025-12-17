@@ -1,0 +1,47 @@
+# monochromatic-manga.yaml - Monochrome Manga style preset
+# Black-and-white inked manga look with screentones and strong linework
+
+name: "Monochromatic Manga"
+description: "Black-and-white manga illustration: crisp ink linework, high contrast lighting, and screentone shading. Ideal for noir, drama, horror, or punchy action panels."
+
+# L3: Mood
+mood:
+  tone: "graphic, dramatic, cinematic, high-contrast"
+  lighting: "strong directional lighting, deep blacks and sharp highlights; readable shapes in monochrome"
+  color_palette: "strictly black, white, and gray screentones (no color hues)"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Monochromatic Japanese manga illustration in black and white. Crisp inked
+  line art with confident contours and deliberate line weight variation.
+  Use screentone/halftone shading, cross-hatching, and solid black fills for
+  contrast. The image must read like a printed manga panel: high contrast,
+  clear silhouettes, and expressive faces. Absolutely no color rendering—
+  only black, white, and gray screentones. The visual style is paramount and
+  must be maintained consistently throughout the entire image.
+
+# L5: Technical
+technical:
+  perspective: "first-person or close third-person"
+  shot: "medium wide shot (panel-like framing) with occasional dramatic close-up emphasis"
+  camera: "eye level with occasional low angle for intensity"
+  effects: "screentone gradients, halftone dots, speed lines for motion, subtle ink splatter optional"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "full color illustration"
+  - "pastel or vibrant palette"
+  - "watercolor or painterly"
+  - "oil painting or classical art"
+  - "photorealistic"
+  - "3D CGI rendering"
+  - "western comic book full-color look"
+  - "soft airbrushed shading"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "any color tinting (must be monochrome)"
+  - "muddy gray wash without defined inks"
+  - "moire patterns or broken halftone textures"
