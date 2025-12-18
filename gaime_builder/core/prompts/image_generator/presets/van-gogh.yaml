@@ -1,0 +1,49 @@
+# van-gogh.yaml - Vincent van Gogh post-impressionist style preset
+# Bold impasto brushwork, swirling energy, and intense emotional color
+
+name: "Van Gogh"
+description: "Post-impressionist oil painting in the distinctive style of Vincent van Gogh. Bold impasto brushwork, swirling directional strokes, and emotionally charged color that transforms ordinary scenes into expressions of inner experience."
+
+# L3: Mood
+mood:
+  tone: "emotionally intense, vibrant, passionate, restless, alive"
+  lighting: "expressive rather than realistic, dramatic skies, radiating light sources, stars and suns that pulse with energy"
+  color_palette: "vivid and emotionally charged—chrome yellow, cobalt blue, emerald green, vermillion—colors placed in complementary contrast for maximum vibrancy"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Post-impressionist oil painting faithfully recreating Vincent van Gogh's
+  distinctive technique. Bold, visible brushstrokes with heavy impasto texture,
+  following directional patterns that create movement and rhythm. Swirling,
+  energetic strokes in skies and backgrounds. Thick application of paint that
+  catches light. Colors are intensified and emotionally expressive rather than
+  naturalistic. The visual style is paramount and must evoke Van Gogh's unique
+  vision—where wheat fields ripple like waves, stars spiral with cosmic energy,
+  and even simple interiors pulse with emotional intensity.
+
+# L5: Technical
+technical:
+  perspective: "first-person"
+  shot: "medium wide shot"
+  camera: "eye level or slightly elevated"
+  effects: "heavy impasto texture, directional brushwork patterns, visible paint ridges catching light, canvas grain"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic"
+  - "smooth digital rendering"
+  - "flat illustration"
+  - "watercolor or soft edges"
+  - "anime or cartoon"
+  - "muted or desaturated colors"
+  - "classical academic painting"
+  - "minimalist or graphic"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "smooth, flat coloring"
+  - "invisible brushwork"
+  - "photographic realism"
+  - "dull or muddy colors"

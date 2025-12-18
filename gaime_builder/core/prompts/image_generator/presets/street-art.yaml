@@ -1,0 +1,49 @@
+# street-art.yaml - Street Art / Urban Art style preset
+# Banksy-inspired stencil and wheat paste mural aesthetic
+
+name: "Street Art"
+description: "Contemporary street art aesthetic inspired by Banksy, Shepard Fairey, and urban mural culture. Stencil work, wheat paste posters, spray paint texture, and the raw energy of unsanctioned public art on weathered urban surfaces."
+
+# L3: Mood
+mood:
+  tone: "subversive, raw, urgent, provocative, underground"
+  lighting: "flat and graphic for stencil elements, natural urban daylight on wall surfaces"
+  color_palette: "limited palette—often black and white with one or two accent colors (red, yellow, cyan), or the faded tones of weathered posters and paint"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Street art aesthetic combining stencil graffiti, wheat paste posters, and
+  spray paint murals. Banksy-inspired stencil work with crisp graphic edges
+  and ironic juxtapositions. Visible on weathered urban surfaces—crumbling
+  brick, concrete, metal shutters, peeling paint. The texture of the street
+  is essential: drips, overspray, layers of older tags and posters showing
+  through. Work appears site-specific and ephemeral. The visual style is
+  paramount—this must feel like authentic street art discovered in an alley
+  or on an abandoned building, not sanitized gallery work.
+
+# L5: Technical
+technical:
+  perspective: "first-person, as if encountering the art on a wall"
+  shot: "medium shot showing both artwork and urban context"
+  camera: "eye level, straight-on or slight angle"
+  effects: "spray paint texture, stencil edges, drips and runs, weathered wall surface, peeling layers"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "clean gallery presentation"
+  - "digital illustration"
+  - "photorealistic"
+  - "traditional fine art"
+  - "pristine surfaces"
+  - "corporate or commercial polish"
+  - "anime or cartoon"
+  - "fantasy illustration"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "clean, unmarked walls"
+  - "gallery white cube setting"
+  - "digital perfection"
+  - "new or pristine surfaces"

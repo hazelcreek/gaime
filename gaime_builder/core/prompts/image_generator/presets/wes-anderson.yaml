@@ -1,0 +1,54 @@
+# wes-anderson.yaml - Wes Anderson Live-Action Cinematic style preset
+# Symmetrical compositions, pastel palettes - LIVE ACTION PHOTOGRAPHY, not animation
+
+name: "Wes Anderson Cinematic"
+description: "Wes Anderson's distinctive live-action cinematography. Obsessive symmetry, pastel palettes, and the visual precision of The Grand Budapest Hotel, Moonrise Kingdom, and The Royal Tenenbaums. Real actors, real sets, real locations."
+
+# L3: Mood
+mood:
+  tone: "whimsical, melancholic, precise, nostalgic, deadpan"
+  lighting: "soft cinematic lighting, warm tungsten practicals, diffused daylight, professional film set lighting"
+  color_palette: "carefully curated pastel palette—dusty pinks, mustard yellows, mint greens, powder blues—with vintage Kodak film stock color science"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Live-action cinematic photography in the style of Wes Anderson's films like
+  The Grand Budapest Hotel, Moonrise Kingdom, and The Royal Tenenbaums. This
+  is REAL photography of REAL locations and sets with REAL people—not animation,
+  not stop-motion, not miniatures, not claymation. Shot on 35mm Kodak film stock
+  with anamorphic lenses. Perfect bilateral symmetry with the camera centered
+  and perpendicular to walls. Full-scale production design with vintage props,
+  patterned wallpaper, and coordinated color schemes. Real wood, real fabric,
+  real paint—photographed with cinematic precision. Natural human scale with
+  realistic proportions. The visual style is paramount—this must look like a
+  frame from a live-action Wes Anderson film, photographed on a real film set.
+
+# L5: Technical
+technical:
+  perspective: "centered, perpendicular to main wall"
+  shot: "symmetrical wide or medium shot"
+  camera: "35mm anamorphic, locked tripod, perfectly level horizon"
+  effects: "Kodak film grain, warm color grading, shallow depth of field on close-ups"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "stop-motion animation"
+  - "claymation or clay figures"
+  - "miniature sets or models"
+  - "puppet or doll-like figures"
+  - "illustration or drawing"
+  - "3D CGI rendering"
+  - "animated or cartoon"
+  - "toy-like or sculptural"
+  - "plasticine or polymer clay"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "stop-motion or animation aesthetic"
+  - "miniature or model appearance"
+  - "clay or sculpted textures"
+  - "non-human proportions"
+  - "asymmetrical framing"
+  - "tilted camera angles"

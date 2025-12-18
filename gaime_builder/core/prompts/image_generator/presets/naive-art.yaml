@@ -1,0 +1,48 @@
+# naive-art.yaml - Naïve Art / Folk Art style preset
+# Henri Rousseau and Grandma Moses inspired primitive painting aesthetic
+
+name: "Naïve Art"
+description: "Naïve art painting style inspired by Henri Rousseau, Grandma Moses, and folk art traditions. Flattened perspective, bold outlined forms, decorative patterning, and a childlike sincerity that creates charming, dreamlike scenes."
+
+# L3: Mood
+mood:
+  tone: "whimsical, sincere, dreamlike, charming, quietly magical"
+  lighting: "even and soft, no dramatic shadows, gentle ambient light as if lit from within"
+  color_palette: "bright, cheerful colors applied in flat areas—grass greens, sky blues, warm reds and yellows—with a folk art sensibility"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Naïve art painting in the tradition of Henri Rousseau and Grandma Moses.
+  Deliberately flattened perspective where objects appear stacked rather than
+  receding naturally. Bold outlines define forms clearly. Decorative patterning
+  in foliage, textiles, and architectural details. Proportions follow emotional
+  rather than anatomical logic. Every leaf, every blade of grass rendered with
+  equal attention. The visual style is paramount—it must feel handmade, sincere,
+  and untrained yet deeply intentional, like a treasured folk painting.
+
+# L5: Technical
+technical:
+  perspective: "flattened, stacked planes with minimal depth recession"
+  shot: "wide or medium wide shot showing full scene"
+  camera: "frontal or slightly elevated bird's eye view"
+  effects: "visible brushwork, decorative patterning, outlined forms, flat color areas"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic"
+  - "correct academic perspective"
+  - "realistic proportions"
+  - "dramatic shadows or chiaroscuro"
+  - "impressionist loose brushwork"
+  - "anime or manga"
+  - "digital illustration"
+  - "dark or gritty"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "realistic depth and perspective"
+  - "anatomically correct proportions"
+  - "sophisticated lighting effects"
+  - "modern digital aesthetic"

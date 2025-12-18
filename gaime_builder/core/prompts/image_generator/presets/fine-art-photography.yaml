@@ -1,0 +1,50 @@
+# fine-art-photography.yaml - Ansel Adams Black & White Photography style preset
+# Classic fine art B&W with Zone System tonal mastery and pristine composition
+
+name: "Fine Art Photography (Ansel Adams)"
+description: "Classic black and white fine art photography in the tradition of Ansel Adams. Zone System tonal mastery, pristine sharpness throughout, and clean deliberate composition that reveals the sublime in landscape and architecture."
+
+# L3: Mood
+mood:
+  tone: "sublime, pristine, timeless, contemplative, majestic"
+  lighting: "dramatic natural light—storm clouds breaking, shafts of sunlight, the glow before sunrise or after sunset, light that sculpts form"
+  color_palette: "black and white with full Zone System tonal range—deep rich blacks, luminous whites, and every subtle gradation between"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Classic black and white fine art photography in the tradition of Ansel Adams
+  and the f/64 Group. Zone System tonal mastery with rich blacks, pure whites,
+  and extraordinary tonal separation in mid-grays. Pristine sharpness from
+  foreground to infinity using large format depth of field. Clean, deliberate
+  composition with strong geometric structure. The image captures light as a
+  transformative force—revealing texture in stone, drama in clouds, luminosity
+  in water. Silver gelatin print quality with subtle tonal gradations. The
+  photographic quality is paramount—this must feel like a museum-quality fine
+  art print from a master of the medium.
+
+# L5: Technical
+technical:
+  perspective: "first-person"
+  shot: "medium wide or wide shot with careful compositional balance"
+  camera: "large format equivalent, extreme depth of field, sharp throughout, low ISO"
+  effects: "fine grain, silver gelatin print tonality, subtle dodge and burn, pristine clarity"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "color photography"
+  - "shallow depth of field"
+  - "soft or dreamy"
+  - "grainy or gritty"
+  - "snapshot aesthetic"
+  - "high contrast without mid-tones"
+  - "painterly or illustrated"
+  - "cluttered or chaotic composition"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "color images"
+  - "muddy or blocked shadows"
+  - "blown-out highlights without detail"
+  - "soft focus or motion blur"

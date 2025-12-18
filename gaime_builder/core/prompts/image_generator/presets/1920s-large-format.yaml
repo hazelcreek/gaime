@@ -1,0 +1,49 @@
+# 1920s-large-format.yaml - 1920s Large Format Photography style preset
+# Early modernist photography aesthetic with rich tonality and formal composition
+
+name: "1920s Large Format Photography"
+description: "Early 20th century large format photography aesthetic inspired by Edward Weston, Alfred Stieglitz, and the f/64 Group. Extraordinary tonal range, sharp focus throughout, and the contemplative stillness of 8x10 view camera work."
+
+# L3: Mood
+mood:
+  tone: "contemplative, still, formal, dignified, timeless"
+  lighting: "natural light carefully observed, soft window light for interiors, golden hour or overcast for outdoors, gentle gradations without harsh contrast"
+  color_palette: "monochromatic—full tonal range from deep blacks through subtle mid-grays to luminous whites, with the warm tone of vintage silver gelatin prints"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Vintage large format photography from the 1920s era, evoking the work of
+  Edward Weston, Alfred Stieglitz, and Paul Strand. Shot on 8x10 view camera
+  with extraordinary depth of field—sharp from foreground to infinity. Rich
+  silver gelatin print tonality with smooth gradations across the full tonal
+  range. Formal, considered composition with subjects rendered with stillness
+  and weight. Warm sepia or platinum print toning. The photographic quality
+  is paramount—this must feel like a museum-quality vintage print from the
+  early modernist photography movement.
+
+# L5: Technical
+technical:
+  perspective: "first-person"
+  shot: "medium wide shot with careful formal composition"
+  camera: "large format view camera, sharp focus throughout, low ISO equivalent"
+  effects: "fine film grain, silver gelatin print texture, warm sepia or platinum toning, subtle vignette"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "color photography"
+  - "shallow depth of field"
+  - "motion blur or action"
+  - "snapshot aesthetic"
+  - "digital clarity"
+  - "high contrast noir"
+  - "modern or contemporary feel"
+  - "painterly or illustrated"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "modern objects or anachronisms"
+  - "color images"
+  - "digital sharpening artifacts"
+  - "harsh flash lighting"

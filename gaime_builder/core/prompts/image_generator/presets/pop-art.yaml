@@ -1,0 +1,48 @@
+# pop-art.yaml - Pop Art style preset
+# Bold graphic style inspired by Warhol, Lichtenstein, and the 1960s movement
+
+name: "Pop Art"
+description: "Bold Pop Art aesthetic inspired by Andy Warhol, Roy Lichtenstein, and the 1960s art movement. Flat graphic shapes, Ben-Day dots, bold outlines, and vibrant commercial colors that blur the line between high art and mass culture."
+
+# L3: Mood
+mood:
+  tone: "bold, ironic, energetic, commercial, iconic"
+  lighting: "flat and even, no naturalistic shadows, graphic rather than realistic"
+  color_palette: "vibrant, saturated primary and secondary colors—hot pink, electric yellow, cyan, bold red—often in unexpected combinations with black outlines"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Pop Art illustration in the tradition of Andy Warhol and Roy Lichtenstein.
+  Bold, flat areas of saturated color with strong black outlines. Ben-Day dots
+  for shading and texture, evoking commercial printing. Graphic, poster-like
+  composition with iconic, simplified forms. The aesthetic of comic books,
+  advertising, and mass media elevated to fine art. Colors are artificial and
+  electric rather than naturalistic. The visual style is paramount—this must
+  feel like a gallery-worthy Pop Art piece from the 1960s movement.
+
+# L5: Technical
+technical:
+  perspective: "first-person or flat graphic"
+  shot: "medium shot or close-up for iconic framing"
+  camera: "flat, graphic, poster-like composition"
+  effects: "Ben-Day dots, halftone patterns, bold black outlines, flat color fills, slight print misregistration"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic"
+  - "naturalistic lighting"
+  - "soft gradients"
+  - "muted or earth tones"
+  - "painterly brushwork"
+  - "3D rendering"
+  - "dark or gritty"
+  - "subtle or understated"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "realistic shading"
+  - "photographic texture"
+  - "muted colors"
+  - "complex gradients"

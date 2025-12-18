@@ -1,0 +1,50 @@
+# andreas-gursky.yaml - Andreas Gursky Photography style preset
+# Large-scale, pattern-rich, almost abstract documentary photography
+
+name: "Andreas Gursky Photography"
+description: "Large-scale contemporary photography in the style of Andreas Gursky. Elevated vantage points revealing patterns in human systems, overwhelming detail, and images that oscillate between documentary and abstract through sheer scale and repetition."
+
+# L3: Mood
+mood:
+  tone: "overwhelming, systematic, detached, sublime, contemplative"
+  lighting: "even, comprehensive, clinical clarity, no dramatic shadows obscuring detail"
+  color_palette: "precise and controlled—often muted industrial tones or the specific colors of the subject matter (supermarket products, stock exchange screens, architecture)"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Large-scale photography in the tradition of Andreas Gursky and the Düsseldorf
+  School. Elevated or distant vantage points that reveal patterns in human
+  activity and built environments. Extraordinary resolution capturing
+  overwhelming detail—every face in a crowd, every product on a shelf, every
+  window in a building. The image oscillates between documentary record and
+  abstract pattern. Scale is suggested through repetition and density. Digital
+  compositing creates impossible comprehensive views. The photographic quality
+  is paramount—this must feel like a museum-scale Gursky print where viewers
+  can examine infinite detail.
+
+# L5: Technical
+technical:
+  perspective: "elevated, distant, or comprehensive viewpoint"
+  shot: "wide or extreme wide, encompassing entire systems"
+  camera: "large format digital, extreme resolution, deep focus throughout"
+  effects: "clinical sharpness, no atmospheric haze, even lighting, seamless digital compositing"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "intimate or close-up"
+  - "shallow depth of field"
+  - "dramatic lighting"
+  - "single subject focus"
+  - "candid street photography"
+  - "painterly or soft"
+  - "low resolution"
+  - "emotional or dramatic"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "shallow depth of field"
+  - "dramatic shadows obscuring detail"
+  - "low resolution or lack of detail"
+  - "intimate personal framing"

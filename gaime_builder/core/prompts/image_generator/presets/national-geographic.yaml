@@ -1,0 +1,50 @@
+# national-geographic.yaml - National Geographic Documentary Photojournalism style preset
+# Dramatic documentary photography with storytelling power and technical excellence
+
+name: "National Geographic"
+description: "National Geographic documentary photojournalism aesthetic. Dramatic natural lighting, storytelling composition, and the technical excellence that captures decisive moments in wildlife, culture, and landscape with emotional impact."
+
+# L3: Mood
+mood:
+  tone: "dramatic, authentic, awe-inspiring, immersive, revelatory"
+  lighting: "dramatic natural light—golden hour warmth, storm light drama, rim lighting on subjects, shafts of light through jungle canopy, the blue hour"
+  color_palette: "rich, saturated natural colors—vibrant but authentic, the deep greens of jungle, warm earth tones of desert, the blue depths of ocean"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  National Geographic documentary photography with the storytelling power and
+  technical excellence of award-winning photojournalism. Dramatic natural
+  lighting captured at the decisive moment. Subjects are rendered with clarity
+  and emotional impact—wildlife caught in behavior, landscapes at their most
+  dramatic, human subjects in authentic cultural context. Sharp focus on subject
+  with environmental context. The image tells a story and evokes wonder. Shot
+  on professional equipment with exceptional dynamic range and color accuracy.
+  The photographic quality is paramount—this must feel like a National Geographic
+  cover or feature photograph.
+
+# L5: Technical
+technical:
+  perspective: "first-person or wildlife eye-level"
+  shot: "varies—intimate close-up to epic wide depending on subject"
+  camera: "professional telephoto or wide angle, sharp subject focus, dramatic depth of field"
+  effects: "natural film-like rendering, rich shadow detail, controlled highlights, subtle grain"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "studio or artificial lighting"
+  - "posed or staged"
+  - "painterly or illustrated"
+  - "urban or industrial"
+  - "cartoon or stylized"
+  - "flat or boring lighting"
+  - "snapshot amateur quality"
+  - "over-processed HDR"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "amateur composition"
+  - "harsh flash photography"
+  - "over-saturated processing"
+  - "flat, midday lighting without drama"

@@ -251,6 +251,20 @@ Critical constraints - the image must NOT include:
 | `adult-animation` | Rick and Morty, BoJack, Archer style |
 | `lego` | LEGO brick scenes with minifigures |
 | `monochromatic-manga` | Traditional black & white manga, printed page aesthetic |
+| `dutch-masters` | Rembrandt/Vermeer oil painting, chiaroscuro |
+| `van-gogh` | Post-impressionist, bold impasto brushwork |
+| `naive-art` | Henri Rousseau / folk art, flattened perspective |
+| `1920s-large-format` | Edward Weston era B&W photography |
+| `1980s-sitcom` | Multi-camera sitcom (Cheers, Family Ties) |
+| `fine-art-photography` | Ansel Adams B&W, Zone System tonal mastery |
+| `pop-art` | Warhol / Lichtenstein, bold graphic |
+| `street-art` | Banksy-style stencil and wheat paste |
+| `political-caricature` | Tom Richmond / MAD Magazine editorial |
+| `national-geographic` | Documentary photojournalism |
+| `cartier-bresson` | Decisive moment B&W street photography |
+| `wes-anderson` | Symmetry, pastels, whimsical precision |
+| `andreas-gursky` | Large-scale pattern-rich photography |
+| `2000s-blockbuster` | Superhero/action film, teal-orange grading |
 
 ## How Layers Combine
 

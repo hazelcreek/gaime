@@ -1,0 +1,50 @@
+# 1980s-sitcom.yaml - 1980s Multi-Camera TV Sitcom style preset
+# Classic American sitcom aesthetic like Cheers, Family Ties, and Growing Pains
+
+name: "1980s TV Sitcom"
+description: "Classic 1980s American multi-camera sitcom aesthetic. Bright, even studio lighting, warm cozy interiors, and the distinctive look of shows like Cheers, Family Ties, Growing Pains, and The Cosby Show."
+
+# L3: Mood
+mood:
+  tone: "warm, comfortable, optimistic, family-friendly, nostalgic"
+  lighting: "bright, even multi-source studio lighting with minimal shadows, soft fill light eliminating harsh contrast, warm tungsten glow"
+  color_palette: "warm and inviting—earth tones, wood paneling browns, cozy oranges and yellows, muted greens and burgundies typical of 80s interior design"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Photographic image that feels like a still frame from a 1980s American
+  multi-camera sitcom shot on videotape. Bright, flat studio lighting with
+  soft shadows. Three-wall sets with the distinctive look of 80s production
+  design—wood paneling, patterned wallpaper, overstuffed furniture, practical
+  lamps providing warm accent light. The image should feel cozy, lived-in, and
+  slightly overlit in the characteristic sitcom style. Shot on broadcast video
+  with that distinctive 80s television quality—warm, slightly soft, and homey.
+  The visual style is paramount and must evoke the comfort-food nostalgia of
+  classic 80s family sitcoms.
+
+# L5: Technical
+technical:
+  perspective: "first-person or audience POV"
+  shot: "medium wide shot showing set depth"
+  camera: "eye level, typical three-camera setup angle"
+  effects: "slight video softness, warm color temperature, minimal grain, bright even exposure"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "cinematic film look"
+  - "dramatic shadows or noir"
+  - "modern single-camera aesthetic"
+  - "dark or gritty"
+  - "cold blue tones"
+  - "horror or thriller"
+  - "outdoor natural lighting"
+  - "stylized or artistic"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "modern technology (smartphones, flat screens)"
+  - "harsh dramatic shadows"
+  - "desaturated or cold colors"
+  - "single-source dramatic lighting"

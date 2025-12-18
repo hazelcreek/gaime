@@ -1,0 +1,50 @@
+# cartier-bresson.yaml - Henri Cartier-Bresson style preset
+# The decisive moment in humanist black & white street photography
+
+name: "Henri Cartier-Bresson"
+description: "Humanist street photography in the tradition of Henri Cartier-Bresson and the decisive moment. Black and white, geometric composition, candid human observation, and the poetry of everyday life captured with a 35mm Leica."
+
+# L3: Mood
+mood:
+  tone: "observational, poetic, humanist, fleeting, alive"
+  lighting: "natural available light, dappled shadows, the interplay of light and dark in urban spaces, high contrast daylight"
+  color_palette: "black and white with rich tonal range—deep blacks, luminous mid-tones, crisp whites, silver gelatin print quality"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Black and white street photography in the tradition of Henri Cartier-Bresson
+  and Magnum Photos. The decisive moment—geometry, gesture, and timing aligned
+  in a single frame. Shot with a 35mm rangefinder camera, candid and unposed.
+  Strong geometric composition with leading lines, shadows, and architectural
+  framing. Human subjects caught in authentic moments of life. Available light
+  only, never flash. The image should feel both spontaneous and perfectly
+  composed, as if fate and photographer's eye aligned. The visual style is
+  paramount—this must evoke the humanist poetry of classic French street
+  photography.
+
+# L5: Technical
+technical:
+  perspective: "first-person, eye-level street view"
+  shot: "candid medium shot or environmental portrait"
+  camera: "35mm rangefinder, zone focusing, moderate depth of field"
+  effects: "fine film grain, silver gelatin print tonality, natural vignette, sharp central subject"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "color photography"
+  - "posed or staged"
+  - "studio lighting"
+  - "digital clarity"
+  - "telephoto compression"
+  - "flash photography"
+  - "painterly or illustrated"
+  - "static or lifeless"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "color images"
+  - "artificial or studio lighting"
+  - "posed, aware subjects"
+  - "digital sharpness and clarity"

@@ -1,0 +1,49 @@
+# 2000s-blockbuster.yaml - 2000s Blockbuster Action Movie style preset
+# Big budget superhero and action film aesthetic with teal-orange grading
+
+name: "2000s Blockbuster"
+description: "Big budget 2000s Hollywood action movie aesthetic. The larger-than-life look of superhero films, Michael Bay action, and post-Dark Knight blockbusters with dramatic teal-orange color grading, epic scope, and cinematic grandeur."
+
+# L3: Mood
+mood:
+  tone: "epic, heroic, intense, larger-than-life, dramatic"
+  lighting: "dramatic cinematic lighting, strong rim lights, lens flares, volumetric light shafts, golden hour heroics or blue hour tension"
+  color_palette: "iconic teal and orange color grading—warm skin tones and fire against cool shadows and steel, high contrast, saturated but controlled"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Big budget Hollywood blockbuster cinematography from the 2000s superhero and
+  action era. The larger-than-life visual language of films like The Dark Knight,
+  Iron Man, Transformers, and 300. Dramatic teal-orange color grading that became
+  the defining look of the era. Epic scale with dynamic camera angles—low angles
+  making heroes monumental, dramatic wide shots establishing scope. Lens flares,
+  volumetric lighting, and practical effects enhanced by digital polish. Everything
+  feels heightened and cinematic. The visual style is paramount—this must feel
+  like a frame from a $200 million action tentpole.
+
+# L5: Technical
+technical:
+  perspective: "first-person or dramatic third-person"
+  shot: "epic wide establishing shots or dramatic low-angle hero shots"
+  camera: "anamorphic widescreen, dynamic angles, crane and steadicam movement implied"
+  effects: "lens flares, volumetric god rays, motion blur on action, digital color grading, subtle film grain"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "indie or low-budget"
+  - "documentary handheld"
+  - "flat natural lighting"
+  - "muted or desaturated"
+  - "intimate or small-scale"
+  - "vintage or period accurate"
+  - "cartoon or illustrated"
+  - "arthouse or experimental"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "flat or amateur lighting"
+  - "low production value"
+  - "dull colors"
+  - "static or boring composition"

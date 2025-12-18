@@ -1,0 +1,50 @@
+# political-caricature.yaml - Editorial Caricature style preset
+# Tom Richmond / MAD Magazine inspired exaggerated portrait illustration
+
+name: "Political Caricature"
+description: "Editorial caricature illustration in the style of Tom Richmond and MAD Magazine. Masterfully exaggerated features, dynamic poses, bold confident linework, and rich color that captures personality through strategic distortion."
+
+# L3: Mood
+mood:
+  tone: "satirical, dynamic, bold, humorous, larger-than-life"
+  lighting: "illustrative lighting that defines form, often dramatic for effect, simplified but purposeful shadows"
+  color_palette: "rich, saturated colors with confident application—warm skin tones pushed to caricature, bold costume colors, dynamic backgrounds"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Editorial caricature illustration in the tradition of Tom Richmond, Mort
+  Drucker, and MAD Magazine artists. Masterful exaggeration of distinctive
+  features—large heads with emphasized defining characteristics, expressive
+  hands, dynamic body language. Confident, fluid linework with varied line
+  weight. Rich color applied with illustrative skill, not flat but modeled
+  with purpose. Backgrounds can be detailed or simplified for focus. Characters
+  feel alive and caught mid-expression. The visual style is paramount—this
+  must feel like professional editorial illustration from a master caricaturist,
+  not amateur cartoon.
+
+# L5: Technical
+technical:
+  perspective: "first-person or dynamic angle for drama"
+  shot: "medium shot or full figure, framed for character expression"
+  camera: "eye level or dramatic low/high angle for effect"
+  effects: "confident linework, varied line weight, illustrative color modeling, expressive shading"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic"
+  - "anime or manga"
+  - "simple flat cartoon"
+  - "realistic proportions"
+  - "stiff or static poses"
+  - "digital 3D rendering"
+  - "dark or gritty"
+  - "minimalist or abstract"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "amateur or crude drawing"
+  - "stiff lifeless poses"
+  - "realistic proportions"
+  - "flat, unmodeled color"

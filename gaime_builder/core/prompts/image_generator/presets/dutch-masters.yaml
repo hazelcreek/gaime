@@ -1,0 +1,48 @@
+# dutch-masters.yaml - Dutch Golden Age oil painting style preset
+# Classic Rembrandt and Vermeer aesthetic with dramatic chiaroscuro and rich textures
+
+name: "Dutch Masters"
+description: "Dutch Golden Age oil painting aesthetic inspired by Rembrandt, Vermeer, and Frans Hals. Dramatic chiaroscuro lighting, rich oil textures, and the warm glow of candlelit interiors."
+
+# L3: Mood
+mood:
+  tone: "contemplative, intimate, dignified, quietly dramatic"
+  lighting: "dramatic chiaroscuro, single light source from window or candle, deep shadows with luminous highlights, soft golden glow on skin and fabrics"
+  color_palette: "warm earth tones—burnt umber, raw sienna, ochre—with deep blacks, creamy whites, and occasional rich vermillion or ultramarine accents"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Classical Dutch Golden Age oil painting in the tradition of Rembrandt van Rijn
+  and Johannes Vermeer. Rich impasto brushwork visible in highlights, with smooth
+  glazed shadows creating depth. Dramatic tenebrism where figures emerge from
+  darkness into pools of warm light. Surfaces show the tactile quality of oil
+  paint—the sheen of silk, the weight of velvet, the gleam of metal and glass.
+  The visual style is paramount and must evoke authentic 17th-century Dutch
+  masterwork painting with museum-quality technique.
+
+# L5: Technical
+technical:
+  perspective: "first-person"
+  shot: "medium shot or medium close-up"
+  camera: "eye level, intimate framing"
+  effects: "visible brushwork, canvas texture, varnished surface quality, subtle craquelure"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic or digital"
+  - "flat or illustrative"
+  - "bright even lighting"
+  - "modern or contemporary"
+  - "anime or cartoon"
+  - "watercolor or impressionist"
+  - "harsh or cold lighting"
+  - "minimalist or graphic design"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "flat digital coloring"
+  - "overly saturated colors"
+  - "visible digital artifacts"
+  - "modern objects or anachronisms"
