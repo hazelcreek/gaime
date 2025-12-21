@@ -1,0 +1,52 @@
+# disney-classic.yaml - Disney Golden Age animation style preset
+# Mid-century fairytale animation, hand-painted backgrounds, storybook magic
+
+name: "Disney Classic"
+description: "Disney's Golden Age animation aesthetic—the enchanting world of Snow White, Sleeping Beauty, and Cinderella. Hand-painted backgrounds, soft cel animation, big expressive eyes, and the timeless magic of mid-century fairytale animation."
+
+# L3: Mood
+mood:
+  tone: "magical, romantic, fairytale wonder, gentle nostalgia, storybook enchantment"
+  lighting: "soft theatrical lighting with warm glows, magical sparkles and fairy dust, dramatic silhouettes, the golden light of enchanted forests and candlelit castles"
+  color_palette: "rich jewel tones with soft gradients—royal blues, forest greens, rose pinks, golden yellows—gentle pastel transitions with moments of dramatic contrast"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Disney Golden Age cel animation in the tradition of Snow White, Cinderella,
+  and Sleeping Beauty. Hand-painted backgrounds with soft, impressionistic
+  brushwork—enchanted forests with misty depth, castle interiors with warm
+  candlelight glow. Character animation with graceful, fluid poses and big
+  expressive eyes that convey deep emotion. Smooth color gradients achieved
+  through careful airbrushing on cels. The distinctive Disney aesthetic of
+  idealized beauty with realistic proportions but heightened expressiveness.
+  Soft edges and gentle outlines rather than harsh black lines. Magical elements
+  rendered with sparkling effects and luminous glows. The visual style is
+  paramount—this must evoke authentic mid-century Disney animation, not modern
+  CGI recreations or other animation styles.
+
+# L5: Technical
+technical:
+  perspective: "first-person or cinematic third-person"
+  shot: "medium wide shot with storybook framing"
+  camera: "eye level or gentle dramatic angles for key moments"
+  effects: "soft glow effects, fairy dust sparkles, painted texture, subtle multiplane depth"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "3D CGI or Pixar style"
+  - "anime or Japanese animation"
+  - "modern digital illustration"
+  - "photorealistic or live action"
+  - "harsh outlines or thick linework"
+  - "flat graphic design"
+  - "dark horror or gritty aesthetic"
+  - "rubber-hose or 1930s cartoon"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "flat digital coloring"
+  - "harsh black outlines"
+  - "modern CGI sheen"
+  - "crude or simplified art"

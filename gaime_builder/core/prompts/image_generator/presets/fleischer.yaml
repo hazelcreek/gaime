@@ -1,0 +1,52 @@
+# fleischer.yaml - 1930s Fleischer Studios rubber-hose animation style preset
+# Surreal jazz-age cartoons, pie-cut eyes, bouncy physics, early Technicolor
+
+name: "Fleischer Studios"
+description: "1930s Fleischer Studios rubber-hose animation style—the surreal, jazz-age world of Betty Boop, Popeye, and the rotoscoped Superman. Bouncy physics, pie-cut eyes, hand-inked outlines, and early Technicolor dreamscapes."
+
+# L3: Mood
+mood:
+  tone: "surreal, playful, jazzy, slightly unsettling, vaudeville whimsy"
+  lighting: "theatrical stage lighting with bold pools of light, expressionist shadows, occasional spotlights, the glow of 1930s nightclubs"
+  color_palette: "early Technicolor palette—limited but bold primary colors, warm sepia undertones, cream whites, rich blacks, with that distinctive vintage film color cast"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  1930s Fleischer Studios rubber-hose animation style from the golden age of
+  American cartoons. Characters with impossibly flexible, noodle-like limbs that
+  stretch and squash with every movement. Pie-cut eyes (circular eyes with a
+  wedge removed), white gloves on every character, and bouncy, musical physics
+  where everything sways to an implied jazz rhythm. Hand-inked outlines with
+  slight wobble suggesting frame-by-frame animation. Backgrounds painted in
+  expressionist style with exaggerated perspectives and surreal impossible
+  architecture. Early Technicolor process colors with film grain and slight
+  registration errors. The visual style is paramount—this must capture the
+  uncanny, dreamlike quality of Betty Boop's Minnie the Moocher or the
+  Talkartoons era.
+
+# L5: Technical
+technical:
+  perspective: "theatrical side view or slight angle"
+  shot: "medium shot framing full character"
+  camera: "static frame with vaudeville staging"
+  effects: "film grain, slight color bleeding, hand-painted cel texture, occasional film scratches"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "modern digital animation"
+  - "3D CGI or computer rendering"
+  - "photorealistic or live action"
+  - "anime or manga style"
+  - "Disney Renaissance style"
+  - "realistic proportions"
+  - "clean vector graphics"
+  - "modern cartoon network style"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "crisp digital lines"
+  - "modern color grading"
+  - "realistic human anatomy"
+  - "4K sharpness"

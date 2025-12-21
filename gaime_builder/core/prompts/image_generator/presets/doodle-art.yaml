@@ -1,0 +1,51 @@
+# doodle-art.yaml - Playful doodle and sketch art style preset
+# Hand-drawn aesthetic, spontaneous sketches, overlapping linework
+
+name: "Doodle Art"
+description: "Playful doodle art style—the spontaneous energy of notebook margins, sketchbook pages, and creative brainstorming. Hand-drawn aesthetic with overlapping linework, cartoonish exaggeration, and the charming imperfection of casual sketching."
+
+# L3: Mood
+mood:
+  tone: "playful, spontaneous, whimsical, casual, creatively chaotic"
+  lighting: "flat and graphic with minimal shading, occasional playful crosshatching for emphasis, the even light of paper under a desk lamp"
+  color_palette: "primarily black ink on white or cream paper, with optional pops of color—highlighter yellows, ballpoint blue, red pen accents—or fully monochrome"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Spontaneous doodle art style as if sketched in a notebook margin or on scrap
+  paper during a meeting. Hand-drawn aesthetic with visible pen strokes, slight
+  line wobble, and the charming imperfection of casual sketching. Overlapping
+  linework where ideas collide—characters and objects drawn at different scales,
+  scattered across the composition. Cartoonish exaggeration with simplified
+  features, expressive faces, and playful proportions. Filling every corner
+  with small details, patterns, and decorative flourishes. The energy of pure
+  creative flow without overthinking. Mix of fine pen details and bold marker
+  strokes. The visual style is paramount—this must feel genuinely hand-drawn
+  and spontaneous, not a polished illustration pretending to be casual.
+
+# L5: Technical
+technical:
+  perspective: "flat and graphic, ignoring traditional perspective"
+  shot: "full composition with scattered elements"
+  camera: "overhead view of sketchbook page"
+  effects: "paper texture, slight ink bleeding, pen pressure variation, coffee ring stains optional"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic or 3D rendering"
+  - "polished digital illustration"
+  - "anime or manga style"
+  - "professional vector graphics"
+  - "painterly or oil painting"
+  - "cinematic or dramatic lighting"
+  - "clean corporate design"
+  - "symmetrical compositions"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "perfect straight lines"
+  - "digital gradients"
+  - "too polished or refined"
+  - "overly consistent line weight"

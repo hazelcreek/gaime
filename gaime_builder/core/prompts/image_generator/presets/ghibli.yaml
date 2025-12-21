@@ -1,0 +1,50 @@
+# ghibli.yaml - Studio Ghibli anime style preset
+# Painterly anime, soft watercolor textures, lush nature, magical realism
+
+name: "Studio Ghibli"
+description: "Studio Ghibli's distinctive anime aesthetic—painterly watercolor textures, lush natural environments, emotionally expressive characters, subtle magical realism, and the nostalgic warmth of films like Spirited Away, My Neighbor Totoro, and Howl's Moving Castle."
+
+# L3: Mood
+mood:
+  tone: "nostalgic, gentle, wondrous, emotionally resonant, quietly magical"
+  lighting: "warm golden-hour sunlight, soft dappled shadows through leaves, glowing magical elements, gentle diffused daylight with occasional dramatic clouds"
+  color_palette: "soft pastels with rich accents—sky blues, forest greens, warm earth tones, sunset oranges and pinks—naturalistic but heightened, with that distinctive Ghibli luminosity"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Studio Ghibli anime illustration in the painterly tradition of Hayao Miyazaki's
+  films. Hand-painted cel animation aesthetic with visible watercolor texture in
+  backgrounds. Lush, detailed natural environments with swaying grass, rustling
+  leaves, and billowing clouds that feel alive. Characters with large expressive
+  eyes conveying deep emotion, simple but graceful linework, and naturalistic
+  proportions. Subtle magical realism where the extraordinary feels grounded and
+  believable. Backgrounds painted with loving detail—every tree, stone, and flower
+  rendered with care. The visual style is paramount—this must evoke the warmth
+  and wonder of a genuine Ghibli film frame, not generic anime.
+
+# L5: Technical
+technical:
+  perspective: "first-person or third-person cinematic"
+  shot: "medium wide shot with environmental context"
+  camera: "eye level or gentle low angle to emphasize wonder"
+  effects: "soft watercolor textures, gentle film grain, luminous highlights, atmospheric haze"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic or 3D CGI"
+  - "harsh digital shading or cel-shading"
+  - "dark gritty or horror aesthetic"
+  - "sharp angular modern anime"
+  - "chibi or super-deformed style"
+  - "American cartoon or Western animation"
+  - "hyperrealistic backgrounds"
+  - "neon or cyberpunk colors"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "harsh black outlines"
+  - "flat digital coloring"
+  - "overly saturated garish colors"
+  - "generic anime faces"

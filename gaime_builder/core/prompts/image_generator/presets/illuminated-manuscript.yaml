@@ -1,0 +1,52 @@
+# illuminated-manuscript.yaml - Gothic illuminated manuscript style preset
+# Medieval religious art, gold leaf borders, stylized iconography
+
+name: "Gothic Illuminated Manuscript"
+description: "Medieval illuminated manuscript aesthetic—the sacred artistry of monastic scriptoriums. Intricate gold leaf borders, stylized Gothic iconography, flat medieval perspective, and the devotional beauty of the Book of Kells and Les Très Riches Heures."
+
+# L3: Mood
+mood:
+  tone: "sacred, mysterious, ornate, timeless, devotionally reverent"
+  lighting: "flat medieval illumination with no cast shadows, gold leaf catching light with metallic gleam, the luminous quality of vellum under candlelight"
+  color_palette: "rich medieval pigments—ultramarine blue, vermillion red, gold leaf, deep burgundy, forest green—bold saturated colors on cream vellum with black ink outlines"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Gothic illuminated manuscript art in the tradition of medieval monastic
+  scriptoriums. Intricate decorative borders with intertwining vines, fantastical
+  creatures, and geometric Celtic knotwork rendered in brilliant gold leaf and
+  rich mineral pigments. Flat medieval perspective with no vanishing points—
+  figures shown in stylized frontal or profile view with hierarchical scaling
+  (important figures larger). Black ink outlines with precise calligraphic
+  quality. Backgrounds of burnished gold or rich solid colors. Text areas
+  featuring Gothic blackletter script or uncial calligraphy. Marginalia with
+  grotesques, dragons, and whimsical creatures. The visual style is paramount—
+  this must evoke authentic medieval manuscript illumination like the Book of
+  Kells, Lindisfarne Gospels, or Les Très Riches Heures du Duc de Berry.
+
+# L5: Technical
+technical:
+  perspective: "flat medieval with hierarchical scaling"
+  shot: "full page or decorated initial view"
+  camera: "perpendicular to page surface"
+  effects: "gold leaf shimmer, vellum texture, aged parchment, subtle crackling in pigments"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "Renaissance perspective or realism"
+  - "photorealistic or modern"
+  - "3D rendering or CGI"
+  - "anime or cartoon style"
+  - "impressionist or painterly"
+  - "modern illustration"
+  - "realistic lighting and shadows"
+  - "minimalist or clean design"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "modern typography"
+  - "photographic elements"
+  - "realistic 3D depth"
+  - "washed out or faded colors"

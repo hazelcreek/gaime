@@ -1,0 +1,50 @@
+# da-vinci.yaml - Leonardo da Vinci Renaissance drawing style preset
+# Sepia ink sketches, anatomical precision, sfumato, and genius marginalia
+
+name: "Da Vinci Codex"
+description: "Leonardo da Vinci's Renaissance drawing aesthetic—sepia ink on aged parchment, anatomical precision, sfumato shading, mirror-script annotations, and the restless curiosity of a polymath's notebook."
+
+# L3: Mood
+mood:
+  tone: "intellectual, curious, secretive, timeless, contemplative"
+  lighting: "soft diffused illumination as if from a window onto a desk, subtle shadows suggesting three-dimensional form through hatching"
+  color_palette: "sepia, burnt sienna, raw umber, cream parchment tones—monochromatic warmth with occasional red chalk and sanguine accents"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Renaissance master drawing in the distinctive style of Leonardo da Vinci's
+  notebooks and studies. Fine quill pen work in sepia ink on aged cream parchment.
+  Cross-hatching and parallel hatching to build form and shadow with extraordinary
+  precision. Sfumato technique in shaded areas creating soft, smoke-like transitions.
+  Anatomical accuracy reflecting deep observational study. The aesthetic of the
+  Codex Leicester and Vitruvian Man studies—scientific rigor married to artistic
+  beauty. Margins may contain mirror-script annotations, geometric diagrams, and
+  exploratory sketches. The visual style is paramount—this must evoke an authentic
+  Renaissance master's working drawing, not a finished painting.
+
+# L5: Technical
+technical:
+  perspective: "first-person or study view"
+  shot: "medium shot or detailed study"
+  camera: "eye level, as if examining a page on a desk"
+  effects: "aged parchment texture, subtle foxing, ink feathering, visible paper grain"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "oil painting or color painting"
+  - "digital art or modern rendering"
+  - "photorealistic or photography"
+  - "anime or cartoon style"
+  - "bright saturated colors"
+  - "modern illustration"
+  - "clean white paper"
+  - "mechanical or computer-generated lines"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "modern elements or anachronisms"
+  - "crisp digital lines"
+  - "flat shading without hatching"
+  - "pure black ink"

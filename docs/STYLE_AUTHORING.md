@@ -265,6 +265,12 @@ Critical constraints - the image must NOT include:
 | `wes-anderson` | Symmetry, pastels, whimsical precision |
 | `andreas-gursky` | Large-scale pattern-rich photography |
 | `2000s-blockbuster` | Superhero/action film, teal-orange grading |
+| `da-vinci` | Renaissance master drawings, sepia ink on parchment |
+| `ghibli` | Studio Ghibli painterly anime, magical realism |
+| `fleischer` | 1930s rubber-hose cartoons, jazz-age surrealism |
+| `disney-classic` | Golden Age Disney, fairytale cel animation |
+| `doodle-art` | Playful notebook sketches, spontaneous linework |
+| `illuminated-manuscript` | Medieval religious art, gold leaf borders |
 
 ## How Layers Combine
 
