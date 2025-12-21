@@ -18,6 +18,7 @@ from app.engine.validators.take import TakeValidator
 from app.engine.visibility import DefaultVisibilityResolver
 from app.llm.interactor import InteractorAI
 from app.llm.narrator import NarratorAI
+from app.llm.session_logger import log_two_phase_turn
 from app.models.event import Event, EventType
 from app.models.game import LLMDebugInfo
 from app.models.intent import ActionIntent, ActionType, FlavorIntent, Intent
@@ -109,6 +110,17 @@ class TwoPhaseProcessor:
 
         # Generate narrative
         narrative, debug_info = await self.narrator.narrate([event], snapshot)
+
+        # Log the opening
+        self._log_turn(
+            raw_input="(opening)",
+            intent=None,
+            validation_result=None,
+            events=[event],
+            narrator_debug=debug_info,
+            narrative=narrative,
+            interactor_debug=None,
+        )
 
         return narrative, debug_info
 
@@ -213,6 +225,17 @@ class TwoPhaseProcessor:
                 interactor_debug=interactor_debug,
             )
 
+            # Log the turn
+            self._log_turn(
+                raw_input=raw_input,
+                intent=intent,
+                validation_result=result,
+                events=events,
+                narrator_debug=narrator_debug,
+                narrative=narrative,
+                interactor_debug=interactor_debug,
+            )
+
             return TwoPhaseActionResponse(
                 narrative=narrative,
                 state=self.state_manager.get_state(),
@@ -255,6 +278,17 @@ class TwoPhaseProcessor:
             validation_result=result,
             events=events,
             narrator_debug=narrator_debug,
+            interactor_debug=interactor_debug,
+        )
+
+        # Log the turn
+        self._log_turn(
+            raw_input=raw_input,
+            intent=intent,
+            validation_result=result,
+            events=events,
+            narrator_debug=narrator_debug,
+            narrative=narrative,
             interactor_debug=interactor_debug,
         )
 
@@ -320,6 +354,17 @@ class TwoPhaseProcessor:
                 interactor_debug=interactor_debug,
             )
 
+            # Log the turn
+            self._log_turn(
+                raw_input=raw_input,
+                intent=intent,
+                validation_result=result,
+                events=events,
+                narrator_debug=narrator_debug,
+                narrative=narrative,
+                interactor_debug=interactor_debug,
+            )
+
             return TwoPhaseActionResponse(
                 narrative=narrative,
                 state=self.state_manager.get_state(),
@@ -357,6 +402,17 @@ class TwoPhaseProcessor:
             validation_result=result,
             events=events,
             narrator_debug=narrator_debug,
+            interactor_debug=interactor_debug,
+        )
+
+        # Log the turn
+        self._log_turn(
+            raw_input=raw_input,
+            intent=intent,
+            validation_result=result,
+            events=events,
+            narrator_debug=narrator_debug,
+            narrative=narrative,
             interactor_debug=interactor_debug,
         )
 
@@ -408,6 +464,17 @@ class TwoPhaseProcessor:
                 interactor_debug=interactor_debug,
             )
 
+            # Log the turn
+            self._log_turn(
+                raw_input=raw_input,
+                intent=intent,
+                validation_result=result,
+                events=events,
+                narrator_debug=narrator_debug,
+                narrative=narrative,
+                interactor_debug=interactor_debug,
+            )
+
             return TwoPhaseActionResponse(
                 narrative=narrative,
                 state=self.state_manager.get_state(),
@@ -443,6 +510,17 @@ class TwoPhaseProcessor:
             validation_result=result,
             events=events,
             narrator_debug=narrator_debug,
+            interactor_debug=interactor_debug,
+        )
+
+        # Log the turn
+        self._log_turn(
+            raw_input=raw_input,
+            intent=intent,
+            validation_result=result,
+            events=events,
+            narrator_debug=narrator_debug,
+            narrative=narrative,
             interactor_debug=interactor_debug,
         )
 
@@ -515,6 +593,18 @@ class TwoPhaseProcessor:
             flavor_intent=intent,
         )
 
+        # Log the turn
+        self._log_turn(
+            raw_input=raw_input,
+            intent=None,
+            validation_result=None,
+            events=events,
+            narrator_debug=narrator_debug,
+            narrative=narrative,
+            interactor_debug=interactor_debug,
+            flavor_intent=intent,
+        )
+
         return TwoPhaseActionResponse(
             narrative=narrative,
             state=self.state_manager.get_state(),
@@ -561,6 +651,17 @@ class TwoPhaseProcessor:
                 interactor_debug=interactor_debug,
                 events=[],
             )
+
+        # Log the turn (no narrator for unsupported actions)
+        self._log_turn(
+            raw_input=raw_input,
+            intent=intent,
+            validation_result=None,
+            events=[],
+            narrator_debug=None,
+            narrative=message,
+            interactor_debug=interactor_debug,
+        )
 
         return TwoPhaseActionResponse(
             narrative=message,
@@ -630,4 +731,66 @@ class TwoPhaseProcessor:
             validation_result=validation_dict,
             events=[e.model_dump() for e in events],
             narrator_debug=narrator_debug,
+        )
+
+    def _log_turn(
+        self,
+        raw_input: str,
+        intent: ActionIntent | None,
+        validation_result: ValidationResult | None,
+        events: list[Event],
+        narrator_debug: LLMDebugInfo | None,
+        narrative: str,
+        interactor_debug: LLMDebugInfo | None = None,
+        flavor_intent: FlavorIntent | None = None,
+    ) -> None:
+        """Log a complete turn to the session log file.
+
+        Args:
+            raw_input: Original player input
+            intent: Parsed ActionIntent (or None)
+            validation_result: ValidationResult from validator
+            events: List of events generated
+            narrator_debug: LLM debug info from narrator
+            narrative: The final narrative text
+            interactor_debug: LLM debug info from interactor
+            flavor_intent: FlavorIntent if this was a flavor action
+        """
+        # Serialize validation result if present
+        validation_dict = None
+        if validation_result:
+            validation_dict = {
+                "valid": validation_result.valid,
+                "rejection_code": (
+                    validation_result.rejection_code.value
+                    if validation_result.rejection_code
+                    else None
+                ),
+                "rejection_reason": validation_result.rejection_reason,
+                "context": validation_result.context,
+                "hint": validation_result.hint,
+            }
+
+        # Determine parser type
+        parser_type = "interactor" if interactor_debug else "rule_based"
+
+        # Get parsed intent dict
+        if intent:
+            parsed_intent = intent.model_dump()
+        elif flavor_intent:
+            parsed_intent = flavor_intent.model_dump()
+        else:
+            parsed_intent = None
+
+        log_two_phase_turn(
+            session_id=self.state_manager.session_id,
+            world_id=self.state_manager.world_id,
+            raw_input=raw_input,
+            parser_type=parser_type,
+            parsed_intent=parsed_intent,
+            interactor_debug=interactor_debug,
+            validation_result=validation_dict,
+            events=[e.model_dump() for e in events],
+            narrator_debug=narrator_debug,
+            narrative=narrative,
         )

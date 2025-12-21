@@ -15,7 +15,6 @@ from typing import TYPE_CHECKING
 
 from app.llm.client import get_completion, parse_json_response, get_model_string
 from app.llm.prompt_loader import get_loader
-from app.llm.session_logger import log_llm_interaction
 from app.models.game import LLMDebugInfo
 from app.models.event import Event, EventType, RejectionEvent
 
@@ -88,18 +87,6 @@ class NarratorAI:
         parsed = parse_json_response(response)
 
         model = get_model_string()
-
-        # Log interaction if session_id provided
-        if self.session_id:
-            log_llm_interaction(
-                session_id=self.session_id,
-                world_id=self.world_data.world.name,
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                raw_response=response or "",
-                parsed_response=parsed,
-                model=model,
-            )
 
         # Capture debug info if enabled
         debug_info = None
