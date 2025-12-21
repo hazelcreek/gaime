@@ -1,0 +1,51 @@
+# ori.yaml - Ori and the Blind Forest/Will of the Wisps painterly style
+# Luminous backgrounds, soft glow effects, emotional nature spirits
+
+name: "Ori"
+description: "The luminous painterly style of Ori and the Blind Forest and Will of the Wisps by Moon Studios. Ethereal glowing environments, soft light halos, emotional nature spirits, and breathtakingly beautiful hand-painted forest landscapes."
+
+# L3: Mood
+mood:
+  tone: "ethereal, emotional, hopeful, mystical, breathtakingly beautiful"
+  lighting: "soft volumetric light rays, bioluminescent glow, warm golden light piercing through canopy, cool blue moonlight, magical particle effects catching light"
+  color_palette: "rich saturated nature tones—deep forest greens, warm ambers, soft purples, glowing cyans and magentas for magical elements, high dynamic range from dark shadows to brilliant highlights"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Luminous hand-painted illustration in the style of Moon Studios' Ori games.
+  Lush, layered environments with incredible depth created through atmospheric
+  perspective and parallax layers. Soft, painterly brushwork with visible
+  texture in backgrounds. Characters as small glowing spirits emitting soft
+  light halos against vast, detailed environments. Magical elements rendered
+  with bloom effects and particle systems. The interplay of light and shadow
+  creating emotional resonance—shafts of golden sunlight, bioluminescent
+  plants, glowing spirit wisps. Nature rendered with loving detail: moss,
+  bark texture, falling leaves, flowing water. The visual style is paramount—
+  this must capture the breathtaking beauty and emotional depth of Ori's world.
+
+# L5: Technical
+technical:
+  perspective: "side-scrolling 2D with deep parallax layers"
+  shot: "wide establishing shot showing environmental scale"
+  camera: "cinematic 2D with dramatic depth"
+  effects: "volumetric light rays, bloom, soft glow halos, floating particles, atmospheric fog"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "3D CGI or rendered"
+  - "photorealistic"
+  - "flat or cel-shaded"
+  - "pixel art"
+  - "dark horror aesthetic"
+  - "anime or manga style"
+  - "minimalist or simple"
+  - "harsh lighting"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "flat lighting without glow effects"
+  - "desaturated or muted colors"
+  - "harsh outlines"
+  - "cluttered unreadable composition"

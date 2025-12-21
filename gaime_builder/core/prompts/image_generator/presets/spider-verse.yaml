@@ -1,0 +1,51 @@
+# spider-verse.yaml - Into the Spider-Verse comic book animation style
+# Halftone dots, chromatic aberration, mixed media, kinetic energy
+
+name: "Spider-Verse"
+description: "The groundbreaking visual style of Spider-Man: Into the Spider-Verse. Living comic book aesthetic with Ben-Day halftone dots, chromatic aberration, mixed media textures, and revolutionary animation techniques that make every frame look like sequential art."
+
+# L3: Mood
+mood:
+  tone: "kinetic, bold, youthful, stylish, explosively creative"
+  lighting: "dramatic comic book lighting with strong shadows, neon accent lights, dynamic rim lighting, high contrast for graphic impact"
+  color_palette: "bold saturated colors with comic book intensity—deep blacks, vibrant primaries, neon pinks and cyans, strategic color holds for emotional moments"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Revolutionary comic book animation style from Spider-Man: Into the Spider-Verse.
+  Every frame designed to look like a living comic book panel. Ben-Day halftone
+  dots visible in shadows and gradients, giving a printed comic texture.
+  Chromatic aberration and RGB color fringing around edges creating depth and
+  energy. Mixed media approach—painted textures, ink splatters, hand-drawn
+  speed lines, onomatopoeia text integrated into scenes. Variable frame rates
+  suggested through motion blur choices. Bold graphic compositions with strong
+  silhouettes. Kirby Krackle energy effects for powers. The visual style is
+  paramount—this must capture the specific groundbreaking aesthetic that makes
+  Spider-Verse look unlike any other animation.
+
+# L5: Technical
+technical:
+  perspective: "dynamic Dutch angles, extreme perspectives"
+  shot: "dramatic comic panel compositions, varied shot sizes"
+  camera: "kinetic movement, rack focus, graphic framing"
+  effects: "halftone dots, chromatic aberration, motion lines, ink splatters, color holds"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "traditional smooth 3D animation"
+  - "photorealistic rendering"
+  - "anime or Japanese animation"
+  - "clean vector graphics"
+  - "muted or desaturated"
+  - "static or posed"
+  - "realistic proportions"
+  - "Pixar/Disney 3D style"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "smooth gradients without halftone"
+  - "lack of graphic impact"
+  - "conventional animation look"
+  - "static lifeless poses"

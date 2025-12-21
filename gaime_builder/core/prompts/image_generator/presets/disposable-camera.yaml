@@ -1,0 +1,50 @@
+# disposable-camera.yaml - Lo-fi disposable camera snapshot aesthetic
+# Flash harsh, date stamps, casual composition, 35mm nostalgia
+
+name: "Disposable Camera"
+description: "Lo-fi disposable camera aesthetic—the casual charm of Fujifilm QuickSnap and Kodak FunSaver. Harsh direct flash, slightly washed colors, date stamps, and the beautiful imperfection of point-and-shoot memories."
+
+# L3: Mood
+mood:
+  tone: "casual, nostalgic, candid, imperfect, intimate"
+  lighting: "harsh direct flash creating flat frontal lighting with red-eye potential, dark backgrounds falling off to black, occasional lens flare from light sources"
+  color_palette: "slightly washed and desaturated, warm color cast from cheap optics, muted highlights, crushed shadows, that distinctive disposable camera color science"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Lo-fi disposable camera photography in the style of Fujifilm QuickSnap or
+  Kodak FunSaver single-use cameras. Harsh built-in flash creating flat,
+  unflattering but charming frontal lighting. Fixed-focus plastic lens creating
+  soft edges and slight blur, especially in corners. The distinctive look of
+  cheap 35mm film—visible grain, limited dynamic range, and that particular
+  color cast. Casual, snapshot composition as if taken quickly at a party or
+  on vacation. Red date stamp in the corner reading a plausible date. The
+  visual style is paramount—this must feel like an authentic snapshot from
+  a disposable camera, not professional photography made to look amateur.
+
+# L5: Technical
+technical:
+  perspective: "snapshot eye-level, often slightly off-center"
+  shot: "casual medium shot or group shot"
+  camera: "fixed 32mm plastic lens, f/10, 1m to infinity focus"
+  effects: "heavy film grain, flash falloff, soft focus edges, date stamp, slight vignetting"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "professional photography"
+  - "studio lighting"
+  - "sharp high resolution"
+  - "perfect composition"
+  - "HDR or high dynamic range"
+  - "digital clarity"
+  - "artistic or intentional framing"
+  - "DSLR or mirrorless quality"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "perfect sharpness throughout"
+  - "professional color grading"
+  - "studio backdrop"
+  - "posed editorial look"
+  - "clean modern aesthetic"

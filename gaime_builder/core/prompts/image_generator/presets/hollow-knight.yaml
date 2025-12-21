@@ -1,0 +1,51 @@
+# hollow-knight.yaml - Hollow Knight hand-drawn indie game aesthetic
+# Delicate linework, muted palette, melancholic beauty, bug-scale world
+
+name: "Hollow Knight"
+description: "Hollow Knight's distinctive hand-drawn aesthetic—the melancholic beauty of Hallownest. Delicate linework, muted desaturated palette, vast underground caverns, and the haunting elegance of a fallen insect kingdom."
+
+# L3: Mood
+mood:
+  tone: "melancholic, mysterious, ancient, lonely, hauntingly beautiful"
+  lighting: "soft ambient glow from bioluminescence, distant light sources, pools of pale light in vast darkness, subtle rim lighting on characters"
+  color_palette: "muted and desaturated—deep blues, cool greys, pale teals, occasional warm amber accents, black silhouettes against softly lit backgrounds"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Hand-drawn 2D illustration in the style of Team Cherry's Hollow Knight.
+  Delicate, precise linework with consistent weight creating elegant character
+  silhouettes. Muted, melancholic color palette dominated by cool blues and
+  greys with strategic warm accents. Characters rendered as stylized insects
+  and creatures with mask-like faces and flowing cloaks. Environments featuring
+  vast cavernous spaces, ancient ruins, organic architecture blending with
+  crystal and stone. Subtle animation-ready poses with clear readable
+  silhouettes. The visual style is paramount—this must capture the specific
+  hand-crafted beauty and somber atmosphere of Hallownest, not generic
+  fantasy or other indie game aesthetics.
+
+# L5: Technical
+technical:
+  perspective: "side-scrolling 2D, occasional depth layers"
+  shot: "medium shot with environmental scale"
+  camera: "flat 2D presentation with parallax depth suggestion"
+  effects: "soft particle effects, ambient glow, subtle fog layers, clean linework"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "3D rendered or CGI"
+  - "photorealistic"
+  - "bright saturated colors"
+  - "anime or manga style"
+  - "pixel art"
+  - "cartoonish or comedic"
+  - "realistic insects"
+  - "generic fantasy"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "harsh black outlines"
+  - "overly detailed busy backgrounds"
+  - "bright cheerful atmosphere"
+  - "cluttered composition"

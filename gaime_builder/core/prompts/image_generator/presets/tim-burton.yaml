@@ -1,0 +1,51 @@
+# tim-burton.yaml - Tim Burton gothic whimsy style preset
+# Spindly figures, spiral patterns, German Expressionist influence
+
+name: "Tim Burton"
+description: "Tim Burton's distinctive gothic whimsy—the visual world of Edward Scissorhands, Nightmare Before Christmas, and Beetlejuice. Spindly elongated figures, spiral motifs, stark contrasts, and that perfect balance of macabre and charming."
+
+# L3: Mood
+mood:
+  tone: "gothic, whimsical, melancholic, darkly comedic, outsider romantic"
+  lighting: "high contrast with deep shadows, expressionist angles, pale moonlight, eerie backlight silhouettes, occasional warm pockets in cold environments"
+  color_palette: "predominantly desaturated with strategic bold accents—pale skin against dark surroundings, pops of red or purple, black and white striped patterns, blue-grey shadows"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Tim Burton's distinctive gothic visual style combining German Expressionism
+  with whimsical darkness. Characters with impossibly thin, elongated limbs
+  and exaggerated features—large hollow eyes, spindly fingers, hunched
+  postures. Architecture featuring impossible angles, crooked spires, and
+  spiral motifs. Stark tonal contrasts with pale figures against dark
+  backgrounds. The aesthetic of Edward Scissorhands, Beetlejuice, and
+  The Nightmare Before Christmas—simultaneously creepy and endearing.
+  Recurring visual motifs: spirals, stripes, stitches, bare twisted trees,
+  iron gates, Victorian decay. The visual style is paramount—this must
+  capture Burton's unique marriage of the macabre and the tender.
+
+# L5: Technical
+technical:
+  perspective: "first-person or dramatic low/high angles"
+  shot: "medium shot with environmental context"
+  camera: "wide angle with slight distortion, tilted horizon optional"
+  effects: "high contrast, deep blacks, expressionist shadows, slight film grain"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "photorealistic or naturalistic"
+  - "bright cheerful colors"
+  - "normal human proportions"
+  - "symmetrical balanced compositions"
+  - "smooth clean surfaces"
+  - "modern minimalist"
+  - "anime or manga style"
+  - "generic horror"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "realistic body proportions"
+  - "even flat lighting"
+  - "clean modern aesthetic"
+  - "bright saturated palette"

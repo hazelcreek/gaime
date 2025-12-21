@@ -31,7 +31,7 @@ Future style presets to consider creating. Each includes a brief description of 
 | **Akira/Otomo** | Gritty cyberpunk manga, mechanical detail, urban decay, kinetic energy |
 | **Saturday Morning 80s** | He-Man, Thundercats—bold colors, dynamic poses, action figure aesthetics |
 | **Cuphead** | 1930s cartoon meets boss rush, watercolor backgrounds, hand-drawn animation |
-| **Spider-Verse** | Into the Spider-Verse—comic halftone dots, chromatic aberration, mixed media |
+| ~~**Spider-Verse**~~ ✅ | Into the Spider-Verse—comic halftone dots, chromatic aberration, mixed media |
 | **Arcane** | League of Legends series—painterly 3D, visible brushstrokes, neon-lit steampunk |
 | **Samurai Jack** | Bold graphic silhouettes, limited palettes, widescreen cinematic composition |
 | **Adventure Time** | Simplified shapes, pastel post-apocalypse, whimsical fantasy |
@@ -79,8 +79,8 @@ Future style presets to consider creating. Each includes a brief description of 
 | **Baldur's Gate Portraits** | 90s fantasy RPG character art, painted realism, dramatic lighting |
 | **Disco Elysium** | Oil painting impressionism, psychological intensity, urban decay beauty |
 | **Limbo/Inside** | Stark silhouettes, atmospheric fog, minimal color, eerie isolation |
-| **Hollow Knight** | Delicate hand-drawn lines, muted palette, melancholic beauty, bug-scale |
-| **Ori** | Luminous painted backgrounds, soft glow effects, emotional nature spirits |
+| ~~**Hollow Knight**~~ ✅ | Delicate hand-drawn lines, muted palette, melancholic beauty, bug-scale |
+| ~~**Ori**~~ ✅ | Luminous painted backgrounds, soft glow effects, emotional nature spirits |
 | **Hades** | Supergiant's bold character art, dynamic poses, vivid colors, mythological |
 | **Darkest Dungeon** | Heavy ink shadows, stress and madness, grim Lovecraftian aesthetic |
 | **Return of the Obra Dinn** | 1-bit dithering, Macintosh classic, stark monochrome mystery |
@@ -116,6 +116,92 @@ Future style presets to consider creating. Each includes a brief description of 
 | **Russian Icon** | Byzantine religious art, gold halos, frontal saints, rich egg tempera |
 | **Thai Temple Art** | Ornate gold patterns, mythological creatures, devotional intensity |
 | **Celtic/Insular** | Interlaced knotwork, spirals, zoomorphic designs, medieval manuscripts |
+
+---
+
+## 3D, Toy & Miniature Aesthetics
+
+*Popular styles from the [awesome-nanobanana-pro](https://github.com/ZeroLu/awesome-nanobanana-pro) collection and trending AI art.*
+
+| Style | Description |
+|-------|-------------|
+| **Pop Mart Blind Box** | Cute 3D collectible figures, C4D rendering, Q-version characters, soft studio lighting, pastel colors, plastic toy texture with glossy finish |
+| **Low Poly** | Minimalist 3D with limited polygons, geometric faceted surfaces, flat shading, stylized landscapes |
+| **Voxel Art** | 3D pixel cubes like Minecraft, blocky construction, colorful, playful retro 3D aesthetic |
+| **Tilt-Shift Diorama** | Miniature effect photography, shallow depth of field, tiny model world, architectural precision |
+| **Isometric** | 30-degree angle 3D projection, no perspective distortion, strategy game aesthetic, clean lines |
+| **Toy Photography** | Real toys photographed dramatically, action figures, scale models, macro lens intimacy |
+| **Paper Diorama** | Layered paper cut-out depth, theatrical staging, handcrafted shadow box scenes |
+| **Snow Globe** | Contained miniature scene, glass dome, snow particles, magical encapsulated world |
+| **Funko Pop** | Oversized head vinyl figure style, black button eyes, simplified features, collectible aesthetic |
+
+---
+
+## Illustrator Signatures
+
+*Distinctive artist styles that work well for storytelling.*
+
+| Style | Description |
+|-------|-------------|
+| ~~**Tim Burton**~~ ✅ | Gothic whimsy, spindly figures, spiral patterns, striped motifs, German Expressionist influence |
+| **Edward Gorey** | Macabre Victorian, fine crosshatching, sinister children, alphabet book horror |
+| **Quentin Blake** | Loose ink lines, energetic scribbles, Roald Dahl illustrations, joyful chaos |
+| **Ralph Steadman** | Explosive ink splatters, grotesque caricature, Fear and Loathing, visceral energy |
+| **Mary Blair** | Mid-century modern, bold flat colors, stylized shapes, It's a Small World aesthetic |
+| **Eyvind Earle** | Sleeping Beauty backgrounds, angular trees, Gothic precision, rich jewel tones |
+| **N.C. Wyeth** | Golden Age illustration, romantic adventure, rich oil painting, Treasure Island |
+| **Arthur Rackham** | Fairy tale illustration, gnarled trees, delicate linework, fantastical creatures |
+| **Maxfield Parrish** | Luminous blue skies, idealized figures, ethereal landscapes, golden light |
+| **Shaun Tan** | Surreal immigrant narratives, muted palette, strange creatures, emotional depth |
+
+---
+
+## Printmaking & Graphic Design
+
+*Print-based techniques that translate beautifully to digital.*
+
+| Style | Description |
+|-------|-------------|
+| **Risograph** | Soy-based ink layers, limited spot colors, halftone textures, slight misregistration |
+| **Screen Print** | Bold flat colors, visible squeegee texture, poster art, Warhol influence |
+| **Letterpress** | Deep impression, debossed texture, vintage typography, tactile craft |
+| **Gig Poster** | Concert poster art, bold graphics, psychedelic lettering, rock aesthetic |
+| **Flat Design** | Minimalist 2D, bold solid colors, simple geometric shapes, UI-inspired |
+| **Geometric Abstract** | Kandinsky/Mondrian—pure shapes, primary colors, compositional balance |
+| **Infographic** | Data visualization aesthetic, icons, clean vectors, informational clarity |
+| **Blueprint/Technical** | White lines on blue, architectural drafting, precise measurements, engineering aesthetic |
+
+---
+
+## Trending AI Styles
+
+*Popular styles from [Livemint](https://www.livemint.com/technology/tech-news/forget-ghibli-style-ai-images-create-these-10-stunning-art-styles-with-chatgpt-here-s-how-11743529574175.html), [Hindustan Times](https://www.hindustantimes.com/technology/explore-10-unique-ai-art-styles-with-chatgpt-beyond-ghibli-inspired-creations-101743761967373.html), and [Selldone](https://selldone.com/blog/chatgpt-new-image-ai-prompt-styles-1188).*
+
+| Style | Description |
+|-------|-------------|
+| **Origami** | Folded paper aesthetic, geometric creases, minimalist, paper texture, clean shadows |
+| **Puppet/Felt** | Jim Henson-adjacent, visible stitches, fabric textures, button eyes, handcrafted warmth |
+| **Neon Noir** | Film noir + neon lighting, rain-slicked streets, high contrast, cyberpunk noir hybrid |
+| ~~**Disposable Camera**~~ ✅ | Lo-fi snapshot, flash harsh, date stamps, casual composition, 35mm nostalgia |
+| **Y2K Scrapbook** | Early 2000s collage, holographic stickers, heart frames, bubblegum aesthetic, magazine cutouts |
+| **Cel-Shaded** | Borderlands/Wind Waker, bold outlines, flat color fills, comic book 3D |
+| **Pointillism** | Seurat-style dots, optical color mixing, meticulous stippling, neo-impressionist |
+| **Monochromatic** | Single hue variations, tonal depth, dramatic contrast, color study |
+| **Paper Marbling** | Ebru/Suminagashi, swirling organic patterns, floating ink, decorative endpapers |
+| **Synthwave** | 80s retrofuturism, neon grids, chrome text, sunset gradients, outrun aesthetic |
+
+---
+
+## Experimental & Abstract
+
+| Style | Description |
+|-------|-------------|
+| **Glitch Art** | Digital corruption, RGB splitting, scan lines, data moshing, broken beauty |
+| **Double Exposure** | Overlaid photographs, silhouette fills, dreamlike composites, conceptual portraiture |
+| **Cinemagraph** | Still photo with subtle motion, living photograph, hypnotic loops |
+| **Chromatic Aberration** | Color fringing, lens distortion, RGB separation, analog imperfection |
+| **Datamosh** | Video compression artifacts as art, pixel bleeding, temporal glitches |
+| **Generative/Algorithmic** | Code-based patterns, fractals, mathematical beauty, processing.js aesthetic |
 
 ---
 

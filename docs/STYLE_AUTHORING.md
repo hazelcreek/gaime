@@ -271,6 +271,11 @@ Critical constraints - the image must NOT include:
 | `disney-classic` | Golden Age Disney, fairytale cel animation |
 | `doodle-art` | Playful notebook sketches, spontaneous linework |
 | `illuminated-manuscript` | Medieval religious art, gold leaf borders |
+| `disposable-camera` | Lo-fi snapshot, flash harsh, 35mm nostalgia |
+| `tim-burton` | Gothic whimsy, spindly figures, spiral patterns |
+| `hollow-knight` | Delicate linework, muted palette, melancholic bug-scale |
+| `ori` | Luminous painted backgrounds, soft glow, nature spirits |
+| `spider-verse` | Comic halftone dots, chromatic aberration, mixed media |
 
 ## How Layers Combine
 
