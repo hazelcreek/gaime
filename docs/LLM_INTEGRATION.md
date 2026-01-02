@@ -130,7 +130,7 @@ reload_category("game_master")
 |-----------|-------------|---------|---------|
 | Game Master (Classic) | `game_master/system_prompt.txt` | `game_master.py` | Main system prompt for all game actions |
 | Game Master (Classic) | `game_master/opening_prompt.txt` | `game_master.py` | Generates opening narrative for new games |
-| Interactor (Two-Phase) | `interactor/system_prompt.txt` | `interactor.py` | Parses player input, resolves entities |
+| Interactor (Two-Phase) | `interactor/system_prompt.txt` | `interactor.py` | Parses player input into ActionIntent/FlavorIntent with entity resolution |
 | Narrator (Two-Phase) | `narrator/system_prompt.txt` | `narrator.py` | Generates prose from confirmed events (with history context) |
 | World Builder (TUI) | `world_builder_prompt.txt` | `gaime_builder/` | Generates world YAML from design brief |
 | World Builder (TUI) | `design_brief_prompt.txt` | `gaime_builder/` | First pass: creates design brief from description |
@@ -173,6 +173,61 @@ The smell of mystery meat lingers in the air...
 - Responds with increasing brevity
 - Adds subtle irony ("The lockers remain stubbornly locker-like.")
 - Gently nudges the player to explore elsewhere
+
+### Interactor Prompt Structure (Two-Phase Engine)
+
+The Interactor parses player input into structured intents. Its prompt includes:
+
+**Section 1: Output Formats**
+- `ActionIntent`: For state-changing actions (returns action_type, target_id, etc.)
+- `FlavorIntent`: For atmospheric actions or unresolved targets
+
+**Section 2: Action Type Reference**
+
+| ActionType | When to Use | Required Fields |
+|------------|-------------|-----------------|
+| MOVE | Navigation (go, walk, enter, leave) | target_id (exit direction) |
+| BROWSE | Survey surroundings (look, look around) | target_id="" |
+| EXAMINE | Inspect specific entity | target_id |
+| TAKE | Pick up item | target_id |
+| DROP | Put down item | target_id |
+| USE | Use item, optionally on target | target_id, optional instrument_id |
+| OPEN | Open container/door | target_id |
+| CLOSE | Close container/door | target_id |
+| TALK | Initiate conversation | target_id (npc_id) |
+| ASK | Ask NPC about topic | target_id (npc_id), topic_id |
+| GIVE | Give item to NPC | target_id (item_id), recipient_id |
+| SHOW | Show item to NPC | target_id (item_id), recipient_id |
+| SEARCH | Search area/container | target_id |
+| WAIT | Pass time | target_id="" |
+
+**Section 3: Decision Process**
+Guides the LLM through classification priority:
+1. Movement? → Check exits by direction, destination name, or description
+2. Observation? → BROWSE vs EXAMINE
+3. Item Interaction? → TAKE, DROP, USE, OPEN, CLOSE
+4. NPC Interaction? → TALK, ASK, GIVE, SHOW
+5. Flavor Action? → Unknown verbs or unresolved targets
+
+**Section 4: FlavorIntent Guidance**
+When to use FlavorIntent instead of ActionIntent:
+- Unknown verbs (dance, jump, sing)
+- Known verb but target not in available entities
+- ASK about undefined topic (improvised dialogue)
+- Ambiguous movement (multiple exits match description)
+
+**Section 5: World Context (dynamic)**
+Populated at runtime with:
+- Location ID and name
+- Items at location (format: `id - "Name"`)
+- Location details/scenery
+- NPCs present
+- Player inventory
+- Available exits with descriptions (format: `direction: Destination (description)`)
+
+**Exit Description Matching**: The Interactor can match natural language like "walk through the oak door" to the correct exit by matching against exit descriptions (e.g., `north: Office (heavy oak door)`).
+
+**Ambiguity Handling**: When multiple exits match the player's description, the Interactor returns a FlavorIntent with `action_hint=MOVE`. The Narrator then naturally asks the player to clarify.
 
 ### System Prompt Structure
 

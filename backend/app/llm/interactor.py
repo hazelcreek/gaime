@@ -150,10 +150,15 @@ class InteractorAI:
             inventory_lines.append(f'- {item.id} - "{item.name}"')
         inventory = "\n".join(inventory_lines) if inventory_lines else "Empty"
 
-        # Format exits
+        # Format exits (include description for natural language matching)
         exits_lines = []
         for exit in snapshot.visible_exits:
-            exits_lines.append(f"- {exit.direction}: {exit.destination_name}")
+            if exit.description:
+                exits_lines.append(
+                    f"- {exit.direction}: {exit.destination_name} ({exit.description})"
+                )
+            else:
+                exits_lines.append(f"- {exit.direction}: {exit.destination_name}")
         available_exits = "\n".join(exits_lines) if exits_lines else "None"
 
         # Load prompt template
