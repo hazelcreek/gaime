@@ -147,8 +147,9 @@ from pydantic import BaseModel, Field
 class ActionType(str, Enum):
     """Primary categories of player actions"""
 
-    # Movement
+    # Movement & Observation
     MOVE = "move"              # Navigate between locations
+    BROWSE = "browse"          # Survey surroundings ("look", "look around", "l")
 
     # Object Interaction
     EXAMINE = "examine"        # Look at something closely (includes "look at X")
@@ -173,9 +174,7 @@ class ActionType(str, Enum):
     INVENTORY = "inventory"    # Check inventory
     HELP = "help"              # Show help
 
-    # Note: "look around" / "look" without a target is handled as re-narration
-    # of the current location, not as a separate ActionType. "look at X" is
-    # treated as EXAMINE.
+    # Note: "look at X" is EXAMINE. "look around" / "look" is BROWSE.
 
 
 class ActionIntent(BaseModel):
@@ -236,6 +235,8 @@ class FlavorIntent(BaseModel):
 | Player Input | Parsed Intent |
 |--------------|---------------|
 | "north" | `ActionIntent(action_type=MOVE, target_id="north", verb="go")` |
+| "look around" | `ActionIntent(action_type=BROWSE, target_id="", verb="look")` |
+| "l" | `ActionIntent(action_type=BROWSE, target_id="", verb="look")` |
 | "examine the painting" | `ActionIntent(action_type=EXAMINE, target_id="family_portrait", verb="examine")` |
 | "look at the desk" | `ActionIntent(action_type=EXAMINE, target_id="writing_desk", verb="look at")` |
 | "pick up the key" | `ActionIntent(action_type=TAKE, target_id="brass_key", verb="pick up")` |
@@ -261,8 +262,9 @@ Events represent **what happened** as a result of a validated action. They are t
 class EventType(str, Enum):
     """Types of events that can occur"""
 
-    # Movement
+    # Movement & Observation
     LOCATION_CHANGED = "location_changed"
+    SCENE_BROWSED = "scene_browsed"    # Player surveyed the location
 
     # Items
     ITEM_TAKEN = "item_taken"

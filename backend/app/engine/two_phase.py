@@ -22,7 +22,11 @@ from app.llm.session_logger import log_two_phase_turn
 from app.models.event import Event, EventType
 from app.models.game import LLMDebugInfo
 from app.models.intent import ActionIntent, ActionType, FlavorIntent, Intent
-from app.models.two_phase_state import TwoPhaseActionResponse, TwoPhaseDebugInfo
+from app.models.two_phase_state import (
+    NarrationEntry,
+    TwoPhaseActionResponse,
+    TwoPhaseDebugInfo,
+)
 from app.models.validation import ValidationResult
 
 if TYPE_CHECKING:
@@ -86,7 +90,7 @@ class TwoPhaseProcessor:
     async def get_initial_narrative(self) -> tuple[str, LLMDebugInfo | None]:
         """Generate the opening narrative for a new game.
 
-        Creates a LOCATION_CHANGED event for the starting location
+        Creates a SCENE_BROWSED event for the starting location
         and uses the NarratorAI to generate the opening prose.
 
         Returns:
@@ -95,21 +99,40 @@ class TwoPhaseProcessor:
         state = self.state_manager.get_state()
         world = self.state_manager.world_data
 
-        # Create opening event
+        # Build perception snapshot
+        snapshot = self.visibility_resolver.build_snapshot(state, world)
+
+        # Create opening event using SCENE_BROWSED for comprehensive description
+        # Include premise/starting_situation if available for rich opening context
+        # Note: WorldData.world contains the World model with these fields
         event = Event(
-            type=EventType.LOCATION_CHANGED,
+            type=EventType.SCENE_BROWSED,
             subject=state.current_location,
             context={
                 "first_visit": True,
                 "is_opening": True,
+                "premise": getattr(world.world, "premise", None),
+                "starting_situation": getattr(world.world, "starting_situation", None),
+                "hero_name": getattr(world.world, "hero_name", None),
+                "visible_items": [item.name for item in snapshot.visible_items],
+                "visible_npcs": [npc.name for npc in snapshot.visible_npcs],
+                "visible_exits": [
+                    {"direction": e.direction, "destination": e.destination_name}
+                    for e in snapshot.visible_exits
+                ],
             },
         )
 
-        # Build perception snapshot
-        snapshot = self.visibility_resolver.build_snapshot(state, world)
+        # Get narration history for context
+        history = state.narration_history
 
         # Generate narrative
-        narrative, debug_info = await self.narrator.narrate([event], snapshot)
+        narrative, debug_info = await self.narrator.narrate(
+            [event], snapshot, history=history
+        )
+
+        # Store narration in history
+        self._store_narration(narrative, state.current_location, "scene_browsed")
 
         # Log the opening
         self._log_turn(
@@ -169,6 +192,8 @@ class TwoPhaseProcessor:
         elif isinstance(intent, ActionIntent):
             if intent.action_type == ActionType.MOVE:
                 return await self._process_movement(intent, action, interactor_debug)
+            elif intent.action_type == ActionType.BROWSE:
+                return await self._process_browse(intent, action, interactor_debug)
             elif intent.action_type == ActionType.EXAMINE:
                 return await self._process_examine(intent, action, interactor_debug)
             elif intent.action_type == ActionType.TAKE:
@@ -247,26 +272,46 @@ class TwoPhaseProcessor:
         destination_id = result.context["destination"]
         first_visit = self.state_manager.move_to(destination_id)
 
-        # Create success event
-        event = Event(
-            type=EventType.LOCATION_CHANGED,
-            subject=destination_id,
-            context={
-                "from_location": result.context.get("from_location"),
-                "direction": result.context.get("direction"),
-                "first_visit": first_visit,
-                "destination_name": result.context.get("destination_name"),
-            },
-        )
-        events = [event]
-
         # Build snapshot at new location
         snapshot = self.visibility_resolver.build_snapshot(
             self.state_manager.get_state(), world
         )
 
+        # Create LOCATION_CHANGED event - always the same event type for movement
+        # The first_visit flag and visible entities tell narrator how to describe it
+        context = {
+            "from_location": result.context.get("from_location"),
+            "direction": result.context.get("direction"),
+            "first_visit": first_visit,
+            "destination_name": result.context.get("destination_name"),
+        }
+
+        # For first visits, include visible entities for comprehensive description
+        if first_visit:
+            context["visible_items"] = [item.name for item in snapshot.visible_items]
+            context["visible_npcs"] = [npc.name for npc in snapshot.visible_npcs]
+            context["visible_exits"] = [
+                {"direction": e.direction, "destination": e.destination_name}
+                for e in snapshot.visible_exits
+            ]
+
+        event = Event(
+            type=EventType.LOCATION_CHANGED,
+            subject=destination_id,
+            context=context,
+        )
+        events = [event]
+
+        # Get narration history for context
+        history = self.state_manager.get_state().narration_history
+
         # Generate success narrative
-        narrative, narrator_debug = await self.narrator.narrate(events, snapshot)
+        narrative, narrator_debug = await self.narrator.narrate(
+            events, snapshot, history=history
+        )
+
+        # Store narration in history
+        self._store_narration(narrative, destination_id, "location_changed")
 
         # Increment turn
         self.state_manager.increment_turn()
@@ -612,6 +657,90 @@ class TwoPhaseProcessor:
             pipeline_debug=pipeline_debug,
         )
 
+    async def _process_browse(
+        self,
+        intent: ActionIntent,
+        raw_input: str,
+        interactor_debug: LLMDebugInfo | None = None,
+    ) -> TwoPhaseActionResponse:
+        """Process a browse action (survey surroundings).
+
+        BROWSE surveys the current location without changing state.
+        The narrator generates a comprehensive description of visible
+        entities (items, NPCs, exits, details).
+
+        Args:
+            intent: The parsed BROWSE ActionIntent
+            raw_input: The original player input string
+            interactor_debug: Debug info from Interactor (if used)
+
+        Returns:
+            TwoPhaseActionResponse with scene description
+        """
+        state = self.state_manager.get_state()
+        world = self.state_manager.world_data
+
+        # Build perception snapshot
+        snapshot = self.visibility_resolver.build_snapshot(state, world)
+
+        # Create SCENE_BROWSED event with visible entities
+        event = Event(
+            type=EventType.SCENE_BROWSED,
+            subject=state.current_location,
+            context={
+                "first_visit": False,  # Manual browse is never "first visit"
+                "is_manual_browse": True,
+                "visible_items": [item.name for item in snapshot.visible_items],
+                "visible_npcs": [npc.name for npc in snapshot.visible_npcs],
+                "visible_exits": [
+                    {"direction": e.direction, "destination": e.destination_name}
+                    for e in snapshot.visible_exits
+                ],
+            },
+        )
+        events = [event]
+
+        # Get narration history for context
+        history = state.narration_history
+
+        # Generate narrative with history for variation
+        narrative, narrator_debug = await self.narrator.narrate(
+            events, snapshot, history=history
+        )
+
+        # Increment turn (browsing counts as a turn)
+        self.state_manager.increment_turn()
+
+        # Store narration in history
+        self._store_narration(narrative, state.current_location, "scene_browsed")
+
+        pipeline_debug = self._build_pipeline_debug(
+            raw_input=raw_input,
+            intent=intent,
+            validation_result=None,  # BROWSE always valid
+            events=events,
+            narrator_debug=narrator_debug,
+            interactor_debug=interactor_debug,
+        )
+
+        # Log the turn
+        self._log_turn(
+            raw_input=raw_input,
+            intent=intent,
+            validation_result=None,
+            events=events,
+            narrator_debug=narrator_debug,
+            narrative=narrative,
+            interactor_debug=interactor_debug,
+        )
+
+        return TwoPhaseActionResponse(
+            narrative=narrative,
+            state=self.state_manager.get_state(),
+            events=[e.model_dump() for e in events],
+            pipeline_debug=pipeline_debug,
+        )
+
     async def _process_unsupported(
         self,
         intent: ActionIntent | None,
@@ -794,3 +923,37 @@ class TwoPhaseProcessor:
             narrator_debug=narrator_debug,
             narrative=narrative,
         )
+
+    def _store_narration(
+        self,
+        narrative: str,
+        location_id: str,
+        event_type: str,
+    ) -> None:
+        """Store a narration in the history for style variation.
+
+        Maintains a rolling window of the last 5 narrations.
+
+        Args:
+            narrative: The narrative text generated
+            location_id: Where the narration occurred
+            event_type: Type of event that triggered the narration
+        """
+        state = self.state_manager.get_state()
+
+        # Create new entry
+        entry = NarrationEntry(
+            text=narrative,
+            location_id=location_id,
+            turn=state.turn_count,
+            event_type=event_type,
+        )
+
+        # Add to history (cap at 5 entries)
+        history = list(state.narration_history)
+        history.append(entry)
+        if len(history) > 5:
+            history = history[-5:]
+
+        # Update state with new history
+        self.state_manager.update_narration_history(history)

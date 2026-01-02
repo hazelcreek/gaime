@@ -15,6 +15,25 @@ from pydantic import BaseModel, Field
 from app.models.game import LLMDebugInfo
 
 
+class NarrationEntry(BaseModel):
+    """A single narration with context for style variation.
+
+    Used to track recent narrations so the Narrator can avoid
+    repetitive phrasing and adapt tone based on history.
+
+    Attributes:
+        text: The full narration text
+        location_id: Where the narration occurred
+        turn: The turn number when this was generated
+        event_type: Type of event that triggered the narration
+    """
+
+    text: str
+    location_id: str
+    turn: int
+    event_type: str  # "scene_browsed", "location_changed", etc.
+
+
 class TwoPhaseDebugInfo(BaseModel):
     """Debug info capturing the full two-phase pipeline.
 
@@ -57,7 +76,7 @@ class TwoPhaseGameState(BaseModel):
     Key differences:
         - visited_locations is a set (not list) for efficient first-visit detection
         - container_states tracks open/closed state of containers
-        - No narrative_memory (two-phase uses different context approach)
+        - narration_history tracks recent narrations for style variation
 
     Attributes:
         session_id: Unique identifier for this game session
@@ -68,6 +87,7 @@ class TwoPhaseGameState(BaseModel):
         container_states: Mapping of container_id to is_open state
         turn_count: Number of turns taken
         status: Game status - "playing", "won", or "lost"
+        narration_history: Last 5 narrations for style variation (rolling window)
     """
 
     session_id: str
@@ -78,6 +98,7 @@ class TwoPhaseGameState(BaseModel):
     container_states: dict[str, bool] = Field(default_factory=dict)
     turn_count: int = 0
     status: str = "playing"
+    narration_history: list[NarrationEntry] = Field(default_factory=list)
 
     model_config = {"validate_assignment": True}
 

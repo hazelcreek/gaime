@@ -16,6 +16,7 @@ class TestEventType:
     def test_movement_events(self) -> None:
         """Movement event types are valid."""
         assert EventType.LOCATION_CHANGED == "location_changed"
+        assert EventType.SCENE_BROWSED == "scene_browsed"
 
     def test_item_events(self) -> None:
         """Item event types are valid."""
@@ -86,6 +87,29 @@ class TestEvent:
         assert event.state_changes == {}
         assert event.context == {}
         assert event.primary is True  # Default
+
+    def test_scene_browsed_event(self) -> None:
+        """SCENE_BROWSED event can include visible entities."""
+        event = Event(
+            type=EventType.SCENE_BROWSED,
+            subject="main_hallway",
+            context={
+                "first_visit": True,
+                "is_manual_browse": False,
+                "visible_items": ["rusty_key", "old_letter"],
+                "visible_npcs": ["butler_jenkins"],
+                "visible_exits": [
+                    {"direction": "north", "destination": "library"},
+                    {"direction": "east", "destination": "kitchen"},
+                ],
+            },
+        )
+
+        assert event.type == EventType.SCENE_BROWSED
+        assert event.subject == "main_hallway"
+        assert event.context["first_visit"] is True
+        assert len(event.context["visible_items"]) == 2
+        assert len(event.context["visible_exits"]) == 2
 
     def test_with_subject(self) -> None:
         """Event can have a subject entity."""

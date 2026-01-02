@@ -20,6 +20,7 @@ from app.models.event import Event, EventType, RejectionEvent
 
 if TYPE_CHECKING:
     from app.models.perception import PerceptionSnapshot
+    from app.models.two_phase_state import NarrationEntry
     from app.models.world import WorldData
 
 
@@ -63,17 +64,19 @@ class NarratorAI:
         self,
         events: list[Event],
         snapshot: "PerceptionSnapshot",
+        history: list["NarrationEntry"] | None = None,
     ) -> tuple[str, LLMDebugInfo | None]:
         """Generate narrative prose from events.
 
         Args:
             events: List of events to narrate
             snapshot: What the player can currently perceive
+            history: Recent narration history for style variation
 
         Returns:
             Tuple of (narrative text, debug info if enabled)
         """
-        system_prompt = self._build_system_prompt(snapshot)
+        system_prompt = self._build_system_prompt(snapshot, history)
         user_prompt = self._build_user_prompt(events, snapshot)
 
         messages = [
@@ -104,11 +107,16 @@ class NarratorAI:
         narrative = parsed.get("narrative", "Something happens...")
         return narrative, debug_info
 
-    def _build_system_prompt(self, snapshot: "PerceptionSnapshot") -> str:
+    def _build_system_prompt(
+        self,
+        snapshot: "PerceptionSnapshot",
+        history: list["NarrationEntry"] | None = None,
+    ) -> str:
         """Build the system prompt with world and location context.
 
         Args:
             snapshot: Current perception snapshot
+            history: Recent narration history for style variation
 
         Returns:
             Formatted system prompt
@@ -146,6 +154,9 @@ class NarratorAI:
         # Get hero name
         hero_name = getattr(world, "hero_name", "the hero") or "the hero"
 
+        # Format narration history for variation
+        history_section = self._format_history_section(history, snapshot.location_id)
+
         # Load prompt template
         prompt_template = get_loader().get_prompt("narrator", "system_prompt.txt")
 
@@ -159,7 +170,57 @@ class NarratorAI:
             exits_description=exits_description,
             items_description=items_description,
             inventory_description=inventory_description,
+            narration_history=history_section,
         )
+
+    def _format_history_section(
+        self,
+        history: list["NarrationEntry"] | None,
+        current_location_id: str,
+    ) -> str:
+        """Format narration history for the system prompt.
+
+        Formats recent narrations to help avoid repetition:
+        - Last 3 entries: full text with location context
+        - Entries 4-5: one-line summaries
+
+        Args:
+            history: Recent narration history
+            current_location_id: Current location for context
+
+        Returns:
+            Formatted history section string
+        """
+        if not history:
+            return "No previous narrations in this session."
+
+        lines = []
+
+        # Split into recent (full) and older (summary)
+        recent = history[-3:] if len(history) >= 3 else history
+        older = history[:-3] if len(history) > 3 else []
+
+        if recent:
+            lines.append("### Recent (full text):")
+            for entry in reversed(recent):  # Most recent first
+                loc_marker = (
+                    "(same location)"
+                    if entry.location_id == current_location_id
+                    else ""
+                )
+                # Show full text for recent entries (for phrase avoidance)
+                lines.append(
+                    f"[Turn {entry.turn}, {entry.location_id}] {loc_marker}\n{entry.text}"
+                )
+
+        if older:
+            lines.append("\n### Older (summaries):")
+            for entry in reversed(older):
+                # First sentence only
+                first_sentence = entry.text.split(".")[0] + "."
+                lines.append(f"[Turn {entry.turn}] {first_sentence}")
+
+        return "\n".join(lines)
 
     def _build_user_prompt(
         self,
@@ -198,7 +259,9 @@ class NarratorAI:
         Returns:
             Event description string
         """
-        if event.type == EventType.LOCATION_CHANGED:
+        if event.type == EventType.SCENE_BROWSED:
+            return self._describe_scene_browsed(event, snapshot)
+        elif event.type == EventType.LOCATION_CHANGED:
             return self._describe_location_changed(event, snapshot)
         elif event.type == EventType.ACTION_REJECTED:
             return self._describe_rejection(event)
@@ -213,6 +276,109 @@ class NarratorAI:
         else:
             # Generic event description
             return f"Event: {event.type.value} - {event.subject or 'unknown'}"
+
+    def _describe_scene_browsed(
+        self,
+        event: Event,
+        snapshot: "PerceptionSnapshot",
+    ) -> str:
+        """Describe a SCENE_BROWSED event.
+
+        This event triggers comprehensive scene description including all
+        visible items, NPCs, exits, and location details.
+
+        Args:
+            event: The scene browsed event
+            snapshot: Current perception snapshot
+
+        Returns:
+            Event description
+        """
+        context = event.context
+        is_opening = context.get("is_opening", False)
+        first_visit = context.get("first_visit", False)
+        is_manual_browse = context.get("is_manual_browse", False)
+        from_location = context.get("from_location")
+        direction = context.get("direction")
+
+        lines = [
+            f"### SCENE_BROWSED: Comprehensive scene description for {snapshot.location_name}"
+        ]
+
+        if is_opening:
+            lines.append("- This is the OPENING of the game")
+            lines.append("- Set the scene dramatically and theatrically")
+            lines.append("- Establish atmosphere, stakes, and situation")
+            lines.append("- Make the player feel immersed immediately")
+
+            # Include premise and starting situation for context
+            premise = context.get("premise")
+            starting_situation = context.get("starting_situation")
+            hero_name = context.get("hero_name")
+
+            if premise:
+                lines.append("\n### Premise (explain this to the player):")
+                lines.append(premise)
+
+            if starting_situation:
+                lines.append("\n### Starting Situation (weave this into the opening):")
+                lines.append(starting_situation)
+
+            if hero_name:
+                lines.append(f"\n### Player Character: {hero_name}")
+                lines.append("- Address them by name to personalize the opening")
+        elif first_visit:
+            lines.append("- This is the player's FIRST VISIT to this location")
+            lines.append("- Provide a vivid, complete description")
+            lines.append("- Establish the atmosphere strongly")
+        elif is_manual_browse:
+            lines.append("- Player is LOOKING AROUND manually")
+            lines.append("- Check narration history above for repetition")
+            lines.append("- If player has browsed here repeatedly, be more concise")
+            lines.append("- Add subtle irony if nothing has changed")
+
+        if direction:
+            lines.append(f"- Player traveled: {direction}")
+
+        if from_location:
+            from_loc = self.world_data.get_location(from_location)
+            from_name = from_loc.name if from_loc else from_location
+            lines.append(f"- Came from: {from_name}")
+
+        lines.append(f"\n- Atmosphere: {snapshot.location_atmosphere or 'unspecified'}")
+
+        # Visible items
+        visible_items = context.get("visible_items", [])
+        if visible_items:
+            lines.append("\n### Visible Items to Mention:")
+            for item_name in visible_items:
+                lines.append(f"- {item_name}")
+        else:
+            lines.append("\n### Items: None visible")
+
+        # Visible NPCs
+        visible_npcs = context.get("visible_npcs", [])
+        if visible_npcs:
+            lines.append("\n### NPCs Present:")
+            for npc_name in visible_npcs:
+                lines.append(f"- {npc_name}")
+
+        # Visible exits
+        visible_exits = context.get("visible_exits", [])
+        if visible_exits:
+            lines.append("\n### Available Exits:")
+            for exit_info in visible_exits:
+                lines.append(
+                    f"- {exit_info['direction']}: leads to {exit_info['destination']}"
+                )
+
+        lines.append("\n### Instructions:")
+        lines.append("- Weave ALL visible elements naturally into prose (not a list)")
+        lines.append("- Make exits feel like natural parts of the space")
+        lines.append("- Give items presence without over-describing")
+        lines.append("- If NPCs present, briefly note their presence/activity")
+
+        return "\n".join(lines)
 
     def _describe_location_changed(
         self,
@@ -244,8 +410,8 @@ class NarratorAI:
             lines.append("- Establish atmosphere and introduce the location")
         elif first_visit:
             lines.append("- This is the player's FIRST VISIT to this location")
-            lines.append("- Describe the location in detail")
-            lines.append("- Establish the atmosphere")
+            lines.append("- Provide a vivid, complete description")
+            lines.append("- Establish the atmosphere strongly")
         else:
             lines.append("- Player has been here before")
             lines.append("- Acknowledge familiarity briefly")
@@ -260,6 +426,36 @@ class NarratorAI:
             lines.append(f"- Came from: {from_name}")
 
         lines.append(f"- Atmosphere: {snapshot.location_atmosphere or 'unspecified'}")
+
+        # For first visits, include visible entities for comprehensive description
+        if first_visit or is_opening:
+            visible_items = context.get("visible_items", [])
+            if visible_items:
+                lines.append("\n### Visible Items to Mention:")
+                for item_name in visible_items:
+                    lines.append(f"- {item_name}")
+
+            visible_npcs = context.get("visible_npcs", [])
+            if visible_npcs:
+                lines.append("\n### NPCs Present:")
+                for npc_name in visible_npcs:
+                    lines.append(f"- {npc_name}")
+
+            visible_exits = context.get("visible_exits", [])
+            if visible_exits:
+                lines.append("\n### Available Exits:")
+                for exit_info in visible_exits:
+                    lines.append(
+                        f"- {exit_info['direction']}: leads to {exit_info['destination']}"
+                    )
+
+            lines.append("\n### Instructions:")
+            lines.append(
+                "- Weave ALL visible elements naturally into prose (not a list)"
+            )
+            lines.append("- Make exits feel like natural parts of the space")
+            lines.append("- Give items presence without over-describing")
+            lines.append("- If NPCs present, briefly note their presence/activity")
 
         return "\n".join(lines)
 

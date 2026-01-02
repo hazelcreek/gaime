@@ -22,15 +22,18 @@ if TYPE_CHECKING:
 class RuleBasedParser:
     """Parse common actions without LLM.
 
-    This parser handles movement commands using regex patterns.
+    This parser handles movement and browse commands using regex patterns.
     For input that doesn't match known patterns, it returns None
     to indicate the input cannot be handled.
 
-    Supported patterns (Phase 1 - movement only):
-        - Cardinal directions: north, n, south, s, east, e, west, w
-        - Vertical: up, u, down, d
-        - Go commands: go north, go n, etc.
-        - Return: back, leave, exit
+    Supported patterns:
+        Movement:
+            - Cardinal directions: north, n, south, s, east, e, west, w
+            - Vertical: up, u, down, d
+            - Go commands: go north, go n, etc.
+            - Return: back, leave, exit
+        Browse:
+            - look, look around, l, survey, scan
 
     Example:
         >>> parser = RuleBasedParser()
@@ -39,6 +42,10 @@ class RuleBasedParser:
         True
         >>> intent.target_id
         'north'
+
+        >>> intent = parser.parse("look around", state, world)
+        >>> intent.action_type == ActionType.BROWSE
+        True
     """
 
     # Direction patterns: maps regex pattern to (normalized_direction, verb)
@@ -59,6 +66,14 @@ class RuleBasedParser:
         r"^southwest|sw$": ("southwest", "go"),
     }
 
+    # Browse patterns: look around, l, survey, scan
+    BROWSE_PATTERNS: list[str] = [
+        r"^look(\s+around)?$",
+        r"^l$",
+        r"^survey$",
+        r"^scan$",
+    ]
+
     def parse(
         self,
         raw_input: str,
@@ -76,6 +91,17 @@ class RuleBasedParser:
             ActionIntent if parsing succeeds, None if input not recognized
         """
         normalized = raw_input.lower().strip()
+
+        # Try browse patterns first (before movement, since "l" is short)
+        for pattern in self.BROWSE_PATTERNS:
+            if re.match(pattern, normalized):
+                return ActionIntent(
+                    action_type=ActionType.BROWSE,
+                    raw_input=raw_input,
+                    verb="look",
+                    target_id="",  # BROWSE has no target
+                    confidence=1.0,
+                )
 
         # Try movement patterns
         for pattern, (direction, verb) in self.DIRECTION_PATTERNS.items():

@@ -38,18 +38,18 @@ class ActionType(str, Enum):
     These represent the mechanical action types that can change game state.
 
     Categories:
-        Movement: MOVE
+        Movement: MOVE, BROWSE
         Object Interaction: EXAMINE, TAKE, DROP, USE, OPEN, CLOSE
         Communication: TALK, ASK, GIVE, SHOW
         Environment: LISTEN, SEARCH
         Meta: WAIT, INVENTORY, HELP
 
-    Note: "look around" / bare "look" is treated as re-narration of the
-    current location, not as a separate ActionType. "look at X" is EXAMINE.
+    Note: "look at X" is EXAMINE. "look around" / bare "look" is BROWSE.
     """
 
     # Movement
     MOVE = "move"  # Navigate between locations
+    BROWSE = "browse"  # Survey surroundings (no target required)
 
     # Object Interaction
     EXAMINE = "examine"  # Look at something closely (includes "look at X")

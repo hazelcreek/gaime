@@ -5,9 +5,12 @@ Tests cover:
 - visited_locations set behavior
 - container_states tracking
 - Field validation
+- NarrationEntry model
+- narration_history tracking
 """
 
 from app.models.two_phase_state import (
+    NarrationEntry,
     TwoPhaseGameState,
     TwoPhaseActionResponse,
     TwoPhaseDebugInfo,
@@ -40,6 +43,7 @@ class TestTwoPhaseGameState:
         assert state.container_states == {}
         assert state.turn_count == 0
         assert state.status == "playing"
+        assert state.narration_history == []
 
     def test_visited_locations_is_set(self) -> None:
         """visited_locations is a set for efficient membership checking."""
@@ -106,6 +110,98 @@ class TestTwoPhaseGameState:
                 status=status,
             )
             assert state.status == status
+
+
+class TestNarrationEntry:
+    """Tests for NarrationEntry model."""
+
+    def test_create_narration_entry(self) -> None:
+        """NarrationEntry can be created with all fields."""
+        entry = NarrationEntry(
+            text="You stand in a dimly lit hallway.",
+            location_id="main_hallway",
+            turn=3,
+            event_type="scene_browsed",
+        )
+
+        assert entry.text == "You stand in a dimly lit hallway."
+        assert entry.location_id == "main_hallway"
+        assert entry.turn == 3
+        assert entry.event_type == "scene_browsed"
+
+    def test_narration_entry_serialization(self) -> None:
+        """NarrationEntry can be serialized to dict."""
+        entry = NarrationEntry(
+            text="The lockers line the walls.",
+            location_id="locker_room",
+            turn=5,
+            event_type="location_changed",
+        )
+
+        data = entry.model_dump()
+        assert data["text"] == "The lockers line the walls."
+        assert data["location_id"] == "locker_room"
+        assert data["turn"] == 5
+        assert data["event_type"] == "location_changed"
+
+
+class TestNarrationHistory:
+    """Tests for narration_history in TwoPhaseGameState."""
+
+    def test_narration_history_empty_by_default(self) -> None:
+        """narration_history is empty by default."""
+        state = TwoPhaseGameState(
+            session_id="test-session",
+            current_location="start_room",
+        )
+
+        assert state.narration_history == []
+        assert isinstance(state.narration_history, list)
+
+    def test_narration_history_with_entries(self) -> None:
+        """narration_history can contain NarrationEntry objects."""
+        entries = [
+            NarrationEntry(
+                text="Opening scene...",
+                location_id="main_hallway",
+                turn=0,
+                event_type="scene_browsed",
+            ),
+            NarrationEntry(
+                text="You examine the lockers.",
+                location_id="main_hallway",
+                turn=1,
+                event_type="item_examined",
+            ),
+        ]
+
+        state = TwoPhaseGameState(
+            session_id="test-session",
+            current_location="main_hallway",
+            narration_history=entries,
+        )
+
+        assert len(state.narration_history) == 2
+        assert state.narration_history[0].event_type == "scene_browsed"
+        assert state.narration_history[1].turn == 1
+
+    def test_narration_history_preserves_order(self) -> None:
+        """narration_history preserves insertion order."""
+        entries = [
+            NarrationEntry(
+                text=f"Turn {i}", location_id="room", turn=i, event_type="test"
+            )
+            for i in range(5)
+        ]
+
+        state = TwoPhaseGameState(
+            session_id="test-session",
+            current_location="room",
+            narration_history=entries,
+        )
+
+        for i, entry in enumerate(state.narration_history):
+            assert entry.turn == i
 
 
 class TestTwoPhaseActionResponse:

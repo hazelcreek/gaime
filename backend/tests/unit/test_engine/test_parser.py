@@ -137,6 +137,57 @@ class TestRuleBasedParser:
         assert intent.target_id == "back"
         assert intent.verb == "exit"
 
+    # Browse patterns
+
+    def test_parse_look(self, parser, state, world) -> None:
+        """'look' parses to BROWSE intent."""
+        intent = parser.parse("look", state, world)
+
+        assert intent is not None
+        assert intent.action_type == ActionType.BROWSE
+        assert intent.target_id == ""
+        assert intent.verb == "look"
+        assert intent.confidence == 1.0
+
+    def test_parse_look_around(self, parser, state, world) -> None:
+        """'look around' parses to BROWSE intent."""
+        intent = parser.parse("look around", state, world)
+
+        assert intent is not None
+        assert intent.action_type == ActionType.BROWSE
+        assert intent.target_id == ""
+        assert intent.verb == "look"
+
+    def test_parse_l(self, parser, state, world) -> None:
+        """'l' parses to BROWSE intent."""
+        intent = parser.parse("l", state, world)
+
+        assert intent is not None
+        assert intent.action_type == ActionType.BROWSE
+        assert intent.target_id == ""
+
+    def test_parse_survey(self, parser, state, world) -> None:
+        """'survey' parses to BROWSE intent."""
+        intent = parser.parse("survey", state, world)
+
+        assert intent is not None
+        assert intent.action_type == ActionType.BROWSE
+        assert intent.verb == "look"
+
+    def test_parse_scan(self, parser, state, world) -> None:
+        """'scan' parses to BROWSE intent."""
+        intent = parser.parse("scan", state, world)
+
+        assert intent is not None
+        assert intent.action_type == ActionType.BROWSE
+
+    def test_look_at_not_browse(self, parser, state, world) -> None:
+        """'look at X' should NOT match BROWSE (should return None for Interactor)."""
+        intent = parser.parse("look at the desk", state, world)
+
+        # This should NOT be parsed as BROWSE - Interactor handles it as EXAMINE
+        assert intent is None
+
     # Non-movement commands return None
 
     def test_examine_returns_none(self, parser, state, world) -> None:

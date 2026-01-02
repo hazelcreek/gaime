@@ -31,7 +31,7 @@ class EventType(str, Enum):
     """Types of events that can occur in the game.
 
     Categories:
-        Movement: LOCATION_CHANGED
+        Movement: LOCATION_CHANGED, SCENE_BROWSED
         Items: ITEM_EXAMINED, ITEM_TAKEN, ITEM_DROPPED, ITEM_USED, ITEM_REVEALED, ITEM_CONSUMED
         Containers: CONTAINER_OPENED, CONTAINER_CLOSED
         Discovery: DETAIL_EXAMINED, SECRET_DISCOVERED, EXIT_REVEALED
@@ -42,6 +42,7 @@ class EventType(str, Enum):
 
     # Movement
     LOCATION_CHANGED = "location_changed"
+    SCENE_BROWSED = "scene_browsed"  # Player surveyed the location
 
     # Items
     ITEM_EXAMINED = "item_examined"

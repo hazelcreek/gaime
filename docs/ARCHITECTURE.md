@@ -586,10 +586,10 @@ The two-phase engine is an alternative action processing architecture that separ
 │   Player Input: "examine the letter" / "go north"                       │
 │         │                                                               │
 │         ▼                                                               │
-│   ┌─────────────────┐   Movement?   ┌──────────────┐                    │
-│   │ RuleBasedParser │──────────────►│ ActionIntent │                    │
+│   ┌─────────────────┐  Movement/    ┌──────────────┐                    │
+│   │ RuleBasedParser │──Browse?────►│ ActionIntent │                    │
 │   └────────┬────────┘               └──────────────┘                    │
-│            │ Not movement                                               │
+│            │ Complex action                                             │
 │            ▼                                                            │
 │   ┌─────────────────┐               ┌──────────────────────────────┐    │
 │   │  InteractorAI   │──────────────►│ ActionIntent or FlavorIntent │    │
@@ -605,7 +605,8 @@ The two-phase engine is an alternative action processing architecture that separ
 │            ▼                                                            │
 │   ┌────────────────────────┐        ┌────────────────────────────────┐  │
 │   │ TwoPhaseStateManager   │───────►│ Event (LOCATION_CHANGED,       │  │
-│   │ - Apply state change   │        │ ITEM_EXAMINED, ITEM_TAKEN, etc)│  │
+│   │ - Apply state change   │        │ SCENE_BROWSED, ITEM_EXAMINED,  │  │
+│   │ - Store narration      │        │ ITEM_TAKEN, etc)               │  │
 │   └────────┬───────────────┘        └────────────────────────────────┘  │
 │            │                                                            │
 │            ▼                                                            │
@@ -626,11 +627,33 @@ The two-phase engine is an alternative action processing architecture that separ
 | Model | Location | Purpose |
 |-------|----------|---------|
 | `TwoPhaseGameState` | `models/two_phase_state.py` | Game state (separate from classic) |
+| `NarrationEntry` | `models/two_phase_state.py` | Single narration for style history |
 | `ActionIntent` | `models/intent.py` | Parsed state-changing action |
 | `FlavorIntent` | `models/intent.py` | Atmospheric action (no state change) |
 | `Event` | `models/event.py` | Confirmed game occurrence |
 | `PerceptionSnapshot` | `models/perception.py` | What player can see |
 | `ValidationResult` | `models/validation.py` | Validation outcome |
+
+### TwoPhaseGameState
+
+```python
+class TwoPhaseGameState:
+    session_id: str
+    current_location: str
+    inventory: list[str]
+    flags: dict[str, bool]
+    visited_locations: set[str]
+    container_states: dict[str, bool]
+    turn_count: int
+    status: str  # "playing", "won", "lost"
+    narration_history: list[NarrationEntry]  # Last 5 narrations for style variation
+```
+
+**Narration History vs Narrative Memory**:
+- **Narrative Memory** (classic engine): Tracks *what happened* for content continuity
+- **Narration History** (two-phase): Tracks *what was said* for style variation
+
+The narrator receives the last 5 narrations to avoid repetitive phrasing and adapt tone.
 
 ### Key Classes
 

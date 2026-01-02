@@ -12,7 +12,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from app.models.two_phase_state import TwoPhaseGameState
+from app.models.two_phase_state import NarrationEntry, TwoPhaseGameState
 from app.models.world import WorldData, Location
 from app.engine.world import WorldLoader
 
@@ -241,3 +241,11 @@ class TwoPhaseStateManager:
             True,
             victory.narrative or "Congratulations! You have completed the adventure.",
         )
+
+    def update_narration_history(self, history: list[NarrationEntry]) -> None:
+        """Update the narration history.
+
+        Args:
+            history: The new narration history list
+        """
+        self._state.narration_history = history

@@ -131,13 +131,48 @@ reload_category("game_master")
 | Game Master (Classic) | `game_master/system_prompt.txt` | `game_master.py` | Main system prompt for all game actions |
 | Game Master (Classic) | `game_master/opening_prompt.txt` | `game_master.py` | Generates opening narrative for new games |
 | Interactor (Two-Phase) | `interactor/system_prompt.txt` | `interactor.py` | Parses player input, resolves entities |
-| Narrator (Two-Phase) | `narrator/system_prompt.txt` | `narrator.py` | Generates prose from confirmed events |
+| Narrator (Two-Phase) | `narrator/system_prompt.txt` | `narrator.py` | Generates prose from confirmed events (with history context) |
 | World Builder (TUI) | `world_builder_prompt.txt` | `gaime_builder/` | Generates world YAML from design brief |
 | World Builder (TUI) | `design_brief_prompt.txt` | `gaime_builder/` | First pass: creates design brief from description |
 | World Builder (TUI) | `fix_error_prompt.txt` | `gaime_builder/` | LLM-assisted fixes for creative validation errors |
 | Image Generator | `image_prompt_template.txt` | `image_generator.py` | Generates scene images for locations |
 | Image Generator | `edit_prompt_template.txt` | `image_generator.py` | Edits base images to add NPCs (variants) |
 | Image Generator | `interactive_elements_section.txt` | `image_generator.py` | Section describing exits/items/NPCs in images |
+
+### Narrator History Context (Two-Phase Engine)
+
+The two-phase engine's Narrator receives narration history for style variation:
+
+```
+## Recent Narration History
+
+Use this to AVOID repetition in phrasing, imagery, and structure.
+
+### Recent (full text):
+[Turn 5, main_hallway] (same location)
+The linoleum floor stretches before you...
+
+[Turn 4, cafeteria]
+The smell of mystery meat lingers in the air...
+
+### Older (summaries):
+[Turn 2] Player examined the trophy case.
+```
+
+**Purpose**: Prevent repetitive phrasing, AI clichés, and content repetition.
+
+**Anti-Cliché Guidance**: The prompt includes explicit instructions to avoid:
+- Metaphorical "humming" (actual machine humming is fine)
+- "find yourself"
+- "seems to" / "appears to"
+- "the air is thick with"
+- "echoes of" (unless actual sound)
+- "weight of" (silence, history, etc.)
+
+**Adaptive Tone**: When history shows repeated browsing at the same location, the narrator:
+- Responds with increasing brevity
+- Adds subtle irony ("The lockers remain stubbornly locker-like.")
+- Gently nudges the player to explore elsewhere
 
 ### System Prompt Structure
 

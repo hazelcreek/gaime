@@ -30,7 +30,7 @@ class TestTwoPhaseProcessorIntegration:
     def mock_narrator(self, mock_llm_response):
         """Create a mock narrator that returns test narrative."""
 
-        async def mock_narrate(events, snapshot):
+        async def mock_narrate(events, snapshot, history=None):
             return "You enter a new room.", None
 
         narrator = MagicMock()
@@ -63,6 +63,7 @@ class TestTwoPhaseProcessorIntegration:
         manager.move_to.return_value = True
         manager.check_victory.return_value = (False, "")
         manager.increment_turn.return_value = None
+        manager.update_narration_history.return_value = None
 
         processor = TwoPhaseProcessor(manager, debug=False)
         processor.narrator = mock_narrator
@@ -208,13 +209,14 @@ class TestTwoPhaseProcessorIntegration:
 
         assert narrative is not None
         assert len(narrative) > 0
-        # Narrator should be called with LOCATION_CHANGED event
+        # Narrator should be called with SCENE_BROWSED event (comprehensive opening)
         processor.narrator.narrate.assert_called_once()
         call_args = processor.narrator.narrate.call_args
         events = call_args[0][0]
         assert len(events) == 1
-        assert events[0].type == EventType.LOCATION_CHANGED
+        assert events[0].type == EventType.SCENE_BROWSED
         assert events[0].context.get("is_opening") is True
+        assert events[0].context.get("first_visit") is True
 
     # Game over tests
 
@@ -292,7 +294,7 @@ class TestTwoPhaseProcessorWithRealState:
     def mock_narrator_for_real(self):
         """Create mock narrator for tests with real state manager."""
 
-        async def mock_narrate(events, snapshot):
+        async def mock_narrate(events, snapshot, history=None):
             return "Test narrative.", None
 
         narrator = MagicMock()
@@ -316,7 +318,7 @@ class TestTwoPhaseProcessorDirectionParsing:
     def processor_with_mock(self, sample_world_data):
         """Create processor with mocked narrator."""
 
-        async def mock_narrate(events, snapshot):
+        async def mock_narrate(events, snapshot, history=None):
             return "Test narrative.", None
 
         manager = MagicMock(spec=TwoPhaseStateManager)
@@ -335,6 +337,7 @@ class TestTwoPhaseProcessorDirectionParsing:
         manager.move_to.return_value = True
         manager.check_victory.return_value = (False, "")
         manager.increment_turn.return_value = None
+        manager.update_narration_history.return_value = None
 
         processor = TwoPhaseProcessor(manager, debug=False)
         processor.narrator = MagicMock()
