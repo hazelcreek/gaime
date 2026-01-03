@@ -1,5 +1,7 @@
 """
-Game state management - Handles game sessions and state transitions
+Game state management for the classic engine.
+
+Handles game sessions and state transitions.
 """
 
 from __future__ import annotations
@@ -8,7 +10,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from app.models.game import (
+from app.engine.classic.models import (
     GameState,
     NarrativeExchange,
     NPCInteractionMemory,

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
+# LLMDebugInfo is a shared model used by both engines
 from app.models.game import LLMDebugInfo
 
 

@@ -12,8 +12,8 @@ Tests cover:
 
 import pytest
 
-from app.engine.two_phase_state import TwoPhaseStateManager
-from app.models.two_phase_state import TwoPhaseGameState
+from app.engine.two_phase.state import TwoPhaseStateManager
+from app.engine.two_phase.models.state import TwoPhaseGameState
 
 
 class TestTwoPhaseStateManagerInit:

@@ -7,7 +7,12 @@ Tests cover:
 - RejectionCode enum values
 """
 
-from app.models.event import Event, EventType, RejectionCode, RejectionEvent
+from app.engine.two_phase.models.event import (
+    Event,
+    EventType,
+    RejectionCode,
+    RejectionEvent,
+)
 
 
 class TestEventType:

@@ -12,10 +12,10 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
-from app.models.intent import ActionIntent, ActionType
+from app.engine.two_phase.models.intent import ActionIntent, ActionType
 
 if TYPE_CHECKING:
-    from app.models.two_phase_state import TwoPhaseGameState
+    from app.engine.two_phase.models.state import TwoPhaseGameState
     from app.models.world import WorldData
 
 

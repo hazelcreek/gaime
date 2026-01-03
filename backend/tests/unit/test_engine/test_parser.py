@@ -10,9 +10,9 @@ Tests cover:
 
 import pytest
 
-from app.engine.parser import RuleBasedParser
-from app.models.intent import ActionType
-from app.models.two_phase_state import TwoPhaseGameState
+from app.engine.two_phase.parser import RuleBasedParser
+from app.engine.two_phase.models.intent import ActionType
+from app.engine.two_phase.models.state import TwoPhaseGameState
 
 
 class TestRuleBasedParser:

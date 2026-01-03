@@ -11,14 +11,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from app.models.perception import (
+from app.engine.two_phase.models.perception import (
     PerceptionSnapshot,
     VisibleEntity,
     VisibleExit,
 )
 
 if TYPE_CHECKING:
-    from app.models.two_phase_state import TwoPhaseGameState
+    from app.engine.two_phase.models.state import TwoPhaseGameState
     from app.models.world import Location, WorldData
 
 

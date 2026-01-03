@@ -27,7 +27,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, model_validator
 
-from app.models.event import RejectionCode, RejectionEvent, EventType
+from app.engine.two_phase.models.event import RejectionCode, RejectionEvent, EventType
 
 
 class ValidationResult(BaseModel):

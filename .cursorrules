@@ -29,8 +29,26 @@ gaime/
 │   └── app/
 │       ├── api/      # REST endpoints
 │       ├── engine/   # Game logic
+│       │   ├── classic/       # Classic single-LLM engine
+│       │   │   ├── models.py  # GameState, ActionResponse, etc.
+│       │   │   ├── processor.py  # ActionProcessor
+│       │   │   └── state.py   # GameStateManager
+│       │   ├── two_phase/     # Two-phase engine (Interactor→Narrator)
+│       │   │   ├── models/    # Intent, Event, Perception, Validation
+│       │   │   ├── validators/  # Movement, Examine, Take validators
+│       │   │   ├── parser.py  # RuleBasedParser
+│       │   │   ├── processor.py  # TwoPhaseProcessor
+│       │   │   ├── state.py   # TwoPhaseStateManager
+│       │   │   └── visibility.py  # DefaultVisibilityResolver
+│       │   ├── protocols.py   # Shared interfaces
+│       │   ├── validator.py   # World YAML validator
+│       │   └── world.py       # WorldLoader (shared)
 │       ├── llm/      # LLM integration
-│       └── models/   # Pydantic schemas
+│       │   ├── classic/       # GameMaster LLM
+│       │   ├── two_phase/     # InteractorAI, NarratorAI
+│       │   ├── client.py      # Shared LiteLLM client
+│       │   └── prompts/       # Prompt templates
+│       └── models/   # Shared Pydantic schemas (world.py, game.py)
 ├── frontend/         # React application
 │   └── src/
 │       ├── components/
@@ -53,6 +71,11 @@ We use a hybrid approach to world creation:
 1. **Game Master (Runtime)**: Processes player actions, generates narrative, updates state
 2. **World Builder (Authoring)**: Generates world content from high-level descriptions
 
+### Two Game Engine Architectures
+The backend supports two distinct engine implementations:
+1. **Classic Engine** (`engine/classic/`): Single-LLM architecture where GameMaster handles everything
+2. **Two-Phase Engine** (`engine/two_phase/`): Separates Interactor (parsing) from Narrator (prose generation)
+
 ### World Definition Schema
 - `world.yaml`: Theme, premise, player setup, global constraints
   - **`starting_situation`**: Explains WHY the player can act now (critical for immersion)
@@ -70,6 +93,9 @@ We use a hybrid approach to world creation:
 - Pydantic models for all data structures
 - Async endpoints in FastAPI
 - Keep game logic in `engine/`, LLM logic in `llm/`
+- **Engine separation**: Classic engine code in `engine/classic/`, two-phase in `engine/two_phase/`
+- **LLM separation**: Classic LLM in `llm/classic/`, two-phase in `llm/two_phase/`
+- **Shared code**: `engine/world.py`, `engine/protocols.py`, `llm/client.py` are shared between engines
 
 ### TypeScript (Frontend)
 - Functional components with hooks
@@ -215,11 +241,22 @@ The game engine uses a two-phase action processing loop. See `planning/two-phase
 | VisibilityResolver | Compute what player can see | Used by validators |
 | NarratorAI | Generate prose from events | Narrative text |
 
-### Key Models (in `backend/app/models/`)
+### Key Models
+
+**Classic Engine** (`engine/classic/models.py`):
+- GameState, ActionResponse, LLMResponse
+- NarrativeExchange, NPCInteractionMemory, MemoryUpdates
+
+**Two-Phase Engine** (`engine/two_phase/models/`):
 - `intent.py`: ActionIntent, FlavorIntent, ActionType
 - `event.py`: Event, RejectionEvent, EventType
 - `perception.py`: PerceptionSnapshot, VisibleEntity
 - `validation.py`: ValidationResult, RejectionCode
+- `state.py`: TwoPhaseGameState, TwoPhaseActionResponse
+
+**Shared** (`models/`):
+- `world.py`: WorldData, Location, NPC, Item
+- `game.py`: LLMDebugInfo (used by both engines)
 
 ## Python Code Design Principles
 
@@ -281,7 +318,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.engine.state import GameStateManager
+    from app.engine.classic.state import GameStateManager
 ```
 
 ### Async Patterns

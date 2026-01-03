@@ -16,11 +16,11 @@ from typing import TYPE_CHECKING
 from app.llm.client import get_completion, parse_json_response, get_model_string
 from app.llm.prompt_loader import get_loader
 from app.models.game import LLMDebugInfo
-from app.models.event import Event, EventType, RejectionEvent
+from app.engine.two_phase.models.event import Event, EventType, RejectionEvent
 
 if TYPE_CHECKING:
-    from app.models.perception import PerceptionSnapshot
-    from app.models.two_phase_state import NarrationEntry
+    from app.engine.two_phase.models.perception import PerceptionSnapshot
+    from app.engine.two_phase.models.state import NarrationEntry
     from app.models.world import WorldData
 
 

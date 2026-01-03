@@ -9,7 +9,7 @@ Tests cover:
 - narration_history tracking
 """
 
-from app.models.two_phase_state import (
+from app.engine.two_phase.models.state import (
     NarrationEntry,
     TwoPhaseGameState,
     TwoPhaseActionResponse,

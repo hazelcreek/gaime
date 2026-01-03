@@ -6,7 +6,7 @@ Tests cover:
 - PerceptionSnapshot creation and structure
 """
 
-from app.models.perception import (
+from app.engine.two_phase.models.perception import (
     PerceptionSnapshot,
     VisibleEntity,
     VisibleExit,

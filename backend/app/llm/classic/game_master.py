@@ -1,5 +1,5 @@
 """
-Game Master - LLM-powered narrative generation and action processing
+Game Master - LLM-powered narrative generation and action processing for classic engine.
 """
 
 import re
@@ -10,7 +10,7 @@ from datetime import datetime
 from app.llm.client import get_completion, parse_json_response, get_model_string
 from app.llm.session_logger import log_llm_interaction
 from app.llm.prompt_loader import get_loader
-from app.models.game import (
+from app.engine.classic.models import (
     LLMResponse,
     StateChanges,
     InventoryChange,
@@ -20,7 +20,7 @@ from app.models.game import (
 )
 
 if TYPE_CHECKING:
-    from app.engine.state import GameStateManager
+    from app.engine.classic.state import GameStateManager
 
 
 def _normalize_action(text: str) -> str:

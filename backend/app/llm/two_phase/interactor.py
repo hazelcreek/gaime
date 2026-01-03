@@ -22,10 +22,15 @@ from typing import TYPE_CHECKING
 from app.llm.client import get_completion, get_model_string, parse_json_response
 from app.llm.prompt_loader import get_loader
 from app.models.game import LLMDebugInfo
-from app.models.intent import ActionIntent, ActionType, FlavorIntent, Intent
+from app.engine.two_phase.models.intent import (
+    ActionIntent,
+    ActionType,
+    FlavorIntent,
+    Intent,
+)
 
 if TYPE_CHECKING:
-    from app.models.perception import PerceptionSnapshot
+    from app.engine.two_phase.models.perception import PerceptionSnapshot
     from app.models.world import WorldData
 
 logger = logging.getLogger(__name__)

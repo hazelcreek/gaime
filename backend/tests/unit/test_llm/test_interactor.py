@@ -10,9 +10,13 @@ Tests cover:
 import pytest
 from unittest.mock import AsyncMock, patch
 
-from app.llm.interactor import InteractorAI
-from app.models.intent import ActionIntent, ActionType, FlavorIntent
-from app.models.perception import PerceptionSnapshot, VisibleEntity, VisibleExit
+from app.llm.two_phase.interactor import InteractorAI
+from app.engine.two_phase.models.intent import ActionIntent, ActionType, FlavorIntent
+from app.engine.two_phase.models.perception import (
+    PerceptionSnapshot,
+    VisibleEntity,
+    VisibleExit,
+)
 
 
 class TestInteractorAI:
@@ -231,7 +235,7 @@ class TestInteractorAI:
         mock_response = '{"type": "action_intent", "action_type": "EXAMINE", "target_id": "old_letter", "verb": "examine", "confidence": 1.0}'
 
         with patch(
-            "app.llm.interactor.get_completion", new_callable=AsyncMock
+            "app.llm.two_phase.interactor.get_completion", new_callable=AsyncMock
         ) as mock_llm:
             mock_llm.return_value = mock_response
 
@@ -248,7 +252,7 @@ class TestInteractorAI:
         mock_response = '{"type": "flavor_intent", "verb": "dance"}'
 
         with patch(
-            "app.llm.interactor.get_completion", new_callable=AsyncMock
+            "app.llm.two_phase.interactor.get_completion", new_callable=AsyncMock
         ) as mock_llm:
             mock_llm.return_value = mock_response
 

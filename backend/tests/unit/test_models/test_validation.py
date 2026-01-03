@@ -9,8 +9,8 @@ Tests cover:
 import pytest
 from pydantic import ValidationError
 
-from app.models.event import EventType, RejectionCode
-from app.models.validation import (
+from app.engine.two_phase.models.event import EventType, RejectionCode
+from app.engine.two_phase.models.validation import (
     ValidationResult,
     invalid_result,
     valid_result,

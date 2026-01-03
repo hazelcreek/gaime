@@ -11,8 +11,8 @@ Tests cover:
 
 import pytest
 
-from app.engine.visibility import DefaultVisibilityResolver
-from app.models.two_phase_state import TwoPhaseGameState
+from app.engine.two_phase.visibility import DefaultVisibilityResolver
+from app.engine.two_phase.models.state import TwoPhaseGameState
 
 
 class TestDefaultVisibilityResolver:

@@ -1390,9 +1390,9 @@ FLAVOR_ACTION: Atmospheric action (no state change)
 
 **Goal**: Create data models and engine selection infrastructure
 
-- [x] Create `models/intent.py` with `ActionIntent`, `FlavorIntent`, `ActionType`
-- [x] Create `models/event.py` with `Event`, `RejectionEvent`, `EventType`
-- [x] Create `models/perception.py` with `PerceptionSnapshot`, `VisibleEntity`
+- [x] Create `engine/two_phase/models/intent.py` with `ActionIntent`, `FlavorIntent`, `ActionType`
+- [x] Create `engine/two_phase/models/event.py` with `Event`, `RejectionEvent`, `EventType`
+- [x] Create `engine/two_phase/models/perception.py` with `PerceptionSnapshot`, `VisibleEntity`
 - [x] Add `EngineVersion` enum (`CLASSIC`, `TWO_PHASE`) in `api/engine.py`
 - [x] Add engine selection to session metadata (out-of-band from GameState)
 - [x] Update API to support engine selection at game start

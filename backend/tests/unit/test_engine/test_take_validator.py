@@ -11,10 +11,10 @@ Tests cover:
 
 import pytest
 
-from app.engine.validators.take import TakeValidator
-from app.models.intent import ActionIntent, ActionType
-from app.models.event import RejectionCode
-from app.models.two_phase_state import TwoPhaseGameState
+from app.engine.two_phase.validators.take import TakeValidator
+from app.engine.two_phase.models.intent import ActionIntent, ActionType
+from app.engine.two_phase.models.event import RejectionCode
+from app.engine.two_phase.models.state import TwoPhaseGameState
 
 
 class TestTakeValidator:

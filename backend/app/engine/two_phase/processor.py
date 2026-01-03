@@ -11,26 +11,31 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from app.engine.parser import RuleBasedParser
-from app.engine.validators.examine import ExamineValidator
-from app.engine.validators.movement import MovementValidator
-from app.engine.validators.take import TakeValidator
-from app.engine.visibility import DefaultVisibilityResolver
-from app.llm.interactor import InteractorAI
-from app.llm.narrator import NarratorAI
+from app.engine.two_phase.parser import RuleBasedParser
+from app.engine.two_phase.validators.examine import ExamineValidator
+from app.engine.two_phase.validators.movement import MovementValidator
+from app.engine.two_phase.validators.take import TakeValidator
+from app.engine.two_phase.visibility import DefaultVisibilityResolver
+from app.llm.two_phase.interactor import InteractorAI
+from app.llm.two_phase.narrator import NarratorAI
 from app.llm.session_logger import log_two_phase_turn
-from app.models.event import Event, EventType
+from app.engine.two_phase.models.event import Event, EventType
 from app.models.game import LLMDebugInfo
-from app.models.intent import ActionIntent, ActionType, FlavorIntent, Intent
-from app.models.two_phase_state import (
+from app.engine.two_phase.models.intent import (
+    ActionIntent,
+    ActionType,
+    FlavorIntent,
+    Intent,
+)
+from app.engine.two_phase.models.state import (
     NarrationEntry,
     TwoPhaseActionResponse,
     TwoPhaseDebugInfo,
 )
-from app.models.validation import ValidationResult
+from app.engine.two_phase.models.validation import ValidationResult
 
 if TYPE_CHECKING:
-    from app.engine.two_phase_state import TwoPhaseStateManager
+    from app.engine.two_phase.state import TwoPhaseStateManager
 
 
 class TwoPhaseProcessor:

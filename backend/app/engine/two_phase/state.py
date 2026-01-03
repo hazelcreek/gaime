@@ -12,7 +12,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from app.models.two_phase_state import NarrationEntry, TwoPhaseGameState
+from app.engine.two_phase.models.state import NarrationEntry, TwoPhaseGameState
 from app.models.world import WorldData, Location
 from app.engine.world import WorldLoader
 

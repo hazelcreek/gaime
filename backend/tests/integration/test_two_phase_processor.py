@@ -12,10 +12,10 @@ Tests cover:
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from app.engine.two_phase import TwoPhaseProcessor
-from app.engine.two_phase_state import TwoPhaseStateManager
-from app.models.two_phase_state import TwoPhaseGameState
-from app.models.event import EventType
+from app.engine.two_phase.processor import TwoPhaseProcessor
+from app.engine.two_phase.state import TwoPhaseStateManager
+from app.engine.two_phase.models.state import TwoPhaseGameState
+from app.engine.two_phase.models.event import EventType
 
 
 class TestTwoPhaseProcessorIntegration:
@@ -130,7 +130,7 @@ class TestTwoPhaseProcessorIntegration:
 
         # Mock the interactor response
         async def mock_interactor_parse(raw_input, snapshot):
-            from app.models.intent import ActionIntent, ActionType
+            from app.engine.two_phase.models.intent import ActionIntent, ActionType
 
             return (
                 ActionIntent(
@@ -156,7 +156,7 @@ class TestTwoPhaseProcessorIntegration:
         processor, manager = processor_with_mock
 
         async def mock_interactor_parse(raw_input, snapshot):
-            from app.models.intent import ActionIntent, ActionType
+            from app.engine.two_phase.models.intent import ActionIntent, ActionType
 
             return (
                 ActionIntent(
@@ -181,7 +181,7 @@ class TestTwoPhaseProcessorIntegration:
         processor, manager = processor_with_mock
 
         async def mock_interactor_parse(raw_input, snapshot):
-            from app.models.intent import FlavorIntent
+            from app.engine.two_phase.models.intent import FlavorIntent
 
             return (
                 FlavorIntent(

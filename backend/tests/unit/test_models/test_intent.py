@@ -10,7 +10,12 @@ Tests cover:
 import pytest
 from pydantic import ValidationError
 
-from app.models.intent import ActionIntent, ActionType, FlavorIntent, Intent
+from app.engine.two_phase.models.intent import (
+    ActionIntent,
+    ActionType,
+    FlavorIntent,
+    Intent,
+)
 
 
 class TestActionType:

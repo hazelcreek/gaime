@@ -74,25 +74,36 @@ This document describes the system architecture of GAIME, including component de
 |--------|---------------|
 | `api/` | REST endpoints |
 | `engine/` | Game logic, state management |
+| `engine/classic/` | Classic single-LLM engine |
+| `engine/two_phase/` | Two-phase engine (Interactor→Narrator) |
 | `llm/` | LLM client, prompt templates |
-| `models/` | Pydantic schemas |
+| `llm/classic/` | GameMaster LLM for classic engine |
+| `llm/two_phase/` | InteractorAI, NarratorAI for two-phase engine |
+| `models/` | Shared Pydantic schemas (world.py, game.py) |
 
-### Game Engine
+### Game Engines
 
-**State Manager** (`engine/state.py`):
-- Maintains current game state
-- Handles state transitions
-- Validates state changes
+GAIME supports two game engine architectures that coexist independently:
 
-**Action Processor** (`engine/actions.py`):
-- Parses player input
-- Coordinates with LLM
-- Applies state changes
+**Classic Engine** (`engine/classic/`):
+- Single-LLM architecture where GameMaster handles everything
+- State Manager (`engine/classic/state.py`): GameStateManager
+- Action Processor (`engine/classic/processor.py`): ActionProcessor
+- Models (`engine/classic/models.py`): GameState, ActionResponse, LLMResponse
 
-**World Loader** (`engine/world.py`):
-- Loads YAML world files
-- Validates world consistency on load
-- Provides world context to LLM
+**Two-Phase Engine** (`engine/two_phase/`):
+- Separates parsing (Interactor) from narration (Narrator)
+- State Manager (`engine/two_phase/state.py`): TwoPhaseStateManager
+- Processor (`engine/two_phase/processor.py`): TwoPhaseProcessor
+- Parser (`engine/two_phase/parser.py`): RuleBasedParser
+- Validators (`engine/two_phase/validators/`): Movement, Examine, Take
+- Visibility (`engine/two_phase/visibility.py`): DefaultVisibilityResolver
+- Models (`engine/two_phase/models/`): Intent, Event, Perception, Validation, State
+
+**Shared Components** (`engine/`):
+- World Loader (`engine/world.py`): Loads YAML world files
+- World Validator (`engine/validator.py`): Validates world consistency
+- Protocols (`engine/protocols.py`): Shared interfaces for testability
 
 **World Validator** (`engine/validator.py`):
 - Validates flag consistency (flags checked are set somewhere)
@@ -103,15 +114,16 @@ This document describes the system architecture of GAIME, including component de
 
 ### LLM Integration
 
-**Provider Abstraction** (`llm/client.py`):
-- Uses LiteLLM for provider-agnostic calls
-- Supports Gemini, OpenAI, Anthropic, Ollama
-- Configuration via environment variables
+**Shared** (`llm/`):
+- Provider Abstraction (`llm/client.py`): LiteLLM for provider-agnostic calls
+- Prompt Loader (`llm/prompt_loader.py`): Loads prompt templates
 
-**Game Master** (`llm/game_master.py`):
-- System prompt with world context
-- Structured output parsing (JSON)
-- State change extraction
+**Classic Engine LLM** (`llm/classic/`):
+- Game Master (`llm/classic/game_master.py`): Full game processing
+
+**Two-Phase Engine LLM** (`llm/two_phase/`):
+- Interactor (`llm/two_phase/interactor.py`): Entity resolution and intent parsing
+- Narrator (`llm/two_phase/narrator.py`): Prose generation from events
 
 ## Data Flow
 
@@ -626,13 +638,13 @@ The two-phase engine is an alternative action processing architecture that separ
 
 | Model | Location | Purpose |
 |-------|----------|---------|
-| `TwoPhaseGameState` | `models/two_phase_state.py` | Game state (separate from classic) |
-| `NarrationEntry` | `models/two_phase_state.py` | Single narration for style history |
-| `ActionIntent` | `models/intent.py` | Parsed state-changing action |
-| `FlavorIntent` | `models/intent.py` | Atmospheric action (no state change) |
-| `Event` | `models/event.py` | Confirmed game occurrence |
-| `PerceptionSnapshot` | `models/perception.py` | What player can see |
-| `ValidationResult` | `models/validation.py` | Validation outcome |
+| `TwoPhaseGameState` | `engine/two_phase/models/state.py` | Game state (separate from classic) |
+| `NarrationEntry` | `engine/two_phase/models/state.py` | Single narration for style history |
+| `ActionIntent` | `engine/two_phase/models/intent.py` | Parsed state-changing action |
+| `FlavorIntent` | `engine/two_phase/models/intent.py` | Atmospheric action (no state change) |
+| `Event` | `engine/two_phase/models/event.py` | Confirmed game occurrence |
+| `PerceptionSnapshot` | `engine/two_phase/models/perception.py` | What player can see |
+| `ValidationResult` | `engine/two_phase/models/validation.py` | Validation outcome |
 
 ### TwoPhaseGameState
 
@@ -659,15 +671,15 @@ The narrator receives the last 5 narrations to avoid repetitive phrasing and ada
 
 | Class | Location | Purpose |
 |-------|----------|---------|
-| `TwoPhaseStateManager` | `engine/two_phase_state.py` | State management |
-| `TwoPhaseProcessor` | `engine/two_phase.py` | Main orchestrator |
-| `RuleBasedParser` | `engine/parser.py` | Rule-based parsing (movement) |
-| `InteractorAI` | `llm/interactor.py` | LLM-based entity resolution |
-| `MovementValidator` | `engine/validators/movement.py` | Movement validation |
-| `ExamineValidator` | `engine/validators/examine.py` | Examine validation |
-| `TakeValidator` | `engine/validators/take.py` | Take validation |
-| `DefaultVisibilityResolver` | `engine/visibility.py` | Visibility computation |
-| `NarratorAI` | `llm/narrator.py` | Narrative generation |
+| `TwoPhaseStateManager` | `engine/two_phase/state.py` | State management |
+| `TwoPhaseProcessor` | `engine/two_phase/processor.py` | Main orchestrator |
+| `RuleBasedParser` | `engine/two_phase/parser.py` | Rule-based parsing (movement) |
+| `InteractorAI` | `llm/two_phase/interactor.py` | LLM-based entity resolution |
+| `MovementValidator` | `engine/two_phase/validators/movement.py` | Movement validation |
+| `ExamineValidator` | `engine/two_phase/validators/examine.py` | Examine validation |
+| `TakeValidator` | `engine/two_phase/validators/take.py` | Take validation |
+| `DefaultVisibilityResolver` | `engine/two_phase/visibility.py` | Visibility computation |
+| `NarratorAI` | `llm/two_phase/narrator.py` | Narrative generation |
 
 ### Engine Selection
 

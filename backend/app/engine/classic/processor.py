@@ -1,15 +1,18 @@
 """
 Action processor - Handles player actions with LLM integration
+
+This is the classic engine's action processor, which uses a single LLM call
+to process actions and generate narrative.
 """
 
 import re
 from typing import TYPE_CHECKING
 
-from app.models.game import ActionResponse, StateChanges, LLMDebugInfo
-from app.llm.game_master import GameMaster
+from app.engine.classic.models import ActionResponse, StateChanges, LLMDebugInfo
+from app.llm.classic.game_master import GameMaster
 
 if TYPE_CHECKING:
-    from app.engine.state import GameStateManager
+    from app.engine.classic.state import GameStateManager
 
 
 class ActionProcessor:

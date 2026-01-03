@@ -12,12 +12,17 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from app.engine.state import GameStateManager
-from app.engine.actions import ActionProcessor
-from app.engine.two_phase_state import TwoPhaseStateManager
-from app.engine.two_phase import TwoPhaseProcessor
-from app.models.game import GameState, ActionRequest, ActionResponse, LLMDebugInfo
-from app.models.two_phase_state import TwoPhaseGameState, TwoPhaseActionResponse
+from app.engine.classic.state import GameStateManager
+from app.engine.classic.processor import ActionProcessor
+from app.engine.classic.models import (
+    GameState,
+    ActionRequest,
+    ActionResponse,
+    LLMDebugInfo,
+)
+from app.engine.two_phase.state import TwoPhaseStateManager
+from app.engine.two_phase.processor import TwoPhaseProcessor
+from app.engine.two_phase.models.state import TwoPhaseGameState, TwoPhaseActionResponse
 from app.llm.image_generator import get_location_image_path
 from app.api.engine import EngineVersion, ENGINE_INFO, DEFAULT_ENGINE
 
