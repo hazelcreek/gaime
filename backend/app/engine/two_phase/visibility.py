@@ -501,7 +501,7 @@ class DefaultVisibilityResolver:
 
             # Determine visibility status
             is_in_inventory = item_id in state.inventory
-            is_visible, visibility_reason = self._analyze_item_visibility(
+            is_visible, visibility_reason = self.analyze_item_visibility(
                 item, item_id, state
             )
 
@@ -528,13 +528,22 @@ class DefaultVisibilityResolver:
 
         return items
 
-    def _analyze_item_visibility(
+    def analyze_item_visibility(
         self,
         item: "Item",
         item_id: str,
         state: "GameStateProtocol",
     ) -> tuple[bool, str]:
         """Analyze why an item is visible or hidden.
+
+        This is the single source of truth for item visibility logic.
+        Use this method instead of duplicating visibility checks.
+
+        Visibility rules (in order of precedence):
+        1. Item in inventory -> False, "taken"
+        2. Item hidden with no condition -> False, "hidden"
+        3. Item hidden with unmet condition -> False, "condition_not_met:{flag}"
+        4. Item visible -> True, "visible"
 
         Args:
             item: The item definition

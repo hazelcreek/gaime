@@ -44,6 +44,16 @@ if TYPE_CHECKING:
 # =============================================================================
 
 
+def pytest_addoption(parser: pytest.Parser) -> None:
+    """Add custom command line options."""
+    parser.addoption(
+        "--run-slow",
+        action="store_true",
+        default=False,
+        help="Run slow tests (including E2E tests with real LLM calls)",
+    )
+
+
 def pytest_configure(config: pytest.Config) -> None:
     """Register custom markers."""
     config.addinivalue_line(
@@ -53,6 +63,20 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers", "e2e: marks tests as end-to-end tests requiring real LLM"
     )
+
+
+def pytest_collection_modifyitems(
+    config: pytest.Config, items: list[pytest.Item]
+) -> None:
+    """Skip slow/e2e tests unless --run-slow is provided."""
+    if config.getoption("--run-slow"):
+        # --run-slow given: don't skip slow tests
+        return
+
+    skip_slow = pytest.mark.skip(reason="need --run-slow option to run")
+    for item in items:
+        if "slow" in item.keywords or "e2e" in item.keywords:
+            item.add_marker(skip_slow)
 
 
 # =============================================================================

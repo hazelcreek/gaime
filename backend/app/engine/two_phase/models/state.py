@@ -10,10 +10,16 @@ See planning/two-phase-game-loop-spec.md for the full specification.
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 # LLMDebugInfo is a shared model used by both engines
 from app.models.game import LLMDebugInfo
+
+
+# Type alias for game status
+GameStatus = Literal["playing", "won", "lost"]
 
 
 class NarrationEntry(BaseModel):
@@ -98,7 +104,7 @@ class TwoPhaseGameState(BaseModel):
     visited_locations: set[str] = Field(default_factory=set)
     container_states: dict[str, bool] = Field(default_factory=dict)
     turn_count: int = 0
-    status: str = "playing"
+    status: GameStatus = "playing"
     narration_history: list[NarrationEntry] = Field(default_factory=list)
 
     model_config = {"validate_assignment": True}

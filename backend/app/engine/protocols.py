@@ -15,10 +15,13 @@ Component Flow:
     Player Input -> ActionParser -> ActionIntent/FlavorIntent
                                           |
                                           v
-                                  IntentValidator -> ValidationResult
+                             IntentHandler.validate() -> ValidationResult
                                           |
                                           v (if valid)
-                                  EventExecutor -> List[Event]
+                             IntentHandler.execute() -> State Changes
+                                          |
+                                          v
+                             IntentHandler.create_event() -> Event
                                           |
                                           v
                                    NarratorAI -> Narrative Text
@@ -29,12 +32,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    from app.models.game import GameState
+    from app.engine.two_phase.models.intent import ActionIntent, Intent
+    from app.engine.two_phase.models.event import Event
+    from app.engine.two_phase.models.perception import PerceptionSnapshot
+    from app.engine.two_phase.models.validation import ValidationResult
+    from app.engine.two_phase.models.state import (
+        TwoPhaseGameState,
+        TwoPhaseActionResponse,
+    )
+    from app.engine.two_phase.state import TwoPhaseStateManager
     from app.models.world import WorldData
-    from app.models.intent import ActionIntent, FlavorIntent
-    from app.models.event import Event
-    from app.models.perception import PerceptionSnapshot
-    from app.models.validation import ValidationResult
 
 
 @runtime_checkable
@@ -53,7 +60,7 @@ class ActionParser(Protocol):
     def parse(
         self,
         raw_input: str,
-        state: "GameState",
+        state: "TwoPhaseGameState",
         world: "WorldData",
     ) -> "ActionIntent | None":
         """Parse player input into a structured ActionIntent.
@@ -70,33 +77,6 @@ class ActionParser(Protocol):
 
 
 @runtime_checkable
-class FlavorParser(Protocol):
-    """Protocol for detecting flavor/atmospheric actions.
-
-    Flavor actions don't change game state but add atmosphere
-    (e.g., "dance", "jump", "wave at the painting").
-    """
-
-    def parse(
-        self,
-        raw_input: str,
-        state: "GameState",
-        world: "WorldData",
-    ) -> "FlavorIntent | None":
-        """Parse player input as a flavor action.
-
-        Args:
-            raw_input: The raw player input string
-            state: Current game state for context
-            world: World data for entity resolution
-
-        Returns:
-            FlavorIntent if this is a flavor action, None otherwise
-        """
-        ...
-
-
-@runtime_checkable
 class IntentValidator(Protocol):
     """Protocol for validating intents against world rules.
 
@@ -104,15 +84,15 @@ class IntentValidator(Protocol):
     game state and world rules. They do not modify state.
 
     Example validators:
-        - MoveValidator: Checks if exit exists and is accessible
+        - MovementValidator: Checks if exit exists and is accessible
         - TakeValidator: Checks if item is visible and portable
-        - UseValidator: Checks if item combination is valid
+        - ExamineValidator: Checks if target is visible
     """
 
     def validate(
         self,
         intent: "ActionIntent",
-        state: "GameState",
+        state: "TwoPhaseGameState",
         world: "WorldData",
     ) -> "ValidationResult":
         """Validate an action intent against game rules.
@@ -129,31 +109,84 @@ class IntentValidator(Protocol):
 
 
 @runtime_checkable
-class EventExecutor(Protocol):
-    """Protocol for executing validated intents and producing events.
+class IntentHandler(Protocol):
+    """Protocol for handling any intent type (ActionIntent or FlavorIntent).
 
-    Executors take a validated intent and produce a list of events
-    that represent what happened. They may also apply state changes.
+    IntentHandler is the core abstraction for the two-phase engine's
+    action processing. Each handler encapsulates the complete logic
+    for one type of action:
 
-    Events are the source of truth for what happened and are passed
-    to the narrator for prose generation.
+    1. validate() - Check if the action is allowed
+    2. execute() - Apply state changes (called only if validation passes)
+    3. create_event() - Create the event for narration
+
+    Attributes:
+        checks_victory: Whether to check victory conditions after this action
+
+    Example implementations:
+        - MovementHandler: Handles MOVE actions, checks_victory=True
+        - ExamineHandler: Handles EXAMINE actions, checks_victory=False
+        - FlavorHandler: Handles FlavorIntent, always valid, no state changes
     """
+
+    checks_victory: bool
+
+    def validate(
+        self,
+        intent: "Intent",
+        state: "TwoPhaseGameState",
+        world: "WorldData",
+    ) -> "ValidationResult":
+        """Validate the intent against game rules.
+
+        For FlavorHandler, this always returns a valid result.
+        For ActionHandlers, this delegates to the appropriate validator.
+
+        Args:
+            intent: The parsed intent (ActionIntent or FlavorIntent)
+            state: Current game state
+            world: World data with rules and entity definitions
+
+        Returns:
+            ValidationResult indicating success or failure with reason
+        """
+        ...
 
     def execute(
         self,
-        intent: "ActionIntent",
-        state: "GameState",
-        world: "WorldData",
-    ) -> list["Event"]:
-        """Execute a validated intent and produce events.
+        intent: "Intent",
+        result: "ValidationResult",
+        state_manager: "TwoPhaseStateManager",
+    ) -> None:
+        """Execute state changes (called only if validation passes).
+
+        For FlavorHandler, this is a no-op.
+        For ActionHandlers, this applies the appropriate state mutations.
 
         Args:
-            intent: The validated action intent
-            state: Current game state (may be modified)
+            intent: The validated intent
+            result: The validation result (contains context like destination)
+            state_manager: The state manager to mutate
+        """
+        ...
+
+    def create_event(
+        self,
+        intent: "Intent",
+        result: "ValidationResult",
+        state: "TwoPhaseGameState",
+        world: "WorldData",
+    ) -> "Event":
+        """Create the event for narration.
+
+        Args:
+            intent: The processed intent
+            result: The validation result
+            state: Current game state (may reflect executed changes)
             world: World data for entity lookups
 
         Returns:
-            List of events representing what happened
+            Event for the narrator to describe
         """
         ...
 
@@ -205,7 +238,7 @@ class VisibilityResolver(Protocol):
     def is_item_visible(
         self,
         item_id: str,
-        state: "GameState",
+        state: "TwoPhaseGameState",
         world: "WorldData",
     ) -> bool:
         """Check if an item is visible to the player.
@@ -223,7 +256,7 @@ class VisibilityResolver(Protocol):
     def get_visible_items(
         self,
         location_id: str,
-        state: "GameState",
+        state: "TwoPhaseGameState",
         world: "WorldData",
     ) -> list[str]:
         """Get all visible item IDs at a location.
@@ -240,7 +273,7 @@ class VisibilityResolver(Protocol):
 
     def build_snapshot(
         self,
-        state: "GameState",
+        state: "TwoPhaseGameState",
         world: "WorldData",
     ) -> "PerceptionSnapshot":
         """Build a complete perception snapshot for the narrator.
@@ -268,18 +301,24 @@ class TwoPhaseProcessor(Protocol):
 
     async def process(
         self,
-        raw_input: str,
-        state: "GameState",
-        world: "WorldData",
-    ) -> tuple[str, list["Event"]]:
+        action: str,
+    ) -> "TwoPhaseActionResponse":
         """Process a player action through the two-phase pipeline.
 
         Args:
-            raw_input: The raw player input
-            state: Current game state (may be modified)
-            world: World data
+            action: The raw player input
 
         Returns:
-            Tuple of (narrative text, list of events that occurred)
+            TwoPhaseActionResponse with narrative and updated state
+        """
+        ...
+
+    async def get_initial_narrative(
+        self,
+    ) -> tuple[str, object | None]:
+        """Generate the opening narrative for a new game.
+
+        Returns:
+            Tuple of (narrative text, debug info if enabled)
         """
         ...

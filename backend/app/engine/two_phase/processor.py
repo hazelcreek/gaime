@@ -11,10 +11,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from app.engine.two_phase.handlers import (
+    BrowseHandler,
+    ExamineHandler,
+    FlavorHandler,
+    MovementHandler,
+    TakeHandler,
+)
 from app.engine.two_phase.parser import RuleBasedParser
-from app.engine.two_phase.validators.examine import ExamineValidator
-from app.engine.two_phase.validators.movement import MovementValidator
-from app.engine.two_phase.validators.take import TakeValidator
 from app.engine.two_phase.visibility import DefaultVisibilityResolver
 from app.llm.two_phase.interactor import InteractorAI
 from app.llm.two_phase.narrator import NarratorAI
@@ -43,12 +47,13 @@ class TwoPhaseProcessor:
 
     Coordinates the complete action processing pipeline:
         1. Parse: Rule-based parser for movement, InteractorAI for others
-        2. Validate: Validators check against world rules
+        2. Validate: Handlers validate against world rules
         3. Execute: State changes are applied
         4. Narrate: NarratorAI generates prose
 
-    Phase 2 supports movement, examine, and take actions.
-    FlavorIntents go directly to the narrator for atmospheric responses.
+    The processor uses IntentHandlers for a unified action processing flow.
+    Each handler encapsulates validation, execution, and event creation
+    for its action type.
 
     Example:
         >>> manager = TwoPhaseStateManager("cursed-manor")
@@ -75,10 +80,12 @@ class TwoPhaseProcessor:
         self.parser = RuleBasedParser()
         self.visibility_resolver = DefaultVisibilityResolver()
 
-        # Validators
-        self.movement_validator = MovementValidator()
-        self.examine_validator = ExamineValidator()
-        self.take_validator = TakeValidator()
+        # Initialize handlers (inject visibility resolver where needed)
+        self._movement_handler = MovementHandler(self.visibility_resolver)
+        self._examine_handler = ExamineHandler(self.visibility_resolver)
+        self._take_handler = TakeHandler(self.visibility_resolver)
+        self._browse_handler = BrowseHandler(self.visibility_resolver)
+        self._flavor_handler = FlavorHandler()
 
         # LLM components
         self.interactor = InteractorAI(
@@ -109,7 +116,6 @@ class TwoPhaseProcessor:
 
         # Create opening event using SCENE_BROWSED for comprehensive description
         # Include premise/starting_situation if available for rich opening context
-        # Note: WorldData.world contains the World model with these fields
         event = Event(
             type=EventType.SCENE_BROWSED,
             subject=state.current_location,
@@ -150,7 +156,7 @@ class TwoPhaseProcessor:
             interactor_debug=None,
         )
 
-        # Build TwoPhaseDebugInfo for opening (reuse existing method)
+        # Build TwoPhaseDebugInfo for opening
         pipeline_debug = self._build_pipeline_debug(
             raw_input="(opening)",
             intent=None,
@@ -167,10 +173,8 @@ class TwoPhaseProcessor:
 
         Pipeline:
             1. Parse action: rule-based for movement, InteractorAI for others
-            2. If FlavorIntent, generate atmospheric narrative
-            3. Validate ActionIntent against world rules
-            4. If invalid, generate rejection narrative
-            5. If valid, execute state changes and generate success narrative
+            2. Route to appropriate handler based on intent type
+            3. Unified processing: validate -> execute -> create_event -> narrate
 
         Args:
             action: The raw player action string
@@ -201,18 +205,23 @@ class TwoPhaseProcessor:
             snapshot = self.visibility_resolver.build_snapshot(state, world)
             intent, interactor_debug = await self.interactor.parse(action, snapshot)
 
-        # Phase 2: Validate & Execute based on intent type
+        # Phase 2: Route to handler and process
         if isinstance(intent, FlavorIntent):
-            return await self._process_flavor(intent, action, interactor_debug)
+            return await self._process_intent(
+                handler=self._flavor_handler,
+                intent=intent,
+                raw_input=action,
+                interactor_debug=interactor_debug,
+            )
         elif isinstance(intent, ActionIntent):
-            if intent.action_type == ActionType.MOVE:
-                return await self._process_movement(intent, action, interactor_debug)
-            elif intent.action_type == ActionType.BROWSE:
-                return await self._process_browse(intent, action, interactor_debug)
-            elif intent.action_type == ActionType.EXAMINE:
-                return await self._process_examine(intent, action, interactor_debug)
-            elif intent.action_type == ActionType.TAKE:
-                return await self._process_take(intent, action, interactor_debug)
+            handler = self._get_action_handler(intent.action_type)
+            if handler:
+                return await self._process_intent(
+                    handler=handler,
+                    intent=intent,
+                    raw_input=action,
+                    interactor_debug=interactor_debug,
+                )
             else:
                 # Action type not yet supported
                 return await self._process_unsupported(intent, action, interactor_debug)
@@ -220,30 +229,70 @@ class TwoPhaseProcessor:
             # Shouldn't happen, but handle gracefully
             return await self._process_unsupported(None, action, interactor_debug)
 
-    async def _process_movement(
+    def _get_action_handler(
+        self, action_type: ActionType
+    ) -> MovementHandler | ExamineHandler | TakeHandler | BrowseHandler | None:
+        """Get the appropriate handler for an action type.
+
+        Args:
+            action_type: The action type to handle
+
+        Returns:
+            The handler for this action type, or None if unsupported
+        """
+        handlers = {
+            ActionType.MOVE: self._movement_handler,
+            ActionType.EXAMINE: self._examine_handler,
+            ActionType.TAKE: self._take_handler,
+            ActionType.BROWSE: self._browse_handler,
+        }
+        return handlers.get(action_type)
+
+    async def _process_intent(
         self,
-        intent: ActionIntent,
+        handler: (
+            MovementHandler
+            | ExamineHandler
+            | TakeHandler
+            | BrowseHandler
+            | FlavorHandler
+        ),
+        intent: Intent,
         raw_input: str,
         interactor_debug: LLMDebugInfo | None = None,
     ) -> TwoPhaseActionResponse:
-        """Process a movement action.
+        """Unified action processing flow.
+
+        This method implements the core processing pattern for all intents:
+            1. Validate the intent
+            2. If invalid, create rejection event
+            3. If valid, execute state changes and create success event
+            4. Build snapshot and narrate
+            5. Increment turn and log
+            6. Check victory if applicable
 
         Args:
-            intent: The parsed MOVE ActionIntent
-            raw_input: The original player input string (for debug info)
+            handler: The IntentHandler for this action type
+            intent: The parsed intent (ActionIntent or FlavorIntent)
+            raw_input: The original player input string
+            interactor_debug: Debug info from Interactor (if used)
 
         Returns:
-            TwoPhaseActionResponse with movement result
+            TwoPhaseActionResponse with narrative and updated state
         """
         state = self.state_manager.get_state()
         world = self.state_manager.world_data
 
-        # Validate movement
-        result = self.movement_validator.validate(intent, state, world)
+        # 1. Validate
+        result = handler.validate(intent, state, world)
 
         if not result.valid:
-            # Movement rejected - create rejection event
-            event = result.to_rejection_event(subject=intent.target_id)
+            # 2a. Rejection path
+            target_id = None
+            if isinstance(intent, ActionIntent):
+                target_id = intent.target_id
+
+            event = result.to_rejection_event(subject=target_id)
             events = [event]
 
             # Build snapshot (still at current location)
@@ -255,25 +304,26 @@ class TwoPhaseProcessor:
             # Increment turn even for failed actions
             self.state_manager.increment_turn()
 
-            # Build pipeline debug info
+            # Build debug and log
             pipeline_debug = self._build_pipeline_debug(
                 raw_input=raw_input,
-                intent=intent,
+                intent=intent if isinstance(intent, ActionIntent) else None,
                 validation_result=result,
                 events=events,
                 narrator_debug=narrator_debug,
                 interactor_debug=interactor_debug,
+                flavor_intent=intent if isinstance(intent, FlavorIntent) else None,
             )
 
-            # Log the turn
             self._log_turn(
                 raw_input=raw_input,
-                intent=intent,
+                intent=intent if isinstance(intent, ActionIntent) else None,
                 validation_result=result,
                 events=events,
                 narrator_debug=narrator_debug,
                 narrative=narrative,
                 interactor_debug=interactor_debug,
+                flavor_intent=intent if isinstance(intent, FlavorIntent) else None,
             )
 
             return TwoPhaseActionResponse(
@@ -283,38 +333,38 @@ class TwoPhaseProcessor:
                 pipeline_debug=pipeline_debug,
             )
 
-        # Movement valid - execute
-        destination_id = result.context["destination"]
-        first_visit = self.state_manager.move_to(destination_id)
+        # 2b. Success path
 
-        # Build snapshot at new location
+        # For movement, we need to handle first_visit tracking specially
+        first_visit = False
+        if isinstance(handler, MovementHandler):
+            first_visit = handler.execute(intent, result, self.state_manager)
+        else:
+            handler.execute(intent, result, self.state_manager)
+
+        # Build snapshot (after state changes)
         snapshot = self.visibility_resolver.build_snapshot(
             self.state_manager.get_state(), world
         )
 
-        # Create LOCATION_CHANGED event - always the same event type for movement
-        # The first_visit flag and visible entities tell narrator how to describe it
-        context = {
-            "from_location": result.context.get("from_location"),
-            "direction": result.context.get("direction"),
-            "first_visit": first_visit,
-            "destination_name": result.context.get("destination_name"),
-        }
-
-        # For first visits, include visible entities for comprehensive description
-        if first_visit:
-            context["visible_items"] = [item.name for item in snapshot.visible_items]
-            context["visible_npcs"] = [npc.name for npc in snapshot.visible_npcs]
-            context["visible_exits"] = [
-                {"direction": e.direction, "destination": e.destination_name}
-                for e in snapshot.visible_exits
-            ]
-
-        event = Event(
-            type=EventType.LOCATION_CHANGED,
-            subject=destination_id,
-            context=context,
-        )
+        # Create success event
+        if isinstance(handler, MovementHandler):
+            event = handler.create_event(
+                intent,
+                result,
+                self.state_manager.get_state(),
+                world,
+                first_visit=first_visit,
+                snapshot=snapshot,
+            )
+        elif isinstance(handler, BrowseHandler):
+            event = handler.create_event(
+                intent, result, self.state_manager.get_state(), world, snapshot=snapshot
+            )
+        else:
+            event = handler.create_event(
+                intent, result, self.state_manager.get_state(), world
+            )
         events = [event]
 
         # Get narration history for context
@@ -325,429 +375,50 @@ class TwoPhaseProcessor:
             events, snapshot, history=history
         )
 
-        # Store narration in history
-        self._store_narration(narrative, destination_id, "location_changed")
+        # Store narration in history for certain event types
+        if event.type in (EventType.LOCATION_CHANGED, EventType.SCENE_BROWSED):
+            location_id = self.state_manager.get_state().current_location
+            self._store_narration(narrative, location_id, event.type.value)
 
         # Increment turn
         self.state_manager.increment_turn()
 
-        # Build pipeline debug info
+        # Build debug and log
         pipeline_debug = self._build_pipeline_debug(
             raw_input=raw_input,
-            intent=intent,
+            intent=intent if isinstance(intent, ActionIntent) else None,
             validation_result=result,
             events=events,
             narrator_debug=narrator_debug,
             interactor_debug=interactor_debug,
+            flavor_intent=intent if isinstance(intent, FlavorIntent) else None,
         )
 
-        # Log the turn
         self._log_turn(
             raw_input=raw_input,
-            intent=intent,
+            intent=intent if isinstance(intent, ActionIntent) else None,
             validation_result=result,
             events=events,
             narrator_debug=narrator_debug,
             narrative=narrative,
             interactor_debug=interactor_debug,
+            flavor_intent=intent if isinstance(intent, FlavorIntent) else None,
         )
 
-        # Check for victory
-        is_victory, ending_narrative = self.state_manager.check_victory()
+        # Check for victory if applicable
+        if handler.checks_victory:
+            is_victory, ending_narrative = self.state_manager.check_victory()
 
-        if is_victory:
-            full_narrative = narrative + "\n\n---\n\n" + ending_narrative
-            return TwoPhaseActionResponse(
-                narrative=full_narrative,
-                state=self.state_manager.get_state(),
-                events=[e.model_dump() for e in events],
-                game_complete=True,
-                ending_narrative=ending_narrative,
-                pipeline_debug=pipeline_debug,
-            )
-
-        return TwoPhaseActionResponse(
-            narrative=narrative,
-            state=self.state_manager.get_state(),
-            events=[e.model_dump() for e in events],
-            pipeline_debug=pipeline_debug,
-        )
-
-    async def _process_examine(
-        self,
-        intent: ActionIntent,
-        raw_input: str,
-        interactor_debug: LLMDebugInfo | None = None,
-    ) -> TwoPhaseActionResponse:
-        """Process an examine action.
-
-        Args:
-            intent: The parsed EXAMINE ActionIntent
-            raw_input: The original player input string
-            interactor_debug: Debug info from Interactor (if used)
-
-        Returns:
-            TwoPhaseActionResponse with examine result
-        """
-        state = self.state_manager.get_state()
-        world = self.state_manager.world_data
-
-        # Validate examine
-        result = self.examine_validator.validate(intent, state, world)
-
-        if not result.valid:
-            # Examine rejected
-            event = result.to_rejection_event(subject=intent.target_id)
-            events = [event]
-
-            snapshot = self.visibility_resolver.build_snapshot(state, world)
-            narrative, narrator_debug = await self.narrator.narrate(events, snapshot)
-
-            self.state_manager.increment_turn()
-
-            pipeline_debug = self._build_pipeline_debug(
-                raw_input=raw_input,
-                intent=intent,
-                validation_result=result,
-                events=events,
-                narrator_debug=narrator_debug,
-                interactor_debug=interactor_debug,
-            )
-
-            # Log the turn
-            self._log_turn(
-                raw_input=raw_input,
-                intent=intent,
-                validation_result=result,
-                events=events,
-                narrator_debug=narrator_debug,
-                narrative=narrative,
-                interactor_debug=interactor_debug,
-            )
-
-            return TwoPhaseActionResponse(
-                narrative=narrative,
-                state=self.state_manager.get_state(),
-                events=[e.model_dump() for e in events],
-                pipeline_debug=pipeline_debug,
-            )
-
-        # Examine valid - determine event type
-        entity_type = result.context.get("entity_type", "item")
-        if entity_type == "detail":
-            event_type = EventType.DETAIL_EXAMINED
-        else:
-            event_type = EventType.ITEM_EXAMINED
-
-        event = Event(
-            type=event_type,
-            subject=result.context.get("entity_id"),
-            context={
-                "entity_name": result.context.get("entity_name"),
-                "description": result.context.get("description"),
-                "in_inventory": result.context.get("in_inventory", False),
-                "found_description": result.context.get("found_description"),
-            },
-        )
-        events = [event]
-
-        snapshot = self.visibility_resolver.build_snapshot(state, world)
-        narrative, narrator_debug = await self.narrator.narrate(events, snapshot)
-
-        self.state_manager.increment_turn()
-
-        pipeline_debug = self._build_pipeline_debug(
-            raw_input=raw_input,
-            intent=intent,
-            validation_result=result,
-            events=events,
-            narrator_debug=narrator_debug,
-            interactor_debug=interactor_debug,
-        )
-
-        # Log the turn
-        self._log_turn(
-            raw_input=raw_input,
-            intent=intent,
-            validation_result=result,
-            events=events,
-            narrator_debug=narrator_debug,
-            narrative=narrative,
-            interactor_debug=interactor_debug,
-        )
-
-        return TwoPhaseActionResponse(
-            narrative=narrative,
-            state=self.state_manager.get_state(),
-            events=[e.model_dump() for e in events],
-            pipeline_debug=pipeline_debug,
-        )
-
-    async def _process_take(
-        self,
-        intent: ActionIntent,
-        raw_input: str,
-        interactor_debug: LLMDebugInfo | None = None,
-    ) -> TwoPhaseActionResponse:
-        """Process a take action.
-
-        Args:
-            intent: The parsed TAKE ActionIntent
-            raw_input: The original player input string
-            interactor_debug: Debug info from Interactor (if used)
-
-        Returns:
-            TwoPhaseActionResponse with take result
-        """
-        state = self.state_manager.get_state()
-        world = self.state_manager.world_data
-
-        # Validate take
-        result = self.take_validator.validate(intent, state, world)
-
-        if not result.valid:
-            # Take rejected
-            event = result.to_rejection_event(subject=intent.target_id)
-            events = [event]
-
-            snapshot = self.visibility_resolver.build_snapshot(state, world)
-            narrative, narrator_debug = await self.narrator.narrate(events, snapshot)
-
-            self.state_manager.increment_turn()
-
-            pipeline_debug = self._build_pipeline_debug(
-                raw_input=raw_input,
-                intent=intent,
-                validation_result=result,
-                events=events,
-                narrator_debug=narrator_debug,
-                interactor_debug=interactor_debug,
-            )
-
-            # Log the turn
-            self._log_turn(
-                raw_input=raw_input,
-                intent=intent,
-                validation_result=result,
-                events=events,
-                narrator_debug=narrator_debug,
-                narrative=narrative,
-                interactor_debug=interactor_debug,
-            )
-
-            return TwoPhaseActionResponse(
-                narrative=narrative,
-                state=self.state_manager.get_state(),
-                events=[e.model_dump() for e in events],
-                pipeline_debug=pipeline_debug,
-            )
-
-        # Take valid - add to inventory
-        item_id = result.context.get("item_id")
-        self.state_manager.add_item(item_id)
-
-        event = Event(
-            type=EventType.ITEM_TAKEN,
-            subject=item_id,
-            context={
-                "item_name": result.context.get("item_name"),
-                "take_description": result.context.get("take_description"),
-                "from_location": result.context.get("from_location"),
-            },
-        )
-        events = [event]
-
-        snapshot = self.visibility_resolver.build_snapshot(
-            self.state_manager.get_state(), world
-        )
-        narrative, narrator_debug = await self.narrator.narrate(events, snapshot)
-
-        self.state_manager.increment_turn()
-
-        pipeline_debug = self._build_pipeline_debug(
-            raw_input=raw_input,
-            intent=intent,
-            validation_result=result,
-            events=events,
-            narrator_debug=narrator_debug,
-            interactor_debug=interactor_debug,
-        )
-
-        # Log the turn
-        self._log_turn(
-            raw_input=raw_input,
-            intent=intent,
-            validation_result=result,
-            events=events,
-            narrator_debug=narrator_debug,
-            narrative=narrative,
-            interactor_debug=interactor_debug,
-        )
-
-        # Check for victory (might be item-based)
-        is_victory, ending_narrative = self.state_manager.check_victory()
-
-        if is_victory:
-            full_narrative = narrative + "\n\n---\n\n" + ending_narrative
-            return TwoPhaseActionResponse(
-                narrative=full_narrative,
-                state=self.state_manager.get_state(),
-                events=[e.model_dump() for e in events],
-                game_complete=True,
-                ending_narrative=ending_narrative,
-                pipeline_debug=pipeline_debug,
-            )
-
-        return TwoPhaseActionResponse(
-            narrative=narrative,
-            state=self.state_manager.get_state(),
-            events=[e.model_dump() for e in events],
-            pipeline_debug=pipeline_debug,
-        )
-
-    async def _process_flavor(
-        self,
-        intent: FlavorIntent,
-        raw_input: str,
-        interactor_debug: LLMDebugInfo | None = None,
-    ) -> TwoPhaseActionResponse:
-        """Process a flavor action (atmospheric, no state change).
-
-        Args:
-            intent: The FlavorIntent
-            raw_input: The original player input string
-            interactor_debug: Debug info from Interactor
-
-        Returns:
-            TwoPhaseActionResponse with flavor narrative
-        """
-        state = self.state_manager.get_state()
-        world = self.state_manager.world_data
-
-        # Create flavor event
-        event = Event(
-            type=EventType.FLAVOR_ACTION,
-            context={
-                "verb": intent.verb,
-                "action_hint": intent.action_hint.value if intent.action_hint else None,
-                "target": intent.target,
-                "target_id": intent.target_id,
-                "topic": intent.topic,
-                "manner": intent.manner,
-            },
-        )
-        events = [event]
-
-        snapshot = self.visibility_resolver.build_snapshot(state, world)
-        narrative, narrator_debug = await self.narrator.narrate(events, snapshot)
-
-        self.state_manager.increment_turn()
-
-        pipeline_debug = self._build_pipeline_debug(
-            raw_input=raw_input,
-            intent=None,  # FlavorIntent doesn't have model_dump compatible with ActionIntent
-            validation_result=None,
-            events=events,
-            narrator_debug=narrator_debug,
-            interactor_debug=interactor_debug,
-            flavor_intent=intent,
-        )
-
-        # Log the turn
-        self._log_turn(
-            raw_input=raw_input,
-            intent=None,
-            validation_result=None,
-            events=events,
-            narrator_debug=narrator_debug,
-            narrative=narrative,
-            interactor_debug=interactor_debug,
-            flavor_intent=intent,
-        )
-
-        return TwoPhaseActionResponse(
-            narrative=narrative,
-            state=self.state_manager.get_state(),
-            events=[e.model_dump() for e in events],
-            pipeline_debug=pipeline_debug,
-        )
-
-    async def _process_browse(
-        self,
-        intent: ActionIntent,
-        raw_input: str,
-        interactor_debug: LLMDebugInfo | None = None,
-    ) -> TwoPhaseActionResponse:
-        """Process a browse action (survey surroundings).
-
-        BROWSE surveys the current location without changing state.
-        The narrator generates a comprehensive description of visible
-        entities (items, NPCs, exits, details).
-
-        Args:
-            intent: The parsed BROWSE ActionIntent
-            raw_input: The original player input string
-            interactor_debug: Debug info from Interactor (if used)
-
-        Returns:
-            TwoPhaseActionResponse with scene description
-        """
-        state = self.state_manager.get_state()
-        world = self.state_manager.world_data
-
-        # Build perception snapshot
-        snapshot = self.visibility_resolver.build_snapshot(state, world)
-
-        # Create SCENE_BROWSED event with visible entities
-        event = Event(
-            type=EventType.SCENE_BROWSED,
-            subject=state.current_location,
-            context={
-                "first_visit": False,  # Manual browse is never "first visit"
-                "is_manual_browse": True,
-                "visible_items": [item.name for item in snapshot.visible_items],
-                "visible_npcs": [npc.name for npc in snapshot.visible_npcs],
-                "visible_exits": [
-                    {"direction": e.direction, "destination": e.destination_name}
-                    for e in snapshot.visible_exits
-                ],
-            },
-        )
-        events = [event]
-
-        # Get narration history for context
-        history = state.narration_history
-
-        # Generate narrative with history for variation
-        narrative, narrator_debug = await self.narrator.narrate(
-            events, snapshot, history=history
-        )
-
-        # Increment turn (browsing counts as a turn)
-        self.state_manager.increment_turn()
-
-        # Store narration in history
-        self._store_narration(narrative, state.current_location, "scene_browsed")
-
-        pipeline_debug = self._build_pipeline_debug(
-            raw_input=raw_input,
-            intent=intent,
-            validation_result=None,  # BROWSE always valid
-            events=events,
-            narrator_debug=narrator_debug,
-            interactor_debug=interactor_debug,
-        )
-
-        # Log the turn
-        self._log_turn(
-            raw_input=raw_input,
-            intent=intent,
-            validation_result=None,
-            events=events,
-            narrator_debug=narrator_debug,
-            narrative=narrative,
-            interactor_debug=interactor_debug,
-        )
+            if is_victory:
+                full_narrative = narrative + "\n\n---\n\n" + ending_narrative
+                return TwoPhaseActionResponse(
+                    narrative=full_narrative,
+                    state=self.state_manager.get_state(),
+                    events=[e.model_dump() for e in events],
+                    game_complete=True,
+                    ending_narrative=ending_narrative,
+                    pipeline_debug=pipeline_debug,
+                )
 
         return TwoPhaseActionResponse(
             narrative=narrative,
@@ -814,6 +485,29 @@ class TwoPhaseProcessor:
             pipeline_debug=pipeline_debug,
         )
 
+    def _serialize_validation_result(
+        self, result: ValidationResult | None
+    ) -> dict | None:
+        """Serialize a ValidationResult to a dict.
+
+        Args:
+            result: The validation result to serialize
+
+        Returns:
+            Dict representation, or None if result is None
+        """
+        if not result:
+            return None
+        return {
+            "valid": result.valid,
+            "rejection_code": (
+                result.rejection_code.value if result.rejection_code else None
+            ),
+            "rejection_reason": result.rejection_reason,
+            "context": result.context,
+            "hint": result.hint,
+        }
+
     def _build_pipeline_debug(
         self,
         raw_input: str,
@@ -841,20 +535,7 @@ class TwoPhaseProcessor:
         if not self.debug:
             return None
 
-        # Serialize validation result if present
-        validation_dict = None
-        if validation_result:
-            validation_dict = {
-                "valid": validation_result.valid,
-                "rejection_code": (
-                    validation_result.rejection_code.value
-                    if validation_result.rejection_code
-                    else None
-                ),
-                "rejection_reason": validation_result.rejection_reason,
-                "context": validation_result.context,
-                "hint": validation_result.hint,
-            }
+        validation_dict = self._serialize_validation_result(validation_result)
 
         # Determine parser type
         parser_type = "interactor" if interactor_debug else "rule_based"
@@ -900,20 +581,7 @@ class TwoPhaseProcessor:
             interactor_debug: LLM debug info from interactor
             flavor_intent: FlavorIntent if this was a flavor action
         """
-        # Serialize validation result if present
-        validation_dict = None
-        if validation_result:
-            validation_dict = {
-                "valid": validation_result.valid,
-                "rejection_code": (
-                    validation_result.rejection_code.value
-                    if validation_result.rejection_code
-                    else None
-                ),
-                "rejection_reason": validation_result.rejection_reason,
-                "context": validation_result.context,
-                "hint": validation_result.hint,
-            }
+        validation_dict = self._serialize_validation_result(validation_result)
 
         # Determine parser type
         parser_type = "interactor" if interactor_debug else "rule_based"

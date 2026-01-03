@@ -21,6 +21,7 @@ from app.engine.two_phase.models.validation import (
 
 if TYPE_CHECKING:
     from app.engine.two_phase.models.state import TwoPhaseGameState
+    from app.engine.two_phase.visibility import DefaultVisibilityResolver
     from app.models.world import WorldData
 
 
@@ -37,11 +38,22 @@ class ExamineValidator:
         - valid=False: includes rejection code and reason
 
     Example:
-        >>> validator = ExamineValidator()
+        >>> resolver = DefaultVisibilityResolver()
+        >>> validator = ExamineValidator(resolver)
         >>> result = validator.validate(intent, state, world)
         >>> if result.valid:
         ...     description = result.context["description"]
     """
+
+    def __init__(self, visibility_resolver: "DefaultVisibilityResolver | None" = None):
+        """Initialize the examine validator.
+
+        Args:
+            visibility_resolver: Optional visibility resolver for checking
+                                 item visibility. If not provided, uses
+                                 inline logic for backwards compatibility.
+        """
+        self._visibility_resolver = visibility_resolver
 
     def validate(
         self,
@@ -104,21 +116,35 @@ class ExamineValidator:
             ) or item.location == state.current_location
 
             if item_at_location:
-                # Check visibility (hidden items)
-                if item.hidden:
-                    # Hidden items need their condition met
-                    if item.find_condition:
-                        required_flag = item.find_condition.get("requires_flag")
-                        if required_flag and not state.flags.get(required_flag, False):
-                            return invalid_result(
-                                code=RejectionCode.ITEM_NOT_VISIBLE,
-                                reason="You don't see anything like that here.",
-                            )
-                    else:
+                # Check visibility using resolver if available
+                if self._visibility_resolver:
+                    is_visible, reason = (
+                        self._visibility_resolver.analyze_item_visibility(
+                            item, target_id, state
+                        )
+                    )
+                    if not is_visible and reason != "taken":
                         return invalid_result(
                             code=RejectionCode.ITEM_NOT_VISIBLE,
                             reason="You don't see anything like that here.",
                         )
+                else:
+                    # Fallback: inline visibility check (for backwards compatibility)
+                    if item.hidden:
+                        if item.find_condition:
+                            required_flag = item.find_condition.get("requires_flag")
+                            if required_flag and not state.flags.get(
+                                required_flag, False
+                            ):
+                                return invalid_result(
+                                    code=RejectionCode.ITEM_NOT_VISIBLE,
+                                    reason="You don't see anything like that here.",
+                                )
+                        else:
+                            return invalid_result(
+                                code=RejectionCode.ITEM_NOT_VISIBLE,
+                                reason="You don't see anything like that here.",
+                            )
 
                 return valid_result(
                     entity_type="item",

@@ -126,6 +126,41 @@ See [World Authoring](docs/WORLD_AUTHORING.md) for detailed TUI usage instructio
 
 ## Development
 
+### Testing
+
+The backend has comprehensive test coverage with unit, integration, and E2E tests.
+
+**Run all tests (excluding E2E):**
+
+```bash
+cd backend
+python -m pytest tests/ -v
+```
+
+**Run only unit tests:**
+
+```bash
+cd backend
+python -m pytest tests/unit/ -v
+```
+
+**Run E2E tests with real LLM calls:**
+
+E2E tests verify that InteractorAI and NarratorAI work correctly with actual API calls. They require an API key and network access.
+
+```bash
+cd backend
+
+# Load environment variables and run E2E tests
+export $(grep -v '^#' ../.env | xargs)
+python -m pytest tests/e2e/ -v --run-slow
+
+# Or run a specific test
+python -m pytest tests/e2e/test_two_phase_llm.py::TestInteractorAIE2E -v --run-slow
+```
+
+> **Note:** E2E tests are skipped by default. Use `--run-slow` to enable them.
+
 ### Pre-commit Hooks
 
 This project uses [pre-commit](https://pre-commit.com/) to catch formatting and linting issues before they reach CI.
