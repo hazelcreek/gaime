@@ -19,7 +19,12 @@ Import directly from submodules to avoid circular imports:
 """
 
 # Only import shared utilities that don't cause circular imports
-from app.llm.client import get_completion, parse_json_response, get_model_string
+from app.llm.client import (
+    get_completion,
+    parse_json_response,
+    get_model_string,
+    LLMCompletionResult,
+)
 from app.llm.prompt_loader import get_loader
 
 __all__ = [
@@ -28,4 +33,5 @@ __all__ = [
     "parse_json_response",
     "get_model_string",
     "get_loader",
+    "LLMCompletionResult",
 ]

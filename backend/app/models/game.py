@@ -148,6 +148,11 @@ class LLMDebugInfo(BaseModel):
     parsed_response: dict
     model: str
     timestamp: str
+    # Performance metrics
+    duration_ms: float | None = None  # Time taken for LLM call
+    tokens_input: int | None = None  # Input/prompt tokens
+    tokens_output: int | None = None  # Output/completion tokens
+    tokens_total: int | None = None  # Total tokens
 
 
 class ActionResponse(BaseModel):

@@ -288,10 +288,8 @@ class GameMaster:
             {"role": "user", "content": user_prompt},
         ]
 
-        response = await get_completion(
-            messages, response_format={"type": "json_object"}
-        )
-        parsed = parse_json_response(response)
+        result = await get_completion(messages, response_format={"type": "json_object"})
+        parsed = parse_json_response(result.content)
 
         model = get_model_string()
 
@@ -301,7 +299,7 @@ class GameMaster:
             world_id=self.state_manager.world_id,
             system_prompt=system_prompt,
             user_prompt=user_prompt,
-            raw_response=response or "",
+            raw_response=result.content or "",
             parsed_response=parsed,
             model=model,
         )
@@ -312,10 +310,14 @@ class GameMaster:
             debug_info = LLMDebugInfo(
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,
-                raw_response=response or "",
+                raw_response=result.content or "",
                 parsed_response=parsed,
                 model=model,
                 timestamp=datetime.now().isoformat(),
+                duration_ms=result.duration_ms,
+                tokens_input=result.tokens_input,
+                tokens_output=result.tokens_output,
+                tokens_total=result.tokens_total,
             )
             self.last_debug_info = debug_info
 
@@ -360,10 +362,8 @@ Ensure you respond with a valid JSON object as specified in the system instructi
             {"role": "user", "content": user_prompt},
         ]
 
-        response = await get_completion(
-            messages, response_format={"type": "json_object"}
-        )
-        parsed = parse_json_response(response)
+        result = await get_completion(messages, response_format={"type": "json_object"})
+        parsed = parse_json_response(result.content)
 
         # Check for interactions that should trigger
         if location and location.interactions:
@@ -430,7 +430,7 @@ Ensure you respond with a valid JSON object as specified in the system instructi
             world_id=self.state_manager.world_id,
             system_prompt=system_prompt,
             user_prompt=user_prompt,
-            raw_response=response or "",
+            raw_response=result.content or "",
             parsed_response=parsed,
             model=model,
         )
@@ -441,10 +441,14 @@ Ensure you respond with a valid JSON object as specified in the system instructi
             debug_info = LLMDebugInfo(
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,
-                raw_response=response or "",
+                raw_response=result.content or "",
                 parsed_response=parsed,
                 model=model,
                 timestamp=datetime.now().isoformat(),
+                duration_ms=result.duration_ms,
+                tokens_input=result.tokens_input,
+                tokens_output=result.tokens_output,
+                tokens_total=result.tokens_total,
             )
             self.last_debug_info = debug_info
 

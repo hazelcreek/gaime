@@ -5,9 +5,23 @@ LLM client - Provider-agnostic LLM integration using LiteLLM
 import os
 import json
 import logging
+import time
+from dataclasses import dataclass
 from typing import Any
 
 from dotenv import load_dotenv
+
+
+@dataclass
+class LLMCompletionResult:
+    """Result from an LLM completion call with performance metrics."""
+
+    content: str
+    duration_ms: float
+    tokens_input: int | None
+    tokens_output: int | None
+    tokens_total: int | None
+
 
 # Load environment variables
 load_dotenv()
@@ -49,7 +63,7 @@ async def get_completion(
     temperature: float = 0.7,
     max_tokens: int = 2048,
     response_format: dict | None = None,
-) -> str:
+) -> LLMCompletionResult:
     """
     Get completion from configured LLM provider.
 
@@ -61,7 +75,7 @@ async def get_completion(
         response_format: Optional format specification
 
     Returns:
-        The generated text response
+        LLMCompletionResult with content and performance metrics
     """
     import litellm
 
@@ -92,7 +106,9 @@ async def get_completion(
 
     try:
         logger.info("Calling LiteLLM...")
+        start_time = time.perf_counter()
         response = await litellm.acompletion(**kwargs)
+        duration_ms = (time.perf_counter() - start_time) * 1000
 
         content = response.choices[0].message.content
         finish_reason = (
@@ -101,8 +117,20 @@ async def get_completion(
             else "unknown"
         )
 
+        # Extract token usage if available
+        tokens_input = None
+        tokens_output = None
+        tokens_total = None
+        if hasattr(response, "usage") and response.usage:
+            tokens_input = getattr(response.usage, "prompt_tokens", None)
+            tokens_output = getattr(response.usage, "completion_tokens", None)
+            tokens_total = getattr(response.usage, "total_tokens", None)
+
         logger.info(
-            f"LLM Response: finish_reason={finish_reason}, content_length={len(content) if content else 0}"
+            f"LLM Response: finish_reason={finish_reason}, "
+            f"content_length={len(content) if content else 0}, "
+            f"duration={duration_ms:.0f}ms, "
+            f"tokens={tokens_input}/{tokens_output}/{tokens_total}"
         )
 
         if finish_reason == "length":
@@ -117,7 +145,13 @@ async def get_completion(
             preview = content[:200] + "..." if len(content) > 200 else content
             logger.debug(f"Response preview: {preview}")
 
-        return content
+        return LLMCompletionResult(
+            content=content or "",
+            duration_ms=duration_ms,
+            tokens_input=tokens_input,
+            tokens_output=tokens_output,
+            tokens_total=tokens_total,
+        )
     except Exception as e:
         logger.error(f"LLM Error: {type(e).__name__}: {e}")
         raise

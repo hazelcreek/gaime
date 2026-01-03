@@ -267,7 +267,24 @@ class SessionLogger:
             debug: LLMDebugInfo object
         """
         model = debug.model if hasattr(debug, "model") else "unknown"
-        f.write(f"Model: {model}\n\n")
+        f.write(f"Model: {model}\n")
+
+        # Write performance metrics if available
+        duration_ms = getattr(debug, "duration_ms", None)
+        tokens_input = getattr(debug, "tokens_input", None)
+        tokens_output = getattr(debug, "tokens_output", None)
+        tokens_total = getattr(debug, "tokens_total", None)
+
+        if duration_ms is not None:
+            f.write(f"Duration: {duration_ms:,.0f}ms\n")
+        if tokens_total is not None:
+            input_str = f"{tokens_input:,}" if tokens_input is not None else "?"
+            output_str = f"{tokens_output:,}" if tokens_output is not None else "?"
+            f.write(
+                f"Tokens: {input_str} in / {output_str} out = {tokens_total:,} total\n"
+            )
+
+        f.write("\n")
 
         f.write("System Prompt:\n")
         f.write(debug.system_prompt)

@@ -186,5 +186,3 @@ The single `build_debug_snapshot()` method is the source of truth for merged sta
 - TypeScript JSDoc comments linking to backend models
 
 **C. Cursor Rules (`.cursorrules`)**Add to Documentation Maintenance table:| Change Type | Docs to Update ||-------------|----------------|| New Location fields (`models/world.py`) | `LocationDebugSnapshot` + `LocationExitDebug` + frontend types || New Item fields (`models/world.py`) | `LocationItemDebug` + frontend types || New NPC fields (`models/world.py`) | `LocationNPCDebug` + frontend types || New visibility rules | `DefaultVisibilityResolver.build_debug_snapshot()` |
-
-## Files Changed

@@ -57,9 +57,21 @@ export default function LLMDebugModal({ debugInfo, onClose }: LLMDebugModalProps
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {/* Timestamp */}
-          <div className="text-terminal-dim text-xs px-1">
-            {new Date(debugInfo.timestamp).toLocaleString()}
+          {/* Timestamp and Metrics */}
+          <div className="flex items-center justify-between text-terminal-dim text-xs px-1">
+            <span>{new Date(debugInfo.timestamp).toLocaleString()}</span>
+            <div className="flex items-center gap-3">
+              {debugInfo.duration_ms != null && (
+                <span className="text-terminal-accent">
+                  {debugInfo.duration_ms.toLocaleString(undefined, { maximumFractionDigits: 0 })}ms
+                </span>
+              )}
+              {debugInfo.tokens_total != null && (
+                <span>
+                  {debugInfo.tokens_input?.toLocaleString() ?? '?'} in / {debugInfo.tokens_output?.toLocaleString() ?? '?'} out = {debugInfo.tokens_total.toLocaleString()} tokens
+                </span>
+              )}
+            </div>
           </div>
 
           {/* System Prompt Section */}

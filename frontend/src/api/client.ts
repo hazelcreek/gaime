@@ -46,6 +46,11 @@ export interface LLMDebugInfo {
   parsed_response: Record<string, unknown>;
   model: string;
   timestamp: string;
+  // Performance metrics
+  duration_ms?: number | null;
+  tokens_input?: number | null;
+  tokens_output?: number | null;
+  tokens_total?: number | null;
 }
 
 // =============================================================================

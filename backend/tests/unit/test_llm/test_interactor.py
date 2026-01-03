@@ -10,6 +10,7 @@ Tests cover:
 import pytest
 from unittest.mock import AsyncMock, patch
 
+from app.llm.client import LLMCompletionResult
 from app.llm.two_phase.interactor import InteractorAI
 from app.engine.two_phase.models.intent import ActionIntent, ActionType, FlavorIntent
 from app.engine.two_phase.models.perception import (
@@ -232,12 +233,19 @@ class TestInteractorAI:
     @pytest.mark.asyncio
     async def test_parse_calls_llm(self, interactor, snapshot) -> None:
         """Parse method calls LLM and processes response."""
-        mock_response = '{"type": "action_intent", "action_type": "EXAMINE", "target_id": "old_letter", "verb": "examine", "confidence": 1.0}'
+        mock_content = '{"type": "action_intent", "action_type": "EXAMINE", "target_id": "old_letter", "verb": "examine", "confidence": 1.0}'
+        mock_result = LLMCompletionResult(
+            content=mock_content,
+            duration_ms=100.0,
+            tokens_input=50,
+            tokens_output=20,
+            tokens_total=70,
+        )
 
         with patch(
             "app.llm.two_phase.interactor.get_completion", new_callable=AsyncMock
         ) as mock_llm:
-            mock_llm.return_value = mock_response
+            mock_llm.return_value = mock_result
 
             intent, debug_info = await interactor.parse("examine the letter", snapshot)
 
@@ -249,15 +257,24 @@ class TestInteractorAI:
     @pytest.mark.asyncio
     async def test_parse_returns_debug_info(self, interactor, snapshot) -> None:
         """Parse returns debug info when enabled."""
-        mock_response = '{"type": "flavor_intent", "verb": "dance"}'
+        mock_content = '{"type": "flavor_intent", "verb": "dance"}'
+        mock_result = LLMCompletionResult(
+            content=mock_content,
+            duration_ms=150.0,
+            tokens_input=60,
+            tokens_output=25,
+            tokens_total=85,
+        )
 
         with patch(
             "app.llm.two_phase.interactor.get_completion", new_callable=AsyncMock
         ) as mock_llm:
-            mock_llm.return_value = mock_response
+            mock_llm.return_value = mock_result
 
             intent, debug_info = await interactor.parse("dance", snapshot)
 
         assert debug_info is not None
-        assert debug_info.raw_response == mock_response
+        assert debug_info.raw_response == mock_content
+        assert debug_info.duration_ms == 150.0
+        assert debug_info.tokens_total == 85
         assert "start_room" in debug_info.system_prompt
