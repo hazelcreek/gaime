@@ -18,8 +18,8 @@ from app.engine.classic.models import (
     GameState,
     ActionRequest,
     ActionResponse,
-    LLMDebugInfo,
 )
+from app.models.game import LLMDebugInfo
 from app.engine.two_phase.state import TwoPhaseStateManager
 from app.engine.two_phase.processor import TwoPhaseProcessor
 from app.engine.two_phase.models.state import TwoPhaseGameState, TwoPhaseActionResponse

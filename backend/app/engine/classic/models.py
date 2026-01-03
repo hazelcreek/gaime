@@ -6,6 +6,9 @@ These models are specific to the classic engine's single-LLM architecture.
 
 from pydantic import BaseModel, Field
 
+# LLMDebugInfo is imported from shared models (used by both engines)
+from app.models.game import LLMDebugInfo
+
 
 # =============================================================================
 # Narrative Memory Models
@@ -144,20 +147,6 @@ class ActionRequest(BaseModel):
     session_id: str
     action: str
     debug: bool = False  # Enable LLM debug info in response
-
-
-class LLMDebugInfo(BaseModel):
-    """Debug info for LLM interactions.
-
-    Note: This model is also available from app.models.game for shared use.
-    """
-
-    system_prompt: str
-    user_prompt: str
-    raw_response: str
-    parsed_response: dict
-    model: str
-    timestamp: str
 
 
 class ActionResponse(BaseModel):
