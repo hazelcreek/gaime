@@ -8,6 +8,7 @@ import {
   AnyGameState,
   DebugInfo,
   isTwoPhaseActionResponse,
+  isTwoPhaseNewGameResponse,
 } from '../api/client';
 
 export interface NarrativeEntry {
@@ -142,8 +143,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       setWorldName(selectedWorldName ?? null);
       setEngineVersion(response.engine_version);
       setGameState(response.state);
-      // Attach debug info to the narrative entry (opening uses llm_debug for both engines)
-      addNarrative('narrative', response.narrative, response.llm_debug);
+
+      // Extract debug info based on engine type
+      let debugInfo: DebugInfo | undefined;
+      if (isTwoPhaseNewGameResponse(response)) {
+        // Two-phase engine: use pipeline_debug
+        debugInfo = response.pipeline_debug ?? undefined;
+      } else {
+        // Classic engine: use llm_debug
+        debugInfo = response.llm_debug;
+      }
+
+      addNarrative('narrative', response.narrative, debugInfo);
       addNarrative('system', 'Type your commands below. Try "look around" or "help" to get started.');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to start game';

@@ -22,7 +22,11 @@ from app.engine.classic.models import (
 from app.models.game import LLMDebugInfo
 from app.engine.two_phase.state import TwoPhaseStateManager
 from app.engine.two_phase.processor import TwoPhaseProcessor
-from app.engine.two_phase.models.state import TwoPhaseGameState, TwoPhaseActionResponse
+from app.engine.two_phase.models.state import (
+    TwoPhaseGameState,
+    TwoPhaseActionResponse,
+    TwoPhaseDebugInfo,
+)
 from app.llm.image_generator import get_location_image_path
 from app.api.engine import EngineVersion, ENGINE_INFO, DEFAULT_ENGINE
 
@@ -90,7 +94,7 @@ class TwoPhaseNewGameResponse(BaseModel):
     narrative: str
     state: TwoPhaseGameState
     engine_version: EngineVersion
-    llm_debug: LLMDebugInfo | None = None
+    pipeline_debug: TwoPhaseDebugInfo | None = None
 
 
 class TwoPhaseActionRequest(BaseModel):
@@ -177,7 +181,7 @@ async def _start_two_phase_game(request: NewGameRequest) -> TwoPhaseNewGameRespo
         narrative=initial_narrative,
         state=manager.get_state(),
         engine_version=EngineVersion.TWO_PHASE,
-        llm_debug=debug_info,
+        pipeline_debug=debug_info,
     )
 
 

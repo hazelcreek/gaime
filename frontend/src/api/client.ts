@@ -156,13 +156,20 @@ export interface TwoPhaseNewGameResponse {
   narrative: string;
   state: TwoPhaseGameState;
   engine_version: string;
-  llm_debug?: LLMDebugInfo;  // Opening narrative uses simple debug info
+  pipeline_debug?: TwoPhaseDebugInfo | null;  // Uses two-phase debug info
 }
 
 /**
  * Union type for new game responses
  */
 export type AnyNewGameResponse = NewGameResponse | TwoPhaseNewGameResponse;
+
+/**
+ * Type guard to check if new game response is from two-phase engine
+ */
+export function isTwoPhaseNewGameResponse(response: AnyNewGameResponse): response is TwoPhaseNewGameResponse {
+  return 'pipeline_debug' in response || response.engine_version === 'two_phase';
+}
 
 export interface WorldInfo {
   id: string;

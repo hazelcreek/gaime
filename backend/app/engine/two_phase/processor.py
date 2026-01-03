@@ -92,14 +92,14 @@ class TwoPhaseProcessor:
             debug=debug,
         )
 
-    async def get_initial_narrative(self) -> tuple[str, LLMDebugInfo | None]:
+    async def get_initial_narrative(self) -> tuple[str, TwoPhaseDebugInfo | None]:
         """Generate the opening narrative for a new game.
 
         Creates a SCENE_BROWSED event for the starting location
         and uses the NarratorAI to generate the opening prose.
 
         Returns:
-            Tuple of (narrative text, debug info if enabled)
+            Tuple of (narrative text, TwoPhaseDebugInfo if debug enabled)
         """
         state = self.state_manager.get_state()
         world = self.state_manager.world_data
@@ -132,7 +132,7 @@ class TwoPhaseProcessor:
         history = state.narration_history
 
         # Generate narrative
-        narrative, debug_info = await self.narrator.narrate(
+        narrative, narrator_debug = await self.narrator.narrate(
             [event], snapshot, history=history
         )
 
@@ -145,12 +145,22 @@ class TwoPhaseProcessor:
             intent=None,
             validation_result=None,
             events=[event],
-            narrator_debug=debug_info,
+            narrator_debug=narrator_debug,
             narrative=narrative,
             interactor_debug=None,
         )
 
-        return narrative, debug_info
+        # Build TwoPhaseDebugInfo for opening (reuse existing method)
+        pipeline_debug = self._build_pipeline_debug(
+            raw_input="(opening)",
+            intent=None,
+            validation_result=None,
+            events=[event],
+            narrator_debug=narrator_debug,
+            interactor_debug=None,
+        )
+
+        return narrative, pipeline_debug
 
     async def process(self, action: str) -> TwoPhaseActionResponse:
         """Process a player action through the two-phase pipeline.
