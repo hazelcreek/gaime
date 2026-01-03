@@ -37,4 +37,4 @@ ENGINE_INFO = [
     },
 ]
 
-DEFAULT_ENGINE = EngineVersion.CLASSIC
+DEFAULT_ENGINE = EngineVersion.TWO_PHASE

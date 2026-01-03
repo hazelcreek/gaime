@@ -4,7 +4,7 @@ Tests cover:
 - EngineVersion enum values
 - /engines endpoint response structure
 - NewGameRequest engine parameter
-- Default engine is CLASSIC
+- Default engine is TWO_PHASE
 """
 
 import pytest
@@ -60,18 +60,18 @@ class TestEngineInfo:
 class TestDefaultEngine:
     """Tests for DEFAULT_ENGINE constant."""
 
-    def test_default_is_classic(self) -> None:
-        """Default engine is CLASSIC."""
-        assert DEFAULT_ENGINE == EngineVersion.CLASSIC
+    def test_default_is_two_phase(self) -> None:
+        """Default engine is TWO_PHASE."""
+        assert DEFAULT_ENGINE == EngineVersion.TWO_PHASE
 
 
 class TestNewGameRequest:
     """Tests for NewGameRequest model with engine parameter."""
 
     def test_default_engine(self) -> None:
-        """NewGameRequest defaults to CLASSIC engine."""
+        """NewGameRequest defaults to TWO_PHASE engine."""
         request = NewGameRequest(world_id="test-world")
-        assert request.engine == EngineVersion.CLASSIC
+        assert request.engine == EngineVersion.TWO_PHASE
 
     def test_explicit_classic_engine(self) -> None:
         """NewGameRequest accepts explicit CLASSIC engine."""
@@ -121,12 +121,12 @@ class TestEnginesEndpoint:
         assert "classic" in engine_ids
         assert "two_phase" in engine_ids
 
-    def test_engines_endpoint_default_is_classic(self, client: TestClient) -> None:
-        """GET /api/game/engines default is classic."""
+    def test_engines_endpoint_default_is_two_phase(self, client: TestClient) -> None:
+        """GET /api/game/engines default is two_phase."""
         response = client.get("/api/game/engines")
         data = response.json()
 
-        assert data["default"] == "classic"
+        assert data["default"] == "two_phase"
 
     def test_engine_info_has_required_fields(self, client: TestClient) -> None:
         """Each engine in response has id, name, description."""
