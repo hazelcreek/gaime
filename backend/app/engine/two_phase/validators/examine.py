@@ -45,13 +45,11 @@ class ExamineValidator:
         ...     description = result.context["description"]
     """
 
-    def __init__(self, visibility_resolver: "DefaultVisibilityResolver | None" = None):
+    def __init__(self, visibility_resolver: "DefaultVisibilityResolver"):
         """Initialize the examine validator.
 
         Args:
-            visibility_resolver: Optional visibility resolver for checking
-                                 item visibility. If not provided, uses
-                                 inline logic for backwards compatibility.
+            visibility_resolver: Visibility resolver for checking item visibility
         """
         self._visibility_resolver = visibility_resolver
 
@@ -116,35 +114,15 @@ class ExamineValidator:
             ) or item.location == state.current_location
 
             if item_at_location:
-                # Check visibility using resolver if available
-                if self._visibility_resolver:
-                    is_visible, reason = (
-                        self._visibility_resolver.analyze_item_visibility(
-                            item, target_id, state
-                        )
+                # Check visibility using resolver
+                is_visible, reason = self._visibility_resolver.analyze_item_visibility(
+                    item, target_id, state
+                )
+                if not is_visible and reason != "taken":
+                    return invalid_result(
+                        code=RejectionCode.ITEM_NOT_VISIBLE,
+                        reason="You don't see anything like that here.",
                     )
-                    if not is_visible and reason != "taken":
-                        return invalid_result(
-                            code=RejectionCode.ITEM_NOT_VISIBLE,
-                            reason="You don't see anything like that here.",
-                        )
-                else:
-                    # Fallback: inline visibility check (for backwards compatibility)
-                    if item.hidden:
-                        if item.find_condition:
-                            required_flag = item.find_condition.get("requires_flag")
-                            if required_flag and not state.flags.get(
-                                required_flag, False
-                            ):
-                                return invalid_result(
-                                    code=RejectionCode.ITEM_NOT_VISIBLE,
-                                    reason="You don't see anything like that here.",
-                                )
-                        else:
-                            return invalid_result(
-                                code=RejectionCode.ITEM_NOT_VISIBLE,
-                                reason="You don't see anything like that here.",
-                            )
 
                 return valid_result(
                     entity_type="item",

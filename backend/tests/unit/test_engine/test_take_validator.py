@@ -12,6 +12,7 @@ Tests cover:
 import pytest
 
 from app.engine.two_phase.validators.take import TakeValidator
+from app.engine.two_phase.visibility import DefaultVisibilityResolver
 from app.engine.two_phase.models.intent import ActionIntent, ActionType
 from app.engine.two_phase.models.event import RejectionCode
 from app.engine.two_phase.models.state import TwoPhaseGameState
@@ -21,9 +22,14 @@ class TestTakeValidator:
     """Tests for TakeValidator."""
 
     @pytest.fixture
-    def validator(self) -> TakeValidator:
-        """Create validator instance."""
-        return TakeValidator()
+    def visibility_resolver(self) -> DefaultVisibilityResolver:
+        """Create visibility resolver instance."""
+        return DefaultVisibilityResolver()
+
+    @pytest.fixture
+    def validator(self, visibility_resolver) -> TakeValidator:
+        """Create validator instance with visibility resolver."""
+        return TakeValidator(visibility_resolver)
 
     @pytest.fixture
     def state(self) -> TwoPhaseGameState:
