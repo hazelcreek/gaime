@@ -37,7 +37,7 @@ def get_provider() -> str:
 
 def get_model() -> str:
     """Get configured model name"""
-    return os.getenv("LLM_MODEL", "gemini-3-pro-preview")
+    return os.getenv("LLM_MODEL", "gemini-3-flash-preview")
 
 
 def get_model_string() -> str:
