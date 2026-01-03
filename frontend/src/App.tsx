@@ -16,7 +16,7 @@ function App() {
 }
 
 function GameContent() {
-  const { sessionId, resetGame, worldId, worldName, engineVersion, startNewGame, isLoading, gameState } = useGame();
+  const { sessionId, resetGame, worldId, worldName, engineVersion, startNewGame, isLoading, gameState, locationDebug, fetchLocationDebug } = useGame();
   const { isMuted, isReady, toggleMute, playMenuMusic, stopMenuMusic } = useAudio();
   const [stateOverlayOpen, setStateOverlayOpen] = useState(false);
 
@@ -173,7 +173,9 @@ function GameContent() {
         <StateOverlay
           gameState={gameState}
           engineVersion={engineVersion}
+          locationDebug={locationDebug}
           onClose={() => setStateOverlayOpen(false)}
+          onFetchDebug={fetchLocationDebug}
         />
       )}
     </div>

@@ -27,6 +27,7 @@ from app.engine.two_phase.models.state import (
     TwoPhaseActionResponse,
     TwoPhaseDebugInfo,
 )
+from app.engine.two_phase.visibility import DefaultVisibilityResolver
 from app.llm.image_generator import get_location_image_path
 from app.api.engine import EngineVersion, ENGINE_INFO, DEFAULT_ENGINE
 
@@ -237,14 +238,29 @@ async def _process_two_phase_action(
 
 @router.get("/state/{session_id}")
 async def get_state(session_id: str):
-    """Get current game state."""
+    """Get current game state with location debug information.
+
+    Returns:
+        - state: Current game state (engine-specific)
+        - engine: Engine version ("classic" or "two_phase")
+        - location_debug: Full location details merged with game state visibility
+    """
     if session_id not in game_sessions:
         raise HTTPException(status_code=404, detail="Game session not found")
 
     session = game_sessions[session_id]
+    state = session.manager.get_state()
+    world = session.manager.get_world_data()
+
+    # Build location debug snapshot using the shared VisibilityResolver
+    # This provides a unified view of world data merged with game state
+    resolver = DefaultVisibilityResolver()
+    location_debug = resolver.build_debug_snapshot(state, world)
+
     return {
-        "state": session.manager.get_state(),
+        "state": state,
         "engine": session.engine.value,
+        "location_debug": location_debug.model_dump(),
     }
 
 

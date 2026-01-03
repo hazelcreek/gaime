@@ -7,6 +7,7 @@ import {
   gameAPI,
   AnyGameState,
   DebugInfo,
+  LocationDebugSnapshot,
   isTwoPhaseActionResponse,
   isTwoPhaseNewGameResponse,
 } from '../api/client';
@@ -26,6 +27,7 @@ interface GameContextValue {
   worldName: string | null;
   engineVersion: string | null;
   gameState: AnyGameState | null;
+  locationDebug: LocationDebugSnapshot | null;
   narrative: NarrativeEntry[];
   isLoading: boolean;
   error: string | null;
@@ -35,6 +37,7 @@ interface GameContextValue {
   sendAction: (action: string) => Promise<void>;
   clearError: () => void;
   resetGame: () => void;
+  fetchLocationDebug: () => Promise<void>;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -47,6 +50,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [worldName, setWorldName] = useState<string | null>(null);
   const [engineVersion, setEngineVersion] = useState<string | null>(null);
   const [gameState, setGameState] = useState<AnyGameState | null>(null);
+  const [locationDebug, setLocationDebug] = useState<LocationDebugSnapshot | null>(null);
   const [narrative, setNarrative] = useState<NarrativeEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -222,10 +226,27 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setWorldName(null);
     setEngineVersion(null);
     setGameState(null);
+    setLocationDebug(null);
     setNarrative([]);
     setError(null);
     localStorage.removeItem(STORAGE_KEY);
   }, []);
+
+  // Fetch location debug info (called when state overlay opens)
+  const fetchLocationDebug = useCallback(async () => {
+    if (!sessionId) return;
+
+    try {
+      const { state, engine, location_debug } = await gameAPI.getState(sessionId);
+      setGameState(state);
+      setLocationDebug(location_debug);
+      if (engine) {
+        setEngineVersion(engine);
+      }
+    } catch (err) {
+      console.error('Failed to fetch location debug:', err);
+    }
+  }, [sessionId]);
 
   return (
     <GameContext.Provider value={{
@@ -234,6 +255,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       worldName,
       engineVersion,
       gameState,
+      locationDebug,
       narrative,
       isLoading,
       error,
@@ -241,6 +263,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       sendAction,
       clearError,
       resetGame,
+      fetchLocationDebug,
     }}>
       {children}
     </GameContext.Provider>

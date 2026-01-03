@@ -12,14 +12,27 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from app.engine.two_phase.models.perception import (
+    LocationDebugSnapshot,
+    LocationExitDebug,
+    LocationInteractionDebug,
+    LocationItemDebug,
+    LocationNPCDebug,
     PerceptionSnapshot,
     VisibleEntity,
     VisibleExit,
 )
 
 if TYPE_CHECKING:
-    from app.engine.two_phase.models.state import TwoPhaseGameState
-    from app.models.world import Location, WorldData
+    from typing import Protocol
+
+    from app.models.world import Item, Location, NPC, WorldData
+
+    class GameStateProtocol(Protocol):
+        """Protocol for game state - works with both classic and two-phase engines."""
+
+        current_location: str
+        inventory: list[str]
+        flags: dict[str, bool]
 
 
 class DefaultVisibilityResolver:
@@ -43,7 +56,7 @@ class DefaultVisibilityResolver:
 
     def build_snapshot(
         self,
-        state: "TwoPhaseGameState",
+        state: "GameStateProtocol",
         world: "WorldData",
     ) -> PerceptionSnapshot:
         """Build a complete perception snapshot for the narrator.
@@ -66,7 +79,7 @@ class DefaultVisibilityResolver:
                 location_id=state.current_location,
                 location_name="Unknown Location",
                 location_atmosphere="",
-                first_visit=state.current_location not in state.visited_locations,
+                first_visit=self._is_first_visit(state),
             )
 
         # Build visible exits
@@ -81,8 +94,8 @@ class DefaultVisibilityResolver:
         # Build inventory
         inventory = self._get_inventory_entities(state, world)
 
-        # Check if first visit
-        first_visit = state.current_location not in state.visited_locations
+        # Check if first visit (handle both engine state types)
+        first_visit = self._is_first_visit(state)
 
         return PerceptionSnapshot(
             location_id=state.current_location,
@@ -133,9 +146,24 @@ class DefaultVisibilityResolver:
 
         return exits
 
+    def _is_first_visit(self, state: "GameStateProtocol") -> bool:
+        """Check if this is the first visit to the current location.
+
+        Handles both engine state types:
+        - TwoPhaseGameState: uses visited_locations (set)
+        - GameState: uses discovered_locations (list)
+        """
+        # Check for visited_locations (two-phase engine)
+        if hasattr(state, "visited_locations"):
+            return state.current_location not in state.visited_locations
+        # Check for discovered_locations (classic engine)
+        if hasattr(state, "discovered_locations"):
+            return state.current_location not in state.discovered_locations
+        return False
+
     def _get_visible_items(
         self,
-        state: "TwoPhaseGameState",
+        state: "GameStateProtocol",
         world: "WorldData",
         location: "Location",
     ) -> list[VisibleEntity]:
@@ -220,7 +248,7 @@ class DefaultVisibilityResolver:
 
     def _get_inventory_entities(
         self,
-        state: "TwoPhaseGameState",
+        state: "GameStateProtocol",
         world: "WorldData",
     ) -> list[VisibleEntity]:
         """Get all items in the player's inventory.
@@ -261,7 +289,7 @@ class DefaultVisibilityResolver:
     def is_item_visible(
         self,
         item_id: str,
-        state: "TwoPhaseGameState",
+        state: "GameStateProtocol",
         world: "WorldData",
     ) -> bool:
         """Check if an item is visible to the player.
@@ -302,3 +330,391 @@ class DefaultVisibilityResolver:
                 return False
 
         return True
+
+    # =========================================================================
+    # Debug Snapshot Methods
+    # =========================================================================
+    #
+    # These methods build a complete view of location state for debugging,
+    # showing ALL entities with their visibility status (not just visible ones).
+    #
+    # EXTENSIBILITY: When adding new visibility rules or world model fields,
+    # update the corresponding _get_*_debug methods below.
+    # See docs/DEBUG_SNAPSHOT.md for the full pattern.
+    # =========================================================================
+
+    def build_debug_snapshot(
+        self,
+        state: "GameStateProtocol",
+        world: "WorldData",
+    ) -> LocationDebugSnapshot:
+        """Build complete debug snapshot with ALL entities and their visibility status.
+
+        Unlike build_snapshot() which filters to visible entities only, this method
+        returns everything at the current location with status flags indicating
+        why each entity is visible or hidden.
+
+        This is the single source of truth for merging world definitions with
+        game state. Used by the debug UI, and can be reused by other components
+        that need complete location information.
+
+        Args:
+            state: Current game state
+            world: World data for entity definitions
+
+        Returns:
+            LocationDebugSnapshot with all entities and their status
+        """
+        location = world.get_location(state.current_location)
+
+        if not location:
+            # Fallback for missing location
+            return LocationDebugSnapshot(
+                location_id=state.current_location,
+                name="Unknown Location",
+                atmosphere="",
+            )
+
+        # Build debug info for all entity types
+        # Each method returns ALL entities with visibility analysis
+        exits = self._get_exits_debug(location, world, state)
+        items = self._get_items_debug(location, world, state)
+        npcs = self._get_npcs_debug(location, world, state)
+        interactions = self._get_interactions_debug(location)
+
+        # Build details dict (filter out exit descriptions)
+        details = {
+            key: value
+            for key, value in (location.details or {}).items()
+            if key not in ("north", "south", "east", "west", "up", "down")
+        }
+
+        # Build requires info if location has access requirements
+        requires = None
+        if location.requires:
+            requires = {}
+            if location.requires.flag:
+                requires["flag"] = location.requires.flag
+            if location.requires.item:
+                requires["item"] = location.requires.item
+
+        return LocationDebugSnapshot(
+            location_id=state.current_location,
+            name=location.name,
+            atmosphere=location.atmosphere or "",
+            exits=exits,
+            items=items,
+            npcs=npcs,
+            details=details,
+            interactions=interactions,
+            requires=requires,
+        )
+
+    def _get_exits_debug(
+        self,
+        location: "Location",
+        world: "WorldData",
+        state: "GameStateProtocol",
+    ) -> list[LocationExitDebug]:
+        """Get all exits with accessibility analysis.
+
+        Analyzes each exit to determine if it's accessible and why.
+
+        Args:
+            location: The current location
+            world: World data for destination lookups
+            state: Current game state for checking requirements
+
+        Returns:
+            List of LocationExitDebug with accessibility status
+        """
+        exits = []
+
+        for direction, dest_id in location.exits.items():
+            dest_location = world.get_location(dest_id)
+            dest_name = dest_location.name if dest_location else dest_id
+
+            # Check accessibility of destination
+            is_accessible = True
+            access_reason = "accessible"
+
+            if dest_location and dest_location.requires:
+                # Check flag requirement
+                if dest_location.requires.flag:
+                    if not state.flags.get(dest_location.requires.flag, False):
+                        is_accessible = False
+                        access_reason = f"requires_flag:{dest_location.requires.flag}"
+
+                # Check item requirement (only if flag passed)
+                if is_accessible and dest_location.requires.item:
+                    if dest_location.requires.item not in state.inventory:
+                        is_accessible = False
+                        access_reason = f"requires_item:{dest_location.requires.item}"
+
+            # Get exit description from location details
+            description = location.details.get(direction) if location.details else None
+
+            exits.append(
+                LocationExitDebug(
+                    direction=direction,
+                    destination_id=dest_id,
+                    destination_name=dest_name,
+                    is_accessible=is_accessible,
+                    access_reason=access_reason,
+                    description=description,
+                )
+            )
+
+        return exits
+
+    def _get_items_debug(
+        self,
+        location: "Location",
+        world: "WorldData",
+        state: "GameStateProtocol",
+    ) -> list[LocationItemDebug]:
+        """Get all items at location with visibility analysis.
+
+        Returns ALL items defined at the location, not just visible ones.
+        Each item includes its visibility status and the reason.
+
+        Visibility rules (in order of precedence):
+        1. Item in inventory -> "taken"
+        2. Item hidden with no condition -> "hidden"
+        3. Item hidden with unmet condition -> "condition_not_met:{flag}"
+        4. Item visible -> "visible"
+
+        Args:
+            location: The current location
+            world: World data for item lookups
+            state: Current game state
+
+        Returns:
+            List of LocationItemDebug with visibility status
+        """
+        items = []
+
+        for item_id in location.items:
+            item = world.get_item(item_id)
+            if not item:
+                continue
+
+            # Determine visibility status
+            is_in_inventory = item_id in state.inventory
+            is_visible, visibility_reason = self._analyze_item_visibility(
+                item, item_id, state
+            )
+
+            # Get placement from location if available
+            placement = (
+                location.item_placements.get(item_id)
+                if location.item_placements
+                else None
+            )
+
+            items.append(
+                LocationItemDebug(
+                    item_id=item_id,
+                    name=item.name,
+                    found_description=item.found_description or "",
+                    is_visible=is_visible,
+                    is_in_inventory=is_in_inventory,
+                    visibility_reason=visibility_reason,
+                    placement=placement,
+                    portable=item.portable,
+                    examine=item.examine or "",
+                )
+            )
+
+        return items
+
+    def _analyze_item_visibility(
+        self,
+        item: "Item",
+        item_id: str,
+        state: "GameStateProtocol",
+    ) -> tuple[bool, str]:
+        """Analyze why an item is visible or hidden.
+
+        Args:
+            item: The item definition
+            item_id: The item's ID
+            state: Current game state
+
+        Returns:
+            Tuple of (is_visible, reason_string)
+        """
+        # Check if in inventory first
+        if item_id in state.inventory:
+            return False, "taken"
+
+        # Check hidden status
+        if item.hidden:
+            if not item.find_condition:
+                return False, "hidden"
+
+            required_flag = item.find_condition.get("requires_flag")
+            if required_flag:
+                if state.flags.get(required_flag, False):
+                    return True, "visible"
+                else:
+                    return False, f"condition_not_met:{required_flag}"
+            else:
+                return False, "hidden"
+
+        return True, "visible"
+
+    def _get_npcs_debug(
+        self,
+        location: "Location",
+        world: "WorldData",
+        state: "GameStateProtocol",
+    ) -> list[LocationNPCDebug]:
+        """Get all NPCs that could be at location with visibility analysis.
+
+        Returns NPCs that are defined for this location (via npc.location,
+        npc.locations, or Location.npcs), along with their visibility status.
+
+        Visibility rules:
+        1. NPC removed via location_changes -> "removed"
+        2. NPC moved to different location -> "wrong_location:{actual_loc}"
+        3. NPC appears_when condition not met -> "condition_not_met:{condition}"
+        4. NPC visible -> "visible"
+
+        Args:
+            location: The current location
+            world: World data for NPC lookups
+            state: Current game state
+
+        Returns:
+            List of LocationNPCDebug with visibility status
+        """
+        npcs = []
+        location_id = state.current_location
+
+        # Collect all NPCs that could be at this location
+        for npc_id, npc in world.npcs.items():
+            # Check if NPC is associated with this location
+            is_base_location = npc.location == location_id
+            is_roaming_location = location_id in npc.locations
+            is_in_location_npcs = npc_id in location.npcs
+
+            if not (is_base_location or is_roaming_location or is_in_location_npcs):
+                continue
+
+            # Analyze visibility
+            is_visible, visibility_reason, current_location = (
+                self._analyze_npc_visibility(npc, npc_id, location_id, state)
+            )
+
+            # Get placement from location if available
+            placement = (
+                location.npc_placements.get(npc_id) if location.npc_placements else None
+            )
+
+            npcs.append(
+                LocationNPCDebug(
+                    npc_id=npc_id,
+                    name=npc.name,
+                    role=npc.role or "",
+                    appearance=npc.appearance or "",
+                    is_visible=is_visible,
+                    visibility_reason=visibility_reason,
+                    placement=placement,
+                    current_location=current_location,
+                )
+            )
+
+        return npcs
+
+    def _analyze_npc_visibility(
+        self,
+        npc: "NPC",
+        npc_id: str,
+        location_id: str,
+        state: "GameStateProtocol",
+    ) -> tuple[bool, str, str | None]:
+        """Analyze why an NPC is visible or hidden.
+
+        Args:
+            npc: The NPC definition
+            npc_id: The NPC's ID
+            location_id: The current location ID
+            state: Current game state
+
+        Returns:
+            Tuple of (is_visible, reason_string, current_location)
+        """
+        # Determine NPC's current location considering location_changes
+        current_loc = npc.location
+        has_location_override = False
+
+        for change in npc.location_changes:
+            if state.flags.get(change.when_flag, False):
+                current_loc = change.move_to
+                has_location_override = True
+
+        # Check if NPC was removed (move_to: null)
+        if current_loc is None and has_location_override:
+            return False, "removed", None
+
+        # Check if NPC is at a different location
+        if has_location_override:
+            if current_loc != location_id:
+                return False, f"wrong_location:{current_loc}", current_loc
+        else:
+            # For roaming NPCs, check both single location and locations list
+            is_here = current_loc == location_id or location_id in npc.locations
+            if not is_here:
+                return False, f"wrong_location:{current_loc}", current_loc
+
+        # Check appears_when conditions
+        if npc.appears_when:
+            for condition in npc.appears_when:
+                if condition.condition == "has_flag":
+                    flag_name = str(condition.value)
+                    if not state.flags.get(flag_name, False):
+                        return (
+                            False,
+                            f"condition_not_met:has_flag:{flag_name}",
+                            current_loc,
+                        )
+                elif condition.condition == "trust_above":
+                    # Trust checking would need npc_trust from state
+                    # For now, we'll note it as a condition
+                    return (
+                        False,
+                        f"condition_not_met:trust_above:{condition.value}",
+                        current_loc,
+                    )
+
+        return True, "visible", current_loc
+
+    def _get_interactions_debug(
+        self,
+        location: "Location",
+    ) -> list[LocationInteractionDebug]:
+        """Get all interactions available at the location.
+
+        Args:
+            location: The current location
+
+        Returns:
+            List of LocationInteractionDebug
+        """
+        interactions = []
+
+        if location.interactions:
+            for int_id, interaction in location.interactions.items():
+                interactions.append(
+                    LocationInteractionDebug(
+                        interaction_id=int_id,
+                        triggers=interaction.triggers,
+                        sets_flag=interaction.sets_flag,
+                        reveals_exit=interaction.reveals_exit,
+                        gives_item=interaction.gives_item,
+                        removes_item=interaction.removes_item,
+                    )
+                )
+
+        return interactions

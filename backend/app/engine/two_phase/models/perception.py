@@ -160,3 +160,216 @@ class ItemVisibility(str):
     VISIBLE = "visible"  # Always visible (default)
     CONCEALED = "concealed"  # In a closed container
     HIDDEN = "hidden"  # Secret, needs discovery
+
+
+# =============================================================================
+# Debug Snapshot Models
+# =============================================================================
+#
+# These models provide a complete view of location state for debugging.
+# Unlike PerceptionSnapshot (which filters to what player can see), these
+# show EVERYTHING with visibility status flags.
+#
+# EXTENSIBILITY: When adding fields to world models (models/world.py),
+# update the corresponding debug model here and the build_debug_snapshot()
+# method in visibility.py. See docs/DEBUG_SNAPSHOT.md for the full pattern.
+# =============================================================================
+
+
+class LocationItemDebug(BaseModel):
+    """Item at location with full visibility analysis.
+
+    Shows all items defined at a location with their current visibility
+    status and the reason for that status.
+
+    Source fields from models/world.py Item:
+        - name, found_description, examine, hidden, find_condition, portable
+
+    Attributes:
+        item_id: The item's unique identifier
+        name: Display name from world definition
+        found_description: How item appears in scene (from Item.found_description)
+        is_visible: Whether player can currently see this item
+        is_in_inventory: Whether player has already taken this item
+        visibility_reason: Why the item is visible/hidden
+        placement: Where item is placed in location (from Location.item_placements)
+        portable: Whether item can be taken
+        examine: Full examination text
+
+    Example:
+        >>> item = LocationItemDebug(
+        ...     item_id="brass_key",
+        ...     name="Brass Key",
+        ...     found_description="A small brass key glints in the drawer.",
+        ...     is_visible=False,
+        ...     is_in_inventory=False,
+        ...     visibility_reason="hidden:requires_flag:drawer_opened",
+        ...     placement="inside the desk drawer",
+        ...     portable=True,
+        ... )
+    """
+
+    item_id: str
+    name: str
+    found_description: str = ""
+    is_visible: bool
+    is_in_inventory: bool
+    visibility_reason: str  # "visible", "hidden", "taken", "condition_not_met:flag_x"
+    placement: str | None = None  # from Location.item_placements
+    portable: bool = True
+    examine: str = ""
+
+
+class LocationNPCDebug(BaseModel):
+    """NPC at location with full visibility analysis.
+
+    Shows all NPCs that could be at a location with their current
+    visibility status and the reason for that status.
+
+    Source fields from models/world.py NPC:
+        - name, role, appearance, location, locations, appears_when, location_changes
+
+    Attributes:
+        npc_id: The NPC's unique identifier
+        name: Display name from world definition
+        role: NPC's role/occupation
+        appearance: Physical description
+        is_visible: Whether NPC is currently visible to player
+        visibility_reason: Why the NPC is visible/hidden
+        placement: Where NPC is positioned (from Location.npc_placements)
+        current_location: NPC's current location (may differ from base due to triggers)
+
+    Example:
+        >>> npc = LocationNPCDebug(
+        ...     npc_id="ghost_child",
+        ...     name="Spectral Child",
+        ...     role="haunting spirit",
+        ...     appearance="A translucent figure of a young girl",
+        ...     is_visible=False,
+        ...     visibility_reason="condition_not_met:has_flag:lantern_lit",
+        ...     placement="hovering near the window",
+        ...     current_location="nursery",
+        ... )
+    """
+
+    npc_id: str
+    name: str
+    role: str = ""
+    appearance: str = ""
+    is_visible: bool
+    visibility_reason: (
+        str  # "visible", "condition_not_met:flag_x", "removed", "wrong_location"
+    )
+    placement: str | None = None  # from Location.npc_placements
+    current_location: str | None = None  # NPC's actual current location
+
+
+class LocationExitDebug(BaseModel):
+    """Exit with accessibility analysis.
+
+    Shows all exits from a location with their accessibility status
+    and any requirements that must be met.
+
+    Source fields from models/world.py Location:
+        - exits, details (for exit descriptions)
+    Source fields from models/world.py LocationRequirement:
+        - flag, item
+
+    Attributes:
+        direction: The exit direction (north, south, etc.)
+        destination_id: ID of the destination location
+        destination_name: Display name of destination
+        is_accessible: Whether player can currently use this exit
+        access_reason: Why the exit is accessible/blocked
+        description: Exit description from location details
+
+    Example:
+        >>> exit = LocationExitDebug(
+        ...     direction="north",
+        ...     destination_id="secret_chamber",
+        ...     destination_name="Secret Chamber",
+        ...     is_accessible=False,
+        ...     access_reason="requires_flag:bookcase_moved",
+        ...     description="A concealed passage behind the bookcase",
+        ... )
+    """
+
+    direction: str
+    destination_id: str
+    destination_name: str
+    is_accessible: bool
+    access_reason: str  # "accessible", "requires_flag:x", "requires_item:y"
+    description: str | None = None
+
+
+class LocationInteractionDebug(BaseModel):
+    """Interaction available at location.
+
+    Source fields from models/world.py InteractionEffect:
+        - triggers, narrative_hint, sets_flag, reveals_exit, gives_item, removes_item
+
+    Attributes:
+        interaction_id: The interaction's unique identifier
+        triggers: List of trigger words/phrases
+        sets_flag: Flag that gets set when triggered
+        reveals_exit: Exit that gets revealed
+        gives_item: Item given to player
+        removes_item: Item removed from player
+    """
+
+    interaction_id: str
+    triggers: list[str] = Field(default_factory=list)
+    sets_flag: str | None = None
+    reveals_exit: str | None = None
+    gives_item: str | None = None
+    removes_item: str | None = None
+
+
+class LocationDebugSnapshot(BaseModel):
+    """Full location state for debug view - shows everything with status.
+
+    Unlike PerceptionSnapshot which filters to what the player can see,
+    this snapshot shows ALL entities at a location with their visibility
+    status flags. Used for the state inspection debug view.
+
+    EXTENSIBILITY: This model mirrors the Location model from models/world.py.
+    When new fields are added to Location, they should be added here too.
+    See docs/DEBUG_SNAPSHOT.md for the extension pattern.
+
+    Source: models/world.py Location
+        - name, atmosphere, exits, items, npcs, details, interactions,
+          requires, item_placements, npc_placements
+
+    Attributes:
+        location_id: Current location ID
+        name: Display name of location
+        atmosphere: Atmosphere description for the location
+        exits: All exits with accessibility status
+        items: All items with visibility status
+        npcs: All NPCs with visibility status
+        details: Examinable scenery elements (key -> description)
+        interactions: Available interactions at this location
+        requires: Access requirements for this location (if any)
+
+    Example:
+        >>> snapshot = LocationDebugSnapshot(
+        ...     location_id="study",
+        ...     name="The Study",
+        ...     atmosphere="Dust motes dance in shafts of pale light",
+        ...     exits=[LocationExitDebug(...)],
+        ...     items=[LocationItemDebug(...)],
+        ...     npcs=[LocationNPCDebug(...)],
+        ...     details={"desk": "A heavy oak writing desk"},
+        ...     interactions=[LocationInteractionDebug(...)],
+        ... )
+    """
+
+    location_id: str
+    name: str
+    atmosphere: str = ""
+    exits: list[LocationExitDebug] = Field(default_factory=list)
+    items: list[LocationItemDebug] = Field(default_factory=list)
+    npcs: list[LocationNPCDebug] = Field(default_factory=list)
+    details: dict[str, str] = Field(default_factory=dict)
+    interactions: list[LocationInteractionDebug] = Field(default_factory=list)
+    requires: dict[str, str] | None = None  # {"flag": "x"} or {"item": "y"}

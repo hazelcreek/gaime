@@ -12,6 +12,7 @@ Welcome to the GAIME developer documentation. This guide will help you understan
 | [STYLE_AUTHORING.md](STYLE_AUTHORING.md) | How to create visual style presets for image generation |
 | [LLM_INTEGRATION.md](LLM_INTEGRATION.md) | AI providers, prompts, and configuration |
 | [API.md](API.md) | Backend endpoint documentation |
+| [DEBUG_SNAPSHOT.md](DEBUG_SNAPSHOT.md) | Location debug snapshot pattern for extending models |
 
 ## What is GAIME?
 

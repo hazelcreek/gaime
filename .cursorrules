@@ -160,6 +160,10 @@ When making code changes, **always check if documentation needs updating**:
 | Completing a roadmap phase item | `planning/roadmap.md` |
 | World schema model changes (`models/world.py`) | `gaime_builder/core/prompts/world_builder/*.txt` |
 | New NPC/Item/Location fields | Update prompt examples + `docs/WORLD_AUTHORING.md` |
+| New Location fields (`models/world.py`) | `LocationDebugSnapshot` + `LocationExitDebug` in `perception.py` + frontend types in `client.ts` |
+| New Item fields (`models/world.py`) | `LocationItemDebug` in `perception.py` + frontend types in `client.ts` |
+| New NPC fields (`models/world.py`) | `LocationNPCDebug` in `perception.py` + frontend types in `client.ts` |
+| New visibility rules | `DefaultVisibilityResolver.build_debug_snapshot()` in `visibility.py` |
 
 ### Docs/Planning/Ideas index upkeep
 - Whenever adding, renaming, or removing files in `docs/`, update the table in `docs/index.md` to list the current files with brief descriptions.
