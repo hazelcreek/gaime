@@ -10,18 +10,20 @@ A comprehensive specification for unified visibility semantics, visual descripti
 ## Table of Contents
 
 1. [Executive Summary](#executive-summary)
-2. [Current State Analysis](#current-state-analysis)
-3. [VisibleObject Abstraction](#visibleobject-abstraction)
-4. [Enhanced Exit Model](#enhanced-exit-model)
-5. [Enhanced Details Model](#enhanced-details-model)
-6. [Examination Mechanics](#examination-mechanics)
-7. [PerceptionSnapshot Updates](#perceptionsnapshot-updates)
-8. [Narrator Integration](#narrator-integration)
-9. [World Schema Changes](#world-schema-changes)
-10. [Image Generation Improvements](#image-generation-improvements)
-11. [World Builder Updates](#world-builder-updates)
-12. [Migration Strategy](#migration-strategy)
-13. [Implementation Phases](#implementation-phases)
+2. [Unified Visibility Model](#unified-visibility-model)
+3. [Current State Analysis](#current-state-analysis)
+4. [VisibleObject Abstraction](#visibleobject-abstraction)
+5. [Enhanced Exit Model](#enhanced-exit-model)
+6. [Enhanced Details Model](#enhanced-details-model)
+7. [Examination Mechanics](#examination-mechanics)
+8. [PerceptionSnapshot Updates](#perceptionsnapshot-updates)
+9. [Narrator Integration](#narrator-integration)
+10. [World Schema Changes](#world-schema-changes)
+11. [Image Generation Improvements](#image-generation-improvements)
+12. [World Builder Updates](#world-builder-updates)
+13. [Migration Strategy](#migration-strategy)
+14. [Deprecations](#deprecations)
+15. [Implementation Phases](#implementation-phases)
 
 ---
 
@@ -69,6 +71,209 @@ with iron bands"                 artistic rendering style)
 | "Fair puzzles" | Exit destination visibility prevents frustrating guesswork |
 | "Guided freedom" | Examination reveals depth without info-dumping |
 | "Curated worlds" | World Builder generates consistent descriptions |
+
+---
+
+## Unified Visibility Model
+
+> **Added in Phase 3.5** — This section documents the unified visibility pattern that applies to all VisibleObject types.
+
+### Core Principle: Location-Bound Visibility
+
+Visibility is a property of **placement**, not the entity definition. An item's visibility depends on WHERE it's placed, not WHAT it is. The same key could be visible on a table in one room but hidden in a drawer in another.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ENTITY DEFINITION (items.yaml, npcs.yaml)                  │
+│  ─────────────────────────────────────────                  │
+│  WHAT the entity IS - inherent properties                   │
+│  • name, description, portable, use_actions                 │
+│  • personality, dialogue_rules, knowledge                   │
+│  • NOT: hidden, find_condition, location                    │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  PLACEMENT (locations.yaml)                                 │
+│  ──────────────────────────                                 │
+│  WHERE the entity is + HOW VISIBLE                          │
+│  • placement: "lies on the table"                           │
+│  • hidden: true/false                                       │
+│  • find_condition: {requires_flag: "..."}                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Unified Visibility Fields
+
+All four entity types use **identical** visibility fields:
+
+| Field | Type | Default | Purpose |
+|-------|------|---------|---------|
+| `hidden` | `bool` | `false` | Entity not visible until revealed |
+| `find_condition` | `dict` | `None` | Condition to reveal (e.g., `{requires_flag: "searched_drawer"}`) |
+
+### Visibility by Entity Type
+
+| Entity | Where Visibility Is Defined | Example |
+|--------|---------------------------|---------|
+| **Item** | `location.item_placements[item_id]` | Key hidden under rug |
+| **NPC** | `location.npc_placements[npc_id]` | Spy hiding behind curtain |
+| **Exit** | `location.exits[direction]` | Secret passage behind bookcase |
+| **Detail** | `location.details[detail_id]` | Hidden message on wall |
+
+### Presence vs Visibility (Important Distinction)
+
+For NPCs, there are **two separate concepts**:
+
+| Concept | Field | Controls |
+|---------|-------|----------|
+| **Presence** | `appears_when` | Is the NPC at this location? |
+| **Visibility** | `hidden` + `find_condition` | Can the player SEE the NPC? |
+
+An NPC can be:
+- **Present AND visible**: Normal case (butler standing in hall)
+- **Present but hidden**: NPC is here but concealed (spy behind curtain)
+- **Not present**: NPC is elsewhere or `appears_when` not satisfied
+
+### Visibility Resolution Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  STEP 1: PRESENCE CHECK                                     │
+│  ──────────────────────                                     │
+│  Items: Is item_id in location.item_placements keys?        │
+│  NPCs: Does appears_when pass AND is NPC at this location?  │
+│  Exits: Is exit defined in location.exits?                  │
+│  Details: Is detail defined in location.details?            │
+└─────────────────────────────────────────────────────────────┘
+                              │ Present
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  STEP 2: VISIBILITY CHECK (UNIFIED)                         │
+│  ──────────────────────────────────                         │
+│  For all entity types:                                      │
+│  - If hidden == false → VISIBLE                             │
+│  - If hidden == true:                                       │
+│    - If find_condition.requires_flag is SET → VISIBLE       │
+│    - Otherwise → HIDDEN                                     │
+└─────────────────────────────────────────────────────────────┘
+                              │ Visible
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  INCLUDED IN PerceptionSnapshot                             │
+│  → Narrator can describe it                                 │
+│  → Image generation can include it                          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Schema Changes for Unified Visibility
+
+**Remove redundant lists** — The `items` and `npcs` lists in Location are redundant. The keys of `item_placements` and `npc_placements` define which entities are present.
+
+**Before (Current):**
+```yaml
+nursery:
+  items:                          # ← REDUNDANT
+    - thornwood_amulet
+  item_placements:
+    thornwood_amulet: "glints beneath a loose floorboard"
+```
+
+**After (Proposed):**
+```yaml
+nursery:
+  item_placements:
+    thornwood_amulet:
+      placement: "glints beneath a loose floorboard"
+      hidden: true
+      find_condition:
+        requires_flag: examined_drawings
+```
+
+### Placement Models
+
+```python
+class ItemPlacement(BaseModel):
+    """Item placement with visibility control"""
+    placement: str                      # How item appears in scene
+    hidden: bool = False                # Not visible until revealed
+    find_condition: dict | None = None  # e.g., {requires_flag: "searched_drawer"}
+
+
+class NPCPlacement(BaseModel):
+    """NPC placement with visibility control"""
+    placement: str                      # Where NPC is positioned
+    hidden: bool = False                # Not visible until revealed
+    find_condition: dict | None = None  # e.g., {requires_flag: "pulled_curtain"}
+```
+
+**String shorthand** — For simple placements (visible, no conditions), a plain string is allowed:
+
+```yaml
+item_placements:
+  # Simple string = visible, just placement text
+  old_letter: "lies crumpled on the dusty side table"
+
+  # Structured = placement with visibility control
+  hidden_key:
+    placement: "hidden under the rug"
+    hidden: true
+    find_condition:
+      requires_flag: lifted_rug
+```
+
+### Exit and Detail Visibility
+
+Exits and Details also support the unified visibility fields:
+
+```python
+class ExitDefinition(BaseModel):
+    # ... existing fields ...
+    hidden: bool = False                # NEW: Exit not visible until revealed
+    find_condition: dict | None = None  # NEW: Condition to reveal exit
+
+
+class DetailDefinition(BaseModel):
+    # ... existing fields ...
+    hidden: bool = False                # NEW: Detail not visible until revealed
+    find_condition: dict | None = None  # NEW: Condition to reveal detail
+```
+
+### Example: Hidden Exit (Secret Passage)
+
+```yaml
+library:
+  exits:
+    south:
+      destination: entrance_hall
+      scene_description: "The archway back to the entrance hall"
+      destination_known: true
+
+    secret:
+      destination: secret_passage
+      scene_description: "A narrow passage behind the bookcase"
+      hidden: true
+      find_condition:
+        requires_flag: found_secret_lever
+```
+
+### Example: Hidden NPC
+
+```yaml
+# npcs.yaml - just definition
+spy:
+  name: "The Spy"
+  role: "Enemy agent"
+  appearance: "A figure in dark clothing"
+
+# locations.yaml - placement with visibility
+library:
+  npc_placements:
+    spy:
+      placement: "lurking behind the heavy curtain"
+      hidden: true
+      find_condition:
+        requires_flag: searched_curtain
+```
 
 ---
 
@@ -622,68 +827,115 @@ class ExamineEvent(BaseModel):
 
 ## World Schema Changes
 
-### Location Schema
+> **Updated in Phase 3.5** — This section now reflects the unified visibility model with location-bound visibility.
+
+### Location Schema (V3 - Unified Visibility)
 
 ```python
 class Location(BaseModel):
-    """Location/room definition from locations.yaml"""
+    """Location/room definition from locations.yaml (V3 schema)"""
 
     name: str
     atmosphere: str = ""
 
-    # Enhanced exits with visual descriptions (v2 - no legacy format)
+    # Enhanced exits with visual descriptions and visibility control
     exits: dict[str, ExitDefinition] = Field(default_factory=dict)
 
-    # Enhanced details with examination support (v2 - no legacy format)
+    # Enhanced details with examination support and visibility control
     details: dict[str, DetailDefinition] = Field(default_factory=dict)
 
-    # Existing fields unchanged
-    items: list[str] = Field(default_factory=list)
-    npcs: list[str] = Field(default_factory=list)
+    # REMOVED: items list - use item_placements keys instead
+    # items: list[str] = Field(default_factory=list)  ← DEPRECATED
+
+    # REMOVED: npcs list - use npc_placements keys instead
+    # npcs: list[str] = Field(default_factory=list)   ← DEPRECATED
+
+    # Item placements with visibility control (V3 - structured)
+    item_placements: dict[str, ItemPlacement | str] = Field(default_factory=dict)
+
+    # NPC placements with visibility control (V3 - structured)
+    npc_placements: dict[str, NPCPlacement | str] = Field(default_factory=dict)
+
+    # Other fields unchanged
     interactions: dict[str, InteractionEffect] = Field(default_factory=dict)
     requires: LocationRequirement | None = None
-    item_placements: dict[str, str] = Field(default_factory=dict)
-    npc_placements: dict[str, str] = Field(default_factory=dict)
 ```
 
-### Item Schema
+### ItemPlacement Model (NEW)
+
+```python
+class ItemPlacement(BaseModel):
+    """Item placement with visibility control (V3)"""
+
+    placement: str                      # How item appears in scene
+    hidden: bool = False                # Not visible until revealed
+    find_condition: dict | None = None  # e.g., {requires_flag: "searched_drawer"}
+```
+
+Items at a location are defined by the **keys of `item_placements`**, not a separate list.
+
+### NPCPlacement Model (NEW)
+
+```python
+class NPCPlacement(BaseModel):
+    """NPC placement with visibility control (V3)"""
+
+    placement: str                      # Where NPC is positioned
+    hidden: bool = False                # Not visible until revealed
+    find_condition: dict | None = None  # e.g., {requires_flag: "pulled_curtain"}
+```
+
+NPCs at a location are defined by the **keys of `npc_placements`**, not a separate list.
+
+### Item Schema (V3 - Entity Definition Only)
 
 ```python
 class Item(BaseModel):
-    """Item definition from items.yaml"""
+    """Item definition from items.yaml (V3 schema)
+
+    Note: Visibility fields (hidden, find_condition, location) have moved
+    to ItemPlacement in locations.yaml. Items.yaml now only defines
+    WHAT the item IS, not WHERE it is or HOW VISIBLE.
+    """
 
     name: str
     portable: bool = True
 
-    # v2 field names (no legacy aliases)
-    scene_description: str = ""  # Was: found_description
-    examine_description: str = ""  # Was: examine
+    # Visual descriptions
+    scene_description: str = ""   # How item appears in scene
+    examine_description: str = "" # Detailed examination text
 
-    # Existing fields unchanged
+    # Inherent properties only
     take_description: str = ""
     unlocks: str | None = None
-    location: str | None = None
-    hidden: bool = False
-    find_condition: dict | None = None
     properties: ItemProperty = Field(default_factory=ItemProperty)
     use_actions: dict[str, ItemUseAction] = Field(default_factory=dict)
     clues: list[ItemClue] = Field(default_factory=list)
+
+    # REMOVED - moved to ItemPlacement in locations.yaml:
+    # location: str | None = None      ← DEPRECATED
+    # hidden: bool = False             ← DEPRECATED
+    # find_condition: dict | None      ← DEPRECATED
 ```
 
-### Complete Exit Definition
+### Complete Exit Definition (V3)
 
 ```python
 class ExitDefinition(BaseModel):
-    """Structured exit definition"""
+    """Structured exit definition with visibility control (V3)"""
     destination: str
     scene_description: str = ""
     examine_description: str | None = None
 
-    # Destination visibility
+    # Destination visibility (where it leads)
     destination_known: bool = True  # Initial state (set by author)
     reveal_on_flag: str | None = None  # Dynamic reveal trigger
     reveal_on_examine: bool = False  # Reveal when examined
     # Note: Visiting destination always reveals it (automatic)
+
+    # Exit visibility (whether exit is shown at all) - NEW in V3
+    hidden: bool = False                # Exit not visible until revealed
+    find_condition: dict | None = None  # Condition to reveal exit
 
     # Accessibility
     locked: bool = False
@@ -692,7 +944,7 @@ class ExitDefinition(BaseModel):
     blocked_reason: str | None = None
 ```
 
-### Complete Detail Definition
+### Complete Detail Definition (V3)
 
 ```python
 class ExaminationEffect(BaseModel):
@@ -704,11 +956,15 @@ class ExaminationEffect(BaseModel):
 
 
 class DetailDefinition(BaseModel):
-    """Structured detail definition"""
+    """Structured detail definition with visibility control (V3)"""
     name: str
     scene_description: str
     examine_description: str | None = None
     on_examine: ExaminationEffect | None = None
+
+    # Detail visibility - NEW in V3
+    hidden: bool = False                # Detail not visible until revealed
+    find_condition: dict | None = None  # Condition to reveal detail
 ```
 
 ---
@@ -915,6 +1171,125 @@ Set destination_known: FALSE if:
 - Mystery/suspense is narratively appropriate
 ```
 
+### Visibility-Aware Generation (V3)
+
+> **Added in Phase 3.5** — The World Builder should generate hidden entities when narratively appropriate.
+
+#### Location Generation: Use `item_placements` / `npc_placements`
+
+The World Builder must generate locations using the V3 schema:
+- Use `item_placements` dict (not `items` list) to place items
+- Use `npc_placements` dict (not `npcs` list) to place NPCs
+- For each placement, decide if it should be hidden
+
+#### Prompt Guidance for Hidden Items
+
+```
+## Item Visibility
+
+When placing items, consider whether they should be:
+- Visible: Item is in plain sight (default)
+- Hidden: Item requires discovery through examination or puzzle-solving
+
+For hidden items, generate:
+- placement: where the item physically is (even if hidden)
+- hidden: true
+- find_condition: {requires_flag: "<action_that_reveals_it>"}
+
+Also generate the corresponding interaction that sets the reveal flag.
+
+Examples:
+- Key hidden under a rug → requires "examined_rug" flag
+- Letter in a secret drawer → requires "opened_secret_drawer" flag
+- Artifact behind loose brick → requires "found_loose_brick" flag
+```
+
+#### Prompt Guidance for Hidden Exits
+
+```
+## Exit Visibility
+
+When creating exits, consider whether they should be:
+- Visible: Exit is obvious (door, archway, stairs) - default
+- Hidden: Exit is concealed and requires discovery (secret passage)
+
+For hidden exits (secret passages, concealed doors), generate:
+- Full ExitDefinition with scene_description
+- hidden: true
+- find_condition: {requires_flag: "<discovery_action>"}
+
+Also generate the corresponding interaction that sets the flag.
+
+Examples:
+- Bookshelf passage → requires "pulled_lever" flag
+- Trapdoor under carpet → requires "moved_carpet" flag
+- Hidden cave entrance → requires "cleared_vines" flag
+```
+
+#### Prompt Guidance for Hidden Details
+
+```
+## Detail Visibility
+
+When creating scenery details, consider whether they should be:
+- Visible: Detail is noticeable in the scene (default)
+- Hidden: Detail is only revealed through examination or action
+
+For hidden details (secret clues, concealed writing), generate:
+- DetailDefinition with scene_description (for when revealed)
+- hidden: true
+- find_condition: {requires_flag: "<reveal_action>"}
+
+Examples:
+- Hidden message on wall → requires "used_magnifying_glass" flag
+- Secret compartment → requires "pressed_hidden_switch" flag
+- Concealed mechanism → requires "removed_painting" flag
+```
+
+#### Prompt Guidance for Hidden NPCs
+
+```
+## NPC Visibility
+
+When placing NPCs, consider whether they should be:
+- Visible: NPC is present and observable (default)
+- Hidden: NPC is present but concealed (lurking, hiding)
+
+For hidden NPCs, generate:
+- npc_placements with placement describing WHERE they're hiding
+- hidden: true
+- find_condition: {requires_flag: "<reveal_action>"}
+
+Examples:
+- Spy behind curtain → requires "searched_curtain" flag
+- Monster in shadows → requires "shone_light" flag
+- Thief under bed → requires "checked_under_bed" flag
+```
+
+#### Coordinating Visibility with Interactions
+
+When generating hidden entities, ensure the corresponding interaction exists:
+
+```yaml
+# The interaction that reveals the hidden item
+interactions:
+  examine_rug:
+    triggers:
+      - "examine rug"
+      - "look under rug"
+      - "lift rug"
+    sets_flag: examined_rug
+    narrative_hint: "You lift the corner of the rug and find something hidden beneath."
+
+# The hidden item revealed by the interaction
+item_placements:
+  brass_key:
+    placement: "tucked under the corner of the rug"
+    hidden: true
+    find_condition:
+      requires_flag: examined_rug
+```
+
 ---
 
 ## Migration Strategy
@@ -1093,6 +1468,135 @@ Before migrating each world:
 3. Migrate and validate
 4. If issues: `git checkout v1-backup`
 
+### V3 Migration: Hidden Items (4 total)
+
+These items currently define visibility in `items.yaml` but should move to `item_placements` in `locations.yaml`:
+
+| World | Item | Current Location | Migration Action |
+|-------|------|------------------|------------------|
+| cursed-manor | `thornwood_amulet` | items.yaml:158 | Move `hidden`/`find_condition` to nursery.item_placements |
+| uss-enterprise-d | `replacement_isolinear_chip` | items.yaml:99 | Move to appropriate location.item_placements |
+| uss-enterprise-d | `phase_inverter` | items.yaml:120 | Move to appropriate location.item_placements |
+| hazel_city_1885 | `whiskey_bottle` | items.yaml:52 | Move to appropriate location.item_placements |
+
+### V3 Migration: Hidden Exits (9 total)
+
+These worlds use the `reveals_exit` + `Location.requires` workaround. Convert to proper hidden exits:
+
+| World | Location | Exit | Flag | Current Workaround |
+|-------|----------|------|------|-------------------|
+| cursed-manor | library | secret_passage | `found_secret_passage` | `interaction.reveals_exit` + `Location.requires` |
+| booty-bay-ballad | town_square | smugglers_cove_entrance | `statue_unlocked` | `interaction.reveals_exit` |
+| booty-bay-ballad | crows_nest | zipline | `zipline_active` | `interaction.reveals_exit` |
+| islay-mist-mystery | malt_barn | managers_office | `lift_repaired` | `interaction.reveals_exit` |
+| islay-mist-mystery | malt_barn | smugglers_cove | `cove_open` | `interaction.reveals_exit` |
+| automaton-isle | lighthouse_tower | shipwreck_beach | (determine from interaction) | `interaction.reveals_exit` |
+| automaton-isle | overgrown_path | hidden_hollow | `tree_opened` | `interaction.reveals_exit` |
+| automaton-isle | clockwork_plaza | memory_archive | (determine from interaction) | `interaction.reveals_exit` |
+| automaton-isle | boiler_room | observatory_cliffs | `drawbridge_lowered` | `interaction.reveals_exit` |
+
+**Migration for each hidden exit:**
+
+1. Add the exit to `location.exits` with `hidden: true` and appropriate `find_condition`
+2. Keep the interaction that sets the flag
+3. Remove the `reveals_exit` field from the interaction
+4. Remove the `Location.requires` from the destination (if only used for exit gating)
+
+**Example migration (cursed-manor library):**
+
+Before:
+```yaml
+library:
+  exits:
+    south:
+      destination: entrance_hall
+      # ... no exit to secret_passage
+  interactions:
+    pull_red_book:
+      reveals_exit: secret_passage      # ← Workaround
+      sets_flag: found_secret_passage
+
+secret_passage:
+  requires:
+    flag: found_secret_passage          # ← Workaround
+```
+
+After:
+```yaml
+library:
+  exits:
+    south:
+      destination: entrance_hall
+    secret:
+      destination: secret_passage
+      scene_description: "A narrow passage behind the bookcase"
+      hidden: true                      # ← Proper hidden exit
+      find_condition:
+        requires_flag: found_secret_passage
+  interactions:
+    pull_red_book:
+      # reveals_exit removed
+      sets_flag: found_secret_passage
+
+secret_passage:
+  # requires removed (exit gating replaces location gating)
+```
+
+### V3 Migration: Remove Redundant Lists
+
+For all worlds, remove the `items` and `npcs` lists from locations:
+
+```yaml
+# Before
+library:
+  items:
+    - dusty_tome
+    - reading_glasses
+  item_placements:
+    dusty_tome: "lies open on the desk"
+    reading_glasses: "rest beside the book"
+
+# After
+library:
+  item_placements:
+    dusty_tome: "lies open on the desk"
+    reading_glasses: "rest beside the book"
+```
+
+---
+
+## Deprecations
+
+The following fields and patterns are deprecated in V3:
+
+### Deprecated Item Fields
+
+| Field | Replacement | Reason |
+|-------|-------------|--------|
+| `Item.hidden` | `ItemPlacement.hidden` | Visibility is location-bound |
+| `Item.find_condition` | `ItemPlacement.find_condition` | Visibility is location-bound |
+| `Item.location` | `location.item_placements` keys | Redundant with placements |
+
+### Deprecated Location Fields
+
+| Field | Replacement | Reason |
+|-------|-------------|--------|
+| `Location.items` | `item_placements` keys | Redundant |
+| `Location.npcs` | `npc_placements` keys | Redundant |
+
+### Deprecated Interaction Fields
+
+| Field | Replacement | Reason |
+|-------|-------------|--------|
+| `InteractionEffect.reveals_exit` | Hidden exit with `find_condition` | Cleaner data model |
+
+### Deprecated Patterns
+
+| Pattern | Replacement | Reason |
+|---------|-------------|--------|
+| `Location.requires.flag` for exit gating | Exit `hidden` + `find_condition` | Gate exit, not destination |
+| Direction keys in `details` | Exit `scene_description` | Exits have their own descriptions |
+
 ---
 
 ## Implementation Phases
@@ -1176,9 +1680,64 @@ Before migrating each world:
 - Game state updated: added `revealed_exits: dict[str, set[str]]` for future Phase 4 flag/examine reveals
 - Destination reveal logic: Only `on_visit` auto-reveal implemented in Phase 3; `reveal_on_flag` and `reveal_on_examine` triggers deferred to Phase 4
 
+### Phase 3.5: Unified Visibility Model (V3 Schema)
+
+**Goal**: Implement location-bound visibility for all entity types
+
+#### Phase 3.5a: Schema Updates
+
+- [ ] Add `ItemPlacement` model to `models/world.py`
+- [ ] Add `NPCPlacement` model to `models/world.py`
+- [ ] Add `hidden` + `find_condition` fields to `ExitDefinition`
+- [ ] Add `hidden` + `find_condition` fields to `DetailDefinition`
+- [ ] Update `Location` model: change `item_placements` type from `dict[str, str]` to `dict[str, ItemPlacement | str]`
+- [ ] Update `Location` model: change `npc_placements` type from `dict[str, str]` to `dict[str, NPCPlacement | str]`
+- [ ] Remove `hidden`, `find_condition`, `location` from `Item` model
+- [ ] Remove `items` and `npcs` lists from `Location` model
+- [ ] Update validation script for V3 schema
+
+**Tests**: Validation script passes on V3 YAML
+
+#### Phase 3.5b: World Migration (V3)
+
+- [ ] Migrate hidden items (4 total):
+  - [ ] cursed-manor: `thornwood_amulet` → nursery.item_placements
+  - [ ] uss-enterprise-d: `replacement_isolinear_chip` → location.item_placements
+  - [ ] uss-enterprise-d: `phase_inverter` → location.item_placements
+  - [ ] hazel_city_1885: `whiskey_bottle` → location.item_placements
+- [ ] Migrate hidden exits (9 total):
+  - [ ] cursed-manor: library → secret_passage
+  - [ ] booty-bay-ballad: town_square → smugglers_cove_entrance
+  - [ ] booty-bay-ballad: crows_nest → zipline
+  - [ ] islay-mist-mystery: malt_barn → managers_office
+  - [ ] islay-mist-mystery: malt_barn → smugglers_cove
+  - [ ] automaton-isle: lighthouse_tower → shipwreck_beach
+  - [ ] automaton-isle: overgrown_path → hidden_hollow
+  - [ ] automaton-isle: clockwork_plaza → memory_archive
+  - [ ] automaton-isle: boiler_room → observatory_cliffs
+- [ ] Remove redundant `items` and `npcs` lists from all locations
+- [ ] Remove `reveals_exit` from interactions (replaced by hidden exits)
+- [ ] Remove `Location.requires` used for exit gating (replaced by exit visibility)
+- [ ] Validate all migrated worlds
+
+**Tests**: All worlds load and pass validation
+
+#### Phase 3.5c: Engine Integration
+
+- [ ] Update `WorldLoader._load_locations_yaml()` to parse `ItemPlacement` and `NPCPlacement`
+- [ ] Update `VisibilityResolver._get_visible_items()` to check placement visibility
+- [ ] Update `VisibilityResolver._get_visible_exits()` to filter hidden exits
+- [ ] Update `VisibilityResolver._get_visible_details()` to filter hidden details
+- [ ] Update `VisibilityResolver._get_npcs_debug()` for placement visibility
+- [ ] Add helper method `_check_entity_visibility(hidden, find_condition, flags)`
+- [ ] Update debug snapshot methods for new visibility fields
+- [ ] Run full test suite
+
+**Tests**: All existing tests pass with V3 schema
+
 ### Phase 4: Examination Mechanics (Week 2)
 
-**Goal**: Examination triggers effects
+**Goal**: Examination triggers effects (including visibility reveals)
 
 - [ ] Implement `reveal_on_flag` destination reveal logic (check flag state in VisibilityResolver)
 - [ ] Implement `reveal_on_examine` destination reveal logic (examining exit reveals destination)
@@ -1188,50 +1747,60 @@ Before migrating each world:
 - [ ] Create ExamineEvent with effect tracking
 - [ ] Add revealed items to perception snapshot
 - [ ] Update `revealed_exits` in game state when flag/examine reveals destination
+- [ ] Implement visibility reveal on examination (hidden items/exits/details revealed by examine)
 
 **Tests**: Integration tests for examine action with effects
 
 ### Phase 5: Narrator Integration (Week 2-3)
 
-**Goal**: Narrator uses enhanced descriptions
+**Goal**: Narrator uses enhanced descriptions and respects visibility
 
 - [ ] Update narrator prompts for destination visibility
 - [ ] Add examination event narration
 - [ ] Handle unknown destination prose generation
 - [ ] Add `narrative_hint` to narration context
+- [ ] Ensure hidden entities are not mentioned in narration
 
 **Tests**: E2E tests with real LLM
 
 ### Phase 6: Image Generation (Week 3)
 
-**Goal**: Image generator uses authored descriptions
+**Goal**: Image generator uses authored descriptions and respects visibility
 
-- [ ] Update `ExitInfo` dataclass with `scene_description`
+- [ ] Update `ExitInfo` dataclass with `scene_description` and `hidden` flag
 - [ ] Modify `_build_exits_description` to use authored content
-- [ ] Update `_get_exits_for_image` to extract from new schema
+- [ ] Update `_get_exits_for_image` to extract from V3 schema
+- [ ] Filter out hidden exits from image generation
 - [ ] Add minimal fallback for missing descriptions
 
 **Tests**: Unit tests for image prompt generation
 
 ### Phase 7: World Builder Updates (Week 3-4)
 
-**Goal**: World Builder generates visual descriptions for new worlds
+**Goal**: World Builder generates V3 schema with visibility-aware content
 
-- [ ] Update location generation prompts for exit descriptions
-- [ ] Update location generation prompts for detail structure
-- [ ] Add destination visibility hint generation
-- [ ] Update schema reference documentation
+- [ ] Update location generation prompts to use `item_placements` (not `items` list)
+- [ ] Update location generation prompts to use `npc_placements` (not `npcs` list)
+- [ ] Add prompt guidance for generating hidden items
+- [ ] Add prompt guidance for generating hidden exits (secret passages)
+- [ ] Add prompt guidance for generating hidden details (secret clues)
+- [ ] Add prompt guidance for generating hidden NPCs (lurking enemies)
+- [ ] Generate appropriate `find_condition` flags based on puzzle design
+- [ ] Ensure interactions that reveal hidden things set the correct flags
+- [ ] Update schema reference documentation for V3
 
 **Tests**: Manual testing with world generation
 
 ### Phase 8: Documentation (Week 4)
 
-**Goal**: Update all documentation to reflect new schema
+**Goal**: Update all documentation to reflect V3 schema
 
-- [ ] Update `docs/WORLD_AUTHORING.md` with new exit/detail format
+- [ ] Update `docs/WORLD_AUTHORING.md` with V3 exit/detail/placement format
+- [ ] Update `docs/WORLD_AUTHORING.md` with unified visibility model
 - [ ] Update `docs/ARCHITECTURE.md` with new models
 - [ ] Update `docs/DEBUG_SNAPSHOT.md` with new fields
 - [ ] Update `planning/index.md`
+- [ ] Document deprecated fields and migration path
 
 **Tests**: Review docs for accuracy
 
@@ -1240,7 +1809,7 @@ Before migrating each world:
 ## Appendix: Example World After Migration
 
 ```yaml
-# locations.yaml (v2 schema)
+# locations.yaml (V3 schema - unified visibility)
 entrance_hall:
   name: "Entrance Hall"
   atmosphere: |
@@ -1257,15 +1826,16 @@ entrance_hall:
       destination: dining_room
       scene_description: "A heavy oak door with iron bands and a tarnished brass handle"
       destination_known: false  # Closed door in unfamiliar mansion
-      reveal_on_flag: found_floor_plan  # Examining floor plan reveals rooms
+      reveal_on_flag: found_floor_plan  # Examining floor plan reveals destination
       # Auto-reveals once player visits dining_room
 
     secret:
       destination: hidden_study
       scene_description: "Behind the bookcase, a narrow passage"
       destination_known: true  # Once revealed, destination is obvious
-      blocked: true
-      blocked_reason: "The bookcase conceals this passage"
+      hidden: true  # V3: Exit is hidden until revealed
+      find_condition:  # V3: Condition to reveal exit
+        requires_flag: found_secret_lever
 
   details:
     chandelier:
@@ -1284,17 +1854,45 @@ entrance_hall:
       on_examine:
         sets_flag: examined_portraits
 
-  items:
-    - old_letter
-    - candlestick
+    hidden_message:
+      name: "Faded Writing"
+      scene_description: "Faint words scratched into the wallpaper"
+      hidden: true  # V3: Detail hidden until revealed
+      find_condition:
+        requires_flag: used_magnifying_glass
 
+  # V3: No items list - use item_placements keys instead
+  # items: [old_letter, candlestick]  ← REMOVED
+
+  # V3: item_placements defines which items are here AND their visibility
   item_placements:
-    old_letter: "rests on the marble-topped table"
-    candlestick: "sits in a brass holder by the door"
+    old_letter: "rests on the marble-topped table"  # Simple string = visible
+    candlestick: "sits in a brass holder by the door"  # Simple string = visible
+    small_key:  # V3: Structured placement with visibility
+      placement: "hidden behind a loose crystal in the chandelier"
+      hidden: true
+      find_condition:
+        requires_flag: found_chandelier_key
+
+  # V3: npc_placements can also have visibility control
+  npc_placements:
+    lurking_shadow:
+      placement: "concealed in the dark corner behind the staircase"
+      hidden: true
+      find_condition:
+        requires_flag: shone_lantern_in_corner
+
+  interactions:
+    pull_lever:
+      triggers:
+        - "pull lever"
+        - "use lever"
+      sets_flag: found_secret_lever
+      narrative_hint: "The lever clicks. You hear stone grinding somewhere..."
 ```
 
 ```yaml
-# items.yaml (v2 schema)
+# items.yaml (V3 schema - entity definition only)
 old_letter:
   name: "Yellowed Letter"
   portable: true
@@ -1302,6 +1900,7 @@ old_letter:
   examine_description: |
     The handwriting is elegant but hurried. It reads:
     "My dearest, the key is where light meets dark. Trust no one."
+  # V3: No hidden/find_condition/location here - that's in item_placements
 
 candlestick:
   name: "Brass Candlestick"
@@ -1314,7 +1913,17 @@ small_key:
   portable: true
   scene_description: "A small brass key, tarnished but intact"
   examine_description: "It looks like it would fit a jewelry box or small drawer"
-  hidden: true
-  find_condition:
-    requires_flag: found_chandelier_key
+  # V3: Visibility moved to locations.yaml item_placements
+  # hidden: true                        ← REMOVED
+  # find_condition:                     ← REMOVED
+  #   requires_flag: found_chandelier_key
+```
+
+```yaml
+# npcs.yaml (V3 schema - entity definition only)
+lurking_shadow:
+  name: "Lurking Shadow"
+  role: "Unknown threat"
+  appearance: "A dark figure, barely distinguishable from the shadows"
+  # V3: Visibility is in locations.yaml npc_placements, not here
 ```
