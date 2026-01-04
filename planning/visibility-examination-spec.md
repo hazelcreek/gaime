@@ -919,9 +919,16 @@ Set destination_known: FALSE if:
 
 ## Migration Strategy
 
-### Approach: Breaking Change with LLM-Assisted Migration
+### Approach: Migration-First with Clean Break
 
 We're doing a **clean break** - no backward compatibility. This simplifies the codebase (no union types, no deprecation logic). All existing worlds will be migrated to the new schema.
+
+**Critical Ordering**: Migrate all worlds BEFORE changing engine code. This means:
+1. Define new models (Phase 1) but don't integrate into WorldLoader yet
+2. Migrate all YAML files to new format (Phase 2)
+3. Then update engine code to use new models (Phase 3)
+
+This ordering eliminates the need for any backward compatibility logic.
 
 **Why LLM-Assisted Migration?**
 
@@ -1090,32 +1097,61 @@ Before migrating each world:
 
 ## Implementation Phases
 
-### Phase 1: Schema Foundation (Week 1)
+> **Strategy**: Migration-first approach. We migrate all worlds to the new schema BEFORE changing engine code. This eliminates the need for backward compatibility logic, union types, or deprecation warnings.
 
-**Goal**: Update models without breaking existing functionality
+### Phase 1: Schema Definition (Day 1)
 
-- [ ] Add `ExitDefinition` and `DetailDefinition` models to `models/world.py`
-- [ ] Add `ExaminationEffect` and `DestinationReveal` models
-- [ ] Implement backward-compatible validators for Location
-- [ ] Add `schema_version` field to World model
-- [ ] Update WorldLoader to normalize legacy formats
-- [ ] Add deprecation warnings for old format
+**Goal**: Define new Pydantic models without integrating into engine yet
 
-**Tests**: Unit tests for model parsing and normalization
+- [ ] Add `ExitDefinition` model to `models/world.py`
+- [ ] Add `DetailDefinition` model to `models/world.py`
+- [ ] Add `ExaminationEffect` model to `models/world.py`
+- [ ] Update `Item` model with new field names (add aliases for migration validation)
+- [ ] Create standalone validation script to test YAML against new models
 
-### Phase 2: Visibility Resolver Updates (Week 1-2)
+**Tests**: Validation script passes on migrated YAML
 
-**Goal**: VisibilityResolver uses new schema
+**Note**: Models are defined but NOT yet used by WorldLoader or engine. This allows us to validate migrated YAML before committing to the schema change.
 
-- [ ] Update `_get_visible_exits` to use `ExitDefinition.scene_description`
+### Phase 2: World Migration (Day 1-2)
+
+**Goal**: Migrate all worlds to new schema format
+
+- [ ] Migrate `backend/tests/fixtures/test_world/` first (validates approach)
+- [ ] Migrate each world in `worlds/` using Cursor Agent assistance
+- [ ] Validate all migrated worlds with schema validation script
+- [ ] Git commit migrated worlds
+
+**Deliverable**: All YAML files use new structured format
+
+**Migration Checklist per World**:
+1. Convert `exits: {direction: destination_id}` → `exits: {direction: ExitDefinition}`
+2. Generate `scene_description` for each exit based on world theme
+3. Determine `destination_known` based on narrative context
+4. Convert `details: {key: string}` → `details: {key: DetailDefinition}`
+5. Rename Item fields: `found_description` → `scene_description`, `examine` → `examine_description`
+
+### Phase 3: Code Integration (Day 2-3)
+
+**Goal**: Replace old models and update all consumers (clean swap, no unions)
+
+- [ ] Replace `Location.exits: dict[str, str]` with `dict[str, ExitDefinition]`
+- [ ] Replace `Location.details: dict[str, str]` with `dict[str, DetailDefinition]`
+- [ ] Remove Item field aliases (now only new names exist)
+- [ ] Update `WorldLoader._load_locations_yaml()` to parse structured exits/details
+- [ ] Update `WorldLoader._load_items_yaml()` to use new field names
+- [ ] Update `VisibilityResolver._get_visible_exits()` to use `scene_description`
+- [ ] Update `VisibilityResolver._get_visible_details()` to use `DetailDefinition`
+- [ ] Update `MovementValidator` to extract destination from `ExitDefinition`
+- [ ] Update debug snapshot models in `perception.py`
 - [ ] Add `destination_known` to `VisibleExit` output
-- [ ] Update `_get_visible_details` to use `DetailDefinition`
 - [ ] Add exit destination state tracking to game state
 - [ ] Implement destination reveal logic (on_visit, on_flag, etc.)
+- [ ] Run full test suite, fix any breakage
 
-**Tests**: Unit tests for visibility with new schema
+**Tests**: All existing tests pass with new schema
 
-### Phase 3: Examination Mechanics (Week 2)
+### Phase 4: Examination Mechanics (Week 2)
 
 **Goal**: Examination triggers effects
 
@@ -1127,7 +1163,7 @@ Before migrating each world:
 
 **Tests**: Integration tests for examine action with effects
 
-### Phase 4: Narrator Integration (Week 2-3)
+### Phase 5: Narrator Integration (Week 2-3)
 
 **Goal**: Narrator uses enhanced descriptions
 
@@ -1138,7 +1174,7 @@ Before migrating each world:
 
 **Tests**: E2E tests with real LLM
 
-### Phase 5: Image Generation (Week 3)
+### Phase 6: Image Generation (Week 3)
 
 **Goal**: Image generator uses authored descriptions
 
@@ -1149,9 +1185,9 @@ Before migrating each world:
 
 **Tests**: Unit tests for image prompt generation
 
-### Phase 6: World Builder Updates (Week 3-4)
+### Phase 7: World Builder Updates (Week 3-4)
 
-**Goal**: World Builder generates visual descriptions
+**Goal**: World Builder generates visual descriptions for new worlds
 
 - [ ] Update location generation prompts for exit descriptions
 - [ ] Update location generation prompts for detail structure
@@ -1160,17 +1196,16 @@ Before migrating each world:
 
 **Tests**: Manual testing with world generation
 
-### Phase 7: Migration & Documentation (Week 4)
+### Phase 8: Documentation (Week 4)
 
-**Goal**: Migrate existing worlds, update docs
+**Goal**: Update all documentation to reflect new schema
 
-- [ ] Create migration script
-- [ ] Migrate all worlds in `worlds/` directory
-- [ ] Update `docs/WORLD_AUTHORING.md`
-- [ ] Update `docs/ARCHITECTURE.md`
+- [ ] Update `docs/WORLD_AUTHORING.md` with new exit/detail format
+- [ ] Update `docs/ARCHITECTURE.md` with new models
+- [ ] Update `docs/DEBUG_SNAPSHOT.md` with new fields
 - [ ] Update `planning/index.md`
 
-**Tests**: Validate migrated worlds load correctly
+**Tests**: Review docs for accuracy
 
 ---
 
