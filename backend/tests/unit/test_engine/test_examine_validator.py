@@ -185,15 +185,15 @@ class TestExamineValidator:
 
     # Context fields
 
-    def test_found_description_in_context(
+    def test_scene_description_in_context(
         self, validator, state, sample_world_data, examine_intent
     ) -> None:
-        """Found description is included for items with it."""
+        """Scene description is included for items with it."""
         state.flags["box_opened"] = True
         intent = examine_intent("hidden_gem")
 
         result = validator.validate(intent, state, sample_world_data)
 
         assert result.valid is True
-        assert result.context.get("found_description") is not None
-        assert "glints" in result.context["found_description"]
+        assert result.context.get("scene_description") is not None
+        assert "glints" in result.context["scene_description"]

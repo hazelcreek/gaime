@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from app.models.world import Item, Location, NPC, WorldData
 
     class GameStateProtocol(Protocol):
-        """Protocol for game state - works with both classic and two-phase engines."""
+        """Protocol for game state."""
 
         current_location: str
         inventory: list[str]
@@ -82,8 +82,8 @@ class DefaultVisibilityResolver:
                 first_visit=self._is_first_visit(state),
             )
 
-        # Build visible exits
-        visible_exits = self._get_visible_exits(location, world)
+        # Build visible exits (pass state for destination_known resolution)
+        visible_exits = self._get_visible_exits(location, world, state)
 
         # Build visible items at location
         visible_items = self._get_visible_items(state, world, location)
@@ -115,50 +115,49 @@ class DefaultVisibilityResolver:
         self,
         location: "Location",
         world: "WorldData",
+        state: "GameStateProtocol | None" = None,
     ) -> list[VisibleExit]:
         """Get all visible exits from the current location.
 
         Args:
             location: The current location
             world: World data for destination lookups
+            state: Current game state (optional, for destination_known resolution)
 
         Returns:
             List of VisibleExit objects
         """
         exits = []
 
-        for direction, dest_id in location.exits.items():
-            dest_location = world.get_location(dest_id)
-            dest_name = dest_location.name if dest_location else dest_id
+        for direction, exit_def in location.exits.items():
+            dest_location = world.get_location(exit_def.destination)
+            dest_name = dest_location.name if dest_location else exit_def.destination
 
-            # Get exit description from location details if available
-            description = location.details.get(direction) if location.details else None
+            # Determine if destination is known:
+            # 1. Author set destination_known = True, OR
+            # 2. Player has visited the destination
+            destination_known = exit_def.destination_known
+            if state and hasattr(state, "visited_locations"):
+                if exit_def.destination in state.visited_locations:
+                    destination_known = True
 
             exits.append(
                 VisibleExit(
                     direction=direction,
                     destination_name=dest_name,
-                    description=description,
-                    is_locked=False,  # Lock checking not implemented in Phase 1
-                    is_blocked=False,
+                    destination_known=destination_known,
+                    description=exit_def.scene_description or None,
+                    is_locked=exit_def.locked,
+                    is_blocked=exit_def.blocked,
                 )
             )
 
         return exits
 
     def _is_first_visit(self, state: "GameStateProtocol") -> bool:
-        """Check if this is the first visit to the current location.
-
-        Handles both engine state types:
-        - TwoPhaseGameState: uses visited_locations (set)
-        - GameState: uses discovered_locations (list)
-        """
-        # Check for visited_locations (two-phase engine)
+        """Check if this is the first visit to the current location."""
         if hasattr(state, "visited_locations"):
             return state.current_location not in state.visited_locations
-        # Check for discovered_locations (classic engine)
-        if hasattr(state, "discovered_locations"):
-            return state.current_location not in state.discovered_locations
         return False
 
     def _get_visible_items(
@@ -208,7 +207,9 @@ class DefaultVisibilityResolver:
                 VisibleEntity(
                     id=item_id,
                     name=item.name,
-                    description=item.found_description or item.examine or None,
+                    description=item.scene_description
+                    or item.examine_description
+                    or None,
                     is_new=False,  # TODO: Track newly revealed items
                 )
             )
@@ -230,16 +231,12 @@ class DefaultVisibilityResolver:
         details = []
 
         if location.details:
-            for detail_id, description in location.details.items():
-                # Skip direction-based details (those are exit descriptions)
-                if detail_id in ("north", "south", "east", "west", "up", "down"):
-                    continue
-
+            for detail_id, detail_def in location.details.items():
                 details.append(
                     VisibleEntity(
                         id=detail_id,
-                        name=detail_id.replace("_", " ").title(),
-                        description=description,
+                        name=detail_def.name,
+                        description=detail_def.scene_description,
                         is_new=False,
                     )
                 )
@@ -269,7 +266,7 @@ class DefaultVisibilityResolver:
                     VisibleEntity(
                         id=item_id,
                         name=item.name,
-                        description=item.examine or None,
+                        description=item.examine_description or None,
                         is_new=False,
                     )
                 )
@@ -382,11 +379,10 @@ class DefaultVisibilityResolver:
         npcs = self._get_npcs_debug(location, world, state)
         interactions = self._get_interactions_debug(location)
 
-        # Build details dict (filter out exit descriptions)
+        # Build details dict from DetailDefinition objects
         details = {
-            key: value
-            for key, value in (location.details or {}).items()
-            if key not in ("north", "south", "east", "west", "up", "down")
+            key: detail_def.scene_description
+            for key, detail_def in (location.details or {}).items()
         }
 
         # Build requires info if location has access requirements
@@ -430,7 +426,8 @@ class DefaultVisibilityResolver:
         """
         exits = []
 
-        for direction, dest_id in location.exits.items():
+        for direction, exit_def in location.exits.items():
+            dest_id = exit_def.destination
             dest_location = world.get_location(dest_id)
             dest_name = dest_location.name if dest_location else dest_id
 
@@ -438,7 +435,14 @@ class DefaultVisibilityResolver:
             is_accessible = True
             access_reason = "accessible"
 
-            if dest_location and dest_location.requires:
+            # Check exit-level blocking
+            if exit_def.blocked:
+                is_accessible = False
+                access_reason = f"blocked:{exit_def.blocked_reason or 'unknown'}"
+            elif exit_def.locked:
+                is_accessible = False
+                access_reason = f"locked:{exit_def.requires_key or 'unknown'}"
+            elif dest_location and dest_location.requires:
                 # Check flag requirement
                 if dest_location.requires.flag:
                     if not state.flags.get(dest_location.requires.flag, False):
@@ -451,8 +455,11 @@ class DefaultVisibilityResolver:
                         is_accessible = False
                         access_reason = f"requires_item:{dest_location.requires.item}"
 
-            # Get exit description from location details
-            description = location.details.get(direction) if location.details else None
+            # Determine if destination is known
+            destination_known = exit_def.destination_known
+            if hasattr(state, "visited_locations"):
+                if dest_id in state.visited_locations:
+                    destination_known = True
 
             exits.append(
                 LocationExitDebug(
@@ -461,7 +468,8 @@ class DefaultVisibilityResolver:
                     destination_name=dest_name,
                     is_accessible=is_accessible,
                     access_reason=access_reason,
-                    description=description,
+                    scene_description=exit_def.scene_description or None,
+                    destination_known=destination_known,
                 )
             )
 
@@ -516,13 +524,13 @@ class DefaultVisibilityResolver:
                 LocationItemDebug(
                     item_id=item_id,
                     name=item.name,
-                    found_description=item.found_description or "",
+                    scene_description=item.scene_description or "",
                     is_visible=is_visible,
                     is_in_inventory=is_in_inventory,
                     visibility_reason=visibility_reason,
                     placement=placement,
                     portable=item.portable,
-                    examine=item.examine or "",
+                    examine_description=item.examine_description or "",
                 )
             )
 

@@ -61,7 +61,8 @@ class VisibleExit(BaseModel):
     Attributes:
         direction: The direction (north, south, etc.)
         destination_name: Name of the destination location
-        description: Optional description of the exit
+        destination_known: Whether player knows where this exit leads
+        description: Optional description of the exit (scene_description)
         is_locked: Whether the exit is currently locked
         is_blocked: Whether the exit is blocked (rubble, etc.)
 
@@ -69,12 +70,14 @@ class VisibleExit(BaseModel):
         >>> exit = VisibleExit(
         ...     direction="north",
         ...     destination_name="The Library",
+        ...     destination_known=True,
         ...     description="An archway leads north into shadows.",
         ... )
     """
 
     direction: str
     destination_name: str
+    destination_known: bool = True
     description: str | None = None
     is_locked: bool = False
     is_blocked: bool = False
@@ -183,24 +186,24 @@ class LocationItemDebug(BaseModel):
     status and the reason for that status.
 
     Source fields from models/world.py Item:
-        - name, found_description, examine, hidden, find_condition, portable
+        - name, scene_description, examine_description, hidden, find_condition, portable
 
     Attributes:
         item_id: The item's unique identifier
         name: Display name from world definition
-        found_description: How item appears in scene (from Item.found_description)
+        scene_description: How item appears in scene (from Item.scene_description)
         is_visible: Whether player can currently see this item
         is_in_inventory: Whether player has already taken this item
         visibility_reason: Why the item is visible/hidden
         placement: Where item is placed in location (from Location.item_placements)
         portable: Whether item can be taken
-        examine: Full examination text
+        examine_description: Full examination text
 
     Example:
         >>> item = LocationItemDebug(
         ...     item_id="brass_key",
         ...     name="Brass Key",
-        ...     found_description="A small brass key glints in the drawer.",
+        ...     scene_description="A small brass key glints in the drawer.",
         ...     is_visible=False,
         ...     is_in_inventory=False,
         ...     visibility_reason="hidden:requires_flag:drawer_opened",
@@ -211,13 +214,13 @@ class LocationItemDebug(BaseModel):
 
     item_id: str
     name: str
-    found_description: str = ""
+    scene_description: str = ""
     is_visible: bool
     is_in_inventory: bool
     visibility_reason: str  # "visible", "hidden", "taken", "condition_not_met:flag_x"
     placement: str | None = None  # from Location.item_placements
     portable: bool = True
-    examine: str = ""
+    examine_description: str = ""
 
 
 class LocationNPCDebug(BaseModel):
@@ -270,10 +273,8 @@ class LocationExitDebug(BaseModel):
     Shows all exits from a location with their accessibility status
     and any requirements that must be met.
 
-    Source fields from models/world.py Location:
-        - exits, details (for exit descriptions)
-    Source fields from models/world.py LocationRequirement:
-        - flag, item
+    Source fields from models/world.py ExitDefinition:
+        - destination, scene_description, destination_known, locked, blocked
 
     Attributes:
         direction: The exit direction (north, south, etc.)
@@ -281,7 +282,8 @@ class LocationExitDebug(BaseModel):
         destination_name: Display name of destination
         is_accessible: Whether player can currently use this exit
         access_reason: Why the exit is accessible/blocked
-        description: Exit description from location details
+        scene_description: Visual description of the exit
+        destination_known: Whether player knows where this exit leads
 
     Example:
         >>> exit = LocationExitDebug(
@@ -290,7 +292,8 @@ class LocationExitDebug(BaseModel):
         ...     destination_name="Secret Chamber",
         ...     is_accessible=False,
         ...     access_reason="requires_flag:bookcase_moved",
-        ...     description="A concealed passage behind the bookcase",
+        ...     scene_description="A concealed passage behind the bookcase",
+        ...     destination_known=False,
         ... )
     """
 
@@ -298,8 +301,9 @@ class LocationExitDebug(BaseModel):
     destination_id: str
     destination_name: str
     is_accessible: bool
-    access_reason: str  # "accessible", "requires_flag:x", "requires_item:y"
-    description: str | None = None
+    access_reason: str  # "accessible", "requires_flag:x", "requires_item:y", "locked:x", "blocked:x"
+    scene_description: str | None = None
+    destination_known: bool = True
 
 
 class LocationInteractionDebug(BaseModel):

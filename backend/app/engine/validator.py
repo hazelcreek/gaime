@@ -141,9 +141,10 @@ class WorldValidator:
         """Validate all location references are valid"""
         valid_locations = set(self.world_data.locations.keys())
 
-        # Check exits
+        # Check exits (V2 schema: exits are ExitDefinition objects)
         for loc_id, location in self.world_data.locations.items():
-            for direction, dest_id in location.exits.items():
+            for direction, exit_def in location.exits.items():
+                dest_id = exit_def.destination
                 if dest_id not in valid_locations:
                     self.result.add_error(
                         f"Location '{loc_id}' exit '{direction}' points to invalid location '{dest_id}'"

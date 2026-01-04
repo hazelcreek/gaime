@@ -23,6 +23,9 @@ from app.models.world import (
     PlayerSetup,
     AppearanceCondition,
     VictoryCondition,
+    ExitDefinition,
+    DetailDefinition,
+    ExaminationEffect,
 )
 
 
@@ -145,7 +148,7 @@ class WorldLoader:
         )
 
     def _load_locations_yaml(self, path: Path) -> dict[str, Location]:
-        """Load locations.yaml"""
+        """Load locations.yaml (V2 schema with structured exits and details)"""
         if not path.exists():
             return {}
 
@@ -154,6 +157,47 @@ class WorldLoader:
 
         locations = {}
         for loc_id, loc_data in data.items():
+            # Parse exits as ExitDefinition objects
+            exits = {}
+            for direction, exit_data in loc_data.get("exits", {}).items():
+                if isinstance(exit_data, dict):
+                    exits[direction] = ExitDefinition(
+                        destination=exit_data.get("destination", ""),
+                        scene_description=exit_data.get("scene_description", ""),
+                        examine_description=exit_data.get("examine_description"),
+                        destination_known=exit_data.get("destination_known", True),
+                        reveal_on_flag=exit_data.get("reveal_on_flag"),
+                        reveal_on_examine=exit_data.get("reveal_on_examine", False),
+                        locked=exit_data.get("locked", False),
+                        requires_key=exit_data.get("requires_key"),
+                        blocked=exit_data.get("blocked", False),
+                        blocked_reason=exit_data.get("blocked_reason"),
+                    )
+
+            # Parse details as DetailDefinition objects
+            details = {}
+            for detail_id, detail_data in loc_data.get("details", {}).items():
+                if isinstance(detail_data, dict):
+                    # Parse on_examine effect if present
+                    on_examine = None
+                    on_examine_data = detail_data.get("on_examine")
+                    if on_examine_data and isinstance(on_examine_data, dict):
+                        on_examine = ExaminationEffect(
+                            sets_flag=on_examine_data.get("sets_flag"),
+                            reveals_item=on_examine_data.get("reveals_item"),
+                            reveals_exit=on_examine_data.get("reveals_exit"),
+                            narrative_hint=on_examine_data.get("narrative_hint"),
+                        )
+
+                    details[detail_id] = DetailDefinition(
+                        name=detail_data.get(
+                            "name", detail_id.replace("_", " ").title()
+                        ),
+                        scene_description=detail_data.get("scene_description", ""),
+                        examine_description=detail_data.get("examine_description"),
+                        on_examine=on_examine,
+                    )
+
             # Parse interactions
             interactions = {}
             for int_id, int_data in loc_data.get("interactions", {}).items():
@@ -178,10 +222,10 @@ class WorldLoader:
             locations[loc_id] = Location(
                 name=loc_data.get("name", loc_id),
                 atmosphere=loc_data.get("atmosphere", ""),
-                exits=loc_data.get("exits", {}),
+                exits=exits,
                 items=loc_data.get("items", []),
                 npcs=loc_data.get("npcs", []),
-                details=loc_data.get("details", {}),
+                details=details,
                 interactions=interactions,
                 requires=requires,
                 item_placements=loc_data.get("item_placements", {}) or {},
@@ -265,7 +309,7 @@ class WorldLoader:
         return npcs
 
     def _load_items_yaml(self, path: Path) -> dict[str, Item]:
-        """Load items.yaml"""
+        """Load items.yaml (V2 schema with scene_description and examine_description)"""
         if not path.exists():
             return {}
 
@@ -305,8 +349,8 @@ class WorldLoader:
             items[item_id] = Item(
                 name=item_data.get("name", item_id),
                 portable=item_data.get("portable", True),
-                examine=item_data.get("examine", ""),
-                found_description=item_data.get("found_description", ""),
+                scene_description=item_data.get("scene_description", ""),
+                examine_description=item_data.get("examine_description", ""),
                 take_description=item_data.get("take_description", ""),
                 unlocks=item_data.get("unlocks"),
                 location=item_data.get("location"),

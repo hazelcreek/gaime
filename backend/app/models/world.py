@@ -2,7 +2,7 @@
 World schema models - Pydantic models for YAML world definitions
 """
 
-from pydantic import AliasChoices, BaseModel, Field
+from pydantic import BaseModel, Field
 
 
 class PlayerSetup(BaseModel):
@@ -51,9 +51,8 @@ class InteractionEffect(BaseModel):
 
 
 # =============================================================================
-# V2 Schema Models - For structured exits, details, and examination support
-# These are defined here but NOT yet used by Location. They will be integrated
-# after world YAML files are migrated to the new format (Phase 3).
+# V2 Schema Models - Structured exits, details, and examination support
+# These models are used by Location for the V2 world schema.
 # =============================================================================
 
 
@@ -97,11 +96,6 @@ class DetailDefinition(BaseModel):
     on_examine: ExaminationEffect | None = None
 
 
-# =============================================================================
-# End V2 Schema Models
-# =============================================================================
-
-
 class LocationRequirement(BaseModel):
     """Requirements to access a location"""
 
@@ -110,14 +104,14 @@ class LocationRequirement(BaseModel):
 
 
 class Location(BaseModel):
-    """Location/room definition from locations.yaml"""
+    """Location/room definition from locations.yaml (V2 schema)"""
 
     name: str
     atmosphere: str = ""
-    exits: dict[str, str] = Field(default_factory=dict)
+    exits: dict[str, ExitDefinition] = Field(default_factory=dict)
     items: list[str] = Field(default_factory=list)
     npcs: list[str] = Field(default_factory=list)
-    details: dict[str, str] = Field(default_factory=dict)
+    details: dict[str, DetailDefinition] = Field(default_factory=dict)
     interactions: dict[str, InteractionEffect] = Field(default_factory=dict)
     requires: LocationRequirement | None = None
     item_placements: dict[str, str] = Field(
@@ -202,31 +196,14 @@ class ItemClue(BaseModel):
 
 
 class Item(BaseModel):
-    """Item definition from items.yaml
-
-    Field naming note (V2 migration):
-    - `found_description` will become `scene_description` in V2
-    - `examine` will become `examine_description` in V2
-
-    During migration, both old and new field names are accepted via AliasChoices.
-    After Phase 3, aliases will be removed and only new names will work.
-    """
-
-    model_config = {"populate_by_name": True}
+    """Item definition from items.yaml (V2 schema)"""
 
     name: str
     portable: bool = True
 
-    # V2 migration: Accept both old and new field names from YAML
-    # Old name first (primary), new name as alternative for migrated YAML
-    found_description: str = Field(
-        default="",
-        validation_alias=AliasChoices("found_description", "scene_description"),
-    )
-    examine: str = Field(
-        default="",
-        validation_alias=AliasChoices("examine", "examine_description"),
-    )
+    # Visual descriptions (V2 field names)
+    scene_description: str = ""  # How item appears in scene
+    examine_description: str = ""  # Detailed examination text
 
     take_description: str = ""
     unlocks: str | None = None

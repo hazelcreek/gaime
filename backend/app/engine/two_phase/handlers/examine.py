@@ -118,6 +118,6 @@ class ExamineHandler:
                 "entity_name": result.context.get("entity_name"),
                 "description": result.context.get("description"),
                 "in_inventory": result.context.get("in_inventory", False),
-                "found_description": result.context.get("found_description"),
+                "scene_description": result.context.get("scene_description"),
             },
         )

@@ -2,8 +2,6 @@
 Two-Phase Engine state models.
 
 This module contains state models specific to the two-phase game engine.
-These are completely separate from the classic engine's GameState to maintain
-strict engine isolation.
 
 See planning/two-phase-game-loop-spec.md for the full specification.
 """
@@ -79,18 +77,13 @@ class TwoPhaseDebugInfo(BaseModel):
 class TwoPhaseGameState(BaseModel):
     """Game state for the two-phase engine.
 
-    This model is completely separate from the classic engine's GameState.
-    Key differences:
-        - visited_locations is a set (not list) for efficient first-visit detection
-        - container_states tracks open/closed state of containers
-        - narration_history tracks recent narrations for style variation
-
     Attributes:
         session_id: Unique identifier for this game session
         current_location: ID of the player's current location
         inventory: List of item IDs in player's possession
         flags: World-defined flags (set by interactions)
-        visited_locations: Set of location IDs player has visited
+        visited_locations: Set of location IDs player has visited (used for first-visit and auto-reveal)
+        revealed_exits: Exits where destination was dynamically revealed (for Phase 4 flag/examine reveals)
         container_states: Mapping of container_id to is_open state
         turn_count: Number of turns taken
         status: Game status - "playing", "won", or "lost"
@@ -102,6 +95,9 @@ class TwoPhaseGameState(BaseModel):
     inventory: list[str] = Field(default_factory=list)
     flags: dict[str, bool] = Field(default_factory=dict)
     visited_locations: set[str] = Field(default_factory=set)
+    revealed_exits: dict[str, set[str]] = Field(default_factory=dict)
+    # Maps location_id -> set of directions where destination was revealed
+    # Example: {"entrance_hall": {"east"}}  # east revealed by finding floor plan
     container_states: dict[str, bool] = Field(default_factory=dict)
     turn_count: int = 0
     status: GameStatus = "playing"

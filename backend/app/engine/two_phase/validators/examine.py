@@ -85,7 +85,8 @@ class ExamineValidator:
                     entity_type="item",
                     entity_id=target_id,
                     entity_name=item.name,
-                    description=item.examine or f"You examine the {item.name}.",
+                    description=item.examine_description
+                    or f"You examine the {item.name}.",
                     in_inventory=True,
                 )
 
@@ -93,14 +94,16 @@ class ExamineValidator:
         location = world.get_location(state.current_location)
         if location and location.details:
             if target_id in location.details:
-                detail_description = location.details[target_id]
-                # Create a readable name from the ID
-                detail_name = target_id.replace("_", " ").title()
+                detail_def = location.details[target_id]
+                # Use examine_description if available, otherwise scene_description
+                description = (
+                    detail_def.examine_description or detail_def.scene_description
+                )
                 return valid_result(
                     entity_type="detail",
                     entity_id=target_id,
-                    entity_name=detail_name,
-                    description=detail_description,
+                    entity_name=detail_def.name,
+                    description=description,
                     in_inventory=False,
                 )
 
@@ -128,8 +131,9 @@ class ExamineValidator:
                     entity_type="item",
                     entity_id=target_id,
                     entity_name=item.name,
-                    description=item.examine or f"You examine the {item.name}.",
-                    found_description=item.found_description,
+                    description=item.examine_description
+                    or f"You examine the {item.name}.",
+                    scene_description=item.scene_description,
                     in_inventory=False,
                 )
 

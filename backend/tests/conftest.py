@@ -33,6 +33,8 @@ from app.models.world import (  # noqa: E402
     LocationRequirement,
     NPCTrust,
     NPCPersonality,
+    ExitDefinition,
+    DetailDefinition,
 )
 
 if TYPE_CHECKING:
@@ -123,23 +125,52 @@ def sample_locations() -> dict[str, Location]:
         "start_room": Location(
             name="Starting Room",
             atmosphere="A simple room with exits in multiple directions.",
-            exits={"north": "locked_room", "east": "secret_room"},
+            exits={
+                "north": ExitDefinition(
+                    destination="locked_room",
+                    scene_description="A heavy wooden door to the north",
+                    destination_known=False,
+                ),
+                "east": ExitDefinition(
+                    destination="secret_room",
+                    scene_description="A concealed passage to the east",
+                    destination_known=False,
+                ),
+            },
             items=["container_box"],
             details={
-                "floor": "Plain wooden floorboards.",
-                "walls": "Bare stone walls.",
+                "floor": DetailDefinition(
+                    name="Floor",
+                    scene_description="Plain wooden floorboards.",
+                ),
+                "walls": DetailDefinition(
+                    name="Walls",
+                    scene_description="Bare stone walls.",
+                ),
             },
         ),
         "locked_room": Location(
             name="Locked Room",
             atmosphere="A room that was previously locked.",
-            exits={"south": "start_room"},
+            exits={
+                "south": ExitDefinition(
+                    destination="start_room",
+                    scene_description="The doorway back to the starting room",
+                    destination_known=True,
+                ),
+            },
             requires=LocationRequirement(flag="door_unlocked"),
         ),
         "secret_room": Location(
             name="Secret Room",
             atmosphere="A hidden chamber with ancient secrets.",
-            exits={"west": "start_room"},
+            exits={
+                "west": ExitDefinition(
+                    destination="start_room",
+                    scene_description="The passage back to the starting room",
+                    destination_known=True,
+                ),
+            },
             requires=LocationRequirement(flag="knows_secret"),
         ),
     }
@@ -152,24 +183,24 @@ def sample_items() -> dict[str, Item]:
         "test_key": Item(
             name="Test Key",
             portable=True,
-            examine="A simple brass key for testing.",
+            examine_description="A simple brass key for testing.",
             location="start_room",
             unlocks="locked_room",
         ),
         "container_box": Item(
             name="Wooden Box",
             portable=False,
-            examine="A small wooden box with a lid.",
+            examine_description="A small wooden box with a lid.",
             location="start_room",
         ),
         "hidden_gem": Item(
             name="Hidden Gem",
             portable=True,
-            examine="A sparkling gem hidden in the box.",
+            examine_description="A sparkling gem hidden in the box.",
             location="start_room",
             hidden=True,
             find_condition={"requires_flag": "box_opened"},
-            found_description="A beautiful gem glints from inside the box.",
+            scene_description="A beautiful gem glints from inside the box.",
         ),
     }
 

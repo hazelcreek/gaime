@@ -2,7 +2,7 @@
 
 A comprehensive specification for unified visibility semantics, visual descriptions, examination mechanics, and destination visibility for exits.
 
-> **Status**: Design Specification — January 2026
+> **Status**: Phase 3 Complete — January 2026
 > **Related**: [Two-Phase Game Loop](./two-phase-game-loop-spec.md) | [Game Mechanics Design](../ideas/game-mechanics-design.md) | [Vision](../docs/VISION.md)
 
 ---
@@ -1143,35 +1143,51 @@ Before migrating each world:
 - All 256 pytest tests passing
 - Validation: 0 errors, 2 warnings (automaton-isle has intentional direction-named details for scenery)
 
-### Phase 3: Code Integration (Day 2-3)
+### Phase 3: Code Integration (Day 2-3) ✅
 
 **Goal**: Replace old models and update all consumers (clean swap, no unions)
 
-- [ ] Replace `Location.exits: dict[str, str]` with `dict[str, ExitDefinition]`
-- [ ] Replace `Location.details: dict[str, str]` with `dict[str, DetailDefinition]`
-- [ ] Remove Item field aliases (now only new names exist)
-- [ ] Update `WorldLoader._load_locations_yaml()` to parse structured exits/details
-- [ ] Update `WorldLoader._load_items_yaml()` to use new field names
-- [ ] Update `VisibilityResolver._get_visible_exits()` to use `scene_description`
-- [ ] Update `VisibilityResolver._get_visible_details()` to use `DetailDefinition`
-- [ ] Update `MovementValidator` to extract destination from `ExitDefinition`
-- [ ] Update debug snapshot models in `perception.py`
-- [ ] Add `destination_known` to `VisibleExit` output
-- [ ] Add exit destination state tracking to game state
-- [ ] Implement destination reveal logic (on_visit, on_flag, etc.)
-- [ ] Run full test suite, fix any breakage
+- [x] Replace `Location.exits: dict[str, str]` with `dict[str, ExitDefinition]`
+- [x] Replace `Location.details: dict[str, str]` with `dict[str, DetailDefinition]`
+- [x] Remove Item field aliases (now only new names exist: `scene_description`, `examine_description`)
+- [x] Update `WorldLoader._load_locations_yaml()` to parse structured exits/details
+- [x] Update `WorldLoader._load_items_yaml()` to use new field names
+- [x] Update `VisibilityResolver._get_visible_exits()` to use `scene_description`
+- [x] Update `VisibilityResolver._get_visible_details()` to use `DetailDefinition`
+- [x] Update `MovementValidator` to extract destination from `ExitDefinition`
+- [x] Update debug snapshot models in `perception.py`
+- [x] Add `destination_known` to `VisibleExit` output
+- [x] Add `revealed_exits` to game state (for Phase 4 flag/examine reveals)
+- [x] Implement `on_visit` auto-reveal for destination visibility
+- [x] Run full test suite, fix any breakage (256 tests passing)
+- [x] Clean up classic engine artifacts (deleted empty `engine/classic/` and `llm/classic/` directories)
+- [x] Update frontend TypeScript types in `client.ts`
 
-**Tests**: All existing tests pass with new schema
+**Tests**: All existing tests pass with new schema ✅
+
+**Implementation Notes** (January 2026):
+- World models updated: `Location.exits` now `dict[str, ExitDefinition]`, `Location.details` now `dict[str, DetailDefinition]`
+- Item fields renamed: `found_description` → `scene_description`, `examine` → `examine_description`
+- WorldLoader updated to parse V2 schema including `on_examine` effects for details
+- VisibilityResolver updated for new models, including `destination_known` resolution via author config + visited_locations
+- MovementValidator now checks `ExitDefinition.locked`, `blocked`, and extracts destination properly
+- ExamineValidator updated for `DetailDefinition` and new Item field names
+- Perception models updated: `VisibleExit.destination_known`, `LocationItemDebug.scene_description`, `LocationExitDebug.scene_description`
+- Game state updated: added `revealed_exits: dict[str, set[str]]` for future Phase 4 flag/examine reveals
+- Destination reveal logic: Only `on_visit` auto-reveal implemented in Phase 3; `reveal_on_flag` and `reveal_on_examine` triggers deferred to Phase 4
 
 ### Phase 4: Examination Mechanics (Week 2)
 
 **Goal**: Examination triggers effects
 
+- [ ] Implement `reveal_on_flag` destination reveal logic (check flag state in VisibilityResolver)
+- [ ] Implement `reveal_on_examine` destination reveal logic (examining exit reveals destination)
 - [ ] Update ExamineValidator to handle new entity types
-- [ ] Implement `on_examine` effect processing for details
+- [ ] Implement `on_examine` effect processing for details (sets_flag, reveals_item, reveals_exit)
 - [ ] Add examination support for exits
 - [ ] Create ExamineEvent with effect tracking
 - [ ] Add revealed items to perception snapshot
+- [ ] Update `revealed_exits` in game state when flag/examine reveals destination
 
 **Tests**: Integration tests for examine action with effects
 

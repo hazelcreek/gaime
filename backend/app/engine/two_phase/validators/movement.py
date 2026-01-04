@@ -84,7 +84,8 @@ class MovementValidator:
                 reason=f"There's no way to go {direction} from here.",
             )
 
-        destination_id = location.exits[direction]
+        exit_def = location.exits[direction]
+        destination_id = exit_def.destination
         destination = world.get_location(destination_id)
 
         if not destination:
@@ -92,6 +93,27 @@ class MovementValidator:
                 code=RejectionCode.TARGET_NOT_FOUND,
                 reason="The path leads somewhere undefined.",
             )
+
+        # Check exit-level blocking
+        if exit_def.blocked:
+            return invalid_result(
+                code=RejectionCode.PRECONDITION_FAILED,
+                reason=exit_def.blocked_reason or "The way is blocked.",
+            )
+
+        # Check exit-level locking
+        if exit_def.locked:
+            key_item = (
+                world.get_item(exit_def.requires_key) if exit_def.requires_key else None
+            )
+            if exit_def.requires_key and exit_def.requires_key in state.inventory:
+                pass  # Has the key, can proceed
+            else:
+                return invalid_result(
+                    code=RejectionCode.PRECONDITION_FAILED,
+                    reason="The way is locked.",
+                    hint=f"Perhaps a {key_item.name if key_item else 'key'} would help.",
+                )
 
         # Check destination access requirements
         if destination.requires:
@@ -133,7 +155,8 @@ class MovementValidator:
         # If only one exit, use that
         if len(location.exits) == 1:
             direction = list(location.exits.keys())[0]
-            destination_id = location.exits[direction]
+            exit_def = location.exits[direction]
+            destination_id = exit_def.destination
             destination = world.get_location(destination_id)
 
             if destination:
@@ -156,7 +179,8 @@ class MovementValidator:
 
         # Look for south (common return direction)
         if "south" in location.exits:
-            destination_id = location.exits["south"]
+            exit_def = location.exits["south"]
+            destination_id = exit_def.destination
             destination = world.get_location(destination_id)
 
             if destination:

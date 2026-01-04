@@ -31,6 +31,7 @@ export interface GameState {
   inventory: string[];
   flags: Record<string, boolean>;
   visited_locations: string[];  // Backend sends set as list
+  revealed_exits: Record<string, string[]>;  // location_id -> directions where destination was revealed
   container_states: Record<string, boolean>;
   turn_count: number;
   status: string;
@@ -104,8 +105,8 @@ export interface LocationItemDebug {
   item_id: string;
   /** Display name from world definition */
   name: string;
-  /** How item appears in scene (from Item.found_description) */
-  found_description: string;
+  /** How item appears in scene (from Item.scene_description) */
+  scene_description: string;
   /** Whether player can currently see this item */
   is_visible: boolean;
   /** Whether player has already taken this item */
@@ -117,7 +118,7 @@ export interface LocationItemDebug {
   /** Whether item can be taken */
   portable: boolean;
   /** Full examination text */
-  examine: string;
+  examine_description: string;
 }
 
 /**
@@ -158,10 +159,12 @@ export interface LocationExitDebug {
   destination_name: string;
   /** Whether player can currently use this exit */
   is_accessible: boolean;
-  /** Why the exit is accessible/blocked: "accessible", "requires_flag:{x}", "requires_item:{y}" */
+  /** Why the exit is accessible/blocked: "accessible", "requires_flag:{x}", "requires_item:{y}", "locked:{x}", "blocked:{x}" */
   access_reason: string;
-  /** Exit description from location details */
-  description: string | null;
+  /** Visual description of the exit (from ExitDefinition.scene_description) */
+  scene_description: string | null;
+  /** Whether player knows where this exit leads */
+  destination_known: boolean;
 }
 
 /**
