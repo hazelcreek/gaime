@@ -1,7 +1,7 @@
 old_letter:
   name: "Crumpled Letter"
   portable: true
-  examine: |
+  examine_description: |
     A yellowed letter, hastily crumpled and then smoothed out again.
     The elegant handwriting is slightly smudged, as if by tears:
 
@@ -18,7 +18,7 @@ old_letter:
     Forgive me for not being stronger.
 
     - Your loving sister, Catherine"
-  found_description: "A crumpled letter lies on the side table, as if dropped in haste"
+  scene_description: "A crumpled letter lies on the side table, as if dropped in haste"
   take_description: "You carefully pocket the fragile letter"
   clues:
     - hint_for: nursery
@@ -27,21 +27,21 @@ old_letter:
 pocket_watch:
   name: "Silver Pocket Watch"
   portable: true
-  examine: |
+  examine_description: |
     Your father's pocket watch, a family heirloom. The hands are
     stopped at 3:47 - the time he passed. You've carried it for
     luck ever since, though tonight you wonder if luck has abandoned you.
-  found_description: "You pat your pocket, feeling the familiar weight of your watch"
+  scene_description: "You pat your pocket, feeling the familiar weight of your watch"
   take_description: "The watch is already in your possession"
 
 journal:
   name: "Leather Journal"
   portable: true
-  examine: |
+  examine_description: |
     Your personal journal, filled with notes from your travels.
     The last entry reads: "Storm approaching. Spotted a manor house
     on the hill. Will seek shelter there."
-  found_description: "Your journal, tucked safely in your coat"
+  scene_description: "Your journal, tucked safely in your coat"
   take_description: "The journal is already with you"
   properties:
     artifact: false
@@ -53,11 +53,11 @@ journal:
 candlestick:
   name: "Silver Candlestick"
   portable: true
-  examine: |
+  examine_description: |
     A heavy silver candlestick, tarnished but solid. The candle
     is half-melted. Could serve as a light source... or a weapon
     if needed.
-  found_description: "A silver candlestick sits on a side table, its candle long since melted down"
+  scene_description: "A silver candlestick sits on a side table, its candle long since melted down"
   take_description: "You pick up the candlestick. It has a satisfying weight"
   use_actions:
     light:
@@ -68,13 +68,13 @@ candlestick:
 dusty_tome:
   name: "Occult Tome"
   portable: true
-  examine: |
+  examine_description: |
     A heavy book bound in dark leather, its title in Latin:
     "De Ritibus Immortalitatis" - On the Rites of Immortality.
     The pages detail various rituals for extending life, each
     more disturbing than the last. One chapter is bookmarked,
     describing a ritual requiring three artifacts and... a sacrifice.
-  found_description: "A thick book lies open on the desk, its pages yellowed with age"
+  scene_description: "A thick book lies open on the desk, its pages yellowed with age"
   take_description: "You take the tome, feeling a chill as you touch its cover"
   clues:
     - reveals: "The ritual requires three artifacts and a sacrifice"
@@ -82,30 +82,30 @@ dusty_tome:
 reading_glasses:
   name: "Silver Reading Glasses"
   portable: true
-  examine: |
+  examine_description: |
     Delicate silver spectacles, the glass thick with age. They
     must have belonged to the master of the house.
-  found_description: "A pair of spectacles rests beside the open book"
+  scene_description: "A pair of spectacles rests beside the open book"
   take_description: "You pocket the glasses"
 
 silver_key:
   name: "Small Silver Key"
   portable: true
-  examine: |
+  examine_description: |
     A small silver key with an ornate handle shaped like a rose.
     Too small for a door - perhaps it unlocks a box or drawer?
-  found_description: "Something glints beneath the dining table - a small key"
+  scene_description: "Something glints beneath the dining table - a small key"
   take_description: "You pick up the silver key"
   unlocks: jewelry_box
 
 iron_key:
   name: "Heavy Iron Key"
   portable: true
-  examine: |
+  examine_description: |
     A large iron key, cold and heavy. The head is shaped like a
     serpent eating its own tail - an ouroboros. It feels significant,
     almost hungry in your hand.
-  found_description: "Hidden in the wardrobe, you find a heavy iron key"
+  scene_description: "Hidden in the wardrobe, you find a heavy iron key"
   take_description: "You take the iron key. It seems to pulse with cold"
   location: master_bedroom
   unlocks: basement
@@ -114,23 +114,23 @@ iron_key:
 kitchen_knife:
   name: "Kitchen Knife"
   portable: true
-  examine: |
+  examine_description: |
     A large kitchen knife, rusted but still sharp. Its blade is
     stained with something dark that won't wash off.
-  found_description: "A knife lies on the counter, forgotten"
+  scene_description: "A knife lies on the counter, forgotten"
   take_description: "You take the knife, hoping you won't need it"
 
 family_photo:
   name: "Family Photograph"
   portable: true
-  examine: |
+  examine_description: |
     A formal family portrait photograph, the kind popular in the
     previous century. A stern man sits in a chair, his beautiful
     wife standing beside him. Three children pose in front - two
     boys and a young girl. Everyone is smiling, but there's something
     haunted in the mother's eyes. On the back is written:
     "The Thornwood Family, 1887"
-  found_description: "A framed photograph sits on the mantelpiece"
+  scene_description: "A framed photograph sits on the mantelpiece"
   take_description: "You carefully remove the photograph from its frame"
   clues:
     - reveals: "The family name is Thornwood"
@@ -138,21 +138,21 @@ family_photo:
 matches:
   name: "Box of Matches"
   portable: true
-  examine: |
+  examine_description: |
     A small box of lucifer matches, still dry and usable. The box
     advertises "Thornwood & Sons Foundry" - a family business, perhaps?
-  found_description: "A box of matches sits on the desk"
+  scene_description: "A box of matches sits on the desk"
   take_description: "You pocket the matches"
 
 thornwood_amulet:
   name: "Thornwood Amulet"
   portable: true
-  examine: |
+  examine_description: |
     A silver amulet on a tarnished chain. The pendant shows a tree
     wrapped in thorns - the Thornwood family symbol. It hums faintly
     when held, a vibration felt more than heard. This is one of
     the artifacts needed for the ritual.
-  found_description: "Hidden beneath a loose floorboard, something glints"
+  scene_description: "Hidden beneath a loose floorboard, something glints"
   take_description: "You clasp the amulet. A calm washes over you"
   location: nursery
   hidden: true
@@ -168,12 +168,12 @@ thornwood_amulet:
 ancient_dagger:
   name: "Ritual Dagger"
   portable: true
-  examine: |
+  examine_description: |
     A ceremonial dagger with a blade of black iron and a handle
     wrapped in what appears to be human skin. Symbols are etched
     along the blade, matching those in the ritual chamber. The
     blade is stained dark with old blood. One of the three artifacts.
-  found_description: "In the corner of the basement, half-buried in debris, you find it"
+  scene_description: "In the corner of the basement, half-buried in debris, you find it"
   take_description: "You take the dagger, fighting the urge to drop it"
   location: basement
   properties:
@@ -184,7 +184,7 @@ ancient_dagger:
 grimoire:
   name: "Thornwood Grimoire"
   portable: true
-  examine: |
+  examine_description: |
     A book bound in pale leather, its pages filled with handwritten
     text and diagrams. This is the Thornwood family grimoire,
     containing the ritual of immortality. The final pages are
@@ -192,7 +192,7 @@ grimoire:
 
     A note in the margin reads: "Three must die so one may live
     forever. But what is immortality if all you love is gone?"
-  found_description: "On the central pedestal, the grimoire waits"
+  scene_description: "On the central pedestal, the grimoire waits"
   take_description: "You take the grimoire. The chamber seems to sigh"
   location: ritual_chamber
   properties:

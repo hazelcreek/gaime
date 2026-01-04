@@ -17,16 +17,28 @@ start_room:
     A simple room with plain walls and wooden floors.
     Exits lead north and east. A wooden box sits in the corner.
   exits:
-    north: locked_room
-    east: secret_room
+    north:
+      destination: locked_room
+      scene_description: "A sturdy wooden door with an iron lock mechanism"
+      destination_known: false
+    east:
+      destination: secret_room
+      scene_description: "A section of wall that looks slightly different from the rest"
+      destination_known: false
   items:
     - container_box
   npcs:
     - test_npc
   details:
-    floor: "Plain wooden floorboards, slightly dusty."
-    walls: "Bare stone walls with no decoration."
-    box: "A small wooden box with a brass clasp."
+    floor:
+      name: "Wooden Floor"
+      scene_description: "Plain wooden floorboards, slightly dusty."
+    walls:
+      name: "Stone Walls"
+      scene_description: "Bare stone walls with no decoration."
+    box:
+      name: "Wooden Box"
+      scene_description: "A small wooden box with a brass clasp."
   item_placements:
     container_box: "sits in the corner"
   npc_placements:
@@ -46,11 +58,16 @@ locked_room:
     A previously locked room, now accessible.
     The door to the south leads back to the starting room.
   exits:
-    south: start_room
+    south:
+      destination: start_room
+      scene_description: "The doorway back to the starting room"
+      destination_known: true
   requires:
     flag: door_unlocked
   details:
-    door: "A heavy wooden door with an iron lock."
+    door:
+      name: "Wooden Door"
+      scene_description: "A heavy wooden door with an iron lock."
   interactions:
     examine_lock:
       triggers:
@@ -64,12 +81,19 @@ secret_room:
     A hidden chamber that glows with an inner light.
     Ancient symbols are carved into the walls.
   exits:
-    west: start_room
+    west:
+      destination: start_room
+      scene_description: "The passage back to the starting room"
+      destination_known: true
   requires:
     flag: knows_secret
   details:
-    symbols: "Strange glowing symbols pulse with energy."
-    altar: "A stone altar in the center of the room."
+    symbols:
+      name: "Glowing Symbols"
+      scene_description: "Strange glowing symbols pulse with energy."
+    altar:
+      name: "Stone Altar"
+      scene_description: "A stone altar in the center of the room."
   interactions:
     solve_puzzle:
       triggers:

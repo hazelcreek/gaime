@@ -9,8 +9,8 @@
 test_key:
   name: "Test Key"
   portable: true
-  examine: "A simple brass key, slightly worn from use."
-  found_description: "A brass key catches the light."
+  examine_description: "A simple brass key, slightly worn from use."
+  scene_description: "A brass key catches the light."
   take_description: "You pocket the brass key."
   location: start_room
   unlocks: locked_room
@@ -18,7 +18,7 @@ test_key:
 container_box:
   name: "Wooden Box"
   portable: false
-  examine: |
+  examine_description: |
     A small wooden box with a brass clasp.
     It looks like it can be opened.
   location: start_room
@@ -28,10 +28,10 @@ container_box:
 hidden_gem:
   name: "Hidden Gem"
   portable: true
-  examine: |
+  examine_description: |
     A sparkling gem that pulses with inner light.
     It feels warm to the touch.
-  found_description: "A beautiful gem glints from inside the box."
+  scene_description: "A beautiful gem glints from inside the box."
   take_description: "You carefully pick up the glowing gem."
   location: start_room
   hidden: true

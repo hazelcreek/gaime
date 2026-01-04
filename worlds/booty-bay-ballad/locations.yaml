@@ -3,16 +3,24 @@ docks_landing:
   atmosphere: |
     The smell of salt and questionable fish stew hangs heavy in the air. Seagulls squawk insults from above. To the north, the bustling Town Square awaits. To the east, your own trusty (and rusty) ship, 'The Leaky Tub', is moored.
   exits:
-    north: town_square
-    east: ships_deck
+    north:
+      destination: town_square
+      scene_description: "A cobblestone path leading into the noisy heart of Booty Bay"
+      destination_known: true
+    east:
+      destination: ships_deck
+      scene_description: "The gangplank to your ship, creaking ominously with every wave"
+      destination_known: true
   items:
     - sticky_jail_key
   item_placements:
     sticky_jail_key: "Deep inside the Grog Barrel (currently invisible)."
+  npcs: []
+  npc_placements: {}
   details:
-    north: "A cobblestone path leading into the noisy heart of Booty Bay."
-    east: "The gangplank to your ship, which creaks ominously with every wave."
-    grog_barrel: "A massive barrel labeled 'XXL SPICY GROG - DO NOT TOUCH'. It rumbles slightly."
+    grog_barrel:
+      name: "Grog Barrel"
+      scene_description: "A massive barrel labeled 'XXL SPICY GROG - DO NOT TOUCH'. It rumbles slightly."
   interactions:
     scoop_grog:
       triggers:
@@ -26,17 +34,29 @@ town_square:
   atmosphere: |
     The heart of Booty Bay. Pirates haggle over parrots and peg legs. In the center stands a grand statue of Captain No-Beard McGee, looking heroic and surprisingly clean-shaven.
   exits:
-    south: docks_landing
-    west: tavern_entrance
-    east: brig_entrance
+    south:
+      destination: docks_landing
+      scene_description: "The path back to the salty docks"
+      destination_known: true
+    west:
+      destination: tavern_entrance
+      scene_description: "The swinging doors of The Rusty Cutlass Tavern"
+      destination_known: true
+    east:
+      destination: brig_entrance
+      scene_description: "The imposing iron-reinforced door of the Brig"
+      destination_known: true
   items: []
   item_placements: {}
+  npcs: []
+  npc_placements: {}
   details:
-    statue: "A stone likeness of the Captain. He stands atop a plinth, one arm raised as if holding a bird. The statue looks incomplete without his famous parrot accessory."
-    plinth: "The base of the statue. It has a parrot-shaped indentation."
-    south: "The path back to the salty docks."
-    west: "The swinging doors of The Rusty Cutlass Tavern."
-    east: "The imposing iron-reinforced door of the Brig."
+    statue:
+      name: "Captain's Statue"
+      scene_description: "A stone likeness of the Captain. He stands atop a plinth, one arm raised as if holding a bird. The statue looks incomplete without his famous parrot accessory."
+    plinth:
+      name: "Statue Plinth"
+      scene_description: "The base of the statue. It has a parrot-shaped indentation."
   interactions:
     place_parrot:
       triggers:
@@ -50,8 +70,14 @@ tavern_entrance:
   atmosphere: |
     Raucous laughter and terrible music fill the room. The air is thick with smoke and the smell of spilled ale. Pirates arm-wrestle at sticky tables.
   exits:
-    east: town_square
-    north: tavern_backroom
+    east:
+      destination: town_square
+      scene_description: "The swinging doors leading back to the Town Square"
+      destination_known: true
+    north:
+      destination: tavern_backroom
+      scene_description: "A curtained doorway leading to the private backroom"
+      destination_known: true
   items:
     - ceramic_parrot
     - golden_tooth
@@ -63,8 +89,12 @@ tavern_entrance:
   npc_placements:
     bard_barbarossa: "Standing on a table, reciting limericks about scurvy."
   details:
-    shark_head: "A taxidermied shark with a suspiciously shiny glint in its mouth."
-    sign: "A 'Help Wanted' sign reads: 'Seeking Cook. Must know difference between sawdust and cumin.'"
+    shark_head:
+      name: "Shark Head"
+      scene_description: "A taxidermied shark with a suspiciously shiny glint in its mouth."
+    sign:
+      name: "Help Wanted Sign"
+      scene_description: "A 'Help Wanted' sign reads: 'Seeking Cook. Must know difference between sawdust and cumin.'"
   interactions:
     slam_poetry:
       triggers:
@@ -83,12 +113,22 @@ brig_entrance:
   atmosphere: |
     A gloomy stone building. The only sound is the dripping of water and the mournful harmonica playing of a prisoner.
   exits:
-    west: town_square
-    in: jail_cell
+    west:
+      destination: town_square
+      scene_description: "Sunlight streaming in from the Town Square"
+      destination_known: true
+    in:
+      destination: jail_cell
+      scene_description: "The heavy iron door leading to the dark cells within"
+      destination_known: true
+  items: []
+  item_placements: {}
+  npcs: []
+  npc_placements: {}
   details:
-    door: "A heavy iron door with a massive, rusty padlock."
-    west: "Sunlight streams in from the Town Square."
-    in: "The dark interior of the cells."
+    door:
+      name: "Jail Door"
+      scene_description: "A heavy iron door with a massive, rusty padlock."
   requires:
     in:
       item: sticky_jail_key
@@ -99,15 +139,19 @@ jail_cell:
   atmosphere: |
     Damp, cold, and smelling of regret. Navigator Ned sits on a wooden bench, looking miserable.
   exits:
-    out: brig_entrance
-  npcs:
-    - navigator_ned
-  npc_placements:
-    navigator_ned: "Sitting on the bunk, trying to read a map in the dark."
+    out:
+      destination: brig_entrance
+      scene_description: "The iron door leading back to the Brig entrance"
+      destination_known: true
   items:
     - ancient_compass
   item_placements:
     ancient_compass: "Held tightly by Navigator Ned."
+  npcs:
+    - navigator_ned
+  npc_placements:
+    navigator_ned: "Sitting on the bunk, trying to read a map in the dark."
+  details: {}
   interactions:
     free_ned:
       triggers:
@@ -121,35 +165,60 @@ ships_deck:
   atmosphere: |
     The deck of your ship. It's seen better days. Ropes coil like snakes and the main mast stretches up into the blue sky.
   exits:
-    west: docks_landing
-    up: crows_nest
-    down: galley
+    west:
+      destination: docks_landing
+      scene_description: "The gangplank leading back to the docks"
+      destination_known: true
+    up:
+      destination: crows_nest
+      scene_description: "A rope ladder leading high up to the Crow's Nest"
+      destination_known: true
+    down:
+      destination: galley
+      scene_description: "A narrow hatch leading down to the Galley"
+      destination_known: true
+  items: []
+  item_placements: {}
+  npcs: []
+  npc_placements: {}
   details:
-    up: "A rope ladder leading high up to the Crow's Nest."
-    down: "A narrow hatch leading to the Galley."
-    west: "The gangplank back to the docks."
-    rope_line: "A slack line hangs from the mast, looking like it could form a zipline if tightened from above."
+    rope_line:
+      name: "Rope Line"
+      scene_description: "A slack line hangs from the mast, looking like it could form a zipline if tightened from above."
 
 galley:
   name: "Ship's Galley"
   atmosphere: |
     A cramped kitchen. Dirty dishes are piled high. It smells faintly of sawdust and despair.
   exits:
-    up: ships_deck
+    up:
+      destination: ships_deck
+      scene_description: "The hatch leading back up to the deck"
+      destination_known: true
   items:
     - ladle_infinite
   item_placements:
     ladle_infinite: "Stuck into a pot of solidified oatmeal."
+  npcs: []
+  npc_placements: {}
   details:
-    sack: "A sack in the corner labeled 'Premium Flour'. It is ripped open, revealing pure sawdust inside."
+    sack:
+      name: "Flour Sack"
+      scene_description: "A sack in the corner labeled 'Premium Flour'. It is ripped open, revealing pure sawdust inside."
 
 crows_nest:
   name: "Crow's Nest"
   atmosphere: |
     High above the bay. The wind whips your hair. You can see the whole island from here.
   exits:
-    down: ships_deck
-    zipline: ships_deck
+    down:
+      destination: ships_deck
+      scene_description: "The rope ladder descending to the deck below"
+      destination_known: true
+    zipline:
+      destination: ships_deck
+      scene_description: "A taut zipline ready for a thrilling descent"
+      destination_known: true
   items:
     - rusty_cutlass
   item_placements:
@@ -159,7 +228,9 @@ crows_nest:
   npc_placements:
     weeping_lookout: "Curled up in a ball, sobbing into his spyglass."
   details:
-    counterweight_rope: "A thick rope holding a heavy counterweight. If cut, it might snap the zipline tight."
+    counterweight_rope:
+      name: "Counterweight Rope"
+      scene_description: "A thick rope holding a heavy counterweight. If cut, it might snap the zipline tight."
   interactions:
     cut_rope:
       triggers:
@@ -177,10 +248,22 @@ smugglers_cove_entrance:
   atmosphere: |
     A dark, rocky tunnel revealed beneath the statue. The air is cool and smells of gold and mildew.
   exits:
-    up: town_square
-    down: treasure_cave
+    up:
+      destination: town_square
+      scene_description: "The stone staircase leading back up to the Town Square"
+      destination_known: true
+    down:
+      destination: treasure_cave
+      scene_description: "A winding, pitch-black tunnel descending into the depths"
+      destination_known: false
+  items: []
+  item_placements: {}
+  npcs: []
+  npc_placements: {}
   details:
-    darkness: "The tunnel ahead is pitch black and winding."
+    darkness:
+      name: "Dark Tunnel"
+      scene_description: "The tunnel ahead is pitch black and winding."
   requires:
     down:
       item: ancient_compass
@@ -191,27 +274,54 @@ treasure_cave:
   atmosphere: |
     A massive cavern illuminated by glowing moss. In the center, a pile of gold glitters.
   exits:
-    up: smugglers_cove_entrance
+    up:
+      destination: smugglers_cove_entrance
+      scene_description: "The winding tunnel leading back up toward the surface"
+      destination_known: true
+  items: []
+  item_placements: {}
+  npcs: []
+  npc_placements: {}
   details:
-    chest: "The legendary chest of Captain No-Beard."
+    chest:
+      name: "Treasure Chest"
+      scene_description: "The legendary chest of Captain No-Beard."
 
 tavern_backroom:
   name: "Tavern Backroom"
   atmosphere: |
     A private room for high-stakes card games. It's surprisingly quiet.
   exits:
-    south: tavern_entrance
+    south:
+      destination: tavern_entrance
+      scene_description: "The curtained doorway leading back to the main tavern"
+      destination_known: true
+  items: []
+  item_placements: {}
+  npcs: []
+  npc_placements: {}
   details:
-    table: "A card table covered in green felt."
+    table:
+      name: "Card Table"
+      scene_description: "A card table covered in green felt."
 
 captains_cabin:
   name: "Captain's Cabin"
   atmosphere: |
     Located at the stern of the ship (accessed from deck, though door was stuck before). Wait, this is just a narrative flavor room attached to the deck logic.
   exits:
-    out: ships_deck
+    out:
+      destination: ships_deck
+      scene_description: "The cabin door leading back to the main deck"
+      destination_known: true
+  items: []
+  item_placements: {}
+  npcs: []
+  npc_placements: {}
   details:
-    floorboard: "A loose floorboard squeaks under your foot."
+    floorboard:
+      name: "Loose Floorboard"
+      scene_description: "A loose floorboard squeaks under your foot."
   interactions:
     examine_floor:
       triggers:
@@ -223,4 +333,12 @@ zipline_descent:
   name: "Mid-Air Zipline"
   atmosphere: "WHEEEEEEEEEE!"
   exits:
-    land: ships_deck
+    land:
+      destination: ships_deck
+      scene_description: "The deck of your ship rushing up to meet you"
+      destination_known: true
+  items: []
+  item_placements: {}
+  npcs: []
+  npc_placements: {}
+  details: {}

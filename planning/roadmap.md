@@ -49,7 +49,7 @@ See [two-phase-game-loop-spec.md](two-phase-game-loop-spec.md) for full specific
 | Phase | Focus | Status |
 |-------|-------|--------|
 | 1 | Schema Definition | ✅ Complete |
-| 2 | World Migration | ⚪ Planned |
+| 2 | World Migration | ✅ Complete |
 | 3 | Code Integration | ⚪ Planned |
 | 4 | Examination Mechanics | ⚪ Planned |
 | 5 | Narrator Integration | ⚪ Planned |
@@ -381,6 +381,7 @@ See [ideas/features.md](../ideas/features.md) for full descriptions.
 
 | Date | Change |
 |------|--------|
+| 2026-01-04 | Visibility & Examination Phase 2 complete: All 10 worlds migrated to V2 schema (ExitDefinition, DetailDefinition, renamed Item fields), 256 tests passing |
 | 2026-01-04 | Visibility & Examination Phase 1 complete: ExitDefinition, DetailDefinition, ExaminationEffect models; Item field aliases; validation script |
 | 2026-01-04 | Classic Engine deprecated: removed engine selection, deleted classic engine code, simplified API |
 | 2025-12-17 | Two-Phase Engine Phase 2 complete: InteractorAI, ExamineValidator, TakeValidator, 33 new tests, 214 total tests passing |

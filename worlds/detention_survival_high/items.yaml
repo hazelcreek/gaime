@@ -1,63 +1,63 @@
 chewed_gum:
   name: "Wad of Chewed Gum"
   portable: true
-  examine: |
+  examine_description: |
     It's gray, flavorless, and slightly fuzzy from your pocket lint. A classic tool of mischief.
-  found_description: "You have some old gum in your pocket."
+  scene_description: "You have some old gum in your pocket."
   take_description: "You keep the gum. Gross."
 
 hall_pass:
   name: "Laminated Hall Pass"
   portable: true
-  examine: |
+  examine_description: |
     A heavy block of wood with 'RESTROOM' written in Sharpie. It grants immunity from minor rule infractions.
-  found_description: "A forgotten hall pass sits on a bench."
+  scene_description: "A forgotten hall pass sits on a bench."
   take_description: "You grab the hall pass. You feel authorized."
 
 janitor_keys:
   name: "Janitor's Key Ring"
   portable: true
-  examine: |
+  examine_description: |
     A massive ring with fifty keys. Only one looks like it opens the front gate.
-  found_description: "A jangling set of keys is draped over a locker door."
+  scene_description: "A jangling set of keys is draped over a locker door."
   take_description: "You take the keys. Freedom is within reach!"
 
 spatular_sword:
   name: "The Spatula of Destiny"
   portable: true
-  examine: |
+  examine_description: |
     An industrial-sized spatula used for flipping mass quantities of burgers. It feels balanced.
-  found_description: "A giant metal spatula rests against the wall."
+  scene_description: "A giant metal spatula rests against the wall."
   take_description: "You wield the spatula. En garde!"
 
 baking_soda:
   name: "Box of Baking Soda"
   portable: true
-  examine: |
+  examine_description: |
     Standard grade sodium bicarbonate. Unstable if mixed with acids.
-  found_description: "A box of baking soda sits on the counter."
+  scene_description: "A box of baking soda sits on the counter."
   take_description: "You pocket the baking soda."
 
 vinegar:
   name: "Jug of Vinegar"
   portable: true
-  examine: |
+  examine_description: |
     Smells sharp. Highly acidic.
-  found_description: "A jug of vinegar is near the sink."
+  scene_description: "A jug of vinegar is near the sink."
   take_description: "You pick up the heavy jug."
 
 rubber_stamp:
   name: "'DENIED' Stamp"
   portable: true
-  examine: |
+  examine_description: |
     A heavy rubber stamp with red ink. It says DENIED in capital letters.
-  found_description: "A rubber stamp sits on the desk."
+  scene_description: "A rubber stamp sits on the desk."
   take_description: "You take the stamp. You feel powerful."
 
 dodgeball:
   name: "Red Rubber Dodgeball"
   portable: true
-  examine: |
+  examine_description: |
     The source of all childhood trauma. It makes a distinct 'pwang' sound.
-  found_description: "A lone dodgeball sits in the center of the court."
+  scene_description: "A lone dodgeball sits in the center of the court."
   take_description: "You pick up the ball. You are ready to dodge, duck, dip, dive, and dodge."

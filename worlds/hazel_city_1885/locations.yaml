@@ -3,7 +3,10 @@ sheriff_office:
   atmosphere: |
     Dust motes dance in the shafts of harsh sunlight cutting through the barred windows. The smell of stale coffee and gun oil hangs heavy. The jail cell in the corner stands empty, its door swinging slightly on rusty hinges.
   exits:
-    north: main_street_south
+    north:
+      destination: main_street_south
+      scene_description: "The open doorway leading out to the sun-bleached street"
+      destination_known: true
   items:
     - armory_key
   item_placements:
@@ -13,32 +16,42 @@ sheriff_office:
   npc_placements:
     sheriff_hayes: "slumps in the wooden chair, clutching his bandaged leg"
   details:
-    desk: "Scratched and scarred from years of frustration. A half-empty whiskey bottle sits on it."
-    north: "Through the open doorway, the dusty expanse of Main Street is visible."
+    desk:
+      name: "Oak Desk"
+      scene_description: "Scratched and scarred from years of frustration. A half-empty whiskey bottle sits on it."
 
 main_street_south:
   name: "Main Street (South)"
   atmosphere: |
     The sun beats down on the packed dirt road. Tumbleweeds actually roll past, cliche as it is. To the south is the Sheriff's Office. To the north, the street continues toward the Saloon. To the east lies the General Store.
   exits:
-    south: sheriff_office
-    north: main_street_center
-    east: general_store
+    south:
+      destination: sheriff_office
+      scene_description: "The sturdy door of the Sheriff's Office, a last bastion of law"
+      destination_known: true
+    north:
+      destination: main_street_center
+      scene_description: "The dusty street stretching toward the rowdy noise of the Saloon"
+      destination_known: true
+    east:
+      destination: general_store
+      scene_description: "The General Store's creaking sign swaying in the hot wind"
+      destination_known: true
   items: []
   item_placements: {}
   npcs: []
   npc_placements: {}
-  details:
-    south: "The Sheriff's Office looks small and besieged against the vast desert sky."
-    north: "The street stretches on towards the rowdy noise of the Saloon."
-    east: "The General Store's sign swings with a mournful creak."
+  details: {}
 
 general_store:
   name: "Mercantile & Goods"
   atmosphere: |
     It's cooler in here, smelling of dry grain and peppermint. Shelves are stocked with canned peaches and bolts of fabric, but the ammunition shelf is suspiciously empty.
   exits:
-    west: main_street_south
+    west:
+      destination: main_street_south
+      scene_description: "The bright rectangle of the doorway leading back to the sweltering street"
+      destination_known: true
   items:
     - dynamite_stick
     - whiskey_bottle
@@ -50,9 +63,12 @@ general_store:
   npc_placements:
     shopkeeper_silas: "nervously polishes the counter, eyes darting to the door"
   details:
-    west: "The bright rectangle of the door leads back to the sweltering street."
-    shelves: "Most essentials are here, but the gun powder and bullets have been raided."
-    flour_sacks: "Heavy burlap sacks of flour stacked on the back shelves."
+    shelves:
+      name: "Store Shelves"
+      scene_description: "Most essentials are here, but the gun powder and bullets have been raided."
+    flour_sacks:
+      name: "Flour Sacks"
+      scene_description: "Heavy burlap sacks of flour stacked on the back shelves."
   interactions:
     ask_silas_whiskey:
       triggers: ["ask silas about whiskey", "ask silas about liquor", "ask silas about booze", "ask about whiskey", "ask about liquor", "ask silas for whiskey", "ask silas for liquor"]
@@ -64,9 +80,18 @@ main_street_center:
   atmosphere: |
     The heart of Hazel City. The imposing Grand Saloon dominates the northern view. A water trough sits dry and cracking nearby. To the west is the Livery Stable.
   exits:
-    south: main_street_south
-    north: grand_saloon_porch
-    west: livery_stable
+    south:
+      destination: main_street_south
+      scene_description: "The dusty road back toward the Sheriff's Office"
+      destination_known: true
+    north:
+      destination: grand_saloon_porch
+      scene_description: "The weathered bat-wing doors of the Grand Saloon, music drifting out"
+      destination_known: true
+    west:
+      destination: livery_stable
+      scene_description: "The open barn doors of the Livery Stable, smelling of horses and hay"
+      destination_known: true
   items: []
   item_placements: {}
   npcs:
@@ -74,16 +99,19 @@ main_street_center:
   npc_placements:
     town_drunk: "lies passed out in the shadow of the water trough"
   details:
-    north: "The bat-wing doors of the Saloon loom ahead, music drifting out."
-    west: "The smell of horses and hay comes from the open barn doors."
-    trough: "Bone dry. It hasn't rained in weeks."
+    trough:
+      name: "Water Trough"
+      scene_description: "Bone dry. It hasn't rained in weeks."
 
 livery_stable:
   name: "Livery Stable"
   atmosphere: |
     Shadowy and smelling of manure and sweet hay. Horses shift restlessly in their stalls. A heavy anvil sits near a cold forge.
   exits:
-    east: main_street_center
+    east:
+      destination: main_street_center
+      scene_description: "The bright street outside contrasting with the gloom of the stable"
+      destination_known: true
   items:
     - rope_coil
   item_placements:
@@ -93,17 +121,27 @@ livery_stable:
   npc_placements:
     stable_boy_timmy: "hides behind a bale of hay, peeking out fearfully"
   details:
-    east: "The bright street outside contrasts with the gloom of the stable."
-    forge: "Cold. The blacksmith must have fled town."
+    forge:
+      name: "Cold Forge"
+      scene_description: "Cold. The blacksmith must have fled town."
 
 grand_saloon_porch:
   name: "Saloon Porch"
   atmosphere: |
     The wooden planks creak underfoot. Laughter and piano music spill from inside, sounding menacingly cheerful given the town's plight. A 'Wanted' poster flutters on a pillar.
   exits:
-    south: main_street_center
-    north: grand_saloon
-    east: back_alley
+    south:
+      destination: main_street_center
+      scene_description: "The dusty street stretching back toward the rest of town"
+      destination_known: true
+    north:
+      destination: grand_saloon
+      scene_description: "The swinging bat-wing doors leading into the den of the gang"
+      destination_known: true
+    east:
+      destination: back_alley
+      scene_description: "A narrow, trash-strewn path winding around the side of the building"
+      destination_known: true
   items:
     - wanted_poster
   item_placements:
@@ -112,18 +150,21 @@ grand_saloon_porch:
     - goon_lefty
   npc_placements:
     goon_lefty: "leans against the wall, whittling a stick with a large knife"
-  details:
-    north: "The bat-wing doors push inward to the den of the gang."
-    south: "The street looks abandoned from this vantage point."
-    east: "A narrow, trash-strewn path winds around the side of the building."
+  details: {}
 
 back_alley:
   name: "Muddy Alley"
   atmosphere: |
     A narrow strip of mud and broken bottles between the Saloon and the bank. It reeks of refuse. A ladder leads up to the Saloon's balcony, but the bottom rungs are missing.
   exits:
-    west: grand_saloon_porch
-    up: saloon_balcony
+    west:
+      destination: grand_saloon_porch
+      scene_description: "The alley opening back to the Saloon's front porch"
+      destination_known: true
+    up:
+      destination: saloon_balcony
+      scene_description: "A rickety ladder climbing up to an open window on the balcony level"
+      destination_known: true
   items:
     - empty_crate
   item_placements:
@@ -131,17 +172,23 @@ back_alley:
   npcs: []
   npc_placements: {}
   details:
-    ladder: "It leads up to the saloon's balcony, but the bottom rungs are missing. You'd need something to stand on - like that wooden crate."
-    west: "The alley opens back up to the front porch."
-    up: "The rickety ladder climbs up to an open window on the balcony level."
+    ladder:
+      name: "Broken Ladder"
+      scene_description: "It leads up to the saloon's balcony, but the bottom rungs are missing. You'd need something to stand on - like that wooden crate."
 
 grand_saloon:
   name: "The Grand Saloon"
   atmosphere: |
     Smoke hangs in the air like a thick fog. The piano player stops abruptly as you enter. Tables are overturned, save for the large poker table in the center where the gang holds court.
   exits:
-    south: grand_saloon_porch
-    up: saloon_balcony
+    south:
+      destination: grand_saloon_porch
+      scene_description: "The swinging doors leading back to the porch and freedom"
+      destination_known: true
+    up:
+      destination: saloon_balcony
+      scene_description: "A grand staircase curving up to the balcony overlooking the room"
+      destination_known: true
   items:
     - whiskey_shot
   item_placements:
@@ -152,35 +199,42 @@ grand_saloon:
   npc_placements:
     jackal_boone: "sits at the center table, cleaning a massive revolver"
     piano_player: "freezes at the keys of the upright piano in the corner"
-  details:
-    south: "The exit to the porch is your only escape route."
-    up: "A grand staircase curves up to the balcony overlooking the room."
+  details: {}
 
 saloon_balcony:
   name: "Saloon Balcony"
   atmosphere: |
     Overlooking the main floor, this area is lined with doors to private rooms. It offers a tactical vantage point over the poker table below. An open window on the east side leads to a ladder descending to the alley.
   exits:
-    down: grand_saloon
-    west: secret_room
-    east: back_alley
+    down:
+      destination: grand_saloon
+      scene_description: "The grand staircase descending to the smoky saloon floor below"
+      destination_known: true
+    west:
+      destination: secret_room
+      scene_description: "A door slightly ajar revealing a dark room beyond"
+      destination_known: false
+    east:
+      destination: back_alley
+      scene_description: "An open window leading to a rickety ladder descending to the muddy alley"
+      destination_known: true
   items:
     - winchester_rifle
   item_placements:
     winchester_rifle: "leans against the railing, forgotten by a drunken outlaw"
   npcs: []
   npc_placements: {}
-  details:
-    down: "You can see the tops of the outlaws' hats from here."
-    west: "A door slightly ajar reveals a dark room."
-    east: "An open window leads to a rickety ladder descending to the muddy alley below."
+  details: {}
 
 secret_room:
   name: "Boone's Stash Room"
   atmosphere: |
     A small storage room converted into an office. Maps of the railroad lines are pinned to the walls.
   exits:
-    east: saloon_balcony
+    east:
+      destination: saloon_balcony
+      scene_description: "The door leading back to the noisy balcony"
+      destination_known: true
   items:
     - train_schedule
   item_placements:
@@ -188,5 +242,6 @@ secret_room:
   npcs: []
   npc_placements: {}
   details:
-    east: "The door leads back to the balcony noise."
-    maps: "Detailed diagrams of the Union Pacific route."
+    maps:
+      name: "Railroad Maps"
+      scene_description: "Detailed diagrams of the Union Pacific route."

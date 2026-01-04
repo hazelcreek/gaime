@@ -1,49 +1,49 @@
 deputy_badge:
   name: "Deputy Star"
   portable: true
-  examine: |
+  examine_description: |
     A tin star. It feels heavier than it looks. It symbolizes the law in a lawless land.
-  found_description: "Your new badge glimmers faintly in the light."
+  scene_description: "Your new badge glimmers faintly in the light."
   take_description: "You pin the badge to your chest. You are the law now."
 
 armory_key:
   name: "Armory Key"
   portable: true
-  examine: |
+  examine_description: |
     A small iron key. It looks like it opens a cabinet, but the armory cabinet was smashed open years ago.
-  found_description: "A small iron key hangs on a nail behind the heavy oak desk."
+  scene_description: "A small iron key hangs on a nail behind the heavy oak desk."
   take_description: "You swipe the key. Might be useful for something else."
 
 dynamite_stick:
   name: "Stick of Dynamite"
   portable: true
-  examine: |
+  examine_description: |
     Red, dangerous, and sweating slightly. handle with extreme care.
-  found_description: "A stick of dynamite is tucked almost out of sight behind a jar of pickled eggs."
+  scene_description: "A stick of dynamite is tucked almost out of sight behind a jar of pickled eggs."
   take_description: "You carefully pocket the dynamite. Let's hope it doesn't go off."
 
 rope_coil:
   name: "Coil of Rope"
   portable: true
-  examine: |
+  examine_description: |
     Sturdy hemp rope. Good for lassoing cattle or climbing.
-  found_description: "A coil of rope hangs looped over a wooden post near the entrance."
+  scene_description: "A coil of rope hangs looped over a wooden post near the entrance."
   take_description: "You sling the rope over your shoulder."
 
 wanted_poster:
   name: "Boone Wanted Poster"
   portable: true
-  examine: |
+  examine_description: |
     'WANTED DEAD OR ALIVE: Jackal Boone. $500 Reward.' The drawing captures his sneer perfectly.
-  found_description: "A wanted poster is nailed to a support beam, flapping in the hot wind."
+  scene_description: "A wanted poster is nailed to a support beam, flapping in the hot wind."
   take_description: "You rip the poster down. You won't need a drawing to recognize him."
 
 whiskey_shot:
   name: "Glass of Whiskey"
   portable: true
-  examine: |
+  examine_description: |
     Cheap rotgut. Smells like turpentine.
-  found_description: "A glass of whiskey sits abandoned on a sticky table near the door."
+  scene_description: "A glass of whiskey sits abandoned on a sticky table near the door."
   take_description: "You pick up the glass. Careful not to spill it."
 
 whiskey_bottle:
@@ -52,31 +52,31 @@ whiskey_bottle:
   hidden: true
   find_condition:
     requires_flag: silas_revealed_whiskey
-  examine: |
+  examine_description: |
     A dusty bottle of frontier whiskey. Half-full. Should be enough to tempt a thirsty outlaw.
-  found_description: "A dusty whiskey bottle is tucked behind the flour sacks, just where Silas said."
+  scene_description: "A dusty whiskey bottle is tucked behind the flour sacks, just where Silas said."
   take_description: "You grab the bottle. Silas pretends not to notice."
 
 empty_crate:
   name: "Wooden Crate"
   portable: true
-  examine: |
+  examine_description: |
     A sturdy wooden crate. It looks strong enough to stand on.
-  found_description: "An empty wooden crate sits overturned near the wall beneath the ladder."
+  scene_description: "An empty wooden crate sits overturned near the wall beneath the ladder."
   take_description: "You pick up the crate. It's awkward to carry."
 
 winchester_rifle:
   name: "Winchester Rifle"
   portable: true
-  examine: |
+  examine_description: |
     A lever-action beauty. Perfectly oiled and loaded. This evens the odds.
-  found_description: "A Winchester rifle leans against the railing, forgotten by a drunken outlaw."
+  scene_description: "A Winchester rifle leans against the railing, forgotten by a drunken outlaw."
   take_description: "You grab the Winchester and rack the lever. Click-clack."
 
 train_schedule:
   name: "Stolen Train Schedule"
   portable: true
-  examine: |
+  examine_description: |
     Marked in red ink: 'NOON SHIPMENT - GOLD BULLION'. This is the proof of their plan.
-  found_description: "A train schedule is pinned to the wall with a knife."
+  scene_description: "A train schedule is pinned to the wall with a knife."
   take_description: "You pull the schedule off the wall. This is the evidence you need."

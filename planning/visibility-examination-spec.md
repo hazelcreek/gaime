@@ -1118,16 +1118,16 @@ Before migrating each world:
 - Item model uses `AliasChoices` to accept both old (`found_description`, `examine`) and new (`scene_description`, `examine_description`) field names
 - Validation script created at `scripts/validate_v2_schema.py` - run with `--world <name>` or `--all`
 
-### Phase 2: World Migration (Day 1-2)
+### Phase 2: World Migration (Day 1-2) ✅
 
 **Goal**: Migrate all worlds to new schema format
 
-- [ ] Migrate `backend/tests/fixtures/test_world/` first (validates approach)
-- [ ] Migrate each world in `worlds/` using Cursor Agent assistance
-- [ ] Validate all migrated worlds with schema validation script
-- [ ] Git commit migrated worlds
+- [x] Migrate `backend/tests/fixtures/test_world/` first (validates approach)
+- [x] Migrate each world in `worlds/` using Cursor Agent assistance
+- [x] Validate all migrated worlds with schema validation script
+- [x] Git commit migrated worlds
 
-**Deliverable**: All YAML files use new structured format
+**Deliverable**: All YAML files use new structured format ✅
 
 **Migration Checklist per World**:
 1. Convert `exits: {direction: destination_id}` → `exits: {direction: ExitDefinition}`
@@ -1135,6 +1135,13 @@ Before migrating each world:
 3. Determine `destination_known` based on narrative context
 4. Convert `details: {key: string}` → `details: {key: DetailDefinition}`
 5. Rename Item fields: `found_description` → `scene_description`, `examine` → `examine_description`
+
+**Implementation Notes** (January 2026):
+- All 10 worlds migrated: test_world (fixture), whistlewood_fable, hazel_city_1885, automaton-isle, islay-mist-mystery, detention_survival_high, echoes_of_subjugation, booty-bay-ballad, cursed-manor, uss-enterprise-d
+- Exit `scene_description` generated to match each world's theme/tone
+- `destination_known` set based on narrative context (familiar places = true, mystery/exploration = false)
+- All 256 pytest tests passing
+- Validation: 0 errors, 2 warnings (automaton-isle has intentional direction-named details for scenery)
 
 ### Phase 3: Code Integration (Day 2-3)
 

@@ -1,39 +1,39 @@
 red_scarf:
   name: "Red Knitted Scarf"
   portable: true
-  examine: |
+  examine_description: |
     A tiny scarf knitted by your grandmother. It keeps the chill away.
-  found_description: "You are wearing your lucky red scarf."
+  scene_description: "You are wearing your lucky red scarf."
   take_description: "You adjust the scarf around your neck."
 
 berry_basket:
   name: "Basket of Dried Berries"
   portable: true
-  examine: |
+  examine_description: |
     Sweet dried berries. Good for a snack or a bribe.
-  found_description: "A small woven basket of berries rests near the entrance, half-filled with dried provisions."
+  scene_description: "A small woven basket of berries rests near the entrance, half-filled with dried provisions."
   take_description: "You pick up the basket handle in your teeth."
 
 shiny_pebble:
   name: "Iridescent Pebble"
   portable: true
-  examine: |
+  examine_description: |
     A smooth river stone that reflects colors like a soap bubble.
-  found_description: "An iridescent pebble glints brightly from the muddy bank near the water's edge."
+  scene_description: "An iridescent pebble glints brightly from the muddy bank near the water's edge."
   take_description: "You scoop up the shiny pebble."
 
 jar_of_moonlight:
   name: "Jar of Moonlight"
   portable: true
-  examine: |
+  examine_description: |
     A glass jar containing a captured beam of pure moonlight. It glows coolly.
-  found_description: "A jar of moonlight sits on the windowsill, glowing with a soft, pale luminescence."
+  scene_description: "A jar of moonlight sits on the windowsill, glowing with a soft, pale luminescence."
   take_description: "You carefully grip the jar of moonlight."
 
 golden_acorn:
   name: "The Golden Acorn"
   portable: true
-  examine: |
+  examine_description: |
     Warm to the touch and heavy. It hums with the life force of the forest.
-  found_description: "The Golden Acorn rests atop a pedestal of pure quartz, pulsing with warm light."
+  scene_description: "The Golden Acorn rests atop a pedestal of pure quartz, pulsing with warm light."
   take_description: "You reverently take the Golden Acorn."

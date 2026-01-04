@@ -3,7 +3,10 @@ cell_block_c:
   atmosphere: |
     You stand in your cramped cell in Cell Block C. The air smells of ozone and unwashed bodies. Rows of hexagonal energy barriers normally seal each cell, humming with a headache-inducing frequency. But right now, YOUR barrier has failed - the violet shimmer that kept you caged flickers weakly, then dies completely. The power fluctuation has created your window of escape. The concrete floor is cold and stained with decades of grime.
   exits:
-    north: mess_hall
+    north:
+      destination: mess_hall
+      scene_description: "The corridor leading to the Nutrient Dispensary, now unblocked by your failed barrier"
+      destination_known: true
   items:
     - stale_ration
   item_placements:
@@ -13,70 +16,106 @@ cell_block_c:
   npc_placements:
     old_marcus: "lies on the bed slab in the adjacent cell, his weathered face pressed against the flickering barrier, whispering urgently"
   details:
-    barrier: "Your cell's energy barrier has failed! The violet shimmer flickers weakly before dying completely. The way north to the mess hall is now open."
-    north: "The corridor north leads to the Nutrient Dispensary. With your barrier down, nothing stops you from walking out."
-    bed: "A slab of metal bolted to the wall where you've slept for months."
-    cell: "Your cramped cell - four concrete walls, a metal bed slab, and normally an impassable energy barrier. Tonight, the barrier is down."
+    barrier:
+      name: "Energy Barrier"
+      scene_description: "Your cell's energy barrier has failed! The violet shimmer flickers weakly before dying completely. The way north to the mess hall is now open."
+    bed:
+      name: "Bed Slab"
+      scene_description: "A slab of metal bolted to the wall where you've slept for months."
+    cell:
+      name: "Cell"
+      scene_description: "Your cramped cell - four concrete walls, a metal bed slab, and normally an impassable energy barrier. Tonight, the barrier is down."
 
 mess_hall:
   name: "Nutrient Dispensary"
   atmosphere: |
     A cavernous room lit by flickering halogen strips. Rows of metal tables are bolted to the floor. A large screen on the wall plays endless propaganda about the Protectors' mercy. The dispensing machines grind loudly.
   exits:
-    south: cell_block_c
-    east: kitchen_scullery
-    west: courtyard_access
+    south:
+      destination: cell_block_c
+      scene_description: "The corridor back to Cell Block C and the flickering barriers"
+      destination_known: true
+    east:
+      destination: kitchen_scullery
+      scene_description: "Steam billowing from the Scullery doorway where industrial machinery hums"
+      destination_known: true
+    west:
+      destination: courtyard_access
+      scene_description: "Heavy blast doors leading to the Courtyard Access airlock"
+      destination_known: true
   items: []
+  item_placements: {}
   npcs:
     - unit_88
   npc_placements:
     unit_88: "stands at the dispensing station with an unsettling smile, mechanically distributing grey paste to a queue of hollow-eyed inmates"
   details:
-    screen: "A Protector with elongated limbs speaks soothingly about obedience."
-    dispenser: "It oozes a grey paste labeled 'Sustenance'."
-    south: "The corridor south leads back to Cell Block C and the flickering barriers."
-    east: "Steam billows from the Scullery to the east, where industrial machinery hums."
-    west: "Heavy blast doors to the west lead to the Courtyard Access airlock."
+    screen:
+      name: "Propaganda Screen"
+      scene_description: "A Protector with elongated limbs speaks soothingly about obedience."
+    dispenser:
+      name: "Dispenser"
+      scene_description: "It oozes a grey paste labeled 'Sustenance'."
 
 kitchen_scullery:
   name: "Scullery"
   atmosphere: |
     Steaming vents hiss constantly. The room is filled with industrial dishwashers and waste chutes. It's surprisingly unguarded, considered too filthy for the Protectors to patrol often.
   exits:
-    west: mess_hall
-    down: waste_processing
+    west:
+      destination: mess_hall
+      scene_description: "The doorway back to the Nutrient Dispensary's flickering lights"
+      destination_known: true
+    down:
+      destination: waste_processing
+      scene_description: "A dark waste chute dropping into darkness, the smell of rot rising from below"
+      destination_known: false
   items:
     - rusty_pipe
   item_placements:
     rusty_pipe: "lies loose beside the rumbling dishwasher, its corroded length rattling with each machine cycle"
   npcs: []
+  npc_placements: {}
   details:
-    chute: "A dark hole smelling of rot. It leads down to Waste Processing."
-    west: "The doorway west leads back to the Nutrient Dispensary's flickering lights."
-    down: "A waste chute drops down into darkness - the smell of rot rises from below."
+    chute:
+      name: "Waste Chute"
+      scene_description: "A dark hole smelling of rot. It leads down to Waste Processing."
 
 courtyard_access:
   name: "Courtyard Airlock"
   atmosphere: |
     A heavy blast door separates the interior from the exercise yard. A security kiosk sits behind reinforced glass. The scanner light blinks rhythmically red.
   exits:
-    east: mess_hall
-    north: security_kiosk
-    west: exercise_yard
+    east:
+      destination: mess_hall
+      scene_description: "The corridor back to the Nutrient Dispensary"
+      destination_known: true
+    north:
+      destination: security_kiosk
+      scene_description: "A reinforced glass window revealing Guard Station Alpha, the door beside it ajar"
+      destination_known: true
+    west:
+      destination: exercise_yard
+      scene_description: "The partially open blast door leading to the Exercise Yard outside"
+      destination_known: true
   items: []
+  item_placements: {}
   npcs: []
+  npc_placements: {}
   details:
-    scanner: "Retinal scanner. It looks for compliance chips."
-    east: "The corridor east leads back to the Nutrient Dispensary."
-    north: "A reinforced glass window reveals Guard Station Alpha to the north. The door beside it is ajar."
-    west: "The heavy blast door to the west stands partially open, leading to the Exercise Yard outside."
+    scanner:
+      name: "Retinal Scanner"
+      scene_description: "Retinal scanner. It looks for compliance chips."
 
 security_kiosk:
   name: "Guard Station Alpha"
   atmosphere: |
     Sterile and white. Monitors cover every wall, showing feeds from across the camp. A dead Protector drone lies sparked out on a workbench, half-disassembled.
   exits:
-    south: courtyard_access
+    south:
+      destination: courtyard_access
+      scene_description: "The door back to the Courtyard Access airlock"
+      destination_known: true
   items:
     - access_card_blue
   item_placements:
@@ -86,16 +125,23 @@ security_kiosk:
   npc_placements:
     tech_scavenger_rin: "crouches beneath the monitor bank, fingers flying over exposed circuitry, glancing nervously at the door every few seconds"
   details:
-    monitors: "You see yourself on one of the screens. It's unnerving."
-    south: "The door south leads back to the Courtyard Access airlock."
+    monitors:
+      name: "Monitor Bank"
+      scene_description: "You see yourself on one of the screens. It's unnerving."
 
 exercise_yard:
   name: "The Cage"
   atmosphere: |
     An open-air section surrounded by thirty-foot high electrified fences. The sky above is choked with smog and Protector surveillance ships. Searchlights sweep the mud.
   exits:
-    east: courtyard_access
-    north: maintenance_shed
+    east:
+      destination: courtyard_access
+      scene_description: "The blast door leading back into the Courtyard Access airlock"
+      destination_known: true
+    north:
+      destination: maintenance_shed
+      scene_description: "A small maintenance shed barely visible at the north edge of the yard"
+      destination_known: true
   items:
     - wire_cutters
   item_placements:
@@ -105,55 +151,79 @@ exercise_yard:
   npc_placements:
     smuggler_jax: "leans against the fence in a shadow between searchlight sweeps, watching the yard with calculating eyes"
   details:
-    fence: "It buzzes angrily. Climbing is suicide."
-    sky: "You can't remember the last time you saw a star."
-    east: "The blast door east leads back into the Courtyard Access airlock."
-    north: "A small maintenance shed sits at the north edge of the yard, barely visible in the sweeping searchlights."
+    fence:
+      name: "Electrified Fence"
+      scene_description: "It buzzes angrily. Climbing is suicide."
+    sky:
+      name: "Sky"
+      scene_description: "You can't remember the last time you saw a star."
 
 maintenance_shed:
   name: "Maintenance Shed"
   atmosphere: |
     A cramped structure filled with old tools and cleaning supplies. A hidden hatch is barely visible under a pile of oily rags.
   exits:
-    south: exercise_yard
-    down: old_sewers
+    south:
+      destination: exercise_yard
+      scene_description: "The shed door leading back to the Exercise Yard and its sweeping searchlights"
+      destination_known: true
+    down:
+      destination: old_sewers
+      scene_description: "A rusted hatch beneath oily rags marked with a broken chain symbol"
+      destination_known: false
   items:
     - flashlight
   item_placements:
     flashlight: "has rolled beneath a dusty workbench, its military-grade casing barely visible in the gloom"
   npcs: []
+  npc_placements: {}
   details:
-    hatch: "Scratched into the metal is a symbol: a broken chain. This leads down to the old sewers."
-    south: "The shed door opens south to the Exercise Yard and its sweeping searchlights."
-    down: "A rusted hatch beneath oily rags leads down into darkness - the old sewer tunnels."
+    hatch:
+      name: "Hidden Hatch"
+      scene_description: "Scratched into the metal is a symbol: a broken chain. This leads down to the old sewers."
 
 waste_processing:
   name: "Waste Processing"
   atmosphere: |
     The bowels of the facility. Sludge moves slowly along conveyor belts toward an incinerator. The heat is intense, and the noise is deafening.
   exits:
-    up: kitchen_scullery
-    north: old_sewers
+    up:
+      destination: kitchen_scullery
+      scene_description: "The waste chute leading back up to the Scullery above"
+      destination_known: true
+    north:
+      destination: old_sewers
+      scene_description: "A crumbling passage leading into old pre-invasion tunnels"
+      destination_known: false
   items: []
+  item_placements: {}
   npcs: []
+  npc_placements: {}
   details:
-    incinerator: "A roaring furnace. Don't fall in."
-    up: "The waste chute leads back up to the Scullery above."
-    north: "A crumbling passage north leads into old pre-invasion tunnels - the forgotten sewers."
+    incinerator:
+      name: "Incinerator"
+      scene_description: "A roaring furnace. Don't fall in."
 
 old_sewers:
   name: "Forgotten Tunnels"
   atmosphere: |
     These tunnels predate the invasion. The brickwork is crumbling, and water trickles down the walls. It's dark, damp, and smells of freedom. This is it - the path out of Omega-9.
   exits:
-    up: maintenance_shed
-    south: waste_processing
+    up:
+      destination: maintenance_shed
+      scene_description: "A ladder leading up to the maintenance shed hatch above"
+      destination_known: true
+    south:
+      destination: waste_processing
+      scene_description: "The passage connecting to the prison's Waste Processing facility"
+      destination_known: true
   items:
     - resistance_map
   item_placements:
     resistance_map: "is wedged into a crack in the crumbling brick wall, folded tight and stained with damp"
   npcs: []
+  npc_placements: {}
   details:
-    graffiti: "'THEY BLEED LIKE US' is spray-painted in red. The mark of the Resistance."
-    up: "A ladder leads up to the maintenance shed hatch above."
-    south: "The passage south connects to the prison's Waste Processing facility."
+    graffiti:
+      name: "Resistance Graffiti"
+      scene_description: "'THEY BLEED LIKE US' is spray-painted in red. The mark of the Resistance."

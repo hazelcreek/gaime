@@ -6,16 +6,24 @@ cadet_quarters:
     a narrow viewport, the stars are steady and indifferent to human schedules. The ship's carpeted
     deck and gentle ambient hum make even urgency feel… civilized.
   exits:
-    west: main_corridor
+    west:
+      destination: main_corridor
+      scene_description: "The door slides open onto the main corridor with a soft pneumatic whisper"
+      destination_known: true
   items: []
   item_placements: {}
   npcs: []
   npc_placements: {}
   details:
-    desk: "A built-in desk with a small LCARS panel and a personal terminal."
-    uniform: "A crisp cadet uniform on a hanger, Starfleet delta subtly catching the light."
-    viewport: "A small window into the galaxy — calm, vast, and unsettling in its patience."
-    west: "The door slides open onto the main corridor with a soft pneumatic whisper."
+    desk:
+      name: "Built-in Desk"
+      scene_description: "A built-in desk with a small LCARS panel and a personal terminal."
+    uniform:
+      name: "Cadet Uniform"
+      scene_description: "A crisp cadet uniform on a hanger, Starfleet delta subtly catching the light."
+    viewport:
+      name: "Viewport"
+      scene_description: "A small window into the galaxy — calm, vast, and unsettling in its patience."
   interactions:
     acknowledge_call:
       triggers:
@@ -34,12 +42,30 @@ main_corridor:
     updates — professional, not fearful. Somewhere deeper in the ship, the ambient hum wavers like a
     cello string touched by an unsteady hand.
   exits:
-    east: cadet_quarters
-    north: turbolift
-    south: ten_forward
-    west: sickbay
-    up: holodeck_corridor
-    down: jeffries_hatch
+    east:
+      destination: cadet_quarters
+      scene_description: "The door to your cadet quarters"
+      destination_known: true
+    north:
+      destination: turbolift
+      scene_description: "The turbolift doors, their seams lit by a thin line of white"
+      destination_known: true
+    south:
+      destination: ten_forward
+      scene_description: "The corridor opening toward Ten Forward with its low murmur of conversation"
+      destination_known: true
+    west:
+      destination: sickbay
+      scene_description: "A red medical marker indicating Sickbay's entrance"
+      destination_known: true
+    up:
+      destination: holodeck_corridor
+      scene_description: "A corridor branch leading toward the holodecks, lighting subtly colder"
+      destination_known: true
+    down:
+      destination: jeffries_hatch
+      scene_description: "A maintenance access hatch set into the deck plating"
+      destination_known: false
   items:
     - tricorder
     - insulated_gloves
@@ -49,13 +75,12 @@ main_corridor:
   npcs: []
   npc_placements: {}
   details:
-    panels: "LCARS readouts flicker — not broken, but momentarily out of sync, as if the ship is thinking too fast."
-    conduit_hum: "A faint vibration runs through the bulkhead: EPS flow, a living river under the deck."
-    north: "The turbolift doors stand ready, their seams lit by a thin line of white."
-    south: "The corridor opens toward Ten Forward; you can almost hear the low murmur of conversation."
-    west: "A red medical marker indicates Sickbay's entrance."
-    up: "A corridor branch leads toward the holodecks; the lighting there seems subtly colder."
-    down: "A maintenance access hatch is set into the deck plating — normally secured and ignored."
+    panels:
+      name: "LCARS Panels"
+      scene_description: "LCARS readouts flicker — not broken, but momentarily out of sync, as if the ship is thinking too fast."
+    conduit_hum:
+      name: "Conduit Hum"
+      scene_description: "A faint vibration runs through the bulkhead: EPS flow, a living river under the deck."
   interactions:
     scan_eps_feedback:
       triggers:
@@ -85,19 +110,29 @@ turbolift:
     offers destinations in calm LCARS categories. Normally, the turbolift feels like effortless
     certainty — today, there's a slight hesitation in its response, like a breath held too long.
   exits:
-    south: main_corridor
-    up: bridge
-    down: engineering_corridor
+    south:
+      destination: main_corridor
+      scene_description: "Back out into the corridor traffic"
+      destination_known: true
+    up:
+      destination: bridge
+      scene_description: "The turbolift route to the Bridge — the ship's nerve center"
+      destination_known: true
+    down:
+      destination: engineering_corridor
+      scene_description: "A route toward Engineering, deeper into the ship's humming heart"
+      destination_known: true
   items: []
   item_placements: {}
   npcs: []
   npc_placements: {}
   details:
-    controls: "A responsive LCARS interface awaiting your destination."
-    speakers: "A soft chime that usually reassures — now just a touch delayed."
-    up: "The turbolift route to the Bridge — the ship's nerve center."
-    down: "A route toward Engineering, deeper into the ship's humming heart."
-    south: "Back out into the corridor traffic."
+    controls:
+      name: "LCARS Interface"
+      scene_description: "A responsive LCARS interface awaiting your destination."
+    speakers:
+      name: "Turbolift Speakers"
+      scene_description: "A soft chime that usually reassures — now just a touch delayed."
   interactions:
     call_destination:
       triggers:
@@ -117,9 +152,18 @@ bridge:
     into the unknown. Today it shows a calm starfield… but the faint shimmer at the edge of sensor
     overlays suggests the ship is not as calm as it appears.
   exits:
-    down: turbolift
-    east: ready_room
-    west: observation_lounge
+    down:
+      destination: turbolift
+      scene_description: "The turbolift back toward the ship's decks"
+      destination_known: true
+    east:
+      destination: ready_room
+      scene_description: "The Ready Room door — private, quiet, and weighty with responsibility"
+      destination_known: true
+    west:
+      destination: observation_lounge
+      scene_description: "The Observation Lounge — where decisions gain their context"
+      destination_known: true
   items:
     - briefing_padd
     - engineering_access_padd
@@ -139,13 +183,18 @@ bridge:
     worf: "holds position at Tactical, rigid and vigilant, gaze scanning for threats that may not exist"
     troi: "stands slightly apart, attentive to the room's emotional weather as much as the ship's"
   details:
-    viewscreen: "A starfield that should be reassuring — and yet feels like a question."
-    captain_chair: "A simple seat, more symbolic than luxurious."
-    ops: "The operations console: ship status, internal systems, and coordination."
-    tactical: "Weapons and defensive systems — used reluctantly, but maintained flawlessly."
-    east: "The Ready Room door — private, quiet, and weighty with responsibility."
-    west: "The Observation Lounge — where decisions gain their context."
-    down: "The turbolift back toward the ship's decks."
+    viewscreen:
+      name: "Viewscreen"
+      scene_description: "A starfield that should be reassuring — and yet feels like a question."
+    captain_chair:
+      name: "Captain's Chair"
+      scene_description: "A simple seat, more symbolic than luxurious."
+    ops:
+      name: "Operations Console"
+      scene_description: "The operations console: ship status, internal systems, and coordination."
+    tactical:
+      name: "Tactical Station"
+      scene_description: "Weapons and defensive systems — used reluctantly, but maintained flawlessly."
   interactions:
     receive_orders:
       triggers:
@@ -164,15 +213,21 @@ observation_lounge:
     This is where events become meaning — where raw sensor data becomes a choice the crew must live
     with. The air feels like discipline: not rigid, but intentional.
   exits:
-    east: bridge
+    east:
+      destination: bridge
+      scene_description: "Back onto the Bridge, where decisions become actions"
+      destination_known: true
   items: []
   item_placements: {}
   npcs: []
   npc_placements: {}
   details:
-    table: "A long conference table with embedded LCARS panels."
-    window: "The galaxy at cruising speed: beautiful, indifferent."
-    east: "Back onto the Bridge, where decisions become actions."
+    table:
+      name: "Conference Table"
+      scene_description: "A long conference table with embedded LCARS panels."
+    window:
+      name: "Forward Window"
+      scene_description: "The galaxy at cruising speed: beautiful, indifferent."
   interactions:
     present_findings:
       triggers:
@@ -191,7 +246,10 @@ ready_room:
     beneath soft lighting, and a cup of tea waits with the patience of habit. This is not a place of
     authority so much as reflection: the calm that makes ethical action possible.
   exits:
-    west: bridge
+    west:
+      destination: bridge
+      scene_description: "Back out to the Bridge"
+      destination_known: true
   requires:
     flag: picard_invites
   items:
@@ -203,9 +261,12 @@ ready_room:
   npc_placements:
     picard: "stands near the desk, calm as a mountain, gaze steady and curious rather than judgmental"
   details:
-    books: "Volumes on history, archaeology, and philosophy — artifacts of a mind that refuses to stop learning."
-    desk: "A simple desk with an LCARS display, tidy and restrained."
-    west: "Back out to the Bridge."
+    books:
+      name: "Book Collection"
+      scene_description: "Volumes on history, archaeology, and philosophy — artifacts of a mind that refuses to stop learning."
+    desk:
+      name: "Captain's Desk"
+      scene_description: "A simple desk with an LCARS display, tidy and restrained."
   interactions:
     earn_invitation:
       triggers:
@@ -223,8 +284,14 @@ engineering_corridor:
     Crew members in gold uniforms move between access points, reading diagnostics off PADDs, speaking
     in calm bursts of technical language. The ship is not panicking; it is solving itself.
   exits:
-    up: turbolift
-    north: engineering
+    up:
+      destination: turbolift
+      scene_description: "Back up toward the turbolift car"
+      destination_known: true
+    north:
+      destination: engineering
+      scene_description: "The wide doors to Main Engineering"
+      destination_known: true
   requires:
     flag: scanned_eps_feedback
   items: []
@@ -232,9 +299,9 @@ engineering_corridor:
   npcs: []
   npc_placements: {}
   details:
-    bulkheads: "Reinforced, utilitarian, built for function over ceremony."
-    north: "The wide doors to Main Engineering."
-    up: "Back up toward the turbolift car."
+    bulkheads:
+      name: "Bulkheads"
+      scene_description: "Reinforced, utilitarian, built for function over ceremony."
 
 engineering:
   name: "Main Engineering"
@@ -243,9 +310,18 @@ engineering:
     pillar, blue light pulsing with restrained power. Consoles ring the space, and above, catwalks
     and conduits form a practical cathedral. The crew's competence is almost a kind of prayer.
   exits:
-    south: engineering_corridor
-    north: warp_core
-    east: computer_core
+    south:
+      destination: engineering_corridor
+      scene_description: "Back out to the engineering corridor"
+      destination_known: true
+    north:
+      destination: warp_core
+      scene_description: "A reinforced accessway toward the warp core control alcove"
+      destination_known: true
+    east:
+      destination: computer_core
+      scene_description: "A corridor leading toward the ship's computer core and its isolinear pathways"
+      destination_known: true
   items:
     - engineering_toolkit
   item_placements:
@@ -257,12 +333,15 @@ engineering:
     geordi: "stands at the main diagnostic console, visor angled toward the warp core's shifting light"
     obrien: "moves between panels with practical speed, hands steady and unglamorous in their competence"
   details:
-    warp_core: "The warp core's glow is steady — for now — but you can feel the system compensating."
-    consoles: "LCARS readouts show EPS load spikes rippling outward like waves."
-    catwalks: "Metal catwalks above, with conduits and access points to half the ship."
-    north: "A reinforced accessway toward the warp core control alcove."
-    east: "A corridor leading toward the ship's computer core and its isolinear pathways."
-    south: "Back out to the engineering corridor."
+    warp_core:
+      name: "Warp Core"
+      scene_description: "The warp core's glow is steady — for now — but you can feel the system compensating."
+    consoles:
+      name: "Engineering Consoles"
+      scene_description: "LCARS readouts show EPS load spikes rippling outward like waves."
+    catwalks:
+      name: "Catwalks"
+      scene_description: "Metal catwalks above, with conduits and access points to half the ship."
   interactions:
     coordinate_repairs:
       triggers:
@@ -281,7 +360,10 @@ warp_core:
     Every flicker of light is an equation made physical. The safety fields hold with quiet confidence,
     but EPS indicators show a feedback pattern that shouldn't exist outside a simulation.
   exits:
-    south: engineering
+    south:
+      destination: engineering
+      scene_description: "Back into Main Engineering"
+      destination_known: true
   requires:
     flag: engineering_authorized
   items:
@@ -291,9 +373,12 @@ warp_core:
   npcs: []
   npc_placements: {}
   details:
-    interlocks: "Safety interlocks — robust, redundant, and currently being asked to do too much."
-    panel: "A control panel with EPS routing diagrams that pulse in orange warnings."
-    south: "Back into Main Engineering."
+    interlocks:
+      name: "Safety Interlocks"
+      scene_description: "Safety interlocks — robust, redundant, and currently being asked to do too much."
+    panel:
+      name: "Control Panel"
+      scene_description: "A control panel with EPS routing diagrams that pulse in orange warnings."
   interactions:
     stabilize_eps:
       triggers:
@@ -312,7 +397,10 @@ computer_core:
     Cooling air moves in constant, disciplined flow. The LCARS panels here feel less like interfaces
     and more like conversations — silent, swift, and relentlessly precise.
   exits:
-    west: engineering
+    west:
+      destination: engineering
+      scene_description: "Back toward Engineering"
+      destination_known: true
   requires:
     item: engineering_access_padd
   items:
@@ -322,10 +410,15 @@ computer_core:
   npcs: []
   npc_placements: {}
   details:
-    pathways: "Isolinear pathways — physical logic, elegant and strangely comforting."
-    cooling: "Cool air that smells faintly of clean metal and ozone."
-    drawer: "A storage drawer of common replacements, each labeled in LCARS categories."
-    west: "Back toward Engineering."
+    pathways:
+      name: "Isolinear Pathways"
+      scene_description: "Isolinear pathways — physical logic, elegant and strangely comforting."
+    cooling:
+      name: "Cooling System"
+      scene_description: "Cool air that smells faintly of clean metal and ozone."
+    drawer:
+      name: "Storage Drawer"
+      scene_description: "A storage drawer of common replacements, each labeled in LCARS categories."
   interactions:
     secure_chip:
       triggers:
@@ -343,8 +436,14 @@ ten_forward:
     galaxy a gentle, social intimacy. The lighting is warm. The mood is relaxed — even when the ship
     isn't. People come here to remember they are more than their duty rosters.
   exits:
-    north: main_corridor
-    east: ten_forward_celebration
+    north:
+      destination: main_corridor
+      scene_description: "Back into the corridor and the ship's purposeful motion"
+      destination_known: true
+    east:
+      destination: ten_forward_celebration
+      scene_description: "A corner area where tables can be pushed together — a place the crew claims for celebrations"
+      destination_known: true
   items:
     - synthcoffee
     - data_crystal
@@ -356,10 +455,12 @@ ten_forward:
   npc_placements:
     guinan: "stands behind the bar, composed and watchful, as if she can hear decisions forming before they're spoken"
   details:
-    bar: "A polished bar with bottles that are mostly stories and a few that are genuinely excellent."
-    windows: "A panoramic view of stars that makes even uncertainty feel survivable."
-    north: "Back into the corridor and the ship's purposeful motion."
-    east: "A corner area where tables can be pushed together — a place the crew claims when they want to be together about something."
+    bar:
+      name: "Bar"
+      scene_description: "A polished bar with bottles that are mostly stories and a few that are genuinely excellent."
+    windows:
+      name: "Panoramic Windows"
+      scene_description: "A panoramic view of stars that makes even uncertainty feel survivable."
   interactions:
     seek_perspective:
       triggers:
@@ -378,7 +479,10 @@ ten_forward_celebration:
     celebration — small, sincere, and unmistakably Starfleet: pride in the work, gratitude for each
     other, and the quiet belief that doing the right thing matters.
   exits:
-    west: ten_forward
+    west:
+      destination: ten_forward
+      scene_description: "Back into the main seating area of Ten Forward"
+      destination_known: true
   requires:
     flag: anomaly_resolved
   items: []
@@ -388,9 +492,12 @@ ten_forward_celebration:
   npc_placements:
     guinan: "stands near the claimed table, offering warmth without making the moment about herself"
   details:
-    table: "A cluster of tables pulled together, with mugs, plates, and a few small decorations made from whatever was at hand."
-    windows: "Stars curve past like slow applause."
-    west: "Back into the main seating area of Ten Forward."
+    table:
+      name: "Celebration Table"
+      scene_description: "A cluster of tables pulled together, with mugs, plates, and a few small decorations made from whatever was at hand."
+    windows:
+      name: "Windows"
+      scene_description: "Stars curve past like slow applause."
 
 sickbay:
   name: "Sickbay"
@@ -399,7 +506,10 @@ sickbay:
     energy here is gentle: care as a discipline. The ship's instability reaches even this far — a
     minor fluctuation in the lights — but Sickbay's calm is a kind of shield.
   exits:
-    east: main_corridor
+    east:
+      destination: main_corridor
+      scene_description: "Back into the corridor"
+      destination_known: true
   items:
     - hypospray
   item_placements:
@@ -409,9 +519,12 @@ sickbay:
   npc_placements:
     crusher: "stands near a biobed, eyes focused, posture simultaneously warm and formidable"
   details:
-    biobeds: "Biobeds with diagnostic monitors that can read a life at a glance."
-    cabinets: "Supplies labeled with clinical precision; everything has a place."
-    east: "Back into the corridor."
+    biobeds:
+      name: "Biobeds"
+      scene_description: "Biobeds with diagnostic monitors that can read a life at a glance."
+    cabinets:
+      name: "Medical Cabinets"
+      scene_description: "Supplies labeled with clinical precision; everything has a place."
   interactions:
     request_medical_help:
       triggers:
@@ -430,8 +543,14 @@ holodeck_corridor:
     asking for permission before it panics. The faintest sound leaks through: footsteps where there
     should be none.
   exits:
-    down: main_corridor
-    north: holodeck
+    down:
+      destination: main_corridor
+      scene_description: "Back to the main corridor"
+      destination_known: true
+    north:
+      destination: holodeck
+      scene_description: "Into the holodeck — if you're cleared to enter"
+      destination_known: true
   requires:
     flag: received_orders
   items: []
@@ -439,10 +558,12 @@ holodeck_corridor:
   npcs: []
   npc_placements: {}
   details:
-    indicator: "A warning indicator: holodeck safety interlocks are reporting an error state."
-    door: "The holodeck door — sealed unless you have authorization."
-    north: "Into the holodeck — if you're cleared to enter."
-    down: "Back to the main corridor."
+    indicator:
+      name: "Warning Indicator"
+      scene_description: "A warning indicator: holodeck safety interlocks are reporting an error state."
+    door:
+      name: "Holodeck Door"
+      scene_description: "The holodeck door — sealed unless you have authorization."
   interactions:
     request_holodeck_access:
       triggers:
@@ -462,7 +583,10 @@ holodeck:
     edges feel sharp, light feels heavy, and the air holds the charged stillness of a storm that
     hasn't decided where to break.
   exits:
-    south: holodeck_corridor
+    south:
+      destination: holodeck_corridor
+      scene_description: "Back out to the corridor — if the holodeck will let you leave"
+      destination_known: true
   requires:
     flag: holodeck_access_granted
   items:
@@ -474,9 +598,12 @@ holodeck:
   npc_placements:
     elysian_echo: "stands just beyond the arch's projected boundary, edges flickering as if the holodeck is struggling to keep them whole; their gaze darts to the control arch with unmistakable fear"
   details:
-    arch: "The holodeck control arch — an exit, a boundary, and today an argument."
-    panel: "A sliding access panel that protects physical safety interlocks from casual hands."
-    south: "Back out to the corridor — if the holodeck will let you leave."
+    arch:
+      name: "Control Arch"
+      scene_description: "The holodeck control arch — an exit, a boundary, and today an argument."
+    panel:
+      name: "Access Panel"
+      scene_description: "A sliding access panel that protects physical safety interlocks from casual hands."
   interactions:
     confront_echo:
       triggers:
@@ -522,8 +649,14 @@ jeffries_hatch:
     Cables and conduits run like veins. The air is warm and smells faintly of ozone. It is not
     glamorous work, but it is honest: the kind of place that proves ideals require infrastructure.
   exits:
-    up: main_corridor
-    north: jeffries_tube
+    up:
+      destination: main_corridor
+      scene_description: "Back to the corridor and normal ship life"
+      destination_known: true
+    north:
+      destination: jeffries_tube
+      scene_description: "Deeper into the Jeffries tubes"
+      destination_known: true
   requires:
     flag: opened_jeffries_hatch
   items: []
@@ -531,10 +664,12 @@ jeffries_hatch:
   npcs: []
   npc_placements: {}
   details:
-    ladder: "A short ladder down into the ship's maintenance space."
-    conduit: "An EPS conduit wrapped in insulation, vibrating with too much load."
-    up: "Back to the corridor and normal ship life."
-    north: "Deeper into the Jeffries tubes."
+    ladder:
+      name: "Access Ladder"
+      scene_description: "A short ladder down into the ship's maintenance space."
+    conduit:
+      name: "EPS Conduit"
+      scene_description: "An EPS conduit wrapped in insulation, vibrating with too much load."
 
 jeffries_tube:
   name: "Jeffries Tubes"
@@ -548,8 +683,14 @@ jeffries_tube:
     the hexagonal walls at intervals. This is a maintenance crawlspace, not a corridor — cramped,
     industrial, and claustrophobic. The bare duranium plating hums with power transfer.
   exits:
-    south: jeffries_hatch
-    north: engineering
+    south:
+      destination: jeffries_hatch
+      scene_description: "Back toward the access hatch and the corridor above"
+      destination_known: true
+    north:
+      destination: engineering
+      scene_description: "The tube stretches ahead into shadow — more crawling on hands and knees"
+      destination_known: true
   items:
     - phase_inverter
   item_placements:
@@ -557,12 +698,18 @@ jeffries_tube:
   npcs: []
   npc_placements: {}
   details:
-    junction_box: "A junction box with scorch marks: evidence of a brief but intense feedback surge."
-    access_ports: "Ports for diagnostics and manual rerouting — if you know what you're doing."
-    tube_structure: "Hexagonal metal tube walls press in from all sides — you can touch both walls with your elbows while crawling."
-    cables: "ODN cables and EPS conduits bundled overhead, close enough to bump your head on."
-    north: "The tube stretches ahead into shadow — more crawling on hands and knees."
-    south: "Back toward the access hatch and the corridor above."
+    junction_box:
+      name: "Junction Box"
+      scene_description: "A junction box with scorch marks: evidence of a brief but intense feedback surge."
+    access_ports:
+      name: "Access Ports"
+      scene_description: "Ports for diagnostics and manual rerouting — if you know what you're doing."
+    tube_structure:
+      name: "Tube Structure"
+      scene_description: "Hexagonal metal tube walls press in from all sides — you can touch both walls with your elbows while crawling."
+    cables:
+      name: "Cables and Conduits"
+      scene_description: "ODN cables and EPS conduits bundled overhead, close enough to bump your head on."
   interactions:
     examine_scorch_marks:
       triggers:

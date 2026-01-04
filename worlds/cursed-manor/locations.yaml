@@ -8,10 +8,22 @@ entrance_hall:
     of old wood, dust, and something faintly metallic. Rain hammers
     against the windows, and occasional lightning illuminates the decay.
   exits:
-    north: library
-    east: dining_room
-    west: sitting_room
-    up: upper_landing
+    north:
+      destination: library
+      scene_description: "An ornate archway leading into a book-lined room"
+      destination_known: true
+    east:
+      destination: dining_room
+      scene_description: "A heavy oak door with tarnished brass handles"
+      destination_known: false
+    west:
+      destination: sitting_room
+      scene_description: "A set of double doors, slightly ajar, leading to a darkened parlor"
+      destination_known: false
+    up:
+      destination: upper_landing
+      scene_description: "A grand staircase sweeping upward into shadow"
+      destination_known: false
   items:
     - old_letter
     - candlestick
@@ -19,11 +31,20 @@ entrance_hall:
     old_letter: "lies crumpled on the dusty side table beside the front door, as if dropped in haste"
     candlestick: "sits on the narrow console table beneath the portraits, its candle melted to a stub"
   npcs: []
+  npc_placements: {}
   details:
-    portraits: "Five family portraits hang on the walls - a stern father, a beautiful mother, and three children of varying ages"
-    chandelier: "The chandelier must have been magnificent once. Now it hangs crooked, crystals clouded with decades of dust"
-    floor: "Black and white marble tiles, cracked and worn by countless footsteps"
-    door: "The front door is heavy oak, reinforced with iron. The storm rages outside"
+    portraits:
+      name: "Family Portraits"
+      scene_description: "Five family portraits hang on the walls - a stern father, a beautiful mother, and three children of varying ages"
+    chandelier:
+      name: "Crystal Chandelier"
+      scene_description: "The chandelier must have been magnificent once. Now it hangs crooked, crystals clouded with decades of dust"
+    floor:
+      name: "Marble Floor"
+      scene_description: "Black and white marble tiles, cracked and worn by countless footsteps"
+    door:
+      name: "Front Door"
+      scene_description: "The front door is heavy oak, reinforced with iron. The storm rages outside"
   interactions:
     examine_portraits:
       triggers:
@@ -43,7 +64,10 @@ library:
     filters through a grimy window, illuminating dust motes that drift like
     snow. A massive oak desk dominates the center, covered in papers.
   exits:
-    south: entrance_hall
+    south:
+      destination: entrance_hall
+      scene_description: "The archway leading back to the entrance hall"
+      destination_known: true
   items:
     - dusty_tome
     - reading_glasses
@@ -51,11 +75,20 @@ library:
     dusty_tome: "lies open on the massive oak desk, its yellowed pages stirring in the draft"
     reading_glasses: "rest beside the open book on the desk, as if their owner just stepped away"
   npcs: []
+  npc_placements: {}
   details:
-    books: "Thousands of books on every subject - history, science, and disturbingly many on the occult"
-    desk: "The desk is covered in handwritten notes, many featuring strange symbols"
-    window: "The window looks out onto an overgrown garden, barely visible through rain and grime"
-    red_book: "One book on the middle shelf stands out - bound in red leather, it protrudes slightly"
+    books:
+      name: "Bookshelves"
+      scene_description: "Thousands of books on every subject - history, science, and disturbingly many on the occult"
+    desk:
+      name: "Oak Desk"
+      scene_description: "The desk is covered in handwritten notes, many featuring strange symbols"
+    window:
+      name: "Window"
+      scene_description: "The window looks out onto an overgrown garden, barely visible through rain and grime"
+    red_book:
+      name: "Red Book"
+      scene_description: "One book on the middle shelf stands out - bound in red leather, it protrudes slightly"
   interactions:
     pull_red_book:
       triggers:
@@ -83,16 +116,30 @@ secret_passage:
     older than the manor above. The air is stale and carries a faint
     scent of earth and something else... incense, perhaps, or old blood.
   exits:
-    back: library
-    down: ritual_chamber
+    back:
+      destination: library
+      scene_description: "The passage back to the library through the hidden bookshelf door"
+      destination_known: true
+    down:
+      destination: ritual_chamber
+      scene_description: "A narrow stone stairway descending into deeper darkness"
+      destination_known: false
   items: []
+  item_placements: {}
   npcs: []
+  npc_placements: {}
   requires:
     flag: found_secret_passage
   details:
-    walls: "The stones are ancient, covered in moss and strange carved symbols"
-    cobwebs: "Thick cobwebs suggest no one has passed this way in years"
-    symbols: "The carved symbols look like a language you don't recognize"
+    walls:
+      name: "Stone Walls"
+      scene_description: "The stones are ancient, covered in moss and strange carved symbols"
+    cobwebs:
+      name: "Cobwebs"
+      scene_description: "Thick cobwebs suggest no one has passed this way in years"
+    symbols:
+      name: "Carved Symbols"
+      scene_description: "The carved symbols look like a language you don't recognize"
 
 ritual_chamber:
   name: "Ritual Chamber"
@@ -103,17 +150,26 @@ ritual_chamber:
     Candles line the walls, unlit but leaving trails of ancient wax.
     The air feels heavy, charged with something unnatural.
   exits:
-    up: secret_passage
+    up:
+      destination: secret_passage
+      scene_description: "The narrow stone stairs leading back up to the secret passage"
+      destination_known: true
   items:
     - grimoire
   item_placements:
     grimoire: "rests upon the central pedestal, its pale leather binding seeming to glow faintly in the darkness"
   npcs: []
+  npc_placements: {}
   details:
-    symbols: "The painted symbols match those from the notes - this is where the ritual was performed"
-    pedestals: "Three stone pedestals, clearly meant to hold something important. They seem to be waiting for the artifacts."
-    circle: "The ritual circle is incomplete - something interrupted the ceremony"
-    up: "A narrow stone passage leads back up to the library's secret entrance."
+    symbols:
+      name: "Blood Symbols"
+      scene_description: "The painted symbols match those from the notes - this is where the ritual was performed"
+    pedestals:
+      name: "Stone Pedestals"
+      scene_description: "Three stone pedestals, clearly meant to hold something important. They seem to be waiting for the artifacts."
+    circle:
+      name: "Ritual Circle"
+      scene_description: "The ritual circle is incomplete - something interrupted the ceremony"
   interactions:
     place_artifacts:
       triggers:
@@ -138,8 +194,14 @@ dining_room:
     in the corner, impossibly still working. The east wall features a
     large fireplace, cold and dark.
   exits:
-    west: entrance_hall
-    north: kitchen
+    west:
+      destination: entrance_hall
+      scene_description: "The heavy oak door leading back to the entrance hall"
+      destination_known: true
+    north:
+      destination: kitchen
+      scene_description: "A service door leading to the kitchen"
+      destination_known: true
   items:
     - silver_key
   item_placements:
@@ -149,10 +211,18 @@ dining_room:
   npc_placements:
     butler_jenkins: "stands rigidly beside the grandfather clock, his pale hands clasped before him, watching you with hollow eyes"
   details:
-    table: "The table is set for six, but the food has long since rotted away"
-    clock: "The grandfather clock keeps perfect time - 11:47 PM. How is it still running?"
-    fireplace: "The fireplace is cold, but there's a strange draft coming from it"
-    china: "Fine bone china with the family crest - a thorned tree"
+    table:
+      name: "Dining Table"
+      scene_description: "The table is set for six, but the food has long since rotted away"
+    clock:
+      name: "Grandfather Clock"
+      scene_description: "The grandfather clock keeps perfect time - 11:47 PM. How is it still running?"
+    fireplace:
+      name: "Fireplace"
+      scene_description: "The fireplace is cold, but there's a strange draft coming from it"
+    china:
+      name: "Fine China"
+      scene_description: "Fine bone china with the family crest - a thorned tree"
 
 kitchen:
   name: "Kitchen"
@@ -162,17 +232,30 @@ kitchen:
     is cold, and the preparation tables are covered in dust. A door
     leads to what must be a pantry. The smell of decay lingers.
   exits:
-    south: dining_room
-    down: basement
+    south:
+      destination: dining_room
+      scene_description: "The service door leading back to the dining room"
+      destination_known: true
+    down:
+      destination: basement
+      scene_description: "A heavy door with an iron lock leading to the basement stairs"
+      destination_known: true
   items:
     - kitchen_knife
   item_placements:
     kitchen_knife: "lies on the stone preparation counter near the hearth, its blade stained dark"
   npcs: []
+  npc_placements: {}
   details:
-    hearth: "The hearth is large enough to roast a whole pig"
-    pantry: "The pantry door hangs open, revealing bare shelves"
-    pots: "Beautiful copper pots, now green with verdigris"
+    hearth:
+      name: "Hearth"
+      scene_description: "The hearth is large enough to roast a whole pig"
+    pantry:
+      name: "Pantry"
+      scene_description: "The pantry door hangs open, revealing bare shelves"
+    pots:
+      name: "Copper Pots"
+      scene_description: "Beautiful copper pots, now green with verdigris"
   interactions:
     examine_basement_door:
       triggers:
@@ -190,18 +273,28 @@ basement:
     cobwebs. Strange stains mark the floor, and the walls are rough-hewn
     stone. In the far corner, something glints in the darkness.
   exits:
-    up: kitchen
+    up:
+      destination: kitchen
+      scene_description: "The stairs leading back up to the kitchen"
+      destination_known: true
   items:
     - ancient_dagger
   item_placements:
     ancient_dagger: "lies half-buried in debris in the far corner, its black iron blade catching what little light filters down"
   npcs: []
+  npc_placements: {}
   requires:
     item: iron_key
   details:
-    wine_racks: "Hundreds of bottles, some perhaps still drinkable"
-    stains: "Dark stains on the floor... best not to think about their origin"
-    glint: "Something metallic catches what little light there is"
+    wine_racks:
+      name: "Wine Racks"
+      scene_description: "Hundreds of bottles, some perhaps still drinkable"
+    stains:
+      name: "Dark Stains"
+      scene_description: "Dark stains on the floor... best not to think about their origin"
+    glint:
+      name: "Something Glinting"
+      scene_description: "Something metallic catches what little light there is"
 
 sitting_room:
   name: "Sitting Room"
@@ -212,17 +305,29 @@ sitting_room:
     the mantelpiece, showing happier times. Heavy curtains block the
     windows, holding back the storm.
   exits:
-    east: entrance_hall
+    east:
+      destination: entrance_hall
+      scene_description: "The double doors leading back to the entrance hall"
+      destination_known: true
   items:
     - family_photo
   item_placements:
     family_photo: "sits in a tarnished silver frame on the mantelpiece, the family frozen in a moment of happiness"
   npcs: []
+  npc_placements: {}
   details:
-    piano: "A beautiful grand piano, covered in dust but potentially still playable"
-    photographs: "Photos of the family - the children smiling, the parents proud"
-    fireplace: "The fireplace is cold, but laid with fresh logs... strange"
-    curtains: "Heavy velvet curtains, faded from deep red to dusty pink"
+    piano:
+      name: "Grand Piano"
+      scene_description: "A beautiful grand piano, covered in dust but potentially still playable"
+    photographs:
+      name: "Photographs"
+      scene_description: "Photos of the family - the children smiling, the parents proud"
+    fireplace:
+      name: "Fireplace"
+      scene_description: "The fireplace is cold, but laid with fresh logs... strange"
+    curtains:
+      name: "Curtains"
+      scene_description: "Heavy velvet curtains, faded from deep red to dusty pink"
   interactions:
     play_piano:
       triggers:
@@ -241,17 +346,39 @@ upper_landing:
     creak with every step, and sometimes you hear creaking when you
     stand still...
   exits:
-    down: entrance_hall
-    north: master_bedroom
-    south: nursery
-    east: guest_room
+    down:
+      destination: entrance_hall
+      scene_description: "The grand staircase descending to the entrance hall"
+      destination_known: true
+    north:
+      destination: master_bedroom
+      scene_description: "An imposing door leading to the master bedroom"
+      destination_known: false
+    south:
+      destination: nursery
+      scene_description: "A smaller door, painted a faded blue, leading to the nursery"
+      destination_known: false
+    east:
+      destination: guest_room
+      scene_description: "A plain door leading to the guest room"
+      destination_known: false
   items: []
+  item_placements: {}
   npcs: []
+  npc_placements: {}
   details:
-    sconces: "The wall sconces burn with an odd, bluish flame"
-    doors: "Several closed doors line the hallway"
-    window: "Lightning illuminates the grounds - is that a figure in the garden?"
-    carpet: "A threadbare carpet runs the length of the hall, its pattern worn away"
+    sconces:
+      name: "Wall Sconces"
+      scene_description: "The wall sconces burn with an odd, bluish flame"
+    doors:
+      name: "Doors"
+      scene_description: "Several closed doors line the hallway"
+    window:
+      name: "Window"
+      scene_description: "Lightning illuminates the grounds - is that a figure in the garden?"
+    carpet:
+      name: "Carpet"
+      scene_description: "A threadbare carpet runs the length of the hall, its pattern worn away"
 
 master_bedroom:
   name: "Master Bedroom"
@@ -261,17 +388,29 @@ master_bedroom:
     the room, but something about the reflection seems... wrong. A
     wardrobe stands against one wall, its doors slightly ajar.
   exits:
-    south: upper_landing
+    south:
+      destination: upper_landing
+      scene_description: "The door leading back to the upper landing"
+      destination_known: true
   items:
     - iron_key
   item_placements:
     iron_key: "hangs from a hook inside the wardrobe, cold and heavy, as if deliberately hidden away"
   npcs: []
+  npc_placements: {}
   details:
-    bed: "The bed is made, as if waiting for occupants who will never return"
-    mirror: "The mirror shows the room, but the shadows seem to move independently"
-    wardrobe: "The wardrobe door creaks when touched"
-    portrait: "A portrait of the lady of the house hangs above the bed"
+    bed:
+      name: "Four-Poster Bed"
+      scene_description: "The bed is made, as if waiting for occupants who will never return"
+    mirror:
+      name: "Vanity Mirror"
+      scene_description: "The mirror shows the room, but the shadows seem to move independently"
+    wardrobe:
+      name: "Wardrobe"
+      scene_description: "The wardrobe door creaks when touched"
+    portrait:
+      name: "Portrait"
+      scene_description: "A portrait of the lady of the house hangs above the bed"
   interactions:
     examine_mirror:
       triggers:
@@ -290,17 +429,29 @@ nursery:
     thrown back. Childish drawings paper the walls, but some show
     disturbing imagery - dark figures, flames, crying faces.
   exits:
-    north: upper_landing
+    north:
+      destination: upper_landing
+      scene_description: "The faded blue door leading back to the upper landing"
+      destination_known: true
   items:
     - thornwood_amulet
   item_placements:
     thornwood_amulet: "glints beneath a loose floorboard near the smallest bed, hidden in the children's secret place"
   npcs: []
+  npc_placements: {}
   details:
-    toys: "Toys scattered mid-play - a ball, wooden soldiers, a doll with no eyes"
-    beds: "Three beds for three children, none of whom sleep here anymore"
-    drawings: "Children's drawings, some happy, some nightmarish"
-    rocking_horse: "The rocking horse moves on its own, back and forth, back and forth"
+    toys:
+      name: "Toys"
+      scene_description: "Toys scattered mid-play - a ball, wooden soldiers, a doll with no eyes"
+    beds:
+      name: "Children's Beds"
+      scene_description: "Three beds for three children, none of whom sleep here anymore"
+    drawings:
+      name: "Drawings"
+      scene_description: "Children's drawings, some happy, some nightmarish"
+    rocking_horse:
+      name: "Rocking Horse"
+      scene_description: "The rocking horse moves on its own, back and forth, back and forth"
   interactions:
     examine_drawings:
       triggers:
@@ -329,13 +480,23 @@ guest_room:
     house this abandoned. A writing desk sits by the window, and
     a wardrobe stands in the corner.
   exits:
-    west: upper_landing
+    west:
+      destination: upper_landing
+      scene_description: "The plain door leading back to the upper landing"
+      destination_known: true
   items:
     - matches
   item_placements:
     matches: "rest on the writing desk beside a dried-out inkwell, as if left for a late-night letter"
   npcs: []
+  npc_placements: {}
   details:
-    bed: "The bed is freshly made, as if expecting a guest"
-    desk: "A writing desk with paper and dried-up ink"
-    window: "The window rattles in the storm"
+    bed:
+      name: "Guest Bed"
+      scene_description: "The bed is freshly made, as if expecting a guest"
+    desk:
+      name: "Writing Desk"
+      scene_description: "A writing desk with paper and dried-up ink"
+    window:
+      name: "Window"
+      scene_description: "The window rattles in the storm"

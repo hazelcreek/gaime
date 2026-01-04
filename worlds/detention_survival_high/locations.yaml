@@ -3,26 +3,49 @@ main_hallway:
   atmosphere: |
     The linoleum floor stretches out endlessly, reflecting the orange glow of the late afternoon sun streaming through the trophy case glass. It's unnervingly quiet, save for the hum of the vending machine. The lockers line the walls like silent metal soldiers.
   exits:
-    north: principal_office
-    east: cafeteria
-    west: science_lab
-    south: gymnasium
-    outside: front_gate
+    north:
+      destination: principal_office
+      scene_description: "The ominous door to the Principal's Office, its frosted glass window reading 'PRINCIPAL SKINNER'"
+      destination_known: true
+    east:
+      destination: cafeteria
+      scene_description: "Double doors with porthole windows leading to the cafeteria"
+      destination_known: true
+    west:
+      destination: science_lab
+      scene_description: "A door marked with a faded 'SCIENCE LAB' sign and a biohazard sticker"
+      destination_known: true
+    south:
+      destination: gymnasium
+      scene_description: "The large gymnasium doors with their institutional push-bars"
+      destination_known: true
+    outside:
+      destination: front_gate
+      scene_description: "The main entrance doors leading to the locked front gate"
+      destination_known: true
   items:
     - hall_pass
   item_placements:
     hall_pass: "sits forgotten on a wooden bench beneath the trophy case, its laminated surface catching the afternoon light"
   npcs: []
+  npc_placements: {}
   details:
-    trophy_case: "Full of participation trophies from 1998."
-    lockers: "Most are locked, but one (number 404) is slightly ajar."
+    trophy_case:
+      name: "Trophy Case"
+      scene_description: "Full of participation trophies from 1998."
+    lockers:
+      name: "Lockers"
+      scene_description: "Most are locked, but one (number 404) is slightly ajar."
 
 principal_office:
   name: "Principal Skinner's Office"
   atmosphere: |
     The air here smells of stale coffee and bureaucratic dread. A massive mahogany desk dominates the room. Behind it, a portrait of the school mascot (a confused badger) stares judgingly at you.
   exits:
-    south: main_hallway
+    south:
+      destination: main_hallway
+      scene_description: "The door back to the main hallway and relative safety"
+      destination_known: true
   items:
     - rubber_stamp
   item_placements:
@@ -32,16 +55,26 @@ principal_office:
   npc_placements:
     principal_skinner: "sits behind the massive desk, fingers steepled, peering at you over his reading glasses with barely contained suspicion"
   details:
-    desk: "Covered in confiscation forms."
-    portrait: "The eyes seem to follow you."
+    desk:
+      name: "Mahogany Desk"
+      scene_description: "Covered in confiscation forms."
+    portrait:
+      name: "Mascot Portrait"
+      scene_description: "The eyes seem to follow you."
 
 cafeteria:
   name: "The Cafeteria"
   atmosphere: |
     Tables are folded up against the wall. The lingering scent of mystery meat and bleach hangs heavy. Dust motes dance in the light beams hitting the serving station.
   exits:
-    west: main_hallway
-    north: kitchen
+    west:
+      destination: main_hallway
+      scene_description: "The double doors leading back to the main hallway"
+      destination_known: true
+    north:
+      destination: kitchen
+      scene_description: "A swinging door marked 'STAFF ONLY' leading to the kitchen"
+      destination_known: true
   items:
     - spatular_sword
   item_placements:
@@ -51,15 +84,22 @@ cafeteria:
   npc_placements:
     lunch_lady_doris: "stands behind the serving counter with arms crossed, hairnet askew, guarding the kitchen entrance like a gruff sentinel"
   details:
-    serving_station: "Currently serving nothing but disappointment."
-    floor: "Sticky. It's always sticky."
+    serving_station:
+      name: "Serving Station"
+      scene_description: "Currently serving nothing but disappointment."
+    floor:
+      name: "Cafeteria Floor"
+      scene_description: "Sticky. It's always sticky."
 
 science_lab:
   name: "The Science Lab"
   atmosphere: |
     Bunsen burners sit cold on black countertops. A skeleton model in the corner is wearing a tie-dye t-shirt. The periodic table on the wall has several elements spelled wrong.
   exits:
-    east: main_hallway
+    east:
+      destination: main_hallway
+      scene_description: "The door back to the main hallway"
+      destination_known: true
   items:
     - baking_soda
   item_placements:
@@ -69,66 +109,106 @@ science_lab:
   npc_placements:
     nerd_neil: "crouches behind the teacher's desk, peeking out nervously, his thick glasses catching the fluorescent light"
   details:
-    skeleton: "His name tag says 'Mr. Bones'."
-    blackboard: "Someone has drawn a complex diagram of a spitball trajectory."
+    skeleton:
+      name: "Skeleton Model"
+      scene_description: "His name tag says 'Mr. Bones'."
+    blackboard:
+      name: "Blackboard"
+      scene_description: "Someone has drawn a complex diagram of a spitball trajectory."
 
 gymnasium:
   name: "The Gymnasium"
   atmosphere: |
     The squeak of sneakers is ghosted into the hardwood floor. It smells of sweat and rubber. The bleachers are retracted, creating a cavernous echo whenever you move.
   exits:
-    north: main_hallway
-    east: locker_room
+    north:
+      destination: main_hallway
+      scene_description: "The gymnasium doors leading back to the main hallway"
+      destination_known: true
+    east:
+      destination: locker_room
+      scene_description: "The entrance to the boys' locker room, emanating a faint Axe body spray cloud"
+      destination_known: true
   items:
     - dodgeball
   item_placements:
     dodgeball: "sits dead center on the half-court line, as if waiting to deliver childhood trauma to its next victim"
   npcs: []
+  npc_placements: {}
   details:
-    hoop: "Just out of reach for a slam dunk."
-    bleachers: "Graffiti underneath says 'School Rulez' ironically."
+    hoop:
+      name: "Basketball Hoop"
+      scene_description: "Just out of reach for a slam dunk."
+    bleachers:
+      name: "Bleachers"
+      scene_description: "Graffiti underneath says 'School Rulez' ironically."
 
 locker_room:
   name: "The Locker Room"
   atmosphere: |
     Damp, dark, and smelling of Axe body spray. A single shower head drips rhythmically: drip... drip... drip. It's the scariest place in the school.
   exits:
-    west: gymnasium
+    west:
+      destination: gymnasium
+      scene_description: "The door back to the gymnasium and fresher air"
+      destination_known: true
   items:
     - janitor_keys
   item_placements:
     janitor_keys: "dangle from a hook on locker 13, their massive key ring jangling softly with the building's vibrations"
   npcs: []
+  npc_placements: {}
   details:
-    shower: "It looks like it hasn't been cleaned since the 80s."
-    bench: "A forgotten towel lies here."
+    shower:
+      name: "Shower"
+      scene_description: "It looks like it hasn't been cleaned since the 80s."
+    bench:
+      name: "Bench"
+      scene_description: "A forgotten towel lies here."
 
 kitchen:
   name: "The Kitchen"
   atmosphere: |
     Behind the serving line. Industrial sized mixers and ovens loom like metal giants. It's surprisingly clean, except for a pile of unfinished tater tots.
   exits:
-    south: cafeteria
+    south:
+      destination: cafeteria
+      scene_description: "The swinging door back to the cafeteria"
+      destination_known: true
   items:
     - vinegar
   item_placements:
     vinegar: "sits on the counter by the industrial sink, its plastic jug half-empty and smelling sharply acidic"
   npcs: []
+  npc_placements: {}
   details:
-    freezer: "Locked tight. Probably full of ice cream sandwiches."
+    freezer:
+      name: "Industrial Freezer"
+      scene_description: "Locked tight. Probably full of ice cream sandwiches."
 
 front_gate:
   name: "The Front Gate"
   atmosphere: |
     The massive chain-link fence stretches tall, topped with rusty barbed wire that's more for show than security. Beyond it, freedom beckons - the empty parking lot, the distant sound of traffic, the sweet promise of a weekend waiting for you. The padlock on the gate glints in the late afternoon sun.
   exits:
-    inside: main_hallway
+    inside:
+      destination: main_hallway
+      scene_description: "The main entrance doors leading back into the school"
+      destination_known: true
   items: []
+  item_placements: {}
   npcs: []
+  npc_placements: {}
   details:
-    gate: "A heavy padlock secures the gate. It looks like it needs a specific key from the janitor's keyring."
-    fence: "Too high to climb, especially with that barbed wire. You'd need to be Spider-Man."
-    parking_lot: "Empty except for Principal Skinner's beige sedan and a lone shopping cart."
+    gate:
+      name: "Front Gate"
+      scene_description: "A heavy padlock secures the gate. It looks like it needs a specific key from the janitor's keyring."
+    fence:
+      name: "Chain-Link Fence"
+      scene_description: "Too high to climb, especially with that barbed wire. You'd need to be Spider-Man."
+    parking_lot:
+      name: "Parking Lot"
+      scene_description: "Empty except for Principal Skinner's beige sedan and a lone shopping cart."
   interactions:
     unlock_gate:
       triggers:
