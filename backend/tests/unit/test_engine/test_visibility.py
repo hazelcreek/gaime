@@ -3,10 +3,11 @@
 Tests cover:
 - build_snapshot() returns correct location info
 - Visible exits populated correctly
-- Visible items filtering
+- Visible items filtering (V3: via item_placements)
 - Inventory entities
-- Hidden item filtering
+- Hidden item filtering (V3: visibility from ItemPlacement)
 - First visit detection
+- V3: Hidden exits, details, NPCs via find_condition
 """
 
 import pytest
@@ -88,13 +89,11 @@ class TestDefaultVisibilityResolver:
     def test_hidden_item_visible_with_flag(
         self, resolver, state, sample_world_data
     ) -> None:
-        """Hidden items become visible when condition met.
+        """Hidden items become visible when condition met (V3).
 
-        Note: This test verifies the is_item_visible() logic, not build_snapshot().
-        The hidden_gem in the fixture has location="start_room" but is NOT in
-        the location.items list, so it won't appear in visible_items.
-
-        For items to appear in build_snapshot(), they must be in location.items.
+        V3: hidden_gem is in item_placements with hidden=True and
+        find_condition={requires_flag: box_opened}. When the flag is set,
+        the item becomes visible both via is_item_visible() and build_snapshot().
         """
         state.flags["box_opened"] = True
 
@@ -499,30 +498,37 @@ class TestDefaultVisibilityResolver:
 
     # ==========================================================================
     # analyze_item_visibility tests (public method)
+    # V3: This method now takes ItemPlacement instead of Item
     # ==========================================================================
 
     def test_analyze_visibility_visible_item(
         self, resolver, state, sample_world_data
     ) -> None:
         """analyze_item_visibility returns visible for non-hidden items."""
-        item = sample_world_data.get_item("container_box")
+        from app.models.world import ItemPlacement
+
+        # V3: Create a visible placement
+        placement = ItemPlacement(placement="sits in the corner")
         is_visible, reason = resolver.analyze_item_visibility(
-            item, "container_box", state
+            placement, "container_box", state
         )
         assert is_visible is True
         assert reason == "visible"
 
     def test_analyze_visibility_taken_item(self, resolver, sample_world_data) -> None:
         """analyze_item_visibility returns 'taken' for inventory items."""
+        from app.models.world import ItemPlacement
+
         state = TwoPhaseGameState(
             session_id="test-session",
             current_location="start_room",
             inventory=["container_box"],
             flags={},
         )
-        item = sample_world_data.get_item("container_box")
+        # V3: Create a visible placement
+        placement = ItemPlacement(placement="sits in the corner")
         is_visible, reason = resolver.analyze_item_visibility(
-            item, "container_box", state
+            placement, "container_box", state
         )
         assert is_visible is False
         assert reason == "taken"
@@ -530,18 +536,16 @@ class TestDefaultVisibilityResolver:
     def test_analyze_visibility_hidden_no_condition(
         self, resolver, state, sample_world_data
     ) -> None:
-        """analyze_item_visibility returns 'hidden' for items with no condition."""
-        # Create a hidden item with no find_condition
-        from app.models.world import Item
+        """analyze_item_visibility returns 'hidden' for placements with no condition."""
+        from app.models.world import ItemPlacement
 
-        hidden_item = Item(
-            name="Secret Item",
-            portable=True,
-            examine="A secret item.",
+        # V3: Create a hidden placement with no find_condition
+        placement = ItemPlacement(
+            placement="hidden in a crack",
             hidden=True,
         )
         is_visible, reason = resolver.analyze_item_visibility(
-            hidden_item, "secret_item", state
+            placement, "secret_item", state
         )
         assert is_visible is False
         assert reason == "hidden"
@@ -550,8 +554,13 @@ class TestDefaultVisibilityResolver:
         self, resolver, state, sample_world_data
     ) -> None:
         """analyze_item_visibility returns condition_not_met for unmet conditions."""
-        item = sample_world_data.get_item("hidden_gem")
-        is_visible, reason = resolver.analyze_item_visibility(item, "hidden_gem", state)
+
+        # V3: Get the hidden_gem placement from the fixture
+        location = sample_world_data.get_location("start_room")
+        placement = location.item_placements["hidden_gem"]
+        is_visible, reason = resolver.analyze_item_visibility(
+            placement, "hidden_gem", state
+        )
         assert is_visible is False
         assert "condition_not_met" in reason
         assert "box_opened" in reason
@@ -559,14 +568,378 @@ class TestDefaultVisibilityResolver:
     def test_analyze_visibility_hidden_condition_met(
         self, resolver, sample_world_data
     ) -> None:
-        """analyze_item_visibility returns visible when condition met."""
+        """analyze_item_visibility returns revealed when condition met."""
+
         state = TwoPhaseGameState(
             session_id="test-session",
             current_location="start_room",
             inventory=[],
             flags={"box_opened": True},
         )
-        item = sample_world_data.get_item("hidden_gem")
-        is_visible, reason = resolver.analyze_item_visibility(item, "hidden_gem", state)
+        # V3: Get the hidden_gem placement from the fixture
+        location = sample_world_data.get_location("start_room")
+        placement = location.item_placements["hidden_gem"]
+        is_visible, reason = resolver.analyze_item_visibility(
+            placement, "hidden_gem", state
+        )
         assert is_visible is True
-        assert reason == "visible"
+        assert reason == "revealed"
+
+    # ==========================================================================
+    # V3: Hidden exit tests
+    # ==========================================================================
+
+    def test_hidden_exit_not_visible(self, resolver) -> None:
+        """V3: Hidden exits are not visible until condition met."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            ExitDefinition,
+            PlayerSetup,
+        )
+
+        # Create a location with a hidden exit
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    exits={
+                        "north": ExitDefinition(
+                            destination="secret",
+                            hidden=True,
+                            find_condition={"requires_flag": "found_lever"},
+                        ),
+                    },
+                ),
+                "secret": Location(name="Secret Room"),
+            },
+            items={},
+            npcs={},
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={},  # Flag NOT set
+        )
+
+        snapshot = resolver.build_snapshot(state, world)
+
+        # Hidden exit should not appear
+        assert len(snapshot.visible_exits) == 0
+
+    def test_hidden_exit_visible_with_flag(self, resolver) -> None:
+        """V3: Hidden exits become visible when condition met."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            ExitDefinition,
+            PlayerSetup,
+        )
+
+        # Create a location with a hidden exit
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    exits={
+                        "north": ExitDefinition(
+                            destination="secret",
+                            hidden=True,
+                            find_condition={"requires_flag": "found_lever"},
+                        ),
+                    },
+                ),
+                "secret": Location(name="Secret Room"),
+            },
+            items={},
+            npcs={},
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={"found_lever": True},  # Flag IS set
+        )
+
+        snapshot = resolver.build_snapshot(state, world)
+
+        # Hidden exit should now appear
+        assert len(snapshot.visible_exits) == 1
+        assert snapshot.visible_exits[0].direction == "north"
+
+    def test_debug_hidden_exit_visibility_status(self, resolver) -> None:
+        """V3: Debug snapshot shows hidden exit visibility status."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            ExitDefinition,
+            PlayerSetup,
+        )
+
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    exits={
+                        "north": ExitDefinition(
+                            destination="secret",
+                            hidden=True,
+                            find_condition={"requires_flag": "found_lever"},
+                        ),
+                        "south": ExitDefinition(destination="hall"),  # Not hidden
+                    },
+                ),
+                "secret": Location(name="Secret Room"),
+                "hall": Location(name="Hall"),
+            },
+            items={},
+            npcs={},
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={},  # Flag NOT set
+        )
+
+        debug = resolver.build_debug_snapshot(state, world)
+
+        # Should show both exits
+        assert len(debug.exits) == 2
+
+        north_exit = next((e for e in debug.exits if e.direction == "north"), None)
+        assert north_exit is not None
+        assert north_exit.is_hidden is True
+        assert "condition_not_met" in north_exit.visibility_reason
+
+        south_exit = next((e for e in debug.exits if e.direction == "south"), None)
+        assert south_exit is not None
+        assert south_exit.is_hidden is False
+        assert south_exit.visibility_reason == "visible"
+
+    # ==========================================================================
+    # V3: Hidden detail tests
+    # ==========================================================================
+
+    def test_hidden_detail_not_visible(self, resolver) -> None:
+        """V3: Hidden details are not visible until condition met."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            DetailDefinition,
+            PlayerSetup,
+        )
+
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    details={
+                        "secret_note": DetailDefinition(
+                            name="Secret Note",
+                            scene_description="A hidden note tucked behind the frame.",
+                            hidden=True,
+                            find_condition={"requires_flag": "examined_painting"},
+                        ),
+                        "painting": DetailDefinition(
+                            name="Painting",
+                            scene_description="A dusty painting on the wall.",
+                        ),
+                    },
+                ),
+            },
+            items={},
+            npcs={},
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={},  # Flag NOT set
+        )
+
+        snapshot = resolver.build_snapshot(state, world)
+
+        # Hidden detail should not appear, painting should
+        detail_ids = [d.id for d in snapshot.visible_details]
+        assert "painting" in detail_ids
+        assert "secret_note" not in detail_ids
+
+    def test_hidden_detail_visible_with_flag(self, resolver) -> None:
+        """V3: Hidden details become visible when condition met."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            DetailDefinition,
+            PlayerSetup,
+        )
+
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    details={
+                        "secret_note": DetailDefinition(
+                            name="Secret Note",
+                            scene_description="A hidden note tucked behind the frame.",
+                            hidden=True,
+                            find_condition={"requires_flag": "examined_painting"},
+                        ),
+                    },
+                ),
+            },
+            items={},
+            npcs={},
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={"examined_painting": True},  # Flag IS set
+        )
+
+        snapshot = resolver.build_snapshot(state, world)
+
+        # Hidden detail should now appear
+        detail_ids = [d.id for d in snapshot.visible_details]
+        assert "secret_note" in detail_ids
+
+    # ==========================================================================
+    # V3: Hidden NPC tests
+    # ==========================================================================
+
+    def test_hidden_npc_not_visible(self, resolver) -> None:
+        """V3: Hidden NPCs are not visible until condition met."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            NPC,
+            NPCPlacement,
+            PlayerSetup,
+        )
+
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    npc_placements={
+                        "spy": NPCPlacement(
+                            placement="lurking behind the curtain",
+                            hidden=True,
+                            find_condition={"requires_flag": "pulled_curtain"},
+                        ),
+                    },
+                ),
+            },
+            items={},
+            npcs={
+                "spy": NPC(name="Shadowy Figure", location="room"),
+            },
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={},  # Flag NOT set
+        )
+
+        debug = resolver.build_debug_snapshot(state, world)
+
+        # NPC should exist but be hidden
+        spy = next((n for n in debug.npcs if n.npc_id == "spy"), None)
+        assert spy is not None
+        assert spy.is_visible is False
+        assert "condition_not_met" in spy.visibility_reason
+
+    def test_hidden_npc_visible_with_flag(self, resolver) -> None:
+        """V3: Hidden NPCs become visible when condition met."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            NPC,
+            NPCPlacement,
+            PlayerSetup,
+        )
+
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    npc_placements={
+                        "spy": NPCPlacement(
+                            placement="lurking behind the curtain",
+                            hidden=True,
+                            find_condition={"requires_flag": "pulled_curtain"},
+                        ),
+                    },
+                ),
+            },
+            items={},
+            npcs={
+                "spy": NPC(name="Shadowy Figure", location="room"),
+            },
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={"pulled_curtain": True},  # Flag IS set
+        )
+
+        debug = resolver.build_debug_snapshot(state, world)
+
+        # NPC should now be visible
+        spy = next((n for n in debug.npcs if n.npc_id == "spy"), None)
+        assert spy is not None
+        assert spy.is_visible is True
+        assert spy.visibility_reason == "revealed"

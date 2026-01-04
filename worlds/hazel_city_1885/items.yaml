@@ -49,9 +49,7 @@ whiskey_shot:
 whiskey_bottle:
   name: "Whiskey Bottle"
   portable: true
-  hidden: true
-  find_condition:
-    requires_flag: silas_revealed_whiskey
+  # V3: hidden and find_condition moved to locations.yaml item_placements
   examine_description: |
     A dusty bottle of frontier whiskey. Half-full. Should be enough to tempt a thirsty outlaw.
   scene_description: "A dusty whiskey bottle is tucked behind the flour sacks, just where Silas said."

@@ -1,4 +1,4 @@
-# Test World Locations
+# Test World Locations (V3 Schema)
 #
 # Layout:
 #   [locked_room] (north, requires door_unlocked)
@@ -10,6 +10,7 @@
 # - Flag-based access control
 # - Container interactions
 # - NPC presence
+# - Hidden items with visibility conditions (V3)
 
 start_room:
   name: "Starting Room"
@@ -25,10 +26,6 @@ start_room:
       destination: secret_room
       scene_description: "A section of wall that looks slightly different from the rest"
       destination_known: false
-  items:
-    - container_box
-  npcs:
-    - test_npc
   details:
     floor:
       name: "Wooden Floor"
@@ -39,10 +36,21 @@ start_room:
     box:
       name: "Wooden Box"
       scene_description: "A small wooden box with a brass clasp."
+  # V3: item_placements defines WHICH items are here AND their visibility
   item_placements:
-    container_box: "sits in the corner"
+    test_key:
+      placement: "catches the light on the floor"
+    container_box:
+      placement: "sits in the corner"
+    hidden_gem:
+      placement: "glints from inside the box"
+      hidden: true
+      find_condition:
+        requires_flag: box_opened
+  # V3: npc_placements defines WHICH npcs are here
   npc_placements:
-    test_npc: "stands near the east wall"
+    test_npc:
+      placement: "stands near the east wall"
   interactions:
     examine_box:
       triggers:

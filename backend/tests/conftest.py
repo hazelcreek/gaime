@@ -35,6 +35,8 @@ from app.models.world import (  # noqa: E402
     NPCPersonality,
     ExitDefinition,
     DetailDefinition,
+    ItemPlacement,
+    NPCPlacement,
 )
 
 if TYPE_CHECKING:
@@ -114,12 +116,14 @@ def sample_world() -> World:
 
 @pytest.fixture
 def sample_locations() -> dict[str, Location]:
-    """Create a minimal 3-room layout for testing.
+    """Create a minimal 3-room layout for testing (V3 schema).
 
     Layout:
         [locked_room] (north, requires door_unlocked flag)
               |
         [start_room] --- [secret_room] (east, requires knows_secret flag)
+
+    V3: Uses item_placements and npc_placements instead of items/npcs lists.
     """
     return {
         "start_room": Location(
@@ -137,7 +141,26 @@ def sample_locations() -> dict[str, Location]:
                     destination_known=False,
                 ),
             },
-            items=["container_box"],
+            # V3: item_placements defines which items are here and their visibility
+            item_placements={
+                "test_key": ItemPlacement(
+                    placement="catches the light on the floor",
+                ),
+                "container_box": ItemPlacement(
+                    placement="sits in the corner",
+                ),
+                "hidden_gem": ItemPlacement(
+                    placement="glints from inside the box",
+                    hidden=True,
+                    find_condition={"requires_flag": "box_opened"},
+                ),
+            },
+            # V3: npc_placements defines which NPCs are here
+            npc_placements={
+                "test_npc": NPCPlacement(
+                    placement="stands near the east wall",
+                ),
+            },
             details={
                 "floor": DetailDefinition(
                     name="Floor",
@@ -178,29 +201,30 @@ def sample_locations() -> dict[str, Location]:
 
 @pytest.fixture
 def sample_items() -> dict[str, Item]:
-    """Create sample items including a container with hidden contents."""
+    """Create sample items (V3 schema).
+
+    V3: Removed location, hidden, find_condition - these are now in ItemPlacement.
+    """
     return {
         "test_key": Item(
             name="Test Key",
             portable=True,
             examine_description="A simple brass key for testing.",
-            location="start_room",
+            scene_description="A brass key catches the light.",
             unlocks="locked_room",
         ),
         "container_box": Item(
             name="Wooden Box",
             portable=False,
             examine_description="A small wooden box with a lid.",
-            location="start_room",
+            scene_description="A wooden box sits here.",
         ),
         "hidden_gem": Item(
             name="Hidden Gem",
             portable=True,
             examine_description="A sparkling gem hidden in the box.",
-            location="start_room",
-            hidden=True,
-            find_condition={"requires_flag": "box_opened"},
             scene_description="A beautiful gem glints from inside the box.",
+            # V3: hidden and find_condition moved to ItemPlacement in locations
         ),
     }
 

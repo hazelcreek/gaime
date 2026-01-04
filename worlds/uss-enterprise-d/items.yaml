@@ -96,9 +96,7 @@ engineering_toolkit:
 replacement_isolinear_chip:
   name: "Replacement Isolinear Chip"
   portable: true
-  hidden: true
-  find_condition:
-    requires_flag: retrieved_replacement_chip
+  # V3: hidden and find_condition moved to locations.yaml item_placements
   examine_description: |
     A slim, durable isolinear chip: logic pathways etched into matter. It looks unimpressive until
     you remember it can change how an entire ship thinks about power.
@@ -117,9 +115,7 @@ plasma_injector_regulator:
 phase_inverter:
   name: "Phase Inverter"
   portable: true
-  hidden: true
-  find_condition:
-    requires_flag: found_feedback_path
+  # V3: hidden and find_condition moved to locations.yaml item_placements
   examine_description: |
     A compact engineering component used to invert and cancel phase-aligned feedback. It's a
     deceptively simple answer to a complex problem: meet the loop with its own mirror.

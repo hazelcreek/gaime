@@ -40,20 +40,65 @@ class World(BaseModel):
 
 
 class InteractionEffect(BaseModel):
-    """Effect of an interaction"""
+    """Effect of an interaction (V3).
+
+    V3 removes reveals_exit - use hidden exits with find_condition instead.
+
+    Attributes:
+        triggers: Phrases that trigger this interaction
+        narrative_hint: Hint for narrator about what happens
+        sets_flag: Flag to set when triggered
+        gives_item: Item given to player
+        removes_item: Item removed from player
+    """
 
     triggers: list[str] = Field(default_factory=list)
     narrative_hint: str = ""
     sets_flag: str | None = None
-    reveals_exit: str | None = None
+    # V3: Removed reveals_exit - use hidden exits with find_condition instead
     gives_item: str | None = None
     removes_item: str | None = None
 
 
 # =============================================================================
-# V2 Schema Models - Structured exits, details, and examination support
-# These models are used by Location for the V2 world schema.
+# V3 Schema Models - Unified visibility with location-bound placement
+# These models are used by Location for the V3 world schema.
 # =============================================================================
+
+
+class ItemPlacement(BaseModel):
+    """Item placement with visibility control (V3).
+
+    Visibility is a property of WHERE an item is placed, not WHAT the item is.
+    The same key could be visible on a table in one room but hidden in a
+    drawer in another.
+
+    Attributes:
+        placement: How item appears in scene (e.g., "lies on the dusty table")
+        hidden: Not visible until revealed by find_condition
+        find_condition: Condition to reveal (e.g., {requires_flag: "searched_drawer"})
+    """
+
+    placement: str  # How item appears in scene
+    hidden: bool = False  # Not visible until revealed
+    find_condition: dict | None = None  # e.g., {requires_flag: "searched_drawer"}
+
+
+class NPCPlacement(BaseModel):
+    """NPC placement with visibility control (V3).
+
+    Visibility is a property of WHERE an NPC is placed, not WHO the NPC is.
+    An NPC can be present but hidden (e.g., spy behind curtain).
+
+    Attributes:
+        placement: Where NPC is positioned (e.g., "lurking behind the curtain")
+        hidden: Not visible until revealed by find_condition
+        find_condition: Condition to reveal (e.g., {requires_flag: "searched_curtain"})
+    """
+
+    placement: str  # Where NPC is positioned
+    hidden: bool = False  # Not visible until revealed
+    find_condition: dict | None = None  # e.g., {requires_flag: "pulled_curtain"}
 
 
 class ExaminationEffect(BaseModel):
@@ -66,7 +111,25 @@ class ExaminationEffect(BaseModel):
 
 
 class ExitDefinition(BaseModel):
-    """Structured exit with visual descriptions and destination visibility"""
+    """Structured exit with visual descriptions and destination visibility (V3).
+
+    Supports both destination visibility (whether player knows WHERE it leads)
+    and exit visibility (whether the exit itself is shown at all).
+
+    Attributes:
+        destination: Location ID this exit leads to
+        scene_description: How exit appears in scene
+        examine_description: Detailed view on examination
+        destination_known: Whether player initially knows the destination
+        reveal_on_flag: Reveal destination when this flag is set
+        reveal_on_examine: Reveal destination when player examines the exit
+        hidden: Exit not visible until revealed (V3)
+        find_condition: Condition to reveal exit (V3)
+        locked: Whether exit requires a key
+        requires_key: Item ID needed to unlock
+        blocked: Whether exit is blocked
+        blocked_reason: Why the exit is blocked
+    """
 
     destination: str
 
@@ -74,11 +137,15 @@ class ExitDefinition(BaseModel):
     scene_description: str = ""
     examine_description: str | None = None
 
-    # Destination visibility (initial state set by author)
+    # Destination visibility (whether player knows WHERE it leads)
     destination_known: bool = True
     reveal_on_flag: str | None = None
     reveal_on_examine: bool = False
     # Note: Visiting the destination ALWAYS reveals it (automatic, not configurable)
+
+    # Exit visibility (whether exit is shown at all) - V3
+    hidden: bool = False  # Exit not visible until revealed
+    find_condition: dict | None = None  # e.g., {requires_flag: "found_secret_lever"}
 
     # Accessibility
     locked: bool = False
@@ -88,12 +155,28 @@ class ExitDefinition(BaseModel):
 
 
 class DetailDefinition(BaseModel):
-    """Structured detail with examination support"""
+    """Structured detail with examination support (V3).
+
+    Details are scenery elements that can be examined but not taken.
+    Supports visibility control for hidden details (e.g., secret clues).
+
+    Attributes:
+        name: Display name for the detail
+        scene_description: How detail appears in scene
+        examine_description: Detailed view on examination
+        on_examine: Effects triggered by examination
+        hidden: Detail not visible until revealed (V3)
+        find_condition: Condition to reveal detail (V3)
+    """
 
     name: str
     scene_description: str
     examine_description: str | None = None
     on_examine: ExaminationEffect | None = None
+
+    # Detail visibility - V3
+    hidden: bool = False  # Detail not visible until revealed
+    find_condition: dict | None = None  # e.g., {requires_flag: "used_magnifying_glass"}
 
 
 class LocationRequirement(BaseModel):
@@ -104,22 +187,34 @@ class LocationRequirement(BaseModel):
 
 
 class Location(BaseModel):
-    """Location/room definition from locations.yaml (V2 schema)"""
+    """Location/room definition from locations.yaml (V3 schema).
+
+    V3 uses item_placements/npc_placements as the source of truth for which
+    entities are present. The keys of these dicts define which items/NPCs
+    are at this location, replacing the old items/npcs lists.
+
+    Attributes:
+        name: Display name for the location
+        atmosphere: Atmosphere hints for AI narrative generation
+        exits: Direction -> ExitDefinition mapping
+        details: Examinable scenery elements
+        interactions: Special interactions at this location
+        requires: Access requirements (flag or item needed)
+        item_placements: Items at this location with visibility control
+        npc_placements: NPCs at this location with visibility control
+    """
 
     name: str
     atmosphere: str = ""
     exits: dict[str, ExitDefinition] = Field(default_factory=dict)
-    items: list[str] = Field(default_factory=list)
-    npcs: list[str] = Field(default_factory=list)
     details: dict[str, DetailDefinition] = Field(default_factory=dict)
     interactions: dict[str, InteractionEffect] = Field(default_factory=dict)
     requires: LocationRequirement | None = None
-    item_placements: dict[str, str] = Field(
-        default_factory=dict
-    )  # Maps item_id to placement description
-    npc_placements: dict[str, str] = Field(
-        default_factory=dict
-    )  # Maps npc_id to position description
+
+    # V3: Item and NPC placements with visibility control
+    # The KEYS define which items/NPCs are present at this location
+    item_placements: dict[str, ItemPlacement] = Field(default_factory=dict)
+    npc_placements: dict[str, NPCPlacement] = Field(default_factory=dict)
 
 
 class NPCPersonality(BaseModel):
@@ -196,20 +291,35 @@ class ItemClue(BaseModel):
 
 
 class Item(BaseModel):
-    """Item definition from items.yaml (V2 schema)"""
+    """Item definition from items.yaml (V3 schema).
+
+    V3 separates WHAT an item IS (defined here) from WHERE it is placed
+    and HOW VISIBLE it is (defined in Location.item_placements).
+
+    Attributes:
+        name: Display name for the item
+        portable: Whether item can be taken
+        scene_description: How item appears in scene
+        examine_description: Detailed examination text
+        take_description: Narration when item is taken
+        unlocks: Location or container this item unlocks
+        properties: Special item properties
+        use_actions: Actions that can be performed with this item
+        clues: Hints this item provides
+    """
 
     name: str
     portable: bool = True
 
-    # Visual descriptions (V2 field names)
+    # Visual descriptions
     scene_description: str = ""  # How item appears in scene
     examine_description: str = ""  # Detailed examination text
 
     take_description: str = ""
     unlocks: str | None = None
-    location: str | None = None
-    hidden: bool = False
-    find_condition: dict | None = None
+
+    # V3: Removed location, hidden, find_condition - now in ItemPlacement
+
     properties: ItemProperty = Field(default_factory=ItemProperty)
     use_actions: dict[str, ItemUseAction] = Field(default_factory=dict)
     clues: list[ItemClue] = Field(default_factory=list)
@@ -244,14 +354,24 @@ class WorldData(BaseModel):
         return result
 
     def get_items_at_location(self, location_id: str) -> list[Item]:
-        """Get all visible items at a location"""
+        """Get all items defined at a location (V3).
+
+        Returns items whose IDs are keys in location.item_placements.
+        Does NOT filter by visibility - use VisibilityResolver for that.
+
+        Args:
+            location_id: The location ID to check
+
+        Returns:
+            List of Item objects at this location
+        """
         location = self.get_location(location_id)
         if not location:
             return []
 
         result = []
-        for item_id in location.items:
+        for item_id in location.item_placements.keys():
             item = self.get_item(item_id)
-            if item and not item.hidden:
+            if item:
                 result.append(item)
         return result

@@ -107,9 +107,8 @@ iron_key:
     almost hungry in your hand.
   scene_description: "Hidden in the wardrobe, you find a heavy iron key"
   take_description: "You take the iron key. It seems to pulse with cold"
-  location: master_bedroom
+  # V3: removed location, hidden - now in locations.yaml item_placements
   unlocks: basement
-  hidden: false
 
 kitchen_knife:
   name: "Kitchen Knife"
@@ -154,10 +153,7 @@ thornwood_amulet:
     the artifacts needed for the ritual.
   scene_description: "Hidden beneath a loose floorboard, something glints"
   take_description: "You clasp the amulet. A calm washes over you"
-  location: nursery
-  hidden: true
-  find_condition:
-    requires_flag: examined_drawings
+  # V3: removed location, hidden, find_condition - now in locations.yaml item_placements
   properties:
     artifact: true
   use_actions:
@@ -175,7 +171,7 @@ ancient_dagger:
     blade is stained dark with old blood. One of the three artifacts.
   scene_description: "In the corner of the basement, half-buried in debris, you find it"
   take_description: "You take the dagger, fighting the urge to drop it"
-  location: basement
+  # V3: removed location - now in locations.yaml item_placements
   properties:
     artifact: true
   clues:
@@ -194,6 +190,6 @@ grimoire:
     forever. But what is immortality if all you love is gone?"
   scene_description: "On the central pedestal, the grimoire waits"
   take_description: "You take the grimoire. The chamber seems to sigh"
-  location: ritual_chamber
+  # V3: removed location - now in locations.yaml item_placements
   properties:
     artifact: true

@@ -5,27 +5,24 @@ distillery_courtyard:
   exits:
     north:
       destination: malt_barn
-      scene_description: "Heavy wooden doors of the Malt Barn, slightly ajar and dripping with rain"
+      scene_description: Heavy wooden doors of the Malt Barn, slightly ajar and dripping with rain
       destination_known: true
     east:
       destination: managers_office
-      scene_description: "The administrative wing with a flickering light in the window"
+      scene_description: The administrative wing with a flickering light in the window
       destination_known: true
     west:
       destination: sea_caves
-      scene_description: "A treacherous muddy path descending toward the roaring ocean"
+      scene_description: A treacherous muddy path descending toward the roaring ocean
       destination_known: false
-  items: []
   item_placements: {}
-  npcs:
-    - old_tam
   npc_placements:
-    old_tam: Huddled under the eaves near the barn entrance, smoking a pipe.
+    old_tam:
+      placement: Huddled under the eaves near the barn entrance, smoking a pipe.
   details:
     cobblestones:
-      name: "Cobblestones"
-      scene_description: "Slick with rain and moss."
-
+      name: Cobblestones
+      scene_description: Slick with rain and moss.
 malt_barn:
   name: The Malt Barn
   atmosphere: |
@@ -33,25 +30,22 @@ malt_barn:
   exits:
     south:
       destination: distillery_courtyard
-      scene_description: "The exit back to the rainy courtyard"
+      scene_description: The exit back to the rainy courtyard
       destination_known: true
     north:
       destination: lab
-      scene_description: "A clean, clinical door leading to the Laboratory"
+      scene_description: A clean, clinical door leading to the Laboratory
       destination_known: true
-  items:
-    - torn_logbook_page
-    - barley_sack
   item_placements:
-    torn_logbook_page: Sticking out from the top of a slashed barley sack.
-    barley_sack: A pile of hessian sacks sits near the north wall.
-  npcs: []
+    torn_logbook_page:
+      placement: Sticking out from the top of a slashed barley sack.
+    barley_sack:
+      placement: A pile of hessian sacks sits near the north wall.
   npc_placements: {}
   details:
     grain:
-      name: "Barley Grain"
-      scene_description: "Golden barley, the lifeblood of the island."
-
+      name: Barley Grain
+      scene_description: Golden barley, the lifeblood of the island.
 lab:
   name: Distillery Laboratory
   atmosphere: |
@@ -59,31 +53,29 @@ lab:
   exits:
     south:
       destination: malt_barn
-      scene_description: "The door back to the dusty Malt Barn"
+      scene_description: The door back to the dusty Malt Barn
       destination_known: true
     east:
       destination: library
-      scene_description: "A side door leading to the quiet Library"
+      scene_description: A side door leading to the quiet Library
       destination_known: true
-  items:
-    - chemical_reagent
   item_placements:
-    chemical_reagent: Sitting on a high shelf labeled 'Reagents'.
-  npcs:
-    - callum_macleod
+    chemical_reagent:
+      placement: Sitting on a high shelf labeled 'Reagents'.
   npc_placements:
-    callum_macleod: Pacing nervously between the lab benches.
+    callum_macleod:
+      placement: Pacing nervously between the lab benches.
   details:
     shelf:
-      name: "Reagent Shelf"
-      scene_description: "Filled with dangerous looking chemicals."
+      name: Reagent Shelf
+      scene_description: Filled with dangerous looking chemicals.
   interactions:
     reveal_code:
       triggers:
-        - use chemical_reagent on torn_logbook_page
-      narrative_hint: 'You carefully brush the iodine solution over the blank parchment. Slowly, coordinates and a keypad code appear in rusty brown script: ''18-15-44''.'
+      - use chemical_reagent on torn_logbook_page
+      narrative_hint: |-
+        You carefully brush the iodine solution over the blank parchment. Slowly, coordinates and a keypad code appear in rusty brown script: '18-15-44'.
       sets_flag: code_revealed
-
 library:
   name: Distillery Library
   atmosphere: |
@@ -91,23 +83,20 @@ library:
   exits:
     west:
       destination: lab
-      scene_description: "The door back to the sterile Laboratory"
+      scene_description: The door back to the sterile Laboratory
       destination_known: true
     south:
       destination: tasting_room
-      scene_description: "A reinforced steel door with an electronic keypad"
+      scene_description: A reinforced steel door with an electronic keypad
       destination_known: false
-  items:
-    - celtic_dictionary
   item_placements:
-    celtic_dictionary: Left open on the leather armchair.
-  npcs: []
+    celtic_dictionary:
+      placement: Left open on the leather armchair.
   npc_placements: {}
   details:
     shelves:
-      name: "Oak Bookshelves"
-      scene_description: "Books on chemistry, botany, and local history."
-
+      name: Oak Bookshelves
+      scene_description: Books on chemistry, botany, and local history.
 tasting_room:
   name: Private Tasting Room
   atmosphere: |
@@ -115,24 +104,21 @@ tasting_room:
   exits:
     north:
       destination: library
-      scene_description: "The secure door leading back to the Library"
+      scene_description: The secure door leading back to the Library
       destination_known: true
-  items:
-    - heavy_bung
   item_placements:
-    heavy_bung: Hidden inside a smashed display case, stained with dried blood.
-  npcs: []
+    heavy_bung:
+      placement: Hidden inside a smashed display case, stained with dried blood.
   npc_placements: {}
   details:
     display_case:
-      name: "Display Case"
-      scene_description: "Shattered glass covers the floor."
+      name: Display Case
+      scene_description: Shattered glass covers the floor.
     chair:
-      name: "Overturned Chair"
-      scene_description: "Overturned in a hurry."
+      name: Overturned Chair
+      scene_description: Overturned in a hurry.
   requires:
     flag: code_revealed
-
 managers_office:
   name: Manager's Office
   atmosphere: |
@@ -140,29 +126,27 @@ managers_office:
   exits:
     west:
       destination: distillery_courtyard
-      scene_description: "The door leading out to the rain-lashed courtyard"
+      scene_description: The door leading out to the rain-lashed courtyard
       destination_known: true
-  items:
-    - framed_photo
   item_placements:
-    framed_photo: Sitting prominently on the mahogany desk.
-  npcs:
-    - fiona_campbell
+    framed_photo:
+      placement: Sitting prominently on the mahogany desk.
   npc_placements:
-    fiona_campbell: Sitting behind the desk, looking defiant.
+    fiona_campbell:
+      placement: Sitting behind the desk, looking defiant.
   details:
     elevator:
-      name: "Service Elevator"
-      scene_description: "A rusty service dumbwaiter shaft. The call button is dead."
+      name: Service Elevator
+      scene_description: A rusty service dumbwaiter shaft. The call button is dead.
     photo:
-      name: "Framed Photo"
-      scene_description: "It shows two men fighting over a woman on a pier."
+      name: Framed Photo
+      scene_description: It shows two men fighting over a woman on a pier.
   interactions:
     unlock_loop:
       triggers:
-        - push button
-      narrative_hint: Nothing happens. The mechanism sounds completely dead. It likely connects to the caves below.
-
+      - push button
+      narrative_hint: |-
+        Nothing happens. The mechanism sounds completely dead. It likely connects to the caves below.
 sea_caves:
   name: The Sea Caves
   atmosphere: |
@@ -170,36 +154,43 @@ sea_caves:
   exits:
     east:
       destination: distillery_courtyard
-      scene_description: "The muddy path climbing back to the distillery"
+      scene_description: The muddy path climbing back to the distillery
       destination_known: true
     north:
       destination: smugglers_cove
-      scene_description: "A smooth section of rock wall known as the 'Weeping Wall'"
+      scene_description: A smooth section of rock wall known as the 'Weeping Wall'
       destination_known: false
-  items:
-    - winch_handle
+      hidden: true
+      find_condition:
+        requires_flag: cove_open
+    up:
+      destination: managers_office
+      scene_description: The rusty service dumbwaiter, now functional after cranking the winch
+      destination_known: true
+      hidden: true
+      find_condition:
+        requires_flag: lift_repaired
   item_placements:
-    winch_handle: Lying in a puddle near the shaft.
-  npcs: []
+    winch_handle:
+      placement: Lying in a puddle near the shaft.
   npc_placements: {}
   details:
     shaft:
-      name: "Service Shaft"
-      scene_description: "Goes straight up into darkness. Looks like a service lift."
+      name: Service Shaft
+      scene_description: Goes straight up into darkness. Looks like a service lift.
   interactions:
     repair_lift:
       triggers:
-        - use winch_handle on shaft
-      narrative_hint: You crank the rusty handle. With a groan of metal, the dumbwaiter descends. You can now ride it up to the Manager's Office.
+      - use winch_handle on shaft
+      narrative_hint: |-
+        You crank the rusty handle. With a groan of metal, the dumbwaiter descends. You can now ride it up to the Manager's Office.
       sets_flag: lift_repaired
-      reveals_exit: managers_office
     reveal_cove:
       triggers:
-        - say translation
-      narrative_hint: You recite the Gaelic words. A draft suddenly blows from the Weeping Wall as a hidden stone pivots, revealing a passage.
+      - say translation
+      narrative_hint: |-
+        You recite the Gaelic words. A draft suddenly blows from the Weeping Wall as a hidden stone pivots, revealing a passage.
       sets_flag: cove_open
-      reveals_exit: smugglers_cove
-
 smugglers_cove:
   name: Smuggler's Cove
   atmosphere: |
@@ -207,21 +198,18 @@ smugglers_cove:
   exits:
     south:
       destination: sea_caves
-      scene_description: "The pivot door leading back to the main cave"
+      scene_description: The pivot door leading back to the main cave
       destination_known: true
-  items:
-    - vintage_bottle
-    - illegal_ledger
   item_placements:
-    vintage_bottle: Tucked behind a false brick in the wall.
-    illegal_ledger: Resting on top of a dry barrel.
-  npcs: []
+    vintage_bottle:
+      placement: Tucked behind a false brick in the wall.
+    illegal_ledger:
+      placement: Resting on top of a dry barrel.
   npc_placements: {}
   details:
     brick:
-      name: "Loose Brick"
-      scene_description: "It looks loose."
-
+      name: Loose Brick
+      scene_description: It looks loose.
 founders_statue:
   name: Founder's Statue
   atmosphere: |
@@ -229,27 +217,25 @@ founders_statue:
   exits:
     south:
       destination: ferry_terminal
-      scene_description: "The concrete pier jutting out toward the rough sea"
+      scene_description: The concrete pier jutting out toward the rough sea
       destination_known: true
     north:
       destination: distillery_courtyard
-      scene_description: "The path back to the distillery courtyard"
+      scene_description: The path back to the distillery courtyard
       destination_known: true
-  items: []
   item_placements: {}
-  npcs: []
   npc_placements: {}
   details:
     inscription:
-      name: "Gaelic Inscription"
-      scene_description: "Weather-worn Gaelic text etched into the stone base."
+      name: Gaelic Inscription
+      scene_description: Weather-worn Gaelic text etched into the stone base.
   interactions:
     translate_statue:
       triggers:
-        - use celtic_dictionary on inscription
-      narrative_hint: 'The dictionary helps you translate the phrase: ''The water of life flows where the stone weeps''.'
+      - use celtic_dictionary on inscription
+      narrative_hint: |-
+        The dictionary helps you translate the phrase: 'The water of life flows where the stone weeps'.
       sets_flag: translation_known
-
 ferry_terminal:
   name: Ferry Terminal
   atmosphere: |
@@ -257,25 +243,24 @@ ferry_terminal:
   exits:
     north:
       destination: founders_statue
-      scene_description: "The path back to the statue and distillery beyond"
+      scene_description: The path back to the statue and distillery beyond
       destination_known: true
-  items: []
   item_placements: {}
-  npcs:
-    - the_killer
   npc_placements:
-    the_killer: Standing near the bollards, suitcase in hand, looking at the horizon.
+    the_killer:
+      placement: Standing near the bollards, suitcase in hand, looking at the horizon.
   details:
     sea:
-      name: "The Sea"
-      scene_description: "Dark and unforgiving."
+      name: The Sea
+      scene_description: Dark and unforgiving.
   interactions:
     confront_killer:
       triggers:
-        - confront gordon
-        - accuse gordon
-        - show bung to gordon
-        - present evidence
-        - arrest gordon
-      narrative_hint: You present the bloodied cask bung to Gordon MacNeil. His calm facade crumbles as he realizes his fate is sealed.
+      - confront gordon
+      - accuse gordon
+      - show bung to gordon
+      - present evidence
+      - arrest gordon
+      narrative_hint: |-
+        You present the bloodied cask bung to Gordon MacNeil. His calm facade crumbles as he realizes his fate is sealed.
       sets_flag: killer_confronted

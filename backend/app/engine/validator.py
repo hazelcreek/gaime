@@ -86,14 +86,50 @@ class WorldValidator:
                     location.requires.flag, f"location:{loc_id}/requires"
                 )
 
-        # Flags CHECKED by item find_condition
-        for item_id, item in self.world_data.items.items():
-            if item.find_condition:
-                required_flag = item.find_condition.get("requires_flag")
-                if required_flag:
-                    self._record_flag_checked(
-                        required_flag, f"item:{item_id}/find_condition"
-                    )
+        # V3: Flags CHECKED by item_placements find_condition
+        for loc_id, location in self.world_data.locations.items():
+            for item_id, placement in location.item_placements.items():
+                if placement.find_condition:
+                    required_flag = placement.find_condition.get("requires_flag")
+                    if required_flag:
+                        self._record_flag_checked(
+                            required_flag,
+                            f"location:{loc_id}/item_placements:{item_id}",
+                        )
+
+        # V3: Flags CHECKED by exit find_condition (hidden exits)
+        for loc_id, location in self.world_data.locations.items():
+            for direction, exit_def in location.exits.items():
+                if exit_def.find_condition:
+                    required_flag = exit_def.find_condition.get("requires_flag")
+                    if required_flag:
+                        self._record_flag_checked(
+                            required_flag,
+                            f"location:{loc_id}/exit:{direction}",
+                        )
+
+        # V3: Flags CHECKED by detail find_condition (hidden details)
+        for loc_id, location in self.world_data.locations.items():
+            if location.details:
+                for detail_id, detail_def in location.details.items():
+                    if detail_def.find_condition:
+                        required_flag = detail_def.find_condition.get("requires_flag")
+                        if required_flag:
+                            self._record_flag_checked(
+                                required_flag,
+                                f"location:{loc_id}/detail:{detail_id}",
+                            )
+
+        # V3: Flags CHECKED by npc_placements find_condition (hidden NPCs)
+        for loc_id, location in self.world_data.locations.items():
+            for npc_id, placement in location.npc_placements.items():
+                if placement.find_condition:
+                    required_flag = placement.find_condition.get("requires_flag")
+                    if required_flag:
+                        self._record_flag_checked(
+                            required_flag,
+                            f"location:{loc_id}/npc_placements:{npc_id}",
+                        )
 
         # Flags CHECKED by NPC appears_when
         for npc_id, npc in self.world_data.npcs.items():
@@ -150,12 +186,13 @@ class WorldValidator:
                         f"Location '{loc_id}' exit '{direction}' points to invalid location '{dest_id}'"
                     )
 
-        # Check item locations
-        for item_id, item in self.world_data.items.items():
-            if item.location and item.location not in valid_locations:
-                self.result.add_error(
-                    f"Item '{item_id}' has invalid location '{item.location}'"
-                )
+        # V3: Check item_placements reference valid items
+        for loc_id, location in self.world_data.locations.items():
+            for item_id in location.item_placements.keys():
+                if item_id not in self.world_data.items:
+                    self.result.add_error(
+                        f"Location '{loc_id}' item_placements references invalid item '{item_id}'"
+                    )
 
         # Check NPC locations
         for npc_id, npc in self.world_data.npcs.items():
@@ -209,12 +246,12 @@ class WorldValidator:
                     f"Starting inventory contains invalid item '{item_id}'"
                 )
 
-        # Check items listed in locations
+        # V3: Check items in item_placements are valid
         for loc_id, location in self.world_data.locations.items():
-            for item_id in location.items:
+            for item_id in location.item_placements.keys():
                 if item_id not in valid_items:
                     self.result.add_error(
-                        f"Location '{loc_id}' lists invalid item '{item_id}'"
+                        f"Location '{loc_id}' item_placements references invalid item '{item_id}'"
                     )
 
         # Check victory item

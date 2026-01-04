@@ -23,12 +23,9 @@ main_hallway:
       destination: front_gate
       scene_description: "The main entrance doors leading to the locked front gate"
       destination_known: true
-  items:
-    - hall_pass
   item_placements:
-    hall_pass: "sits forgotten on a wooden bench beneath the trophy case, its laminated surface catching the afternoon light"
-  npcs: []
-  npc_placements: {}
+    hall_pass:
+      placement: "sits forgotten on a wooden bench beneath the trophy case, its laminated surface catching the afternoon light"
   details:
     trophy_case:
       name: "Trophy Case"
@@ -46,14 +43,12 @@ principal_office:
       destination: main_hallway
       scene_description: "The door back to the main hallway and relative safety"
       destination_known: true
-  items:
-    - rubber_stamp
   item_placements:
-    rubber_stamp: "sits on the mahogany desk beside a towering stack of confiscation forms, its red ink pad still fresh"
-  npcs:
-    - principal_skinner
+    rubber_stamp:
+      placement: "sits on the mahogany desk beside a towering stack of confiscation forms, its red ink pad still fresh"
   npc_placements:
-    principal_skinner: "sits behind the massive desk, fingers steepled, peering at you over his reading glasses with barely contained suspicion"
+    principal_skinner:
+      placement: "sits behind the massive desk, fingers steepled, peering at you over his reading glasses with barely contained suspicion"
   details:
     desk:
       name: "Mahogany Desk"
@@ -75,14 +70,12 @@ cafeteria:
       destination: kitchen
       scene_description: "A swinging door marked 'STAFF ONLY' leading to the kitchen"
       destination_known: true
-  items:
-    - spatular_sword
   item_placements:
-    spatular_sword: "leans against the stainless steel serving counter, its industrial size suggesting it has flipped a thousand mystery meat patties"
-  npcs:
-    - lunch_lady_doris
+    spatular_sword:
+      placement: "leans against the stainless steel serving counter, its industrial size suggesting it has flipped a thousand mystery meat patties"
   npc_placements:
-    lunch_lady_doris: "stands behind the serving counter with arms crossed, hairnet askew, guarding the kitchen entrance like a gruff sentinel"
+    lunch_lady_doris:
+      placement: "stands behind the serving counter with arms crossed, hairnet askew, guarding the kitchen entrance like a gruff sentinel"
   details:
     serving_station:
       name: "Serving Station"
@@ -100,14 +93,12 @@ science_lab:
       destination: main_hallway
       scene_description: "The door back to the main hallway"
       destination_known: true
-  items:
-    - baking_soda
   item_placements:
-    baking_soda: "sits on the black countertop next to a collection of beakers, its orange box faded from years of science fair volcanoes"
-  npcs:
-    - nerd_neil
+    baking_soda:
+      placement: "sits on the black countertop next to a collection of beakers, its orange box faded from years of science fair volcanoes"
   npc_placements:
-    nerd_neil: "crouches behind the teacher's desk, peeking out nervously, his thick glasses catching the fluorescent light"
+    nerd_neil:
+      placement: "crouches behind the teacher's desk, peeking out nervously, his thick glasses catching the fluorescent light"
   details:
     skeleton:
       name: "Skeleton Model"
@@ -129,12 +120,9 @@ gymnasium:
       destination: locker_room
       scene_description: "The entrance to the boys' locker room, emanating a faint Axe body spray cloud"
       destination_known: true
-  items:
-    - dodgeball
   item_placements:
-    dodgeball: "sits dead center on the half-court line, as if waiting to deliver childhood trauma to its next victim"
-  npcs: []
-  npc_placements: {}
+    dodgeball:
+      placement: "sits dead center on the half-court line, as if waiting to deliver childhood trauma to its next victim"
   details:
     hoop:
       name: "Basketball Hoop"
@@ -152,12 +140,9 @@ locker_room:
       destination: gymnasium
       scene_description: "The door back to the gymnasium and fresher air"
       destination_known: true
-  items:
-    - janitor_keys
   item_placements:
-    janitor_keys: "dangle from a hook on locker 13, their massive key ring jangling softly with the building's vibrations"
-  npcs: []
-  npc_placements: {}
+    janitor_keys:
+      placement: "dangle from a hook on locker 13, their massive key ring jangling softly with the building's vibrations"
   details:
     shower:
       name: "Shower"
@@ -175,12 +160,9 @@ kitchen:
       destination: cafeteria
       scene_description: "The swinging door back to the cafeteria"
       destination_known: true
-  items:
-    - vinegar
   item_placements:
-    vinegar: "sits on the counter by the industrial sink, its plastic jug half-empty and smelling sharply acidic"
-  npcs: []
-  npc_placements: {}
+    vinegar:
+      placement: "sits on the counter by the industrial sink, its plastic jug half-empty and smelling sharply acidic"
   details:
     freezer:
       name: "Industrial Freezer"
@@ -195,10 +177,6 @@ front_gate:
       destination: main_hallway
       scene_description: "The main entrance doors leading back into the school"
       destination_known: true
-  items: []
-  item_placements: {}
-  npcs: []
-  npc_placements: {}
   details:
     gate:
       name: "Front Gate"

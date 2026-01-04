@@ -268,13 +268,14 @@ class LocationNPCDebug(BaseModel):
 
 
 class LocationExitDebug(BaseModel):
-    """Exit with accessibility analysis.
+    """Exit with accessibility and visibility analysis.
 
-    Shows all exits from a location with their accessibility status
-    and any requirements that must be met.
+    Shows all exits from a location with their accessibility status,
+    visibility status (V3), and any requirements that must be met.
 
     Source fields from models/world.py ExitDefinition:
         - destination, scene_description, destination_known, locked, blocked
+        - hidden, find_condition (V3)
 
     Attributes:
         direction: The exit direction (north, south, etc.)
@@ -284,6 +285,8 @@ class LocationExitDebug(BaseModel):
         access_reason: Why the exit is accessible/blocked
         scene_description: Visual description of the exit
         destination_known: Whether player knows where this exit leads
+        is_hidden: Whether this exit is hidden (V3)
+        visibility_reason: Why the exit is visible/hidden (V3)
 
     Example:
         >>> exit = LocationExitDebug(
@@ -294,6 +297,8 @@ class LocationExitDebug(BaseModel):
         ...     access_reason="requires_flag:bookcase_moved",
         ...     scene_description="A concealed passage behind the bookcase",
         ...     destination_known=False,
+        ...     is_hidden=True,
+        ...     visibility_reason="condition_not_met:bookcase_moved",
         ... )
     """
 
@@ -304,19 +309,24 @@ class LocationExitDebug(BaseModel):
     access_reason: str  # "accessible", "requires_flag:x", "requires_item:y", "locked:x", "blocked:x"
     scene_description: str | None = None
     destination_known: bool = True
+    # V3: Hidden exit support
+    is_hidden: bool = False
+    visibility_reason: str = (
+        "visible"  # "visible", "hidden", "revealed", "condition_not_met:x"
+    )
 
 
 class LocationInteractionDebug(BaseModel):
     """Interaction available at location.
 
     Source fields from models/world.py InteractionEffect:
-        - triggers, narrative_hint, sets_flag, reveals_exit, gives_item, removes_item
+        - triggers, narrative_hint, sets_flag, gives_item, removes_item
+        - V3: reveals_exit removed (use hidden exits instead)
 
     Attributes:
         interaction_id: The interaction's unique identifier
         triggers: List of trigger words/phrases
         sets_flag: Flag that gets set when triggered
-        reveals_exit: Exit that gets revealed
         gives_item: Item given to player
         removes_item: Item removed from player
     """
@@ -324,7 +334,6 @@ class LocationInteractionDebug(BaseModel):
     interaction_id: str
     triggers: list[str] = Field(default_factory=list)
     sets_flag: str | None = None
-    reveals_exit: str | None = None
     gives_item: str | None = None
     removes_item: str | None = None
 

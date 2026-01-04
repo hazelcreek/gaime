@@ -7,12 +7,9 @@ fox_burrow:
       destination: mossy_clearing
       scene_description: "A tunnel of packed earth leading up toward the dim surface light"
       destination_known: true
-  items:
-    - berry_basket
   item_placements:
-    berry_basket: "rests near the entrance, half-filled with dried provisions"
-  npcs: []
-  npc_placements: {}
+    berry_basket:
+      placement: "rests near the entrance, half-filled with dried provisions"
   details:
     roots:
       name: "Willow Roots"
@@ -35,12 +32,9 @@ mossy_clearing:
       destination: babbling_brook
       scene_description: "A fern-lined path following the sound of trickling water"
       destination_known: true
-  items: []
-  item_placements: {}
-  npcs:
-    - badger_barnaby
   npc_placements:
-    badger_barnaby: "sits on a toadstool, grumbling at a pocket watch"
+    badger_barnaby:
+      placement: "sits on a toadstool, grumbling at a pocket watch"
   details:
     moss:
       name: "Velvet Moss"
@@ -59,12 +53,9 @@ babbling_brook:
       destination: glitter_caves
       scene_description: "A dark opening in the rocks, glittering faintly from within"
       destination_known: false
-  items:
-    - shiny_pebble
   item_placements:
-    shiny_pebble: "glints brightly from the muddy bank near the water's edge"
-  npcs: []
-  npc_placements: {}
+    shiny_pebble:
+      placement: "glints brightly from the muddy bank near the water's edge"
   details:
     water:
       name: "Giggling Water"
@@ -87,12 +78,9 @@ whispering_woods:
       destination: witch_cottage
       scene_description: "A winding trail marked by a twist of chimney smoke"
       destination_known: false
-  items: []
-  item_placements: {}
-  npcs:
-    - owl_orion
   npc_placements:
-    owl_orion: "perches high on a branch, head rotated completely backward"
+    owl_orion:
+      placement: "perches high on a branch, head rotated completely backward"
   details:
     trees:
       name: "Ancient Oaks"
@@ -107,14 +95,12 @@ witch_cottage:
       destination: whispering_woods
       scene_description: "The cottage door leading back into the dark whispering woods"
       destination_known: true
-  items:
-    - jar_of_moonlight
   item_placements:
-    jar_of_moonlight: "sits on the windowsill, glowing with a soft, pale luminescence"
-  npcs:
-    - witch_mokey
+    jar_of_moonlight:
+      placement: "sits on the windowsill, glowing with a soft, pale luminescence"
   npc_placements:
-    witch_mokey: "stirs a cauldron made of a pumpkin shell, muttering rhymes"
+    witch_mokey:
+      placement: "stirs a cauldron made of a pumpkin shell, muttering rhymes"
   details:
     cauldron:
       name: "Pumpkin Cauldron"
@@ -133,12 +119,9 @@ glitter_caves:
       destination: crystal_chamber
       scene_description: "A widening tunnel glowing with increasing brilliance"
       destination_known: false
-  items: []
-  item_placements: {}
-  npcs:
-    - mole_miner
   npc_placements:
-    mole_miner: "digs frantically at a wall with a tiny silver shovel"
+    mole_miner:
+      placement: "digs frantically at a wall with a tiny silver shovel"
   details:
     crystals:
       name: "Humming Crystals"
@@ -153,12 +136,9 @@ crystal_chamber:
       destination: glitter_caves
       scene_description: "The tunnel leading back to the miner's area"
       destination_known: true
-  items:
-    - golden_acorn
   item_placements:
-    golden_acorn: "rests atop a pedestal of pure quartz, pulsing with warm light"
-  npcs: []
-  npc_placements: {}
+    golden_acorn:
+      placement: "rests atop a pedestal of pure quartz, pulsing with warm light"
   details:
     pedestal:
       name: "Quartz Pedestal"
@@ -173,12 +153,9 @@ elder_grove:
       destination: whispering_woods
       scene_description: "The path back through the whispering woods"
       destination_known: true
-  items: []
-  item_placements: {}
-  npcs:
-    - spirit_dryad
   npc_placements:
-    spirit_dryad: "fades in and out of existence near the Oak's trunk, looking weeping"
+    spirit_dryad:
+      placement: "fades in and out of existence near the Oak's trunk, looking weeping"
   details:
     oak:
       name: "Great Singing Oak"

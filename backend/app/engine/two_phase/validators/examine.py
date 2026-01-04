@@ -107,55 +107,47 @@ class ExamineValidator:
                     in_inventory=False,
                 )
 
-        # Check items at location
+        # V3: Check items at location via item_placements
         item = world.get_item(target_id)
+        if item and location and target_id in location.item_placements:
+            # V3: Check visibility using resolver with ItemPlacement
+            placement = location.item_placements[target_id]
+            is_visible, reason = self._visibility_resolver.analyze_item_visibility(
+                placement, target_id, state
+            )
+            if not is_visible and reason != "taken":
+                return invalid_result(
+                    code=RejectionCode.ITEM_NOT_VISIBLE,
+                    reason="You don't see anything like that here.",
+                )
+
+            return valid_result(
+                entity_type="item",
+                entity_id=target_id,
+                entity_name=item.name,
+                description=item.examine_description or f"You examine the {item.name}.",
+                scene_description=item.scene_description,
+                in_inventory=False,
+            )
+
+        # Item exists but not at this location
         if item:
-            # Check if item is at current location
-            # Item can be in location.items list OR have item.location set
-            item_at_location = (
-                location and target_id in location.items
-            ) or item.location == state.current_location
-
-            if item_at_location:
-                # Check visibility using resolver
-                is_visible, reason = self._visibility_resolver.analyze_item_visibility(
-                    item, target_id, state
-                )
-                if not is_visible and reason != "taken":
-                    return invalid_result(
-                        code=RejectionCode.ITEM_NOT_VISIBLE,
-                        reason="You don't see anything like that here.",
-                    )
-
-                return valid_result(
-                    entity_type="item",
-                    entity_id=target_id,
-                    entity_name=item.name,
-                    description=item.examine_description
-                    or f"You examine the {item.name}.",
-                    scene_description=item.scene_description,
-                    in_inventory=False,
-                )
-
-            # Item exists but not at this location
             return invalid_result(
                 code=RejectionCode.ITEM_NOT_HERE,
                 reason="You don't see that here.",
             )
 
-        # Check NPCs
-        if location:
-            for npc_id in location.npcs:
-                if npc_id == target_id:
-                    npc = world.get_npc(npc_id)
-                    if npc:
-                        return valid_result(
-                            entity_type="npc",
-                            entity_id=target_id,
-                            entity_name=npc.name,
-                            description=npc.appearance or f"You see {npc.name}.",
-                            in_inventory=False,
-                        )
+        # V3: Check NPCs via npc_placements
+        if location and target_id in location.npc_placements:
+            npc = world.get_npc(target_id)
+            if npc:
+                return valid_result(
+                    entity_type="npc",
+                    entity_id=target_id,
+                    entity_name=npc.name,
+                    description=npc.appearance or f"You see {npc.name}.",
+                    in_inventory=False,
+                )
 
         # Target not found
         return invalid_result(

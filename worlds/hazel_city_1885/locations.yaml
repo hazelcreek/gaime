@@ -7,14 +7,12 @@ sheriff_office:
       destination: main_street_south
       scene_description: "The open doorway leading out to the sun-bleached street"
       destination_known: true
-  items:
-    - armory_key
   item_placements:
-    armory_key: "hangs on a nail behind the heavy oak desk"
-  npcs:
-    - sheriff_hayes
+    armory_key:
+      placement: "hangs on a nail behind the heavy oak desk"
   npc_placements:
-    sheriff_hayes: "slumps in the wooden chair, clutching his bandaged leg"
+    sheriff_hayes:
+      placement: "slumps in the wooden chair, clutching his bandaged leg"
   details:
     desk:
       name: "Oak Desk"
@@ -37,10 +35,6 @@ main_street_south:
       destination: general_store
       scene_description: "The General Store's creaking sign swaying in the hot wind"
       destination_known: true
-  items: []
-  item_placements: {}
-  npcs: []
-  npc_placements: {}
   details: {}
 
 general_store:
@@ -52,16 +46,17 @@ general_store:
       destination: main_street_south
       scene_description: "The bright rectangle of the doorway leading back to the sweltering street"
       destination_known: true
-  items:
-    - dynamite_stick
-    - whiskey_bottle
   item_placements:
-    dynamite_stick: "is tucked almost out of sight behind a jar of pickled eggs"
-    whiskey_bottle: "is hidden behind the flour sacks on the back shelf"
-  npcs:
-    - shopkeeper_silas
+    dynamite_stick:
+      placement: "is tucked almost out of sight behind a jar of pickled eggs"
+    whiskey_bottle:
+      placement: "is hidden behind the flour sacks on the back shelf"
+      hidden: true
+      find_condition:
+        requires_flag: silas_revealed_whiskey
   npc_placements:
-    shopkeeper_silas: "nervously polishes the counter, eyes darting to the door"
+    shopkeeper_silas:
+      placement: "nervously polishes the counter, eyes darting to the door"
   details:
     shelves:
       name: "Store Shelves"
@@ -92,12 +87,9 @@ main_street_center:
       destination: livery_stable
       scene_description: "The open barn doors of the Livery Stable, smelling of horses and hay"
       destination_known: true
-  items: []
-  item_placements: {}
-  npcs:
-    - town_drunk
   npc_placements:
-    town_drunk: "lies passed out in the shadow of the water trough"
+    town_drunk:
+      placement: "lies passed out in the shadow of the water trough"
   details:
     trough:
       name: "Water Trough"
@@ -112,14 +104,12 @@ livery_stable:
       destination: main_street_center
       scene_description: "The bright street outside contrasting with the gloom of the stable"
       destination_known: true
-  items:
-    - rope_coil
   item_placements:
-    rope_coil: "hangs looped over a wooden post near the entrance"
-  npcs:
-    - stable_boy_timmy
+    rope_coil:
+      placement: "hangs looped over a wooden post near the entrance"
   npc_placements:
-    stable_boy_timmy: "hides behind a bale of hay, peeking out fearfully"
+    stable_boy_timmy:
+      placement: "hides behind a bale of hay, peeking out fearfully"
   details:
     forge:
       name: "Cold Forge"
@@ -142,14 +132,12 @@ grand_saloon_porch:
       destination: back_alley
       scene_description: "A narrow, trash-strewn path winding around the side of the building"
       destination_known: true
-  items:
-    - wanted_poster
   item_placements:
-    wanted_poster: "is nailed to a support beam, flapping in the hot wind"
-  npcs:
-    - goon_lefty
+    wanted_poster:
+      placement: "is nailed to a support beam, flapping in the hot wind"
   npc_placements:
-    goon_lefty: "leans against the wall, whittling a stick with a large knife"
+    goon_lefty:
+      placement: "leans against the wall, whittling a stick with a large knife"
   details: {}
 
 back_alley:
@@ -165,12 +153,9 @@ back_alley:
       destination: saloon_balcony
       scene_description: "A rickety ladder climbing up to an open window on the balcony level"
       destination_known: true
-  items:
-    - empty_crate
   item_placements:
-    empty_crate: "sits overturned near the wall beneath the ladder"
-  npcs: []
-  npc_placements: {}
+    empty_crate:
+      placement: "sits overturned near the wall beneath the ladder"
   details:
     ladder:
       name: "Broken Ladder"
@@ -189,16 +174,14 @@ grand_saloon:
       destination: saloon_balcony
       scene_description: "A grand staircase curving up to the balcony overlooking the room"
       destination_known: true
-  items:
-    - whiskey_shot
   item_placements:
-    whiskey_shot: "sits abandoned on a sticky table near the door"
-  npcs:
-    - jackal_boone
-    - piano_player
+    whiskey_shot:
+      placement: "sits abandoned on a sticky table near the door"
   npc_placements:
-    jackal_boone: "sits at the center table, cleaning a massive revolver"
-    piano_player: "freezes at the keys of the upright piano in the corner"
+    jackal_boone:
+      placement: "sits at the center table, cleaning a massive revolver"
+    piano_player:
+      placement: "freezes at the keys of the upright piano in the corner"
   details: {}
 
 saloon_balcony:
@@ -218,12 +201,9 @@ saloon_balcony:
       destination: back_alley
       scene_description: "An open window leading to a rickety ladder descending to the muddy alley"
       destination_known: true
-  items:
-    - winchester_rifle
   item_placements:
-    winchester_rifle: "leans against the railing, forgotten by a drunken outlaw"
-  npcs: []
-  npc_placements: {}
+    winchester_rifle:
+      placement: "leans against the railing, forgotten by a drunken outlaw"
   details: {}
 
 secret_room:
@@ -235,12 +215,9 @@ secret_room:
       destination: saloon_balcony
       scene_description: "The door leading back to the noisy balcony"
       destination_known: true
-  items:
-    - train_schedule
   item_placements:
-    train_schedule: "is pinned to the wall with a knife"
-  npcs: []
-  npc_placements: {}
+    train_schedule:
+      placement: "is pinned to the wall with a knife"
   details:
     maps:
       name: "Railroad Maps"

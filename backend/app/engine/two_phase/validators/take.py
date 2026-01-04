@@ -95,19 +95,18 @@ class TakeValidator:
                 reason="You don't see anything like that here.",
             )
 
-        # Check if item is at current location
+        # V3: Check if item is at current location via item_placements
         location = world.get_location(state.current_location)
-        if not location or target_id not in location.items:
-            # Also check item.location field
-            if item.location != state.current_location:
-                return invalid_result(
-                    code=RejectionCode.ITEM_NOT_HERE,
-                    reason="You don't see that here.",
-                )
+        if not location or target_id not in location.item_placements:
+            return invalid_result(
+                code=RejectionCode.ITEM_NOT_HERE,
+                reason="You don't see that here.",
+            )
 
-        # Check visibility using resolver
+        # V3: Check visibility using resolver with ItemPlacement
+        placement = location.item_placements[target_id]
         is_visible, reason = self._visibility_resolver.analyze_item_visibility(
-            item, target_id, state
+            placement, target_id, state
         )
         if not is_visible and reason != "taken":
             return invalid_result(

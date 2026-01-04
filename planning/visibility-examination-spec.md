@@ -2,7 +2,7 @@
 
 A comprehensive specification for unified visibility semantics, visual descriptions, examination mechanics, and destination visibility for exits.
 
-> **Status**: Phase 3 Complete — January 2026
+> **Status**: Phase 3.5 Complete — January 2026
 > **Related**: [Two-Phase Game Loop](./two-phase-game-loop-spec.md) | [Game Mechanics Design](../ideas/game-mechanics-design.md) | [Vision](../docs/VISION.md)
 
 ---
@@ -1680,60 +1680,80 @@ The following fields and patterns are deprecated in V3:
 - Game state updated: added `revealed_exits: dict[str, set[str]]` for future Phase 4 flag/examine reveals
 - Destination reveal logic: Only `on_visit` auto-reveal implemented in Phase 3; `reveal_on_flag` and `reveal_on_examine` triggers deferred to Phase 4
 
-### Phase 3.5: Unified Visibility Model (V3 Schema)
+### Phase 3.5: Unified Visibility Model (V3 Schema) ✅
 
 **Goal**: Implement location-bound visibility for all entity types
 
-#### Phase 3.5a: Schema Updates
+#### Phase 3.5a: Schema Updates ✅
 
-- [ ] Add `ItemPlacement` model to `models/world.py`
-- [ ] Add `NPCPlacement` model to `models/world.py`
-- [ ] Add `hidden` + `find_condition` fields to `ExitDefinition`
-- [ ] Add `hidden` + `find_condition` fields to `DetailDefinition`
-- [ ] Update `Location` model: change `item_placements` type from `dict[str, str]` to `dict[str, ItemPlacement | str]`
-- [ ] Update `Location` model: change `npc_placements` type from `dict[str, str]` to `dict[str, NPCPlacement | str]`
-- [ ] Remove `hidden`, `find_condition`, `location` from `Item` model
-- [ ] Remove `items` and `npcs` lists from `Location` model
-- [ ] Update validation script for V3 schema
+- [x] Add `ItemPlacement` model to `models/world.py`
+- [x] Add `NPCPlacement` model to `models/world.py`
+- [x] Add `hidden` + `find_condition` fields to `ExitDefinition`
+- [x] Add `hidden` + `find_condition` fields to `DetailDefinition`
+- [x] Update `Location` model: change `item_placements` type to `dict[str, ItemPlacement]`
+- [x] Update `Location` model: change `npc_placements` type to `dict[str, NPCPlacement]`
+- [x] Remove `hidden`, `find_condition`, `location` from `Item` model
+- [x] Remove `items` and `npcs` lists from `Location` model
+- [x] Remove `reveals_exit` from `InteractionEffect` model
 
-**Tests**: Validation script passes on V3 YAML
+**Tests**: Schema updated, models defined ✅
 
-#### Phase 3.5b: World Migration (V3)
+#### Phase 3.5b: World Migration (V3) ✅
 
-- [ ] Migrate hidden items (4 total):
-  - [ ] cursed-manor: `thornwood_amulet` → nursery.item_placements
-  - [ ] uss-enterprise-d: `replacement_isolinear_chip` → location.item_placements
-  - [ ] uss-enterprise-d: `phase_inverter` → location.item_placements
-  - [ ] hazel_city_1885: `whiskey_bottle` → location.item_placements
-- [ ] Migrate hidden exits (9 total):
-  - [ ] cursed-manor: library → secret_passage
-  - [ ] booty-bay-ballad: town_square → smugglers_cove_entrance
-  - [ ] booty-bay-ballad: crows_nest → zipline
-  - [ ] islay-mist-mystery: malt_barn → managers_office
-  - [ ] islay-mist-mystery: malt_barn → smugglers_cove
-  - [ ] automaton-isle: lighthouse_tower → shipwreck_beach
-  - [ ] automaton-isle: overgrown_path → hidden_hollow
-  - [ ] automaton-isle: clockwork_plaza → memory_archive
-  - [ ] automaton-isle: boiler_room → observatory_cliffs
-- [ ] Remove redundant `items` and `npcs` lists from all locations
-- [ ] Remove `reveals_exit` from interactions (replaced by hidden exits)
-- [ ] Remove `Location.requires` used for exit gating (replaced by exit visibility)
-- [ ] Validate all migrated worlds
+- [x] Migrate hidden items (4 total):
+  - [x] cursed-manor: `thornwood_amulet` → nursery.item_placements
+  - [x] uss-enterprise-d: `replacement_isolinear_chip` → location.item_placements
+  - [x] uss-enterprise-d: `phase_inverter` → location.item_placements
+  - [x] hazel_city_1885: `whiskey_bottle` → location.item_placements
+- [x] Migrate hidden exits (9 total):
+  - [x] cursed-manor: library → secret_passage
+  - [x] booty-bay-ballad: town_square → smugglers_cove_entrance
+  - [x] booty-bay-ballad: crows_nest → zipline
+  - [x] islay-mist-mystery: malt_barn → managers_office
+  - [x] islay-mist-mystery: malt_barn → smugglers_cove
+  - [x] automaton-isle: lighthouse_tower → shipwreck_beach
+  - [x] automaton-isle: overgrown_path → hidden_hollow
+  - [x] automaton-isle: clockwork_plaza → memory_archive
+  - [x] automaton-isle: boiler_room → observatory_cliffs
+- [x] Remove redundant `items` and `npcs` lists from all locations
+- [x] Remove `reveals_exit` from interactions (replaced by hidden exits)
+- [x] Migrate test fixture to V3 schema
+- [x] Validate all migrated worlds
 
-**Tests**: All worlds load and pass validation
+**Tests**: All worlds load and pass validation ✅
 
-#### Phase 3.5c: Engine Integration
+**Implementation Notes** (January 2026):
+- All 9 game worlds + test fixture migrated to V3 schema
+- `item_placements` now use structured `ItemPlacement` objects with `placement`, `hidden`, `find_condition`
+- `npc_placements` now use structured `NPCPlacement` objects
+- Hidden items moved from `Item.hidden`/`Item.find_condition` to `ItemPlacement.hidden`/`ItemPlacement.find_condition`
+- Hidden exits implemented via `ExitDefinition.hidden`/`ExitDefinition.find_condition` (replaces `reveals_exit` pattern)
+- Removed `Item.location` field - location now determined by presence in `item_placements`
 
-- [ ] Update `WorldLoader._load_locations_yaml()` to parse `ItemPlacement` and `NPCPlacement`
-- [ ] Update `VisibilityResolver._get_visible_items()` to check placement visibility
-- [ ] Update `VisibilityResolver._get_visible_exits()` to filter hidden exits
-- [ ] Update `VisibilityResolver._get_visible_details()` to filter hidden details
-- [ ] Update `VisibilityResolver._get_npcs_debug()` for placement visibility
-- [ ] Add helper method `_check_entity_visibility(hidden, find_condition, flags)`
-- [ ] Update debug snapshot methods for new visibility fields
-- [ ] Run full test suite
+#### Phase 3.5c: Engine Integration ✅
 
-**Tests**: All existing tests pass with V3 schema
+- [x] Update `WorldLoader._load_locations_yaml()` to parse `ItemPlacement` and `NPCPlacement`
+- [x] Update `VisibilityResolver._get_visible_items()` to check placement visibility
+- [x] Update `VisibilityResolver._get_visible_exits()` to filter hidden exits
+- [x] Update `VisibilityResolver._get_visible_details()` to filter hidden details
+- [x] Update `VisibilityResolver._get_npcs_debug()` for placement visibility
+- [x] Add helper method `_check_entity_visibility(hidden, find_condition, flags)`
+- [x] Update debug snapshot methods for new visibility fields
+- [x] Update `TakeValidator` to use `item_placements` for visibility
+- [x] Update `ExamineValidator` to use `item_placements` and `npc_placements`
+- [x] Update `analyze_item_visibility()` signature to accept `ItemPlacement`
+- [x] Update test fixtures in `conftest.py` for V3 schema
+- [x] Add V3-specific tests for hidden exits, details, and NPCs
+- [x] Run full test suite
+
+**Tests**: All 263 tests pass with V3 schema ✅
+
+**Implementation Notes** (January 2026):
+- `_check_entity_visibility()` is a module-level helper in `visibility.py` providing unified visibility logic
+- Visibility rules: `hidden=False` → visible; `hidden=True` + no condition → hidden; `hidden=True` + condition met → "revealed"
+- `is_item_visible()` now checks `ItemPlacement` in current location
+- Added 7 new V3-specific tests covering hidden exits, details, and NPCs with flag conditions
+- Validators updated to use V3 schema: `item_placements`/`npc_placements` instead of `items`/`npcs` lists
 
 ### Phase 4: Examination Mechanics (Week 2)
 

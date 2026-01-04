@@ -50,7 +50,8 @@ See [two-phase-game-loop-spec.md](two-phase-game-loop-spec.md) for full specific
 |-------|-------|--------|
 | 1 | Schema Definition | ✅ Complete |
 | 2 | World Migration | ✅ Complete |
-| 3 | Code Integration | ⚪ Planned |
+| 3 | Code Integration | ✅ Complete |
+| 3.5 | Unified Visibility Model (V3) | ✅ Complete |
 | 4 | Examination Mechanics | ⚪ Planned |
 | 5 | Narrator Integration | ⚪ Planned |
 | 6 | Image Generation | ⚪ Planned |

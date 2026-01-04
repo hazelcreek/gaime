@@ -7,14 +7,12 @@ cell_block_c:
       destination: mess_hall
       scene_description: "The corridor leading to the Nutrient Dispensary, now unblocked by your failed barrier"
       destination_known: true
-  items:
-    - stale_ration
   item_placements:
-    stale_ration: "sits half-eaten on a metal tray beside your bed slab, the grey cube barely touched"
-  npcs:
-    - old_marcus
+    stale_ration:
+      placement: "sits half-eaten on a metal tray beside your bed slab, the grey cube barely touched"
   npc_placements:
-    old_marcus: "lies on the bed slab in the adjacent cell, his weathered face pressed against the flickering barrier, whispering urgently"
+    old_marcus:
+      placement: "lies on the bed slab in the adjacent cell, his weathered face pressed against the flickering barrier, whispering urgently"
   details:
     barrier:
       name: "Energy Barrier"
@@ -43,12 +41,9 @@ mess_hall:
       destination: courtyard_access
       scene_description: "Heavy blast doors leading to the Courtyard Access airlock"
       destination_known: true
-  items: []
-  item_placements: {}
-  npcs:
-    - unit_88
   npc_placements:
-    unit_88: "stands at the dispensing station with an unsettling smile, mechanically distributing grey paste to a queue of hollow-eyed inmates"
+    unit_88:
+      placement: "stands at the dispensing station with an unsettling smile, mechanically distributing grey paste to a queue of hollow-eyed inmates"
   details:
     screen:
       name: "Propaganda Screen"
@@ -70,12 +65,9 @@ kitchen_scullery:
       destination: waste_processing
       scene_description: "A dark waste chute dropping into darkness, the smell of rot rising from below"
       destination_known: false
-  items:
-    - rusty_pipe
   item_placements:
-    rusty_pipe: "lies loose beside the rumbling dishwasher, its corroded length rattling with each machine cycle"
-  npcs: []
-  npc_placements: {}
+    rusty_pipe:
+      placement: "lies loose beside the rumbling dishwasher, its corroded length rattling with each machine cycle"
   details:
     chute:
       name: "Waste Chute"
@@ -98,10 +90,6 @@ courtyard_access:
       destination: exercise_yard
       scene_description: "The partially open blast door leading to the Exercise Yard outside"
       destination_known: true
-  items: []
-  item_placements: {}
-  npcs: []
-  npc_placements: {}
   details:
     scanner:
       name: "Retinal Scanner"
@@ -116,14 +104,12 @@ security_kiosk:
       destination: courtyard_access
       scene_description: "The door back to the Courtyard Access airlock"
       destination_known: true
-  items:
-    - access_card_blue
   item_placements:
-    access_card_blue: "lies carelessly on the main console desk, left behind by whoever last manned this station"
-  npcs:
-    - tech_scavenger_rin
+    access_card_blue:
+      placement: "lies carelessly on the main console desk, left behind by whoever last manned this station"
   npc_placements:
-    tech_scavenger_rin: "crouches beneath the monitor bank, fingers flying over exposed circuitry, glancing nervously at the door every few seconds"
+    tech_scavenger_rin:
+      placement: "crouches beneath the monitor bank, fingers flying over exposed circuitry, glancing nervously at the door every few seconds"
   details:
     monitors:
       name: "Monitor Bank"
@@ -142,14 +128,12 @@ exercise_yard:
       destination: maintenance_shed
       scene_description: "A small maintenance shed barely visible at the north edge of the yard"
       destination_known: true
-  items:
-    - wire_cutters
   item_placements:
-    wire_cutters: "lie half-buried in the churned mud near the fence line, their insulated handles just visible"
-  npcs:
-    - smuggler_jax
+    wire_cutters:
+      placement: "lie half-buried in the churned mud near the fence line, their insulated handles just visible"
   npc_placements:
-    smuggler_jax: "leans against the fence in a shadow between searchlight sweeps, watching the yard with calculating eyes"
+    smuggler_jax:
+      placement: "leans against the fence in a shadow between searchlight sweeps, watching the yard with calculating eyes"
   details:
     fence:
       name: "Electrified Fence"
@@ -171,12 +155,9 @@ maintenance_shed:
       destination: old_sewers
       scene_description: "A rusted hatch beneath oily rags marked with a broken chain symbol"
       destination_known: false
-  items:
-    - flashlight
   item_placements:
-    flashlight: "has rolled beneath a dusty workbench, its military-grade casing barely visible in the gloom"
-  npcs: []
-  npc_placements: {}
+    flashlight:
+      placement: "has rolled beneath a dusty workbench, its military-grade casing barely visible in the gloom"
   details:
     hatch:
       name: "Hidden Hatch"
@@ -195,10 +176,6 @@ waste_processing:
       destination: old_sewers
       scene_description: "A crumbling passage leading into old pre-invasion tunnels"
       destination_known: false
-  items: []
-  item_placements: {}
-  npcs: []
-  npc_placements: {}
   details:
     incinerator:
       name: "Incinerator"
@@ -217,12 +194,9 @@ old_sewers:
       destination: waste_processing
       scene_description: "The passage connecting to the prison's Waste Processing facility"
       destination_known: true
-  items:
-    - resistance_map
   item_placements:
-    resistance_map: "is wedged into a crack in the crumbling brick wall, folded tight and stained with damp"
-  npcs: []
-  npc_placements: {}
+    resistance_map:
+      placement: "is wedged into a crack in the crumbling brick wall, folded tight and stained with damp"
   details:
     graffiti:
       name: "Resistance Graffiti"

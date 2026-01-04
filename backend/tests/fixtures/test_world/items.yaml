@@ -1,10 +1,12 @@
-# Test World Items
+# Test World Items (V3 Schema)
 #
 # Provides test coverage for:
 # - Portable items (test_key)
 # - Non-portable containers (container_box)
-# - Hidden items with reveal conditions (hidden_gem)
+# - Hidden items with reveal conditions (hidden_gem) - visibility now in locations.yaml
 # - Key/unlock mechanics
+#
+# V3: Removed location, hidden, find_condition - now defined in locations.yaml item_placements
 
 test_key:
   name: "Test Key"
@@ -12,7 +14,6 @@ test_key:
   examine_description: "A simple brass key, slightly worn from use."
   scene_description: "A brass key catches the light."
   take_description: "You pocket the brass key."
-  location: start_room
   unlocks: locked_room
 
 container_box:
@@ -21,7 +22,6 @@ container_box:
   examine_description: |
     A small wooden box with a brass clasp.
     It looks like it can be opened.
-  location: start_room
   properties:
     container: true
 
@@ -33,10 +33,7 @@ hidden_gem:
     It feels warm to the touch.
   scene_description: "A beautiful gem glints from inside the box."
   take_description: "You carefully pick up the glowing gem."
-  location: start_room
-  hidden: true
-  find_condition:
-    requires_flag: box_opened
+  # V3: hidden and find_condition moved to locations.yaml item_placements
   clues:
     - hint_for: puzzle
       reveals: "This gem seems to resonate with something..."

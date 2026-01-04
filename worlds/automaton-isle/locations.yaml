@@ -1,344 +1,336 @@
 shipwreck_beach:
-  name: "Soot-Stained Sands"
+  name: Soot-Stained Sands
   atmosphere: |
     Black sand clings to your boots. To the west, the ocean churns with wreckage. To the east, a dense jungle hums with mechanical clicking sounds.
   exits:
     north:
       destination: tidal_pools
-      scene_description: "Rocky outcrops leading to shimmering tide pools"
+      scene_description: Rocky outcrops leading to shimmering tide pools
       destination_known: false
     east:
       destination: jungle_path
-      scene_description: "A gap in the dense mechanical jungle, clicking with hidden machinery"
+      scene_description: A gap in the dense mechanical jungle, clicking with hidden machinery
       destination_known: false
     in:
       destination: captains_quarters
-      scene_description: "A chunk of the ship's cabin that washed ashore, tilted at an angle"
+      scene_description: A chunk of the ship's cabin that washed ashore, tilted at an angle
       destination_known: true
-  items:
-    - dry_driftwood
   item_placements:
-    dry_driftwood: "A pile of sun-bleached timber sits high on the dunes."
-  npcs: []
+    dry_driftwood:
+      placement: A pile of sun-bleached timber sits high on the dunes.
   npc_placements: {}
   details:
     west:
-      name: "Ocean Wreckage"
-      scene_description: "The wreckage is too far out to swim to, but a chunk of the cabin has washed up nearby."
+      name: Ocean Wreckage
+      scene_description: |-
+        The wreckage is too far out to swim to, but a chunk of the cabin has washed up nearby.
     up:
-      name: "Lighthouse View"
-      scene_description: "You see the Lighthouse Balcony high above. A broken zipline cable dangles from it."
-
+      name: Lighthouse View
+      scene_description: |-
+        You see the Lighthouse Balcony high above. A broken zipline cable dangles from it.
 captains_quarters:
-  name: "Wrecked Cabin"
+  name: Wrecked Cabin
   atmosphere: |
     The splintered remains of the ship's bridge. It's tilted at a sickening angle.
   exits:
     out:
       destination: shipwreck_beach
-      scene_description: "The jagged opening back to the black sand beach"
+      scene_description: The jagged opening back to the black sand beach
       destination_known: true
-  items:
-    - leather_straps
   item_placements:
-    leather_straps: "A torn safety harness with usable leather straps hangs from the wheel."
-  npcs: []
+    leather_straps:
+      placement: A torn safety harness with usable leather straps hangs from the wheel.
   npc_placements: {}
   details: {}
-
 tidal_pools:
-  name: "Oily Tide Pools"
+  name: Oily Tide Pools
   atmosphere: |
     Pools of iridescent water trapped in basalt rock. Small mechanical crabs scuttle about, harvesting rust flakes.
   exits:
     south:
       destination: shipwreck_beach
-      scene_description: "The path back to the black sand beach"
+      scene_description: The path back to the black sand beach
       destination_known: true
     north:
       destination: lighthouse_base
-      scene_description: "A rocky path leading to the towering rusty lighthouse"
+      scene_description: A rocky path leading to the towering rusty lighthouse
       destination_known: true
-  items:
-    - polished_sea_glass
   item_placements:
-    polished_sea_glass: "A giant metal clam shell is clamped shut near the water's edge."
-  npcs:
-    - hermit_crab_droid
+    polished_sea_glass:
+      placement: A giant metal clam shell is clamped shut near the water's edge.
   npc_placements:
-    hermit_crab_droid: "A large droid wearing a shipping crate as a shell blocks the path to the best pools."
+    hermit_crab_droid:
+      placement: |-
+        A large droid wearing a shipping crate as a shell blocks the path to the best pools.
   interactions:
     open_clam:
       triggers:
-        - "open clam"
-        - "pry clam"
-      narrative_hint: "You pry the metal hinge. Inside sits a perfectly smooth, glowing piece of glass."
+      - open clam
+      - pry clam
+      narrative_hint: You pry the metal hinge. Inside sits a perfectly smooth, glowing piece of glass.
       sets_flag: clam_opened
   details: {}
-
 lighthouse_base:
-  name: "The Rusty Spire"
+  name: The Rusty Spire
   atmosphere: |
     The base of a towering lighthouse. Massive pneumatic tubes run up the walls, currently silent and cold.
   exits:
     south:
       destination: tidal_pools
-      scene_description: "The rocky path back to the iridescent tide pools"
+      scene_description: The rocky path back to the iridescent tide pools
       destination_known: true
     up:
       destination: lighthouse_balcony
-      scene_description: "A massive steam-powered elevator shaft ascending into the tower"
+      scene_description: A massive steam-powered elevator shaft ascending into the tower
       destination_known: true
-  items: []
   item_placements: {}
-  npcs: []
   npc_placements: {}
   requires:
     flag: boiler_pressure_restored
   details:
     tubes:
-      name: "Pneumatic Tubes"
-      scene_description: "The pressure gauges are at zero. They connect to underground pipes leading inland."
+      name: Pneumatic Tubes
+      scene_description: |-
+        The pressure gauges are at zero. They connect to underground pipes leading inland.
     elevator:
-      name: "Steam Elevator"
-      scene_description: "The call button is dead. The system needs steam pressure."
-
+      name: Steam Elevator
+      scene_description: The call button is dead. The system needs steam pressure.
 lighthouse_balcony:
-  name: "The Beacon Deck"
+  name: The Beacon Deck
   atmosphere: |
     The wind whips around you. The massive brass lamp housing stands dark in the center, missing its primary lens.
   exits:
     down:
       destination: lighthouse_base
-      scene_description: "The steam elevator descending back to the lighthouse base"
+      scene_description: The steam elevator descending back to the lighthouse base
       destination_known: true
     zip:
       destination: shipwreck_beach
-      scene_description: "A broken zipline cable dangling toward the distant beach below"
+      scene_description: A broken zipline cable dangling toward the distant beach below
       destination_known: true
-  items: []
+      hidden: true
+      find_condition:
+        requires_flag: zipline_repaired
   item_placements: {}
-  npcs: []
   npc_placements: {}
   interactions:
     repair_zipline:
       triggers:
-        - "use leather_straps on zipline"
-        - "fix zipline"
-      narrative_hint: "You secure the rotted harness with the fresh leather. The slide down to the beach is now safe."
-      reveals_exit: shipwreck_beach
+      - use leather_straps on zipline
+      - fix zipline
+      narrative_hint: |-
+        You secure the rotted harness with the fresh leather. The slide down to the beach is now safe.
+      sets_flag: zipline_repaired
     light_beacon:
       triggers:
-        - "use fresnel_lens on lamp"
-        - "insert lens"
-      narrative_hint: "The lens clicks into place. The light intensifies, beaming out to sea."
+      - use fresnel_lens on lamp
+      - insert lens
+      narrative_hint: The lens clicks into place. The light intensifies, beaming out to sea.
       sets_flag: beacon_lit
   details: {}
-
 jungle_path:
-  name: "Clockwork Jungle"
+  name: Clockwork Jungle
   atmosphere: |
     Bronze vines coil around ironwood trees. The canopy is a mesh of solar-gathering leaves.
   exits:
     west:
       destination: shipwreck_beach
-      scene_description: "The path back through the mechanical foliage to the beach"
+      scene_description: The path back through the mechanical foliage to the beach
       destination_known: true
     east:
       destination: graveyard
-      scene_description: "A trail of rusted gears leading deeper into the island"
+      scene_description: A trail of rusted gears leading deeper into the island
       destination_known: false
     north:
       destination: abandoned_mines
-      scene_description: "A dark tunnel entrance carved into the rocky hillside"
+      scene_description: A dark tunnel entrance carved into the rocky hillside
       destination_known: false
-  items: []
+    in:
+      destination: hidden_hollow
+      scene_description: A hidden compartment inside the hollow tree
+      destination_known: true
+      hidden: true
+      find_condition:
+        requires_flag: tree_opened
   item_placements: {}
-  npcs: []
   npc_placements: {}
   interactions:
     cut_vines:
       triggers:
-        - "use machete on vines"
-        - "cut vines"
-      narrative_hint: "You hack away the thick cables choking a hollow tree, revealing a hidden compartment."
+      - use machete on vines
+      - cut vines
+      narrative_hint: |-
+        You hack away the thick cables choking a hollow tree, revealing a hidden compartment.
       sets_flag: tree_opened
-      reveals_exit: hidden_hollow
   details: {}
-
 hidden_hollow:
-  name: "Hollow Tree Cache"
+  name: Hollow Tree Cache
   atmosphere: |
     A small stash inside the artificial tree.
   exits:
     out:
       destination: jungle_path
-      scene_description: "The opening back to the clockwork jungle"
+      scene_description: The opening back to the clockwork jungle
       destination_known: true
-  items:
-    - golden_oil_can
   item_placements:
-    golden_oil_can: "A pristine, golden oil can sits on a velvet cushion."
-  npcs: []
+    golden_oil_can:
+      placement: A pristine, golden oil can sits on a velvet cushion.
   npc_placements: {}
   details: {}
-
 graveyard:
-  name: "Memorial of Gears"
+  name: Memorial of Gears
   atmosphere: |
     Rows of rusting chassis stand like tombstones. In the center, a single human grave: 'My Beloved Daughter'.
   exits:
     west:
       destination: jungle_path
-      scene_description: "The path back through the clockwork jungle"
+      scene_description: The path back through the clockwork jungle
       destination_known: true
     north:
       destination: workshop_gate
-      scene_description: "An imposing iron gate blocking the path northward"
+      scene_description: An imposing iron gate blocking the path northward
       destination_known: true
-  items: []
+    down:
+      destination: memory_archive
+      scene_description: A panel in the statue base revealing stairs leading down
+      destination_known: true
+      hidden: true
+      find_condition:
+        requires_flag: chess_won
   item_placements: {}
-  npcs:
-    - grandmaster_bot
   npc_placements:
-    grandmaster_bot: "A multi-armed robot sits motionless before a stone chess table."
+    grandmaster_bot:
+      placement: A multi-armed robot sits motionless before a stone chess table.
   details:
     statue:
-      name: "Inventor's Statue"
-      scene_description: "A statue of the Inventor overlooks the chess table. Its eyes seem to watch the board."
+      name: Inventor's Statue
+      scene_description: |-
+        A statue of the Inventor overlooks the chess table. Its eyes seem to watch the board.
   interactions:
     play_chess:
       triggers:
-        - "play chess"
-        - "move piece"
-      narrative_hint: "You execute a tricky gambit. The bot nods respectfully. A panel slides open in the statue's base."
-      reveals_exit: memory_archive
-
+      - play chess
+      - move piece
+      narrative_hint: |-
+        You execute a tricky gambit. The bot nods respectfully. A panel slides open in the statue's base.
+      sets_flag: chess_won
 memory_archive:
-  name: "Underground Archive"
+  name: Underground Archive
   atmosphere: |
     A cramped bunker lined with reel-to-reel tapes playing the Inventor's voice, lamenting the loss of his daughter.
   exits:
     out:
       destination: graveyard
-      scene_description: "The passage back up to the memorial grounds"
+      scene_description: The passage back up to the memorial grounds
       destination_known: true
-  items: []
   item_placements: {}
-  npcs: []
   npc_placements: {}
   details: {}
-
 workshop_gate:
-  name: "Iron Gates"
+  name: Iron Gates
   atmosphere: |
     A formidable iron gate blocks the path north. The keyhole is shaped like a complex gear.
   exits:
     south:
       destination: graveyard
-      scene_description: "The path back to the memorial of rusting chassis"
+      scene_description: The path back to the memorial of rusting chassis
       destination_known: true
     north:
       destination: workshop_interior
-      scene_description: "The massive iron gates with a gear-shaped keyhole"
+      scene_description: The massive iron gates with a gear-shaped keyhole
       destination_known: false
-  items:
-    - rusted_gear_key
   item_placements:
-    rusted_gear_key: "A skeleton in a scientist's coat is slumped against the gate, clutching a strange key."
-  npcs: []
+    rusted_gear_key:
+      placement: |-
+        A skeleton in a scientist's coat is slumped against the gate, clutching a strange key.
   npc_placements: {}
   requires:
     item: rusted_gear_key
   details: {}
-
 workshop_interior:
-  name: "The Tinkerer's Floor"
+  name: The Tinkerer's Floor
   atmosphere: |
     Workbenches are littered with half-finished child-sized robots. A massive water wheel dominates the back wall.
   exits:
     south:
       destination: workshop_gate
-      scene_description: "The iron gates leading back to the memorial grounds"
+      scene_description: The iron gates leading back to the memorial grounds
       destination_known: true
     north:
       destination: observatory_cliffs
-      scene_description: "A drawbridge leading across a chasm toward the cliffs"
+      scene_description: A drawbridge leading across a chasm toward the cliffs
       destination_known: false
-  items:
-    - machete
+    east:
+      destination: observatory_cliffs
+      scene_description: A drawbridge leading across a chasm toward the cliffs, now lowered
+      destination_known: true
+      hidden: true
+      find_condition:
+        requires_flag: drawbridge_lowered
   item_placements:
-    machete: "A heavy industrial machete is stuck into a wooden vice."
-  npcs: []
+    machete:
+      placement: A heavy industrial machete is stuck into a wooden vice.
   npc_placements: {}
   interactions:
     fix_wheel:
       triggers:
-        - "repair wheel"
-        - "turn valve"
-      narrative_hint: "You clear the debris jamming the gears. The wheel turns, and the drawbridge outside lowers with a groan."
+      - repair wheel
+      - turn valve
+      narrative_hint: |-
+        You clear the debris jamming the gears. The wheel turns, and the drawbridge outside lowers with a groan.
       sets_flag: drawbridge_lowered
-      reveals_exit: observatory_cliffs
   details: {}
-
 observatory_cliffs:
-  name: "Star-Gazer's Ridge"
+  name: Star-Gazer's Ridge
   atmosphere: |
     A high cliff overlooking the sea. A domed telescope building sits here, its door swinging in the wind.
   exits:
     south:
       destination: workshop_interior
-      scene_description: "The drawbridge leading back to the tinkerer's workshop"
+      scene_description: The drawbridge leading back to the tinkerer's workshop
       destination_known: true
-  items:
-    - pneumatic_schematic
   item_placements:
-    pneumatic_schematic: "A blueprint labeled 'Master Pressure Sequence' is pinned to the telescope."
-  npcs: []
+    pneumatic_schematic:
+      placement: A blueprint labeled 'Master Pressure Sequence' is pinned to the telescope.
   npc_placements: {}
   details: {}
-
 abandoned_mines:
-  name: "Coal Seam"
+  name: Coal Seam
   atmosphere: |
     A dark tunnel hacked into the rock. Tracks lead down into the dark.
   exits:
     south:
       destination: jungle_path
-      scene_description: "The tunnel opening back to the clockwork jungle"
+      scene_description: The tunnel opening back to the clockwork jungle
       destination_known: true
     down:
       destination: boiler_room
-      scene_description: "Rusted mine cart tracks descending into the depths"
+      scene_description: Rusted mine cart tracks descending into the depths
       destination_known: false
-  items:
-    - lump_of_coal
   item_placements:
-    lump_of_coal: "A few spilled lumps of anthracite coal lie near an overturned cart."
-  npcs: []
+    lump_of_coal:
+      placement: A few spilled lumps of anthracite coal lie near an overturned cart.
   npc_placements: {}
   details: {}
-
 boiler_room:
-  name: "The Heart of the Island"
+  name: The Heart of the Island
   atmosphere: |
     An intense heat radiates from the central furnace. Pipes hiss softly, waiting for pressure.
   exits:
     up:
       destination: abandoned_mines
-      scene_description: "The mine cart tracks leading back up to the surface"
+      scene_description: The mine cart tracks leading back up to the surface
       destination_known: true
-  items: []
   item_placements: {}
-  npcs:
-    - stoker_bot
   npc_placements:
-    stoker_bot: "A soot-covered bot shovels nothing into the cold furnace, stuck in a loop."
+    stoker_bot:
+      placement: A soot-covered bot shovels nothing into the cold furnace, stuck in a loop.
   interactions:
     stoke_furnace:
       triggers:
-        - "use dry_driftwood on furnace"
-        - "use lump_of_coal on furnace"
-      narrative_hint: "You arrange the wood and coal according to the schematic's airflow diagram. The fire roars to life, and the pressure gauges spike."
+      - use dry_driftwood on furnace
+      - use lump_of_coal on furnace
+      narrative_hint: |-
+        You arrange the wood and coal according to the schematic's airflow diagram. The fire roars to life, and the pressure gauges spike.
       sets_flag: boiler_pressure_restored
   details: {}

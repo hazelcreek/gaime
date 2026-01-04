@@ -24,14 +24,11 @@ entrance_hall:
       destination: upper_landing
       scene_description: "A grand staircase sweeping upward into shadow"
       destination_known: false
-  items:
-    - old_letter
-    - candlestick
   item_placements:
-    old_letter: "lies crumpled on the dusty side table beside the front door, as if dropped in haste"
-    candlestick: "sits on the narrow console table beneath the portraits, its candle melted to a stub"
-  npcs: []
-  npc_placements: {}
+    old_letter:
+      placement: "lies crumpled on the dusty side table beside the front door, as if dropped in haste"
+    candlestick:
+      placement: "sits on the narrow console table beneath the portraits, its candle melted to a stub"
   details:
     portraits:
       name: "Family Portraits"
@@ -68,14 +65,19 @@ library:
       destination: entrance_hall
       scene_description: "The archway leading back to the entrance hall"
       destination_known: true
-  items:
-    - dusty_tome
-    - reading_glasses
+    # V3: Hidden exit - revealed when found_secret_passage flag is set
+    secret:
+      destination: secret_passage
+      scene_description: "A dark passage behind the bookshelf where a section has swung inward"
+      destination_known: true
+      hidden: true
+      find_condition:
+        requires_flag: found_secret_passage
   item_placements:
-    dusty_tome: "lies open on the massive oak desk, its yellowed pages stirring in the draft"
-    reading_glasses: "rest beside the open book on the desk, as if their owner just stepped away"
-  npcs: []
-  npc_placements: {}
+    dusty_tome:
+      placement: "lies open on the massive oak desk, its yellowed pages stirring in the draft"
+    reading_glasses:
+      placement: "rest beside the open book on the desk, as if their owner just stepped away"
   details:
     books:
       name: "Bookshelves"
@@ -97,7 +99,7 @@ library:
         - "examine red book"
         - "pull the red book"
       narrative_hint: "As you pull the red book, you hear a mechanical click. A section of bookshelf swings inward, revealing a dark passage!"
-      reveals_exit: secret_passage
+      # V3: removed reveals_exit - now using hidden exit with find_condition
       sets_flag: found_secret_passage
     read_notes:
       triggers:
@@ -124,12 +126,7 @@ secret_passage:
       destination: ritual_chamber
       scene_description: "A narrow stone stairway descending into deeper darkness"
       destination_known: false
-  items: []
-  item_placements: {}
-  npcs: []
-  npc_placements: {}
-  requires:
-    flag: found_secret_passage
+  # V3: removed requires - access control is now via the hidden exit in library
   details:
     walls:
       name: "Stone Walls"
@@ -154,12 +151,9 @@ ritual_chamber:
       destination: secret_passage
       scene_description: "The narrow stone stairs leading back up to the secret passage"
       destination_known: true
-  items:
-    - grimoire
   item_placements:
-    grimoire: "rests upon the central pedestal, its pale leather binding seeming to glow faintly in the darkness"
-  npcs: []
-  npc_placements: {}
+    grimoire:
+      placement: "rests upon the central pedestal, its pale leather binding seeming to glow faintly in the darkness"
   details:
     symbols:
       name: "Blood Symbols"
@@ -202,14 +196,12 @@ dining_room:
       destination: kitchen
       scene_description: "A service door leading to the kitchen"
       destination_known: true
-  items:
-    - silver_key
   item_placements:
-    silver_key: "glints beneath the dining table, half-hidden among the dusty chair legs"
-  npcs:
-    - butler_jenkins
+    silver_key:
+      placement: "glints beneath the dining table, half-hidden among the dusty chair legs"
   npc_placements:
-    butler_jenkins: "stands rigidly beside the grandfather clock, his pale hands clasped before him, watching you with hollow eyes"
+    butler_jenkins:
+      placement: "stands rigidly beside the grandfather clock, his pale hands clasped before him, watching you with hollow eyes"
   details:
     table:
       name: "Dining Table"
@@ -240,12 +232,9 @@ kitchen:
       destination: basement
       scene_description: "A heavy door with an iron lock leading to the basement stairs"
       destination_known: true
-  items:
-    - kitchen_knife
   item_placements:
-    kitchen_knife: "lies on the stone preparation counter near the hearth, its blade stained dark"
-  npcs: []
-  npc_placements: {}
+    kitchen_knife:
+      placement: "lies on the stone preparation counter near the hearth, its blade stained dark"
   details:
     hearth:
       name: "Hearth"
@@ -277,12 +266,9 @@ basement:
       destination: kitchen
       scene_description: "The stairs leading back up to the kitchen"
       destination_known: true
-  items:
-    - ancient_dagger
   item_placements:
-    ancient_dagger: "lies half-buried in debris in the far corner, its black iron blade catching what little light filters down"
-  npcs: []
-  npc_placements: {}
+    ancient_dagger:
+      placement: "lies half-buried in debris in the far corner, its black iron blade catching what little light filters down"
   requires:
     item: iron_key
   details:
@@ -309,12 +295,9 @@ sitting_room:
       destination: entrance_hall
       scene_description: "The double doors leading back to the entrance hall"
       destination_known: true
-  items:
-    - family_photo
   item_placements:
-    family_photo: "sits in a tarnished silver frame on the mantelpiece, the family frozen in a moment of happiness"
-  npcs: []
-  npc_placements: {}
+    family_photo:
+      placement: "sits in a tarnished silver frame on the mantelpiece, the family frozen in a moment of happiness"
   details:
     piano:
       name: "Grand Piano"
@@ -362,10 +345,6 @@ upper_landing:
       destination: guest_room
       scene_description: "A plain door leading to the guest room"
       destination_known: false
-  items: []
-  item_placements: {}
-  npcs: []
-  npc_placements: {}
   details:
     sconces:
       name: "Wall Sconces"
@@ -392,12 +371,9 @@ master_bedroom:
       destination: upper_landing
       scene_description: "The door leading back to the upper landing"
       destination_known: true
-  items:
-    - iron_key
   item_placements:
-    iron_key: "hangs from a hook inside the wardrobe, cold and heavy, as if deliberately hidden away"
-  npcs: []
-  npc_placements: {}
+    iron_key:
+      placement: "hangs from a hook inside the wardrobe, cold and heavy, as if deliberately hidden away"
   details:
     bed:
       name: "Four-Poster Bed"
@@ -433,12 +409,13 @@ nursery:
       destination: upper_landing
       scene_description: "The faded blue door leading back to the upper landing"
       destination_known: true
-  items:
-    - thornwood_amulet
   item_placements:
-    thornwood_amulet: "glints beneath a loose floorboard near the smallest bed, hidden in the children's secret place"
-  npcs: []
-  npc_placements: {}
+    # V3: Hidden item - visibility controlled here, not in items.yaml
+    thornwood_amulet:
+      placement: "glints beneath a loose floorboard near the smallest bed, hidden in the children's secret place"
+      hidden: true
+      find_condition:
+        requires_flag: examined_drawings
   details:
     toys:
       name: "Toys"
@@ -484,12 +461,9 @@ guest_room:
       destination: upper_landing
       scene_description: "The plain door leading back to the upper landing"
       destination_known: true
-  items:
-    - matches
   item_placements:
-    matches: "rest on the writing desk beside a dried-out inkwell, as if left for a late-night letter"
-  npcs: []
-  npc_placements: {}
+    matches:
+      placement: "rest on the writing desk beside a dried-out inkwell, as if left for a late-night letter"
   details:
     bed:
       name: "Guest Bed"

@@ -26,6 +26,8 @@ from app.models.world import (
     ExitDefinition,
     DetailDefinition,
     ExaminationEffect,
+    ItemPlacement,
+    NPCPlacement,
 )
 
 
@@ -148,7 +150,7 @@ class WorldLoader:
         )
 
     def _load_locations_yaml(self, path: Path) -> dict[str, Location]:
-        """Load locations.yaml (V2 schema with structured exits and details)"""
+        """Load locations.yaml (V3 schema with location-bound visibility)"""
         if not path.exists():
             return {}
 
@@ -157,7 +159,7 @@ class WorldLoader:
 
         locations = {}
         for loc_id, loc_data in data.items():
-            # Parse exits as ExitDefinition objects
+            # Parse exits as ExitDefinition objects (V3: includes hidden/find_condition)
             exits = {}
             for direction, exit_data in loc_data.get("exits", {}).items():
                 if isinstance(exit_data, dict):
@@ -168,13 +170,15 @@ class WorldLoader:
                         destination_known=exit_data.get("destination_known", True),
                         reveal_on_flag=exit_data.get("reveal_on_flag"),
                         reveal_on_examine=exit_data.get("reveal_on_examine", False),
+                        hidden=exit_data.get("hidden", False),
+                        find_condition=exit_data.get("find_condition"),
                         locked=exit_data.get("locked", False),
                         requires_key=exit_data.get("requires_key"),
                         blocked=exit_data.get("blocked", False),
                         blocked_reason=exit_data.get("blocked_reason"),
                     )
 
-            # Parse details as DetailDefinition objects
+            # Parse details as DetailDefinition objects (V3: includes hidden/find_condition)
             details = {}
             for detail_id, detail_data in loc_data.get("details", {}).items():
                 if isinstance(detail_data, dict):
@@ -196,9 +200,11 @@ class WorldLoader:
                         scene_description=detail_data.get("scene_description", ""),
                         examine_description=detail_data.get("examine_description"),
                         on_examine=on_examine,
+                        hidden=detail_data.get("hidden", False),
+                        find_condition=detail_data.get("find_condition"),
                     )
 
-            # Parse interactions
+            # Parse interactions (V3: removed reveals_exit)
             interactions = {}
             for int_id, int_data in loc_data.get("interactions", {}).items():
                 if isinstance(int_data, dict):
@@ -206,7 +212,6 @@ class WorldLoader:
                         triggers=int_data.get("triggers", []),
                         narrative_hint=int_data.get("narrative_hint", ""),
                         sets_flag=int_data.get("sets_flag"),
-                        reveals_exit=int_data.get("reveals_exit"),
                         gives_item=int_data.get("gives_item"),
                         removes_item=int_data.get("removes_item"),
                     )
@@ -219,17 +224,41 @@ class WorldLoader:
                     flag=req_data.get("flag"), item=req_data.get("item")
                 )
 
+            # Parse item_placements as ItemPlacement objects (V3)
+            item_placements = {}
+            for item_id, placement_data in loc_data.get("item_placements", {}).items():
+                if isinstance(placement_data, dict):
+                    item_placements[item_id] = ItemPlacement(
+                        placement=placement_data.get("placement", ""),
+                        hidden=placement_data.get("hidden", False),
+                        find_condition=placement_data.get("find_condition"),
+                    )
+                elif isinstance(placement_data, str):
+                    # Legacy string format
+                    item_placements[item_id] = ItemPlacement(placement=placement_data)
+
+            # Parse npc_placements as NPCPlacement objects (V3)
+            npc_placements = {}
+            for npc_id, placement_data in loc_data.get("npc_placements", {}).items():
+                if isinstance(placement_data, dict):
+                    npc_placements[npc_id] = NPCPlacement(
+                        placement=placement_data.get("placement", ""),
+                        hidden=placement_data.get("hidden", False),
+                        find_condition=placement_data.get("find_condition"),
+                    )
+                elif isinstance(placement_data, str):
+                    # Legacy string format
+                    npc_placements[npc_id] = NPCPlacement(placement=placement_data)
+
             locations[loc_id] = Location(
                 name=loc_data.get("name", loc_id),
                 atmosphere=loc_data.get("atmosphere", ""),
                 exits=exits,
-                items=loc_data.get("items", []),
-                npcs=loc_data.get("npcs", []),
                 details=details,
                 interactions=interactions,
                 requires=requires,
-                item_placements=loc_data.get("item_placements", {}) or {},
-                npc_placements=loc_data.get("npc_placements", {}) or {},
+                item_placements=item_placements,
+                npc_placements=npc_placements,
             )
 
         return locations
@@ -309,7 +338,7 @@ class WorldLoader:
         return npcs
 
     def _load_items_yaml(self, path: Path) -> dict[str, Item]:
-        """Load items.yaml (V2 schema with scene_description and examine_description)"""
+        """Load items.yaml (V3 schema - visibility is in locations.yaml)"""
         if not path.exists():
             return {}
 
@@ -346,6 +375,7 @@ class WorldLoader:
                         )
                     )
 
+            # V3: Removed location, hidden, find_condition - now in locations.yaml
             items[item_id] = Item(
                 name=item_data.get("name", item_id),
                 portable=item_data.get("portable", True),
@@ -353,9 +383,6 @@ class WorldLoader:
                 examine_description=item_data.get("examine_description", ""),
                 take_description=item_data.get("take_description", ""),
                 unlocks=item_data.get("unlocks"),
-                location=item_data.get("location"),
-                hidden=item_data.get("hidden", False),
-                find_condition=item_data.get("find_condition"),
                 properties=properties,
                 use_actions=use_actions,
                 clues=clues,

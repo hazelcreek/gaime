@@ -25,7 +25,12 @@ from app.engine.two_phase.models.perception import (
 if TYPE_CHECKING:
     from typing import Protocol
 
-    from app.models.world import Item, Location, NPC, WorldData
+    from app.models.world import (
+        ItemPlacement,
+        Location,
+        NPC,
+        WorldData,
+    )
 
     class GameStateProtocol(Protocol):
         """Protocol for game state."""
@@ -33,6 +38,40 @@ if TYPE_CHECKING:
         current_location: str
         inventory: list[str]
         flags: dict[str, bool]
+
+
+def _check_entity_visibility(
+    hidden: bool,
+    find_condition: dict | None,
+    flags: dict[str, bool],
+) -> tuple[bool, str]:
+    """Check if an entity is visible based on hidden flag and find_condition.
+
+    This is the unified visibility check used for items, exits, details, and NPCs
+    in the V3 schema where visibility is location-bound.
+
+    Args:
+        hidden: Whether the entity is marked as hidden
+        find_condition: Condition dict like {requires_flag: "some_flag"}
+        flags: Current game state flags
+
+    Returns:
+        Tuple of (is_visible, reason_string)
+    """
+    if not hidden:
+        return True, "visible"
+
+    if not find_condition:
+        return False, "hidden"
+
+    required_flag = find_condition.get("requires_flag")
+    if required_flag:
+        if flags.get(required_flag, False):
+            return True, "revealed"
+        else:
+            return False, f"condition_not_met:{required_flag}"
+
+    return False, "hidden"
 
 
 class DefaultVisibilityResolver:
@@ -89,7 +128,7 @@ class DefaultVisibilityResolver:
         visible_items = self._get_visible_items(state, world, location)
 
         # Build visible details (scenery)
-        visible_details = self._get_visible_details(location)
+        visible_details = self._get_visible_details(location, state)
 
         # Build inventory
         inventory = self._get_inventory_entities(state, world)
@@ -119,17 +158,27 @@ class DefaultVisibilityResolver:
     ) -> list[VisibleExit]:
         """Get all visible exits from the current location.
 
+        V3: Filters hidden exits based on find_condition.
+
         Args:
             location: The current location
             world: World data for destination lookups
             state: Current game state (optional, for destination_known resolution)
 
         Returns:
-            List of VisibleExit objects
+            List of VisibleExit objects (only visible ones)
         """
         exits = []
+        flags = state.flags if state else {}
 
         for direction, exit_def in location.exits.items():
+            # V3: Check exit visibility
+            is_visible, _ = _check_entity_visibility(
+                exit_def.hidden, exit_def.find_condition, flags
+            )
+            if not is_visible:
+                continue
+
             dest_location = world.get_location(exit_def.destination)
             dest_name = dest_location.name if dest_location else exit_def.destination
 
@@ -166,11 +215,11 @@ class DefaultVisibilityResolver:
         world: "WorldData",
         location: "Location",
     ) -> list[VisibleEntity]:
-        """Get all visible items at the location.
+        """Get all visible items at the location (V3).
 
-        Items are visible if:
-        - They are not hidden, OR
-        - Their find_condition flag is set
+        V3: Uses item_placements for visibility. Items are visible if:
+        - They have a placement at this location, AND
+        - They are not hidden OR their find_condition is met
 
         Items in the player's inventory are NOT included here.
 
@@ -184,7 +233,8 @@ class DefaultVisibilityResolver:
         """
         visible = []
 
-        for item_id in location.items:
+        # V3: Iterate over item_placements (keys define which items are here)
+        for item_id, placement in location.item_placements.items():
             # Skip items already in inventory
             if item_id in state.inventory:
                 continue
@@ -193,15 +243,12 @@ class DefaultVisibilityResolver:
             if not item:
                 continue
 
-            # Check visibility
-            if item.hidden:
-                # Hidden items need their condition met
-                if item.find_condition:
-                    required_flag = item.find_condition.get("requires_flag")
-                    if required_flag and not state.flags.get(required_flag, False):
-                        continue  # Condition not met, skip
-                else:
-                    continue  # Hidden with no condition, skip
+            # V3: Check visibility from placement, not item
+            is_visible, _ = _check_entity_visibility(
+                placement.hidden, placement.find_condition, state.flags
+            )
+            if not is_visible:
+                continue
 
             visible.append(
                 VisibleEntity(
@@ -219,19 +266,31 @@ class DefaultVisibilityResolver:
     def _get_visible_details(
         self,
         location: "Location",
+        state: "GameStateProtocol | None" = None,
     ) -> list[VisibleEntity]:
         """Get all examinable details (scenery) at the location.
 
+        V3: Filters hidden details based on find_condition.
+
         Args:
             location: The current location
+            state: Current game state (optional, for visibility checking)
 
         Returns:
             List of VisibleEntity objects for details
         """
         details = []
+        flags = state.flags if state else {}
 
         if location.details:
             for detail_id, detail_def in location.details.items():
+                # V3: Check detail visibility
+                is_visible, _ = _check_entity_visibility(
+                    detail_def.hidden, detail_def.find_condition, flags
+                )
+                if not is_visible:
+                    continue
+
                 details.append(
                     VisibleEntity(
                         id=detail_id,
@@ -289,11 +348,11 @@ class DefaultVisibilityResolver:
         state: "GameStateProtocol",
         world: "WorldData",
     ) -> bool:
-        """Check if an item is visible to the player.
+        """Check if an item is visible to the player (V3).
 
         An item is visible if:
         - It's in the player's inventory, OR
-        - It's at the current location AND not hidden (or condition met)
+        - It has a placement at the current location AND not hidden (or condition met)
 
         Args:
             item_id: The item to check
@@ -311,22 +370,21 @@ class DefaultVisibilityResolver:
         if not item:
             return False
 
-        # Check if item is at current location
+        # V3: Check if item has a placement at current location
         location = world.get_location(state.current_location)
-        if not location or item_id not in location.items:
-            # Also check item.location field
-            if item.location != state.current_location:
-                return False
+        if not location:
+            return False
 
-        # Check visibility based on hidden state
-        if item.hidden:
-            if not item.find_condition:
-                return False
-            required_flag = item.find_condition.get("requires_flag")
-            if required_flag and not state.flags.get(required_flag, False):
-                return False
+        placement = location.item_placements.get(item_id)
+        if not placement:
+            return False
 
-        return True
+        # V3: Check visibility from placement
+        is_visible, _ = _check_entity_visibility(
+            placement.hidden, placement.find_condition, state.flags
+        )
+
+        return is_visible
 
     # =========================================================================
     # Debug Snapshot Methods
@@ -412,9 +470,9 @@ class DefaultVisibilityResolver:
         world: "WorldData",
         state: "GameStateProtocol",
     ) -> list[LocationExitDebug]:
-        """Get all exits with accessibility analysis.
+        """Get all exits with accessibility and visibility analysis.
 
-        Analyzes each exit to determine if it's accessible and why.
+        V3: Includes is_hidden field for hidden exit support.
 
         Args:
             location: The current location
@@ -430,6 +488,11 @@ class DefaultVisibilityResolver:
             dest_id = exit_def.destination
             dest_location = world.get_location(dest_id)
             dest_name = dest_location.name if dest_location else dest_id
+
+            # V3: Check exit visibility
+            is_visible, visibility_reason = _check_entity_visibility(
+                exit_def.hidden, exit_def.find_condition, state.flags
+            )
 
             # Check accessibility of destination
             is_accessible = True
@@ -470,6 +533,8 @@ class DefaultVisibilityResolver:
                     access_reason=access_reason,
                     scene_description=exit_def.scene_description or None,
                     destination_known=destination_known,
+                    is_hidden=not is_visible,
+                    visibility_reason=visibility_reason,
                 )
             )
 
@@ -481,16 +546,18 @@ class DefaultVisibilityResolver:
         world: "WorldData",
         state: "GameStateProtocol",
     ) -> list[LocationItemDebug]:
-        """Get all items at location with visibility analysis.
+        """Get all items at location with visibility analysis (V3).
 
-        Returns ALL items defined at the location, not just visible ones.
-        Each item includes its visibility status and the reason.
+        V3: Uses item_placements for both presence and visibility.
+
+        Returns ALL items defined at the location (via item_placements),
+        not just visible ones. Each item includes its visibility status.
 
         Visibility rules (in order of precedence):
         1. Item in inventory -> "taken"
-        2. Item hidden with no condition -> "hidden"
-        3. Item hidden with unmet condition -> "condition_not_met:{flag}"
-        4. Item visible -> "visible"
+        2. Placement hidden with no condition -> "hidden"
+        3. Placement hidden with unmet condition -> "condition_not_met:{flag}"
+        4. Item visible -> "visible" or "revealed"
 
         Args:
             location: The current location
@@ -502,23 +569,23 @@ class DefaultVisibilityResolver:
         """
         items = []
 
-        for item_id in location.items:
+        # V3: Iterate over item_placements
+        for item_id, placement in location.item_placements.items():
             item = world.get_item(item_id)
             if not item:
                 continue
 
             # Determine visibility status
             is_in_inventory = item_id in state.inventory
-            is_visible, visibility_reason = self.analyze_item_visibility(
-                item, item_id, state
-            )
 
-            # Get placement from location if available
-            placement = (
-                location.item_placements.get(item_id)
-                if location.item_placements
-                else None
-            )
+            if is_in_inventory:
+                is_visible = False
+                visibility_reason = "taken"
+            else:
+                # V3: Check visibility from placement
+                is_visible, visibility_reason = _check_entity_visibility(
+                    placement.hidden, placement.find_condition, state.flags
+                )
 
             items.append(
                 LocationItemDebug(
@@ -528,7 +595,7 @@ class DefaultVisibilityResolver:
                     is_visible=is_visible,
                     is_in_inventory=is_in_inventory,
                     visibility_reason=visibility_reason,
-                    placement=placement,
+                    placement=placement.placement,
                     portable=item.portable,
                     examine_description=item.examine_description or "",
                 )
@@ -538,23 +605,25 @@ class DefaultVisibilityResolver:
 
     def analyze_item_visibility(
         self,
-        item: "Item",
+        placement: "ItemPlacement",
         item_id: str,
         state: "GameStateProtocol",
     ) -> tuple[bool, str]:
-        """Analyze why an item is visible or hidden.
+        """Analyze why an item is visible or hidden (V3).
+
+        V3: Uses ItemPlacement for visibility, not Item.
 
         This is the single source of truth for item visibility logic.
         Use this method instead of duplicating visibility checks.
 
         Visibility rules (in order of precedence):
         1. Item in inventory -> False, "taken"
-        2. Item hidden with no condition -> False, "hidden"
-        3. Item hidden with unmet condition -> False, "condition_not_met:{flag}"
-        4. Item visible -> True, "visible"
+        2. Placement hidden with no condition -> False, "hidden"
+        3. Placement hidden with unmet condition -> False, "condition_not_met:{flag}"
+        4. Item visible -> True, "visible" or "revealed"
 
         Args:
-            item: The item definition
+            placement: The item placement in the location
             item_id: The item's ID
             state: Current game state
 
@@ -565,21 +634,10 @@ class DefaultVisibilityResolver:
         if item_id in state.inventory:
             return False, "taken"
 
-        # Check hidden status
-        if item.hidden:
-            if not item.find_condition:
-                return False, "hidden"
-
-            required_flag = item.find_condition.get("requires_flag")
-            if required_flag:
-                if state.flags.get(required_flag, False):
-                    return True, "visible"
-                else:
-                    return False, f"condition_not_met:{required_flag}"
-            else:
-                return False, "hidden"
-
-        return True, "visible"
+        # V3: Check visibility from placement
+        return _check_entity_visibility(
+            placement.hidden, placement.find_condition, state.flags
+        )
 
     def _get_npcs_debug(
         self,
@@ -587,16 +645,17 @@ class DefaultVisibilityResolver:
         world: "WorldData",
         state: "GameStateProtocol",
     ) -> list[LocationNPCDebug]:
-        """Get all NPCs that could be at location with visibility analysis.
+        """Get all NPCs at location with visibility analysis (V3).
 
-        Returns NPCs that are defined for this location (via npc.location,
-        npc.locations, or Location.npcs), along with their visibility status.
+        V3: Uses npc_placements for presence and visibility.
+
+        Returns NPCs that are defined at this location via npc_placements,
+        along with their visibility status.
 
         Visibility rules:
-        1. NPC removed via location_changes -> "removed"
-        2. NPC moved to different location -> "wrong_location:{actual_loc}"
-        3. NPC appears_when condition not met -> "condition_not_met:{condition}"
-        4. NPC visible -> "visible"
+        1. Placement hidden with no condition -> "hidden"
+        2. Placement hidden with unmet condition -> "condition_not_met:{flag}"
+        3. NPC visible -> "visible" or "revealed"
 
         Args:
             location: The current location
@@ -609,25 +668,25 @@ class DefaultVisibilityResolver:
         npcs = []
         location_id = state.current_location
 
-        # Collect all NPCs that could be at this location
-        for npc_id, npc in world.npcs.items():
-            # Check if NPC is associated with this location
-            is_base_location = npc.location == location_id
-            is_roaming_location = location_id in npc.locations
-            is_in_location_npcs = npc_id in location.npcs
-
-            if not (is_base_location or is_roaming_location or is_in_location_npcs):
+        # V3: Iterate over npc_placements (keys define which NPCs are here)
+        for npc_id, placement in location.npc_placements.items():
+            npc = world.get_npc(npc_id)
+            if not npc:
                 continue
 
-            # Analyze visibility
-            is_visible, visibility_reason, current_location = (
-                self._analyze_npc_visibility(npc, npc_id, location_id, state)
+            # V3: Check visibility from placement
+            is_visible, visibility_reason = _check_entity_visibility(
+                placement.hidden, placement.find_condition, state.flags
             )
 
-            # Get placement from location if available
-            placement = (
-                location.npc_placements.get(npc_id) if location.npc_placements else None
-            )
+            # Check NPC-level visibility (location_changes, appears_when)
+            if is_visible:
+                npc_visible, npc_reason, _ = self._analyze_npc_visibility(
+                    npc, npc_id, location_id, state
+                )
+                if not npc_visible:
+                    is_visible = False
+                    visibility_reason = npc_reason
 
             npcs.append(
                 LocationNPCDebug(
@@ -637,8 +696,8 @@ class DefaultVisibilityResolver:
                     appearance=npc.appearance or "",
                     is_visible=is_visible,
                     visibility_reason=visibility_reason,
-                    placement=placement,
-                    current_location=current_location,
+                    placement=placement.placement,
+                    current_location=location_id if is_visible else None,
                 )
             )
 
@@ -713,6 +772,8 @@ class DefaultVisibilityResolver:
     ) -> list[LocationInteractionDebug]:
         """Get all interactions available at the location.
 
+        V3: reveals_exit removed from InteractionEffect.
+
         Args:
             location: The current location
 
@@ -728,7 +789,6 @@ class DefaultVisibilityResolver:
                         interaction_id=int_id,
                         triggers=interaction.triggers,
                         sets_flag=interaction.sets_flag,
-                        reveals_exit=interaction.reveals_exit,
                         gives_item=interaction.gives_item,
                         removes_item=interaction.removes_item,
                     )
