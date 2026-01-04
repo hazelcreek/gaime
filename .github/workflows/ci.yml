@@ -58,7 +58,7 @@ jobs:
         run: |
           cd backend
           # Check new two-phase models strictly, allow existing code to pass with errors
-          mypy app/models/intent.py app/models/event.py app/models/perception.py app/models/validation.py app/engine/protocols.py --ignore-missing-imports
+          mypy app/engine/two_phase/models/intent.py app/engine/two_phase/models/event.py app/engine/two_phase/models/perception.py app/engine/two_phase/models/validation.py app/engine/protocols.py --ignore-missing-imports
 
   test:
     name: Test
