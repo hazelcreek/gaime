@@ -44,6 +44,21 @@ The roadmap is organized around **experience goals** from the Vision document:
 
 See [two-phase-game-loop-spec.md](two-phase-game-loop-spec.md) for full specification.
 
+### Visibility & Examination System
+
+| Phase | Focus | Status |
+|-------|-------|--------|
+| 1 | Schema Definition | ✅ Complete |
+| 2 | World Migration | ⚪ Planned |
+| 3 | Code Integration | ⚪ Planned |
+| 4 | Examination Mechanics | ⚪ Planned |
+| 5 | Narrator Integration | ⚪ Planned |
+| 6 | Image Generation | ⚪ Planned |
+| 7 | World Builder Updates | ⚪ Planned |
+| 8 | Documentation | ⚪ Planned |
+
+See [visibility-examination-spec.md](visibility-examination-spec.md) for full specification.
+
 **Legend**: ✅ Complete | 🟡 In Progress | ⚪ Planned
 
 ---
@@ -366,6 +381,7 @@ See [ideas/features.md](../ideas/features.md) for full descriptions.
 
 | Date | Change |
 |------|--------|
+| 2026-01-04 | Visibility & Examination Phase 1 complete: ExitDefinition, DetailDefinition, ExaminationEffect models; Item field aliases; validation script |
 | 2026-01-04 | Classic Engine deprecated: removed engine selection, deleted classic engine code, simplified API |
 | 2025-12-17 | Two-Phase Engine Phase 2 complete: InteractorAI, ExamineValidator, TakeValidator, 33 new tests, 214 total tests passing |
 | 2025-12-17 | Two-Phase Engine Phase 1 complete: movement-only engine with complete separation from classic, 95 new tests |

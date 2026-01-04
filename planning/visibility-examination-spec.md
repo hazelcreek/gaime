@@ -1099,19 +1099,24 @@ Before migrating each world:
 
 > **Strategy**: Migration-first approach. We migrate all worlds to the new schema BEFORE changing engine code. This eliminates the need for backward compatibility logic, union types, or deprecation warnings.
 
-### Phase 1: Schema Definition (Day 1)
+### Phase 1: Schema Definition (Day 1) ✅
 
 **Goal**: Define new Pydantic models without integrating into engine yet
 
-- [ ] Add `ExitDefinition` model to `models/world.py`
-- [ ] Add `DetailDefinition` model to `models/world.py`
-- [ ] Add `ExaminationEffect` model to `models/world.py`
-- [ ] Update `Item` model with new field names (add aliases for migration validation)
-- [ ] Create standalone validation script to test YAML against new models
+- [x] Add `ExitDefinition` model to `models/world.py`
+- [x] Add `DetailDefinition` model to `models/world.py`
+- [x] Add `ExaminationEffect` model to `models/world.py`
+- [x] Update `Item` model with new field names (add aliases for migration validation)
+- [x] Create standalone validation script to test YAML against new models
 
-**Tests**: Validation script passes on migrated YAML
+**Tests**: Validation script passes on migrated YAML ✅
 
 **Note**: Models are defined but NOT yet used by WorldLoader or engine. This allows us to validate migrated YAML before committing to the schema change.
+
+**Implementation Notes** (January 2026):
+- New models added to `backend/app/models/world.py`
+- Item model uses `AliasChoices` to accept both old (`found_description`, `examine`) and new (`scene_description`, `examine_description`) field names
+- Validation script created at `scripts/validate_v2_schema.py` - run with `--world <name>` or `--all`
 
 ### Phase 2: World Migration (Day 1-2)
 

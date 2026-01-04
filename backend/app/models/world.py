@@ -2,7 +2,7 @@
 World schema models - Pydantic models for YAML world definitions
 """
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 
 class PlayerSetup(BaseModel):
@@ -48,6 +48,58 @@ class InteractionEffect(BaseModel):
     reveals_exit: str | None = None
     gives_item: str | None = None
     removes_item: str | None = None
+
+
+# =============================================================================
+# V2 Schema Models - For structured exits, details, and examination support
+# These are defined here but NOT yet used by Location. They will be integrated
+# after world YAML files are migrated to the new format (Phase 3).
+# =============================================================================
+
+
+class ExaminationEffect(BaseModel):
+    """Effects triggered when examining a detail or exit"""
+
+    sets_flag: str | None = None
+    reveals_item: str | None = None
+    reveals_exit: str | None = None  # Exit direction to reveal destination
+    narrative_hint: str | None = None
+
+
+class ExitDefinition(BaseModel):
+    """Structured exit with visual descriptions and destination visibility"""
+
+    destination: str
+
+    # Visual descriptions (for narration and image generation)
+    scene_description: str = ""
+    examine_description: str | None = None
+
+    # Destination visibility (initial state set by author)
+    destination_known: bool = True
+    reveal_on_flag: str | None = None
+    reveal_on_examine: bool = False
+    # Note: Visiting the destination ALWAYS reveals it (automatic, not configurable)
+
+    # Accessibility
+    locked: bool = False
+    requires_key: str | None = None
+    blocked: bool = False
+    blocked_reason: str | None = None
+
+
+class DetailDefinition(BaseModel):
+    """Structured detail with examination support"""
+
+    name: str
+    scene_description: str
+    examine_description: str | None = None
+    on_examine: ExaminationEffect | None = None
+
+
+# =============================================================================
+# End V2 Schema Models
+# =============================================================================
 
 
 class LocationRequirement(BaseModel):
@@ -150,12 +202,32 @@ class ItemClue(BaseModel):
 
 
 class Item(BaseModel):
-    """Item definition from items.yaml"""
+    """Item definition from items.yaml
+
+    Field naming note (V2 migration):
+    - `found_description` will become `scene_description` in V2
+    - `examine` will become `examine_description` in V2
+
+    During migration, both old and new field names are accepted via AliasChoices.
+    After Phase 3, aliases will be removed and only new names will work.
+    """
+
+    model_config = {"populate_by_name": True}
 
     name: str
     portable: bool = True
-    examine: str = ""
-    found_description: str = ""
+
+    # V2 migration: Accept both old and new field names from YAML
+    # Old name first (primary), new name as alternative for migrated YAML
+    found_description: str = Field(
+        default="",
+        validation_alias=AliasChoices("found_description", "scene_description"),
+    )
+    examine: str = Field(
+        default="",
+        validation_alias=AliasChoices("examine", "examine_description"),
+    )
+
     take_description: str = ""
     unlocks: str | None = None
     location: str | None = None
