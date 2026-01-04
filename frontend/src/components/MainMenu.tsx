@@ -4,10 +4,10 @@
  */
 
 import { useState, useEffect } from 'react';
-import { gameAPI, WorldInfo, EngineInfo } from '../api/client';
+import { gameAPI, WorldInfo } from '../api/client';
 
 interface MainMenuProps {
-  onStartGame: (worldId: string, worldName?: string, engine?: string) => void;
+  onStartGame: (worldId: string, worldName?: string) => void;
   isLoading: boolean;
 }
 
@@ -67,38 +67,21 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
   const [selectedWorld, setSelectedWorld] = useState<string>('');
   const [loadingWorlds, setLoadingWorlds] = useState(true);
 
-  // Engine selection (advanced option)
-  const [engines, setEngines] = useState<EngineInfo[]>([]);
-  const [selectedEngine, setSelectedEngine] = useState<string>('');
-  const [defaultEngine, setDefaultEngine] = useState<string>('classic');
-
-  // Load available worlds and engines on mount
+  // Load available worlds on mount
   useEffect(() => {
     setLoadingWorlds(true);
 
-    // Load worlds and engines in parallel
-    Promise.all([
-      gameAPI.listWorlds(),
-      gameAPI.listEngines(),
-    ])
-      .then(([worldsResponse, enginesResponse]) => {
-        // Set worlds
-        setWorlds(worldsResponse.worlds);
-        if (worldsResponse.worlds.length > 0 && !selectedWorld) {
-          setSelectedWorld(worldsResponse.worlds[0].id);
+    gameAPI.listWorlds()
+      .then((response) => {
+        setWorlds(response.worlds);
+        if (response.worlds.length > 0 && !selectedWorld) {
+          setSelectedWorld(response.worlds[0].id);
         }
-
-        // Set engines
-        setEngines(enginesResponse.engines);
-        setDefaultEngine(enginesResponse.default);
-        setSelectedEngine(enginesResponse.default);
       })
       .catch(() => {
         // Fallback to defaults
         setWorlds([{ id: 'cursed-manor', name: 'The Cursed Manor', theme: 'Victorian gothic horror' }]);
         setSelectedWorld('cursed-manor');
-        setEngines([{ id: 'classic', name: 'Classic Engine', description: 'Default engine' }]);
-        setSelectedEngine('classic');
       })
       .finally(() => setLoadingWorlds(false));
   }, []);
@@ -106,9 +89,7 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
   const handleStartGame = () => {
     if (selectedWorld) {
       const selectedWorldInfo = worlds.find(w => w.id === selectedWorld);
-      // Only pass engine if it differs from default
-      const engineToUse = selectedEngine !== defaultEngine ? selectedEngine : undefined;
-      onStartGame(selectedWorld, selectedWorldInfo?.name, engineToUse);
+      onStartGame(selectedWorld, selectedWorldInfo?.name);
     }
   };
 
@@ -186,49 +167,6 @@ export default function MainMenu({ onStartGame, isLoading }: MainMenuProps) {
                     </p>
                   </div>
                 </div>
-              )}
-
-              {/* Advanced Options - Collapsible */}
-              {engines.length > 1 && (
-                <details className="flex-shrink-0 group">
-                  <summary className="text-terminal-dim text-xs uppercase tracking-wider cursor-pointer
-                                    hover:text-terminal-text transition-colors select-none
-                                    list-none flex items-center gap-1">
-                    <svg
-                      className="w-3 h-3 transition-transform group-open:rotate-90"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                    Advanced Options
-                  </summary>
-                  <div className="mt-2 p-3 bg-terminal-bg/50 backdrop-blur-sm rounded-lg border border-terminal-border/30">
-                    <label className="block text-terminal-dim text-xs mb-1.5">
-                      Engine (for testing)
-                    </label>
-                    <select
-                      value={selectedEngine}
-                      onChange={(e) => setSelectedEngine(e.target.value)}
-                      className="w-full px-3 py-2 bg-terminal-bg border border-terminal-border/50
-                               rounded text-terminal-text text-sm
-                               focus:outline-none focus:border-terminal-accent
-                               cursor-pointer"
-                    >
-                      {engines.map((engine) => (
-                        <option key={engine.id} value={engine.id}>
-                          {engine.name}
-                        </option>
-                      ))}
-                    </select>
-                    {selectedEngine !== defaultEngine && (
-                      <p className="text-terminal-dim text-xs mt-1.5 italic">
-                        Using non-default engine for testing
-                      </p>
-                    )}
-                  </div>
-                </details>
               )}
 
               {/* Start Button */}

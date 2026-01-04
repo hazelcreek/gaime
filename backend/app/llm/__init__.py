@@ -1,6 +1,6 @@
 """LLM integration components.
 
-This package contains LLM clients and prompts for both engines.
+This package contains LLM clients and prompts for the two-phase game engine.
 
 Shared Components (at this level):
 - `client.py`: LiteLLM client wrapper
@@ -8,12 +8,10 @@ Shared Components (at this level):
 - `session_logger.py`: Session logging utilities
 - `image_generator.py`: Image generation utilities
 
-Engine-Specific Components:
-- `classic/`: GameMaster for the classic engine
+Two-Phase Engine Components:
 - `two_phase/`: InteractorAI and NarratorAI for the two-phase engine
 
 Import directly from submodules to avoid circular imports:
-    from app.llm.classic.game_master import GameMaster
     from app.llm.two_phase.interactor import InteractorAI
     from app.llm.two_phase.narrator import NarratorAI
 """

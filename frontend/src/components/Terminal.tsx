@@ -5,21 +5,15 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useGame, NarrativeEntry } from '../hooks/useGame';
-import {
-  DebugInfo,
-  LLMDebugInfo,
-  TwoPhaseDebugInfo,
-  isTwoPhaseDebugInfo,
-} from '../api/client';
-import LLMDebugModal from './LLMDebugModal';
+import { PipelineDebugInfo } from '../api/client';
 import TwoPhaseDebugModal from './TwoPhaseDebugModal';
 
 export default function Terminal() {
   const { narrative, isLoading } = useGame();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Debug modal state - can be either classic or two-phase
-  const [selectedDebugInfo, setSelectedDebugInfo] = useState<DebugInfo | null>(null);
+  // Debug modal state
+  const [selectedDebugInfo, setSelectedDebugInfo] = useState<PipelineDebugInfo | null>(null);
 
   // Close debug modal on Escape
   useEffect(() => {
@@ -38,27 +32,6 @@ export default function Terminal() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [narrative]);
-
-  // Determine which modal to show based on debug info type
-  const renderDebugModal = () => {
-    if (!selectedDebugInfo) return null;
-
-    if (isTwoPhaseDebugInfo(selectedDebugInfo)) {
-      return (
-        <TwoPhaseDebugModal
-          debugInfo={selectedDebugInfo as TwoPhaseDebugInfo}
-          onClose={() => setSelectedDebugInfo(null)}
-        />
-      );
-    } else {
-      return (
-        <LLMDebugModal
-          debugInfo={selectedDebugInfo as LLMDebugInfo}
-          onClose={() => setSelectedDebugInfo(null)}
-        />
-      );
-    }
-  };
 
   return (
     <>
@@ -83,8 +56,13 @@ export default function Terminal() {
         )}
       </div>
 
-      {/* Debug Modal - renders appropriate type based on engine */}
-      {renderDebugModal()}
+      {/* Debug Modal */}
+      {selectedDebugInfo && (
+        <TwoPhaseDebugModal
+          debugInfo={selectedDebugInfo}
+          onClose={() => setSelectedDebugInfo(null)}
+        />
+      )}
     </>
   );
 }

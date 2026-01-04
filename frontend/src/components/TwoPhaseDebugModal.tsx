@@ -4,10 +4,10 @@
  */
 
 import { useState } from 'react';
-import { TwoPhaseDebugInfo, LLMDebugInfo } from '../api/client';
+import { PipelineDebugInfo, LLMDebugInfo } from '../api/client';
 
 interface TwoPhaseDebugModalProps {
-  debugInfo: TwoPhaseDebugInfo;
+  debugInfo: PipelineDebugInfo;
   onClose: () => void;
 }
 
@@ -160,31 +160,31 @@ export default function TwoPhaseDebugModal({ debugInfo, onClose }: TwoPhaseDebug
                     {validationValid ? 'Valid' : 'Rejected'}
                   </span>
                 </div>
-                {!validationValid && debugInfo.validation_result.rejection_code && (
+                {!validationValid && (debugInfo.validation_result.rejection_code as string | undefined) && (
                   <>
                     <div className="flex items-center gap-2 text-xs">
                       <span className="text-terminal-dim">Code:</span>
                       <span className="text-terminal-error font-mono">
-                        {String(debugInfo.validation_result.rejection_code)}
+                        {debugInfo.validation_result.rejection_code as string}
                       </span>
                     </div>
                     <div className="flex items-start gap-2 text-xs">
                       <span className="text-terminal-dim shrink-0">Reason:</span>
                       <span className="text-terminal-text">
-                        {String(debugInfo.validation_result.rejection_reason ?? '—')}
+                        {(debugInfo.validation_result.rejection_reason as string | undefined) ?? '—'}
                       </span>
                     </div>
                   </>
                 )}
-                {debugInfo.validation_result.hint && (
+                {(debugInfo.validation_result.hint as string | undefined) && (
                   <div className="flex items-start gap-2 text-xs">
                     <span className="text-terminal-dim shrink-0">Hint:</span>
                     <span className="text-terminal-warning">
-                      {String(debugInfo.validation_result.hint)}
+                      {debugInfo.validation_result.hint as string}
                     </span>
                   </div>
                 )}
-                {debugInfo.validation_result.context && Object.keys(debugInfo.validation_result.context as object).length > 0 && (
+                {(debugInfo.validation_result.context as Record<string, unknown> | undefined) && Object.keys(debugInfo.validation_result.context as Record<string, unknown>).length > 0 && (
                   <details className="mt-2">
                     <summary className="text-terminal-dim text-xs cursor-pointer hover:text-terminal-text">
                       Context
@@ -220,14 +220,14 @@ export default function TwoPhaseDebugModal({ debugInfo, onClose }: TwoPhaseDebug
                       <span className="text-terminal-accent font-mono font-medium">
                         {String(event.type ?? 'unknown').toUpperCase()}
                       </span>
-                      {event.subject && (
+                      {(event.subject as string | undefined) && (
                         <>
                           <span className="text-terminal-dim">→</span>
-                          <span className="text-terminal-text">{String(event.subject)}</span>
+                          <span className="text-terminal-text">{event.subject as string}</span>
                         </>
                       )}
                     </div>
-                    {event.context && Object.keys(event.context as object).length > 0 && (
+                    {(event.context as Record<string, unknown> | undefined) && Object.keys(event.context as Record<string, unknown>).length > 0 && (
                       <details className="mt-1">
                         <summary className="text-terminal-dim text-xs cursor-pointer hover:text-terminal-text">
                           Context

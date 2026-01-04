@@ -6,9 +6,10 @@ This directory contains LLM prompts used by the GAIME backend runtime.
 
 ```
 prompts/
-└── game_master/          # Game engine prompts
-    ├── system_prompt.txt      # Main system prompt for game master
-    └── opening_prompt.txt      # Prompt for generating opening narrative
+├── interactor/           # Interactor prompts (entity resolution)
+│   └── system_prompt.txt
+└── narrator/             # Narrator prompts (narrative generation)
+    └── system_prompt.txt
 ```
 
 > **Note**: Image generation and world builder prompts are in `gaime_builder/core/prompts/` (TUI app).
@@ -23,7 +24,7 @@ Prompts are loaded automatically at server startup via `app.llm.prompt_loader`. 
 from app.llm.prompt_loader import get_loader
 
 # Get a prompt template
-template = get_loader().get_prompt("game_master", "system_prompt.txt")
+template = get_loader().get_prompt("narrator", "system_prompt.txt")
 
 # Format with variables
 formatted = template.format(
@@ -44,22 +45,22 @@ from app.llm.prompt_loader import reload_prompts, reload_category
 reload_prompts()
 
 # Reload only a specific category
-reload_category("game_master")
+reload_category("narrator")
 ```
 
 ## Prompt Reference
 
-### Game Master Prompts
+### Interactor Prompts
 
 **`system_prompt.txt`**
-- **Used in**: `app.llm.game_master.GameMaster._build_system_prompt()`
-- **Purpose**: Main system prompt sent to LLM for all game actions
-- **Variables**: `world_name`, `theme`, `tone`, `starting_situation`, `current_location`, `location_name`, `inventory`, `discovered`, `flags`, `recent_context`, `npc_relationships`, `discoveries`, `location_atmosphere`, `exits`, `npcs_here`, `items_here_detailed`, `item_details`, `location_details`, `constraints`, `npc_knowledge`
+- **Used in**: `app.llm.two_phase.interactor.InteractorAI`
+- **Purpose**: System prompt for entity resolution and action parsing
 
-**`opening_prompt.txt`**
-- **Used in**: `app.llm.game_master.GameMaster.generate_opening()`
-- **Purpose**: User prompt for generating the opening narrative
-- **Variables**: `location_name`, `premise`, `starting_situation`
+### Narrator Prompts
+
+**`system_prompt.txt`**
+- **Used in**: `app.llm.two_phase.narrator.NarratorAI`
+- **Purpose**: System prompt for generating narrative responses
 
 ## Editing Prompts
 

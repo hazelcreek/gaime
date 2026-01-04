@@ -1,18 +1,14 @@
 """Pydantic models for GAIME.
 
 Shared models are kept here in the models package.
-Engine-specific models have been moved to their respective engine packages:
+Engine-specific models are in the engine package:
 
-- Classic engine models: `engine/classic/models.py`
 - Two-phase engine models: `engine/two_phase/models/`
 
 Import directly from submodules to avoid circular imports:
     # World models (shared)
     from app.models.world import World, Location, NPC, Item
     from app.models.game import LLMDebugInfo
-
-    # Classic engine models
-    from app.engine.classic.models import GameState, ActionRequest, ActionResponse
 
     # Two-phase engine models
     from app.engine.two_phase.models.intent import ActionIntent, FlavorIntent, ActionType

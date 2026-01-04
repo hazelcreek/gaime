@@ -5,11 +5,9 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import {
   gameAPI,
-  AnyGameState,
-  DebugInfo,
+  GameState,
+  PipelineDebugInfo,
   LocationDebugSnapshot,
-  isTwoPhaseActionResponse,
-  isTwoPhaseNewGameResponse,
 } from '../api/client';
 
 export interface NarrativeEntry {
@@ -17,7 +15,7 @@ export interface NarrativeEntry {
   type: 'narrative' | 'player' | 'system' | 'error';
   content: string;
   timestamp: Date;
-  debugInfo?: DebugInfo;
+  debugInfo?: PipelineDebugInfo;
 }
 
 interface GameContextValue {
@@ -25,15 +23,14 @@ interface GameContextValue {
   sessionId: string | null;
   worldId: string | null;
   worldName: string | null;
-  engineVersion: string | null;
-  gameState: AnyGameState | null;
+  gameState: GameState | null;
   locationDebug: LocationDebugSnapshot | null;
   narrative: NarrativeEntry[];
   isLoading: boolean;
   error: string | null;
 
   // Actions
-  startNewGame: (worldId?: string, worldName?: string, engine?: string) => Promise<void>;
+  startNewGame: (worldId?: string, worldName?: string) => Promise<void>;
   sendAction: (action: string) => Promise<void>;
   clearError: () => void;
   resetGame: () => void;
@@ -48,8 +45,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [worldId, setWorldId] = useState<string | null>(null);
   const [worldName, setWorldName] = useState<string | null>(null);
-  const [engineVersion, setEngineVersion] = useState<string | null>(null);
-  const [gameState, setGameState] = useState<AnyGameState | null>(null);
+  const [gameState, setGameState] = useState<GameState | null>(null);
   const [locationDebug, setLocationDebug] = useState<LocationDebugSnapshot | null>(null);
   const [narrative, setNarrative] = useState<NarrativeEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -59,7 +55,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const generateId = () => Math.random().toString(36).substring(2, 9);
 
   // Add a narrative entry with optional debug info
-  const addNarrative = useCallback((type: NarrativeEntry['type'], content: string, debugInfo?: DebugInfo) => {
+  const addNarrative = useCallback((type: NarrativeEntry['type'], content: string, debugInfo?: PipelineDebugInfo) => {
     setNarrative(prev => [...prev, {
       id: generateId(),
       type,
@@ -78,13 +74,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           sessionId: storedId,
           worldId: storedWorldId,
           worldName: storedWorldName,
-          engineVersion: storedEngineVersion,
         } = JSON.parse(stored);
         if (storedId) {
           // Try to restore game state from backend
           setIsLoading(true);
           gameAPI.getState(storedId)
-            .then(({ state, engine }) => {
+            .then(({ state }) => {
               // Session exists, restore state
               setSessionId(storedId);
               if (storedWorldId) {
@@ -93,8 +88,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
               if (storedWorldName) {
                 setWorldName(storedWorldName);
               }
-              // Use engine from backend response, or fall back to stored version
-              setEngineVersion(engine ?? storedEngineVersion ?? null);
               setGameState(state);
               addNarrative('system', 'Game restored. Continue your adventure!');
             })
@@ -119,18 +112,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         sessionId,
         worldId,
         worldName,
-        engineVersion,
       }));
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
-  }, [sessionId, worldId, worldName, engineVersion]);
+  }, [sessionId, worldId, worldName]);
 
   // Start a new game - always request debug info
   const startNewGame = useCallback(async (
     selectedWorldId?: string,
-    selectedWorldName?: string,
-    engine?: string
+    selectedWorldName?: string
   ) => {
     // Use provided worldId, or fall back to current world, or default to 'cursed-manor'
     const effectiveWorldId = selectedWorldId ?? worldId ?? 'cursed-manor';
@@ -141,24 +132,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     try {
       // Always request debug info (debug: true)
-      const response = await gameAPI.newGame(effectiveWorldId, true, engine);
+      const response = await gameAPI.newGame(effectiveWorldId, true);
       setSessionId(response.session_id);
       setWorldId(effectiveWorldId);
       setWorldName(selectedWorldName ?? null);
-      setEngineVersion(response.engine_version);
       setGameState(response.state);
 
-      // Extract debug info based on engine type
-      let debugInfo: DebugInfo | undefined;
-      if (isTwoPhaseNewGameResponse(response)) {
-        // Two-phase engine: use pipeline_debug
-        debugInfo = response.pipeline_debug ?? undefined;
-      } else {
-        // Classic engine: use llm_debug
-        debugInfo = response.llm_debug;
-      }
-
-      addNarrative('narrative', response.narrative, debugInfo);
+      addNarrative('narrative', response.narrative, response.pipeline_debug ?? undefined);
       addNarrative('system', 'Type your commands below. Try "look around" or "help" to get started.');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to start game';
@@ -186,25 +166,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const response = await gameAPI.sendAction(sessionId, action, true);
       setGameState(response.state);
 
-      // Extract debug info based on engine type
-      let debugInfo: DebugInfo | undefined;
-      if (isTwoPhaseActionResponse(response)) {
-        // Two-phase engine: use pipeline_debug
-        debugInfo = response.pipeline_debug ?? undefined;
-      } else {
-        // Classic engine: use llm_debug
-        debugInfo = response.llm_debug;
-      }
-
       // Attach debug info to the narrative entry
-      addNarrative('narrative', response.narrative, debugInfo);
-
-      // Show hints if any (classic engine only)
-      if (!isTwoPhaseActionResponse(response) && response.hints && response.hints.length > 0) {
-        response.hints.forEach(hint => {
-          addNarrative('system', `💡 ${hint}`);
-        });
-      }
+      addNarrative('narrative', response.narrative, response.pipeline_debug ?? undefined);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to process action';
       setError(message);
@@ -224,7 +187,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setSessionId(null);
     setWorldId(null);
     setWorldName(null);
-    setEngineVersion(null);
     setGameState(null);
     setLocationDebug(null);
     setNarrative([]);
@@ -237,12 +199,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (!sessionId) return;
 
     try {
-      const { state, engine, location_debug } = await gameAPI.getState(sessionId);
+      const { state, location_debug } = await gameAPI.getState(sessionId);
       setGameState(state);
       setLocationDebug(location_debug);
-      if (engine) {
-        setEngineVersion(engine);
-      }
     } catch (err) {
       console.error('Failed to fetch location debug:', err);
     }
@@ -253,7 +212,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       sessionId,
       worldId,
       worldName,
-      engineVersion,
       gameState,
       locationDebug,
       narrative,

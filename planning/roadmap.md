@@ -33,13 +33,14 @@ The roadmap is organized around **experience goals** from the Vision document:
 
 | Phase | Focus | Status |
 |-------|-------|--------|
-| 0 | Foundation (data models, engine selection) | ✅ Complete |
+| 0 | Foundation (data models) | ✅ Complete |
 | 1 | Simple Movement | ✅ Complete |
 | 2 | Examination & Taking | ✅ Complete |
+| - | Classic Engine Deprecated | ✅ Complete |
 | 3 | Interactions & USE Actions | ⚪ Planned |
 | 4 | Full Narrator | ⚪ Planned |
 | 5 | Containers & Visibility | ⚪ Planned |
-| 6 | Polish & Comparison | ⚪ Planned |
+| 6 | Polish | ⚪ Planned |
 
 See [two-phase-game-loop-spec.md](two-phase-game-loop-spec.md) for full specification.
 
@@ -58,11 +59,6 @@ Separating action parsing from narrative generation enables deterministic state 
 - [x] Data models: `Event`, `RejectionEvent`, `EventType`, `RejectionCode`
 - [x] Data models: `PerceptionSnapshot`, `VisibleEntity`, `VisibleExit`
 - [x] Data models: `ValidationResult` with factory functions
-- [x] `EngineVersion` enum (CLASSIC, TWO_PHASE)
-- [x] Engine selection API (`GET /api/game/engines`)
-- [x] Engine parameter in game start (`POST /api/game/new`)
-- [x] Frontend engine selector (Advanced Options)
-- [x] Unit tests for engine selection
 
 ### Phase 1: Simple Movement ✅
 - [x] `RuleBasedParser` for direction patterns
@@ -106,10 +102,15 @@ Separating action parsing from narrative generation enables deterministic state 
 - [ ] `CONTAINER_OPENED`, `ITEM_REVEALED` events
 - [ ] PerceptionSnapshot respects visibility
 
-### Phase 6: Polish & Comparison
+### Classic Engine Deprecation ✅
+- [x] Remove engine selection API and frontend selector
+- [x] Delete classic engine code (`engine/classic/`, `llm/classic/`)
+- [x] Update tests and documentation
+- [x] Simplify API responses (single engine type)
+
+### Phase 6: Polish
 - [ ] INVENTORY meta action
 - [ ] Remaining action types (GIVE, SHOW, DROP, etc.)
-- [ ] A/B testing framework
 - [ ] Performance optimization
 - [ ] Edge case handling
 
@@ -365,9 +366,10 @@ See [ideas/features.md](../ideas/features.md) for full descriptions.
 
 | Date | Change |
 |------|--------|
+| 2026-01-04 | Classic Engine deprecated: removed engine selection, deleted classic engine code, simplified API |
 | 2025-12-17 | Two-Phase Engine Phase 2 complete: InteractorAI, ExamineValidator, TakeValidator, 33 new tests, 214 total tests passing |
 | 2025-12-17 | Two-Phase Engine Phase 1 complete: movement-only engine with complete separation from classic, 95 new tests |
-| 2025-12-17 | Two-Phase Engine Phase 0 complete: data models, engine selection API, frontend selector |
+| 2025-12-17 | Two-Phase Engine Phase 0 complete: data models |
 | 2025-12-15 | World validation system: schema generator, deprecated pattern detection, hybrid fixer (rule + LLM), migrated 5 existing worlds |
 | 2025-12-12 | Implemented TUI World Builder (gaime_builder package) - terminal UI for world creation and image generation |
 | 2025-12-10 | Implemented Visual Style System with MPA architecture and 14 presets |
@@ -377,4 +379,4 @@ See [ideas/features.md](../ideas/features.md) for full descriptions.
 
 ---
 
-*Last updated: December 2025*
+*Last updated: January 2026*

@@ -1,16 +1,11 @@
 """Game engine components.
 
-This package contains both the classic engine and the two-phase engine.
+This package contains the two-phase game engine with separated parsing
+(Interactor) and narration (Narrator).
 
-- Classic Engine: Single LLM call for action processing and narration.
-  Located in `engine/classic/`.
-
-- Two-Phase Engine: Separated parsing (Interactor) and narration (Narrator).
-  Located in `engine/two_phase/`.
+Located in `engine/two_phase/`.
 
 Import directly from submodules to avoid circular imports:
-    from app.engine.classic.processor import ActionProcessor
-    from app.engine.classic.state import GameStateManager
     from app.engine.two_phase.processor import TwoPhaseProcessor
     from app.engine.two_phase.state import TwoPhaseStateManager
 """

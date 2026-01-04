@@ -14,7 +14,6 @@ http://localhost:8000/api
 |--------|----------|-------------|
 | GET | `/` | Health check |
 | GET | `/worlds` | List available worlds |
-| GET | `/game/engines` | List available game engines |
 | POST | `/game/new` | Start new game |
 | POST | `/game/action` | Process player action |
 | GET | `/game/state/{session_id}` | Get current state |
@@ -68,42 +67,6 @@ GET /api/worlds
 
 ---
 
-## List Engines
-
-Get available game engine versions. Engine selection is primarily for migration testing.
-
-```
-GET /api/game/engines
-```
-
-**Response**
-```json
-{
-  "engines": [
-    {
-      "id": "classic",
-      "name": "Classic Engine",
-      "description": "Single LLM call for action processing and narration"
-    },
-    {
-      "id": "two_phase",
-      "name": "Two-Phase Engine",
-      "description": "Separated parsing (Interactor) and narration (Narrator)"
-    }
-  ],
-  "default": "classic"
-}
-```
-
-| Field | Description |
-|-------|-------------|
-| `engines` | Array of available engine versions |
-| `default` | ID of the default engine |
-
-**Note:** The two-phase engine currently supports movement only (Phase 1). Use `classic` for full gameplay.
-
----
-
 ## Start New Game
 
 Begin a new game session.
@@ -116,8 +79,7 @@ POST /api/game/new
 ```json
 {
   "world_id": "cursed-manor",
-  "debug": false,
-  "engine": "classic"
+  "debug": false
 }
 ```
 
@@ -125,30 +87,22 @@ POST /api/game/new
 |-------|------|----------|---------|-------------|
 | world_id | string | No | "cursed-manor" | ID of world to load |
 | debug | boolean | No | false | Enable LLM debug info in response |
-| engine | string | No | "classic" | Engine version (see `/game/engines`) |
 
 **Response**
 ```json
 {
   "session_id": "abc123-def456-...",
   "narrative": "A violent storm has driven you to seek shelter...",
-  "engine_version": "classic",
-  "llm_debug": null,
+  "pipeline_debug": null,
   "state": {
     "session_id": "abc123-def456-...",
     "current_location": "entrance_hall",
     "inventory": ["pocket_watch", "journal"],
-    "discovered_locations": ["entrance_hall"],
+    "visited_locations": ["entrance_hall"],
+    "container_states": {},
     "flags": {},
     "turn_count": 0,
-    "npc_trust": {},
-    "npc_locations": {},
-    "status": "playing",
-    "narrative_memory": {
-      "recent_exchanges": [],
-      "npc_memory": {},
-      "discoveries": []
-    }
+    "status": "playing"
   }
 }
 ```
@@ -190,15 +144,16 @@ POST /api/game/action
     "session_id": "abc123-def456-...",
     "current_location": "entrance_hall",
     "inventory": ["pocket_watch", "journal"],
-    "discovered_locations": ["entrance_hall"],
+    "visited_locations": ["entrance_hall"],
+    "container_states": {},
     "flags": {},
     "turn_count": 1,
     "status": "playing"
   },
-  "hints": ["The portraits seem to be watching you..."],
+  "events": [],
   "game_complete": false,
   "ending_narrative": null,
-  "llm_debug": null
+  "pipeline_debug": null
 }
 ```
 
@@ -223,17 +178,22 @@ GET /api/game/state/{session_id}
     "session_id": "abc123-def456-...",
     "current_location": "entrance_hall",
     "inventory": ["pocket_watch", "journal"],
-    "discovered_locations": ["entrance_hall"],
+    "visited_locations": ["entrance_hall"],
+    "container_states": {},
     "flags": {},
     "turn_count": 5,
-    "npc_trust": {},
-    "npc_locations": {},
-    "status": "playing",
-    "narrative_memory": {
-      "recent_exchanges": [...],
-      "npc_memory": {...},
-      "discoveries": [...]
-    }
+    "status": "playing"
+  },
+  "location_debug": {
+    "location_id": "entrance_hall",
+    "name": "Entrance Hall",
+    "atmosphere": "...",
+    "exits": [...],
+    "items": [...],
+    "npcs": [...],
+    "details": {...},
+    "interactions": [...],
+    "requires": null
   }
 }
 ```
@@ -245,9 +205,9 @@ GET /api/game/state/{session_id}
 
 ## Debug Game State
 
-Get detailed debug information about game state, flags, and NPC visibility.
+Get detailed debug information about game state, flags, and visibility.
 
-Useful for understanding why NPCs aren't appearing or which flags are set.
+Useful for understanding why items or NPCs aren't appearing.
 
 ```
 GET /api/game/debug/{session_id}
@@ -264,81 +224,11 @@ GET /api/game/debug/{session_id}
     "examined_portraits": true,
     "read_ritual_notes": true
   },
-  "narrative_memory": {
-    "recent_exchanges": [
-      {"turn": 4, "player_action": "talk to jenkins", "narrative_summary": "Jenkins seemed hesitant..."}
-    ],
-    "npc_memory": {
-      "butler_jenkins": {
-        "encounter_count": 2,
-        "first_met_location": "entrance_hall",
-        "topics_discussed": ["the family", "the fire"],
-        "player_disposition": "sympathetic",
-        "npc_disposition": "warming up",
-        "notable_moments": ["He mentioned Lady Margaret with sadness"]
-      }
-    },
-    "discoveries": ["item:candlestick", "feature:slash_marks", "npc:butler_jenkins"]
-  },
   "inventory": ["candlestick", "old_letter"],
-  "discovered_locations": ["entrance_hall", "library", "upper_landing", "nursery"],
-  "npc_trust": {
-    "butler_jenkins": 1
-  },
-  "npc_analysis": [
-    {
-      "npc_id": "ghost_child",
-      "name": "The Whisper",
-      "role": "Spirit of the youngest child, Emily",
-      "base_location": null,
-      "roaming_locations": ["nursery", "upper_landing", "library", "sitting_room"],
-      "current_location": null,
-      "player_location": "nursery",
-      "is_at_player_location": true,
-      "has_appears_when": true,
-      "conditions": [
-        {
-          "type": "has_flag",
-          "flag": "examined_nursery",
-          "required": true,
-          "current_value": false,
-          "met": false
-        }
-      ],
-      "all_conditions_met": false,
-      "would_be_visible": false
-    }
-  ],
-  "interactions_at_location": [
-    {
-      "id": "examine_drawings",
-      "triggers": ["examine drawings", "look at drawings", "study drawings"],
-      "sets_flag": "understood_sacrifice",
-      "reveals_exit": null
-    },
-    {
-      "id": "examine_nursery",
-      "triggers": ["examine nursery", "look around", "search room"],
-      "sets_flag": "examined_nursery",
-      "reveals_exit": null
-    }
-  ]
+  "visited_locations": ["entrance_hall", "library", "upper_landing", "nursery"],
+  "container_states": {}
 }
 ```
-
-**NPC Analysis Fields**
-
-| Field | Description |
-|-------|-------------|
-| `is_at_player_location` | Whether NPC is at the player's current location |
-| `has_appears_when` | Whether NPC has appearance conditions |
-| `conditions` | Details of each condition and whether it's met |
-| `all_conditions_met` | True if all appearance conditions are satisfied |
-| `would_be_visible` | True if NPC would appear (at location AND conditions met) |
-
-**In-Game Debug Command**
-
-You can also type `debug` in the game to see formatted state info in the terminal.
 
 **Errors**
 - `404`: Session not found
@@ -427,36 +317,11 @@ interface GameState {
   session_id: string;
   current_location: string;
   inventory: string[];
-  discovered_locations: string[];
-  flags: Record<string, boolean>;           // World-defined flags (set by interactions)
+  visited_locations: string[];          // Set of visited location IDs
+  container_states: Record<string, boolean>;  // container_id -> is_open
+  flags: Record<string, boolean>;       // World-defined flags (set by interactions)
   turn_count: number;
-  npc_trust: Record<string, number>;        // Trust levels with NPCs
-  npc_locations: Record<string, string>;    // Current NPC locations
-  status: "playing" | "won" | "lost";       // Game completion status
-  narrative_memory: NarrativeMemory;        // Narrative context tracking
-}
-
-interface NarrativeMemory {
-  recent_exchanges: NarrativeExchange[];    // Last 2-3 turns for continuity
-  npc_memory: Record<string, NPCInteractionMemory>;  // Per-NPC interaction history
-  discoveries: string[];                    // Typed IDs: "item:key", "npc:ghost"
-}
-
-interface NarrativeExchange {
-  turn: number;
-  player_action: string;
-  narrative_summary: string;                // Truncated to ~100 words
-}
-
-interface NPCInteractionMemory {
-  encounter_count: number;
-  first_met_location: string | null;
-  first_met_turn: number | null;
-  topics_discussed: string[];               // Max 10 topics
-  player_disposition: string;               // Freeform: "sympathetic", "hostile"
-  npc_disposition: string;                  // How NPC feels toward player
-  notable_moments: string[];                // Max 3 moments
-  last_interaction_turn: number;
+  status: "playing" | "won" | "lost";   // Game completion status
 }
 ```
 
@@ -467,8 +332,7 @@ interface NewGameResponse {
   session_id: string;
   narrative: string;
   state: GameState;
-  engine_version: string;        // Engine used for this session
-  llm_debug?: LLMDebugInfo;      // Debug info when debug=true
+  pipeline_debug?: PipelineDebugInfo;   // Debug info when debug=true
 }
 ```
 
@@ -478,18 +342,28 @@ interface NewGameResponse {
 interface ActionResponse {
   narrative: string;
   state: GameState;
-  hints?: string[];
+  events: object[];              // List of events that occurred
   game_complete: boolean;        // True if game has ended
   ending_narrative?: string;     // Victory/defeat narrative if game ended
-  llm_debug?: LLMDebugInfo;      // Debug info when debug=true
+  pipeline_debug?: PipelineDebugInfo;  // Debug info when debug=true
 }
 ```
 
-### LLMDebugInfo
+### PipelineDebugInfo
 
-Returned when `debug=true` is passed in the request.
+Returned when `debug=true` is passed in the request. Shows debug info at each pipeline stage.
 
 ```typescript
+interface PipelineDebugInfo {
+  raw_input: string;             // Player's raw input
+  parser_type: string;           // "rule_based" or "interactor_ai"
+  parsed_intent: object | null;  // Parsed intent
+  interactor_debug: LLMDebugInfo | null;  // LLM debug for interactor (if used)
+  validation_result: object | null;       // Validation result
+  events: object[];              // Generated events
+  narrator_debug: LLMDebugInfo | null;    // LLM debug for narrator
+}
+
 interface LLMDebugInfo {
   system_prompt: string;         // Full system prompt sent to LLM
   user_prompt: string;           // User prompt for this action
@@ -512,64 +386,6 @@ interface WorldInfo {
   description?: string;
 }
 ```
-
-### EngineInfo
-
-```typescript
-interface EngineInfo {
-  id: string;           // Engine identifier (e.g., "classic", "two_phase")
-  name: string;         // Display name
-  description: string;  // Brief description of the engine
-}
-```
-
-### TwoPhaseGameState
-
-State model for the two-phase engine (separate from classic `GameState`).
-
-```typescript
-interface TwoPhaseGameState {
-  session_id: string;
-  current_location: string;
-  inventory: string[];
-  flags: Record<string, boolean>;
-  visited_locations: string[];          // Set of visited location IDs
-  container_states: Record<string, boolean>;  // container_id -> is_open
-  turn_count: number;
-  status: "playing" | "won" | "lost";
-}
-```
-
-### TwoPhaseNewGameResponse
-
-Response for two-phase engine game start.
-
-```typescript
-interface TwoPhaseNewGameResponse {
-  session_id: string;
-  narrative: string;
-  state: TwoPhaseGameState;            // Note: Different from classic GameState
-  engine_version: "two_phase";
-  llm_debug?: LLMDebugInfo;
-}
-```
-
-### TwoPhaseActionResponse
-
-Response from two-phase engine action processing.
-
-```typescript
-interface TwoPhaseActionResponse {
-  narrative: string;
-  state: TwoPhaseGameState;
-  events: object[];                    // List of events that occurred
-  game_complete: boolean;
-  ending_narrative?: string;
-  llm_debug?: LLMDebugInfo;
-}
-```
-
-**Note:** When using the two-phase engine, responses use `TwoPhaseGameState` instead of `GameState`. The state model is simplified and does not include narrative memory (context handled differently).
 
 ---
 

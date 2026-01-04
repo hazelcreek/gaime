@@ -74,25 +74,15 @@ This document describes the system architecture of GAIME, including component de
 |--------|---------------|
 | `api/` | REST endpoints |
 | `engine/` | Game logic, state management |
-| `engine/classic/` | Classic single-LLM engine |
-| `engine/two_phase/` | Two-phase engine (Interactor→Narrator) |
+| `engine/two_phase/` | Two-phase engine (Parser→Validator→Narrator) |
 | `llm/` | LLM client, prompt templates |
-| `llm/classic/` | GameMaster LLM for classic engine |
-| `llm/two_phase/` | InteractorAI, NarratorAI for two-phase engine |
+| `llm/two_phase/` | InteractorAI, NarratorAI |
 | `models/` | Shared Pydantic schemas (world.py, game.py) |
 
-### Game Engines
+### Game Engine
 
-GAIME supports two game engine architectures that coexist independently:
+The game engine uses a two-phase architecture that separates parsing from narration for determinism and testability:
 
-**Classic Engine** (`engine/classic/`):
-- Single-LLM architecture where GameMaster handles everything
-- State Manager (`engine/classic/state.py`): GameStateManager
-- Action Processor (`engine/classic/processor.py`): ActionProcessor
-- Models (`engine/classic/models.py`): GameState, ActionResponse, LLMResponse
-
-**Two-Phase Engine** (`engine/two_phase/`):
-- Separates parsing (Interactor) from narration (Narrator)
 - State Manager (`engine/two_phase/state.py`): TwoPhaseStateManager
 - Processor (`engine/two_phase/processor.py`): TwoPhaseProcessor
 - Parser (`engine/two_phase/parser.py`): RuleBasedParser
@@ -118,10 +108,7 @@ GAIME supports two game engine architectures that coexist independently:
 - Provider Abstraction (`llm/client.py`): LiteLLM for provider-agnostic calls
 - Prompt Loader (`llm/prompt_loader.py`): Loads prompt templates
 
-**Classic Engine LLM** (`llm/classic/`):
-- Game Master (`llm/classic/game_master.py`): Full game processing
-
-**Two-Phase Engine LLM** (`llm/two_phase/`):
+**Two-Phase LLM** (`llm/two_phase/`):
 - Interactor (`llm/two_phase/interactor.py`): Entity resolution and intent parsing
 - Narrator (`llm/two_phase/narrator.py`): Prose generation from events
 
@@ -258,17 +245,16 @@ GAIME supports two game engine architectures that coexist independently:
 ## State Schema
 
 ```python
-class GameState:
+class TwoPhaseGameState:
     session_id: str
     current_location: str
     inventory: list[str]
-    discovered_locations: list[str]
     flags: dict[str, bool]  # World-defined flags (set by interactions)
+    visited_locations: set[str]
+    container_states: dict[str, bool]  # Container open/closed state
     turn_count: int
-    npc_trust: dict[str, int]  # trust levels with NPCs
-    npc_locations: dict[str, str]  # current NPC locations (for dynamic movement)
     status: str  # "playing", "won", or "lost"
-    narrative_memory: NarrativeMemory  # Narrative context tracking
+    narration_history: list[NarrationEntry]  # Last 5 narrations for style variation
 ```
 
 ### World-Defined Flags
@@ -279,97 +265,9 @@ World-defined `flags` are set by:
 
 These control game mechanics like unlocking doors, triggering NPC appearances, and victory conditions.
 
-## Narrative Memory System
+### Narration History
 
-The narrative memory system provides the LLM with context about previous interactions to maintain immersion and prevent repetition.
-
-### Three-Layer Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  Layer 1: Recent Exchanges (last 2-3 turns)             │
-│  - Full player action + truncated narrative (~100 words)│
-│  - Provides immediate conversational continuity         │
-├─────────────────────────────────────────────────────────┤
-│  Layer 2: NPC Memory (per-character)                    │
-│  - Encounter count, topics discussed                    │
-│  - Player/NPC disposition tracking                      │
-│  - Notable moments (max 3 per NPC)                      │
-├─────────────────────────────────────────────────────────┤
-│  Layer 3: Discovery Log                                 │
-│  - Items/features already examined (don't re-discover)  │
-│  - NPCs already introduced                              │
-│  - Typed IDs: "item:key", "npc:ghost", "feature:marks"  │
-└─────────────────────────────────────────────────────────┘
-```
-
-### Memory Models
-
-```python
-class NarrativeExchange:
-    turn: int
-    player_action: str
-    narrative_summary: str  # Truncated to ~100 words
-
-class NPCInteractionMemory:
-    encounter_count: int
-    first_met_location: str | None
-    first_met_turn: int | None
-    topics_discussed: list[str]  # Max 10 topics
-    player_disposition: str  # Freeform: "friendly", "suspicious"
-    npc_disposition: str  # How NPC feels toward player
-    notable_moments: list[str]  # Max 3 moments
-    last_interaction_turn: int
-
-class NarrativeMemory:
-    recent_exchanges: list[NarrativeExchange]  # Max 3
-    npc_memory: dict[str, NPCInteractionMemory]
-    discoveries: list[str]  # Typed IDs
-```
-
-### LLM Memory Updates
-
-The LLM returns `memory_updates` in its response:
-
-```json
-{
-  "memory_updates": {
-    "npc_interactions": {
-      "ghost_child": {
-        "topic_discussed": "her father's dagger",
-        "player_disposition": "sympathetic",
-        "npc_disposition": "warming up",
-        "notable_moment": "She whispered about the fire"
-      }
-    },
-    "new_discoveries": ["item:rusty_key", "feature:slash_marks"]
-  }
-}
-```
-
-### Memory in System Prompt
-
-Memory context is included in the system prompt:
-
-```
-## Narrative Memory
-### Recent Context
-[Turn 5] Player: "ask ghost about dagger" -> She became emotional...
-[Turn 6] Player: "express sympathy" -> She began to trust you...
-
-### NPC Relationships
-ghost_child: Met 2x. discussed: dagger, her death. player is sympathetic. NPC is warming up.
-
-### Already Discovered (do NOT describe as new)
-item:rusty_key, feature:slash_marks, npc:ghost_child
-```
-
-### Design Principles
-
-1. **World model is authoritative**: Memory never overrides flags, inventory, or location
-2. **Graceful degradation**: If LLM doesn't return memory_updates, game continues normally
-3. **Bounded growth**: Hard limits prevent unbounded token usage
-4. **Token budget**: ~280 tokens total for memory context
+The `narration_history` tracks the last 5 narrations for style variation. The narrator receives this history to avoid repetitive phrasing and adapt tone.
 
 ## Victory Conditions
 
@@ -576,17 +474,7 @@ GET /api/builder/{world_id}/images/{location_id}/variants
 
 ## Two-Phase Engine Architecture
 
-The two-phase engine is an alternative action processing architecture that separates parsing from narration for better determinism and testability.
-
-### Engine Comparison
-
-| Aspect | Classic Engine | Two-Phase Engine |
-|--------|----------------|------------------|
-| Action Processing | Single LLM call | Parse → Validate → Narrate |
-| State Changes | LLM determines | Validators determine |
-| Narrative | Generated with state changes | Generated from confirmed events |
-| Testability | Harder (LLM-dependent) | Easier (deterministic validation) |
-| Current Status | Full featured | Move, Examine, Take (Phase 2) |
+The two-phase engine separates parsing from narration for better determinism and testability.
 
 ### Two-Phase Components
 
@@ -638,34 +526,13 @@ The two-phase engine is an alternative action processing architecture that separ
 
 | Model | Location | Purpose |
 |-------|----------|---------|
-| `TwoPhaseGameState` | `engine/two_phase/models/state.py` | Game state (separate from classic) |
+| `TwoPhaseGameState` | `engine/two_phase/models/state.py` | Game state |
 | `NarrationEntry` | `engine/two_phase/models/state.py` | Single narration for style history |
 | `ActionIntent` | `engine/two_phase/models/intent.py` | Parsed state-changing action |
 | `FlavorIntent` | `engine/two_phase/models/intent.py` | Atmospheric action (no state change) |
 | `Event` | `engine/two_phase/models/event.py` | Confirmed game occurrence |
 | `PerceptionSnapshot` | `engine/two_phase/models/perception.py` | What player can see |
 | `ValidationResult` | `engine/two_phase/models/validation.py` | Validation outcome |
-
-### TwoPhaseGameState
-
-```python
-class TwoPhaseGameState:
-    session_id: str
-    current_location: str
-    inventory: list[str]
-    flags: dict[str, bool]
-    visited_locations: set[str]
-    container_states: dict[str, bool]
-    turn_count: int
-    status: str  # "playing", "won", "lost"
-    narration_history: list[NarrationEntry]  # Last 5 narrations for style variation
-```
-
-**Narration History vs Narrative Memory**:
-- **Narrative Memory** (classic engine): Tracks *what happened* for content continuity
-- **Narration History** (two-phase): Tracks *what was said* for style variation
-
-The narrator receives the last 5 narrations to avoid repetitive phrasing and adapt tone.
 
 ### Key Classes
 
@@ -681,26 +548,11 @@ The narrator receives the last 5 narrations to avoid repetitive phrasing and ada
 | `DefaultVisibilityResolver` | `engine/two_phase/visibility.py` | Visibility computation |
 | `NarratorAI` | `llm/two_phase/narrator.py` | Narrative generation |
 
-### Engine Selection
-
-Engines are selected at game start via the `engine` parameter:
-
-```json
-POST /api/game/new
-{
-  "world_id": "cursed-manor",
-  "engine": "two_phase"
-}
-```
-
-Session data stores the engine version, routing subsequent actions to the correct processor.
-
 ### Design Principles
 
-1. **Complete Separation**: Two-phase engine has its own state model (`TwoPhaseGameState`) - no code sharing with classic except world data loading
-2. **Deterministic Validation**: State changes are validated by code, not LLM
-3. **Derived Visibility**: What player can see is computed at runtime, not stored
-4. **Event-Driven Narration**: Narrator receives confirmed events, not action parsing
+1. **Deterministic Validation**: State changes are validated by code, not LLM
+2. **Derived Visibility**: What player can see is computed at runtime, not stored
+3. **Event-Driven Narration**: Narrator receives confirmed events, not action parsing
 
 See `planning/two-phase-game-loop-spec.md` for the full specification.
 
