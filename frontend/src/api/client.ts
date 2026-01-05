@@ -146,7 +146,7 @@ export interface LocationNPCDebug {
 }
 
 /**
- * Exit with accessibility analysis.
+ * Exit with accessibility and visibility analysis.
  *
  * Source: backend/app/engine/two_phase/models/perception.py::LocationExitDebug
  */
@@ -165,6 +165,10 @@ export interface LocationExitDebug {
   scene_description: string | null;
   /** Whether player knows where this exit leads */
   destination_known: boolean;
+  /** Whether this exit is hidden (V3) */
+  is_hidden: boolean;
+  /** Why the exit is visible/hidden: "visible", "hidden", "revealed", "condition_not_met:{x}" */
+  visibility_reason: string;
 }
 
 /**

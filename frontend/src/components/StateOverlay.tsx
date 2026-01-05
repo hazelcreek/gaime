@@ -290,21 +290,36 @@ function LocationDebugSection({ locationDebug }: { locationDebug: LocationDebugS
 
 function ExitRow({ exit }: { exit: LocationExitDebug }) {
   const isAccessible = exit.is_accessible;
-  const statusColor = isAccessible ? 'text-terminal-success' : 'text-terminal-warning';
-  const statusIcon = isAccessible ? '→' : '⊘';
+  const isVisible = !exit.is_hidden;
+
+  // Visibility determines primary status color (hidden exits are dim)
+  // Then accessibility determines secondary indicator
+  const visibilityColor = isVisible ? 'text-terminal-success' : 'text-terminal-dim';
+  const accessIcon = isAccessible ? '→' : '⊘';
+  const accessColor = isAccessible ? visibilityColor : 'text-terminal-warning';
 
   return (
     <div className="flex items-start gap-2 text-xs">
-      <span className={statusColor}>{statusIcon}</span>
+      <span className={accessColor}>{accessIcon}</span>
       <div className="flex-1">
         <span className="text-terminal-accent font-medium">{exit.direction.toUpperCase()}</span>
+        {/* Exit visibility status (about seeing the exit itself) */}
+        <span className={`ml-1 ${visibilityColor}`}>
+          [{exit.visibility_reason}]
+        </span>
         <span className="text-terminal-dim"> → </span>
-        <span className="text-terminal-text">{exit.destination_name}</span>
+        {/* Destination: shown normally if known, gray brackets if unknown */}
+        {exit.destination_known ? (
+          <span className="text-terminal-text">{exit.destination_name}</span>
+        ) : (
+          <span className="text-terminal-dim">({exit.destination_name})</span>
+        )}
+        {/* Access status (only if not accessible) */}
         {!isAccessible && (
           <span className="text-terminal-warning ml-2">({exit.access_reason})</span>
         )}
-        {exit.description && (
-          <div className="text-terminal-dim mt-0.5 italic">{truncate(exit.description, 50)}</div>
+        {exit.scene_description && (
+          <div className="text-terminal-dim mt-0.5 italic">{truncate(exit.scene_description, 50)}</div>
         )}
       </div>
     </div>
