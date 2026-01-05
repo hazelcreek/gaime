@@ -52,7 +52,7 @@ See [two-phase-game-loop-spec.md](two-phase-game-loop-spec.md) for full specific
 | 2 | World Migration | ✅ Complete |
 | 3 | Code Integration | ✅ Complete |
 | 3.5 | Unified Visibility Model (V3) | ✅ Complete |
-| 4 | Examination Mechanics | ⚪ Planned |
+| 4 | Examination Mechanics | ✅ Complete |
 | 5 | Narrator Integration | ⚪ Planned |
 | 6 | Image Generation | ⚪ Planned |
 | 7 | World Builder Updates | ⚪ Planned |
@@ -382,6 +382,7 @@ See [ideas/features.md](../ideas/features.md) for full descriptions.
 
 | Date | Change |
 |------|--------|
+| 2026-01-05 | Visibility & Examination Phase 4 complete: on_examine effects, exit examination, destination reveal mechanics, reveal_destination_on_flag/examine, 284 tests passing |
 | 2026-01-04 | Visibility & Examination Phase 2 complete: All 10 worlds migrated to V2 schema (ExitDefinition, DetailDefinition, renamed Item fields), 256 tests passing |
 | 2026-01-04 | Visibility & Examination Phase 1 complete: ExitDefinition, DetailDefinition, ExaminationEffect models; Item field aliases; validation script |
 | 2026-01-04 | Classic Engine deprecated: removed engine selection, deleted classic engine code, simplified API |

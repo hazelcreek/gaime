@@ -5,6 +5,7 @@
 # - Non-portable containers (container_box)
 # - Hidden items with reveal conditions (hidden_gem) - visibility now in locations.yaml
 # - Key/unlock mechanics
+# - on_examine effects (Phase 4)
 #
 # V3: Removed location, hidden, find_condition - now defined in locations.yaml item_placements
 
@@ -15,6 +16,10 @@ test_key:
   scene_description: "A brass key catches the light."
   take_description: "You pocket the brass key."
   unlocks: locked_room
+  # Phase 4: on_examine effect - examining the key reveals a hint
+  on_examine:
+    sets_flag: key_examined
+    narrative_hint: "The key has strange markings that suggest it unlocks more than one thing."
 
 container_box:
   name: "Wooden Box"

@@ -37,6 +37,7 @@ from app.models.world import (  # noqa: E402
     DetailDefinition,
     ItemPlacement,
     NPCPlacement,
+    ExaminationEffect,
 )
 
 if TYPE_CHECKING:
@@ -116,7 +117,7 @@ def sample_world() -> World:
 
 @pytest.fixture
 def sample_locations() -> dict[str, Location]:
-    """Create a minimal 3-room layout for testing (V3 schema).
+    """Create a minimal 3-room layout for testing (V3 schema + Phase 4 features).
 
     Layout:
         [locked_room] (north, requires door_unlocked flag)
@@ -124,6 +125,7 @@ def sample_locations() -> dict[str, Location]:
         [start_room] --- [secret_room] (east, requires knows_secret flag)
 
     V3: Uses item_placements and npc_placements instead of items/npcs lists.
+    Phase 4: Uses on_examine effects and destination reveal features.
     """
     return {
         "start_room": Location(
@@ -133,12 +135,15 @@ def sample_locations() -> dict[str, Location]:
                 "north": ExitDefinition(
                     destination="locked_room",
                     scene_description="A heavy wooden door to the north",
+                    examine_description="The iron lock mechanism is old but functional.",
                     destination_known=False,
+                    reveal_destination_on_examine=True,  # Phase 4
                 ),
                 "east": ExitDefinition(
                     destination="secret_room",
                     scene_description="A concealed passage to the east",
                     destination_known=False,
+                    reveal_destination_on_flag="found_secret_door",  # Phase 4
                 ),
             },
             # V3: item_placements defines which items are here and their visibility
@@ -169,6 +174,15 @@ def sample_locations() -> dict[str, Location]:
                 "walls": DetailDefinition(
                     name="Walls",
                     scene_description="Bare stone walls.",
+                ),
+                "box": DetailDefinition(  # Phase 4: detail with on_examine
+                    name="Wooden Box",
+                    scene_description="A small wooden box with a brass clasp.",
+                    examine_description="You open the brass clasp and peer inside the box.",
+                    on_examine=ExaminationEffect(
+                        sets_flag="box_opened",
+                        narrative_hint="The box opens to reveal its contents",
+                    ),
                 ),
             },
         ),
@@ -201,9 +215,10 @@ def sample_locations() -> dict[str, Location]:
 
 @pytest.fixture
 def sample_items() -> dict[str, Item]:
-    """Create sample items (V3 schema).
+    """Create sample items (V3 schema + Phase 4 features).
 
     V3: Removed location, hidden, find_condition - these are now in ItemPlacement.
+    Phase 4: Adds on_examine effects to items.
     """
     return {
         "test_key": Item(
@@ -212,6 +227,10 @@ def sample_items() -> dict[str, Item]:
             examine_description="A simple brass key for testing.",
             scene_description="A brass key catches the light.",
             unlocks="locked_room",
+            on_examine=ExaminationEffect(  # Phase 4
+                sets_flag="key_examined",
+                narrative_hint="The key has strange markings.",
+            ),
         ),
         "container_box": Item(
             name="Wooden Box",

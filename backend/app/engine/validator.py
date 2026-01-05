@@ -70,6 +70,16 @@ class WorldValidator:
                             f"location:{loc_id}/interaction:{int_id}",
                         )
 
+        # Phase 4: Flags SET by detail.on_examine
+        for loc_id, location in self.world_data.locations.items():
+            if location.details:
+                for detail_id, detail_def in location.details.items():
+                    if detail_def.on_examine and detail_def.on_examine.sets_flag:
+                        self._record_flag_set(
+                            detail_def.on_examine.sets_flag,
+                            f"location:{loc_id}/detail:{detail_id}/on_examine",
+                        )
+
         # Flags SET by item use_actions
         for item_id, item in self.world_data.items.items():
             if item.use_actions:
@@ -78,6 +88,13 @@ class WorldValidator:
                         self._record_flag_set(
                             action.sets_flag, f"item:{item_id}/action:{action_id}"
                         )
+
+        # Phase 4: Flags SET by item.on_examine
+        for item_id, item in self.world_data.items.items():
+            if item.on_examine and item.on_examine.sets_flag:
+                self._record_flag_set(
+                    item.on_examine.sets_flag, f"item:{item_id}/on_examine"
+                )
 
         # Flags CHECKED by location requires
         for loc_id, location in self.world_data.locations.items():

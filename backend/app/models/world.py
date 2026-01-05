@@ -102,11 +102,19 @@ class NPCPlacement(BaseModel):
 
 
 class ExaminationEffect(BaseModel):
-    """Effects triggered when examining a detail or exit"""
+    """Effects triggered when examining a detail, item, or exit.
+
+    Note: To reveal hidden items, use sets_flag here and hidden+find_condition
+    on the ItemPlacement. This avoids the confusing 'reveals_item' pattern.
+
+    Attributes:
+        sets_flag: Flag to set when examined
+        reveals_exit_destination: Exit direction whose destination becomes known
+        narrative_hint: Hint for narrator about what the examination reveals
+    """
 
     sets_flag: str | None = None
-    reveals_item: str | None = None
-    reveals_exit: str | None = None  # Exit direction to reveal destination
+    reveals_exit_destination: str | None = None  # Exit direction to reveal destination
     narrative_hint: str | None = None
 
 
@@ -121,8 +129,8 @@ class ExitDefinition(BaseModel):
         scene_description: How exit appears in scene
         examine_description: Detailed view on examination
         destination_known: Whether player initially knows the destination
-        reveal_on_flag: Reveal destination when this flag is set
-        reveal_on_examine: Reveal destination when player examines the exit
+        reveal_destination_on_flag: Reveal destination when this flag is set
+        reveal_destination_on_examine: Reveal destination when player examines the exit
         hidden: Exit not visible until revealed (V3)
         find_condition: Condition to reveal exit (V3)
         locked: Whether exit requires a key
@@ -139,8 +147,8 @@ class ExitDefinition(BaseModel):
 
     # Destination visibility (whether player knows WHERE it leads)
     destination_known: bool = True
-    reveal_on_flag: str | None = None
-    reveal_on_examine: bool = False
+    reveal_destination_on_flag: str | None = None
+    reveal_destination_on_examine: bool = False
     # Note: Visiting the destination ALWAYS reveals it (automatic, not configurable)
 
     # Exit visibility (whether exit is shown at all) - V3
@@ -301,6 +309,7 @@ class Item(BaseModel):
         portable: Whether item can be taken
         scene_description: How item appears in scene
         examine_description: Detailed examination text
+        on_examine: Effects triggered by examination (Phase 4)
         take_description: Narration when item is taken
         unlocks: Location or container this item unlocks
         properties: Special item properties
@@ -314,6 +323,9 @@ class Item(BaseModel):
     # Visual descriptions
     scene_description: str = ""  # How item appears in scene
     examine_description: str = ""  # Detailed examination text
+
+    # Examination effects (Phase 4)
+    on_examine: ExaminationEffect | None = None
 
     take_description: str = ""
     unlocks: str | None = None

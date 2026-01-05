@@ -11,6 +11,8 @@
 # - Container interactions
 # - NPC presence
 # - Hidden items with visibility conditions (V3)
+# - Exit examination with destination reveal (Phase 4)
+# - on_examine effects (Phase 4)
 
 start_room:
   name: "Starting Room"
@@ -21,11 +23,14 @@ start_room:
     north:
       destination: locked_room
       scene_description: "A sturdy wooden door with an iron lock mechanism"
+      examine_description: "The iron lock mechanism is old but functional. This seems to lead to a secure room."
       destination_known: false
+      reveal_destination_on_examine: true  # Phase 4: examining reveals destination
     east:
       destination: secret_room
       scene_description: "A section of wall that looks slightly different from the rest"
       destination_known: false
+      reveal_destination_on_flag: found_secret_door  # Phase 4: flag reveals destination
   details:
     floor:
       name: "Wooden Floor"
@@ -36,6 +41,10 @@ start_room:
     box:
       name: "Wooden Box"
       scene_description: "A small wooden box with a brass clasp."
+      examine_description: "You open the brass clasp and peer inside the box."
+      on_examine:
+        sets_flag: box_opened
+        narrative_hint: "The box opens to reveal its contents"
   # V3: item_placements defines WHICH items are here AND their visibility
   item_placements:
     test_key:
@@ -51,14 +60,6 @@ start_room:
   npc_placements:
     test_npc:
       placement: "stands near the east wall"
-  interactions:
-    examine_box:
-      triggers:
-        - "examine box"
-        - "look at box"
-        - "open box"
-      narrative_hint: "The box opens to reveal its contents"
-      sets_flag: box_opened
 
 locked_room:
   name: "Locked Room"

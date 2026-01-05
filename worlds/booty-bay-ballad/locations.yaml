@@ -13,7 +13,10 @@ docks_landing:
       destination_known: true
   item_placements:
     sticky_jail_key:
-      placement: Deep inside the Grog Barrel (currently invisible).
+      placement: Deep inside the Grog Barrel, submerged in spicy liquid.
+      hidden: true
+      find_condition:
+        requires_flag: grog_scooped
   npc_placements: {}
   details:
     grog_barrel:
@@ -26,7 +29,6 @@ docks_landing:
       narrative_hint: |-
         You scoop out gallons of fiery liquid with the Ladle of Infinite Scooping. At the bottom, sticky and smelling of nutmeg, lies a key!
       sets_flag: grog_scooped
-      reveals_item: sticky_jail_key
 town_square:
   name: Town Square
   atmosphere: |
@@ -85,7 +87,10 @@ tavern_entrance:
     ceramic_parrot:
       placement: Clutched in the hand of Bard Barbarossa, who is currently bowing.
     golden_tooth:
-      placement: Hidden inside the mouth of the mounted shark head above the bar.
+      placement: Wedged in the back of the mounted shark head above the bar.
+      hidden: true
+      find_condition:
+        requires_flag: found_golden_tooth
   npc_placements:
     bard_barbarossa:
       placement: Standing on a table, reciting limericks about scurvy.
@@ -93,6 +98,10 @@ tavern_entrance:
     shark_head:
       name: Shark Head
       scene_description: A taxidermied shark with a suspiciously shiny glint in its mouth.
+      examine_description: You peer into the shark's maw. Wedged in the back is a solid Golden Tooth!
+      on_examine:
+        sets_flag: found_golden_tooth
+        narrative_hint: You peer into the shark's maw. Wedged in the back is a solid Golden Tooth!
     sign:
       name: Help Wanted Sign
       scene_description: |-
@@ -104,12 +113,7 @@ tavern_entrance:
       narrative_hint: |-
         You challenge the Bard to an insult slam. You rhyme 'spittoon' with 'baboon'. The crowd goes wild! Barbarossa weeps and hands you his prize trophy.
       sets_flag: won_slam
-      reveals_item: ceramic_parrot
-    examine_shark:
-      triggers:
-      - examine shark_head
-      narrative_hint: You peer into the shark's maw. Wedged in the back is a solid Golden Tooth!
-      reveals_item: golden_tooth
+      gives_item: ceramic_parrot
 brig_entrance:
   name: The Brig
   atmosphere: |
@@ -156,7 +160,7 @@ jail_cell:
       narrative_hint: |-
         Ned gasps. 'You opened the door! I'm free! Take this, I won't need it where I'm going (the tavern).' He hands you the Ancient Compass.
       sets_flag: ned_freed
-      reveals_item: ancient_compass
+      gives_item: ancient_compass
 ships_deck:
   name: Deck of The Leaky Tub
   atmosphere: |
@@ -301,18 +305,21 @@ captains_cabin:
       destination: ships_deck
       scene_description: The cabin door leading back to the main deck
       destination_known: true
-  item_placements: {}
+  item_placements:
+    ghost_diary:
+      placement: Tucked under a loose floorboard.
+      hidden: true
+      find_condition:
+        requires_flag: examined_floorboard
   npc_placements: {}
   details:
     floorboard:
       name: Loose Floorboard
       scene_description: A loose floorboard squeaks under your foot.
-  interactions:
-    examine_floor:
-      triggers:
-      - examine floorboard
-      narrative_hint: You pry up the board. Underneath is a dusty diary belonging to a Ghost Pirate.
-      reveals_item: ghost_diary
+      examine_description: You pry up the board. Underneath is a dusty diary belonging to a Ghost Pirate.
+      on_examine:
+        sets_flag: examined_floorboard
+        narrative_hint: You pry up the board. Underneath is a dusty diary belonging to a Ghost Pirate.
 zipline_descent:
   name: Mid-Air Zipline
   atmosphere: WHEEEEEEEEEE!

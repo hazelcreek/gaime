@@ -184,11 +184,12 @@ class DefaultVisibilityResolver:
 
             # Determine if destination is known:
             # 1. Author set destination_known = True, OR
-            # 2. Player has visited the destination
-            destination_known = exit_def.destination_known
-            if state and hasattr(state, "visited_locations"):
-                if exit_def.destination in state.visited_locations:
-                    destination_known = True
+            # 2. Player has visited the destination, OR
+            # 3. reveal_destination_on_flag is set and the flag is True, OR
+            # 4. Exit is in revealed_exits for this location
+            destination_known = self._check_destination_known(
+                exit_def, direction, state
+            )
 
             exits.append(
                 VisibleExit(
@@ -202,6 +203,58 @@ class DefaultVisibilityResolver:
             )
 
         return exits
+
+    def _check_destination_known(
+        self,
+        exit_def: "ExitDefinition",  # noqa: F821
+        direction: str,
+        state: "GameStateProtocol | None",
+    ) -> bool:
+        """Check if an exit's destination is known to the player.
+
+        Destination is known if ANY of these are true:
+        1. Author set destination_known = True
+        2. Player has visited the destination
+        3. reveal_destination_on_flag is set and the flag is True
+        4. Direction is in revealed_exits for this location (Phase 4)
+
+        Args:
+            exit_def: The exit definition
+            direction: The exit direction
+            state: Current game state
+
+        Returns:
+            True if the destination is known
+        """
+        from app.models.world import ExitDefinition
+
+        exit_def: ExitDefinition  # type hint for IDE
+
+        # 1. Author set destination_known = True
+        if exit_def.destination_known:
+            return True
+
+        if not state:
+            return False
+
+        # 2. Player has visited the destination
+        if hasattr(state, "visited_locations"):
+            if exit_def.destination in state.visited_locations:
+                return True
+
+        # 3. reveal_destination_on_flag is set and the flag is True
+        if exit_def.reveal_destination_on_flag and state.flags.get(
+            exit_def.reveal_destination_on_flag, False
+        ):
+            return True
+
+        # 4. Direction is in revealed_exits for this location
+        if hasattr(state, "revealed_exits"):
+            location_id = state.current_location
+            if direction in state.revealed_exits.get(location_id, set()):
+                return True
+
+        return False
 
     def _is_first_visit(self, state: "GameStateProtocol") -> bool:
         """Check if this is the first visit to the current location."""
@@ -518,11 +571,10 @@ class DefaultVisibilityResolver:
                         is_accessible = False
                         access_reason = f"requires_item:{dest_location.requires.item}"
 
-            # Determine if destination is known
-            destination_known = exit_def.destination_known
-            if hasattr(state, "visited_locations"):
-                if dest_id in state.visited_locations:
-                    destination_known = True
+            # Determine if destination is known (use shared logic)
+            destination_known = self._check_destination_known(
+                exit_def, direction, state
+            )
 
             exits.append(
                 LocationExitDebug(

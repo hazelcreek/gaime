@@ -168,8 +168,12 @@ class WorldLoader:
                         scene_description=exit_data.get("scene_description", ""),
                         examine_description=exit_data.get("examine_description"),
                         destination_known=exit_data.get("destination_known", True),
-                        reveal_on_flag=exit_data.get("reveal_on_flag"),
-                        reveal_on_examine=exit_data.get("reveal_on_examine", False),
+                        reveal_destination_on_flag=exit_data.get(
+                            "reveal_destination_on_flag"
+                        ),
+                        reveal_destination_on_examine=exit_data.get(
+                            "reveal_destination_on_examine", False
+                        ),
                         hidden=exit_data.get("hidden", False),
                         find_condition=exit_data.get("find_condition"),
                         locked=exit_data.get("locked", False),

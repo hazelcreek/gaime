@@ -407,7 +407,7 @@ entrance_hall:
       destination: dining_room
       scene_description: "A heavy oak door with iron bands and a tarnished brass handle"
       destination_known: false  # Closed door in unfamiliar mansion
-      reveal_on_flag: found_floor_plan  # Optional: examining floor plan reveals it
+      reveal_destination_on_flag: found_floor_plan  # Optional: examining floor plan reveals it
       # Note: Will auto-reveal once player visits dining_room
 ```
 
@@ -428,8 +428,8 @@ class ExitDefinition(BaseModel):
     destination_known: bool = True  # Whether player initially knows the destination
 
     # Dynamic reveal triggers (optional)
-    reveal_on_flag: str | None = None  # Reveal when this flag is set
-    reveal_on_examine: bool = False  # Reveal when player examines the exit
+    reveal_destination_on_flag: str | None = None  # Reveal when this flag is set
+    reveal_destination_on_examine: bool = False  # Reveal when player examines the exit
 
     # Note: Visiting the destination ALWAYS reveals it (automatic, not configurable)
 
@@ -458,9 +458,9 @@ Once the player visits a location, all exits leading TO that location become kno
 
 | Trigger | Use Case |
 |---------|----------|
-| `reveal_on_flag: "found_map"` | Examining a map reveals building layout |
-| `reveal_on_flag: "talked_to_guide"` | NPC tells player about the location |
-| `reveal_on_examine: true` | Looking closely at the door reveals where it leads |
+| `reveal_destination_on_flag: "found_map"` | Examining a map reveals building layout |
+| `reveal_destination_on_flag: "talked_to_guide"` | NPC tells player about the location |
+| `reveal_destination_on_examine: true` | Looking closely at the door reveals where it leads |
 
 ### Destination Visibility Examples
 
@@ -470,7 +470,7 @@ Once the player visits a location, all exits leading TO that location become kno
 | Closed door, unfamiliar | `destination_known: false` | "A heavy oak door to the north" |
 | After visiting | (automatic) | "The door leads back to the library" |
 | Has visible sign | `destination_known: true` | "A door marked 'LIBRARY'" |
-| Revealed by map | `reveal_on_flag: "read_map"` | Initially unknown, then revealed |
+| Revealed by map | `reveal_destination_on_flag: "read_map"` | Initially unknown, then revealed |
 
 ### No Backward Compatibility
 
@@ -929,8 +929,8 @@ class ExitDefinition(BaseModel):
 
     # Destination visibility (where it leads)
     destination_known: bool = True  # Initial state (set by author)
-    reveal_on_flag: str | None = None  # Dynamic reveal trigger
-    reveal_on_examine: bool = False  # Reveal when examined
+    reveal_destination_on_flag: str | None = None  # Dynamic reveal trigger
+    reveal_destination_on_examine: bool = False  # Reveal when examined
     # Note: Visiting destination always reveals it (automatic)
 
     # Exit visibility (whether exit is shown at all) - NEW in V3
@@ -1678,7 +1678,7 @@ The following fields and patterns are deprecated in V3:
 - ExamineValidator updated for `DetailDefinition` and new Item field names
 - Perception models updated: `VisibleExit.destination_known`, `LocationItemDebug.scene_description`, `LocationExitDebug.scene_description`
 - Game state updated: added `revealed_exits: dict[str, set[str]]` for future Phase 4 flag/examine reveals
-- Destination reveal logic: Only `on_visit` auto-reveal implemented in Phase 3; `reveal_on_flag` and `reveal_on_examine` triggers deferred to Phase 4
+- Destination reveal logic: Only `on_visit` auto-reveal implemented in Phase 3; `reveal_destination_on_flag` and `reveal_destination_on_examine` triggers deferred to Phase 4
 
 ### Phase 3.5: Unified Visibility Model (V3 Schema) ✅
 
@@ -1755,21 +1755,34 @@ The following fields and patterns are deprecated in V3:
 - Added 7 new V3-specific tests covering hidden exits, details, and NPCs with flag conditions
 - Validators updated to use V3 schema: `item_placements`/`npc_placements` instead of `items`/`npcs` lists
 
-### Phase 4: Examination Mechanics (Week 2)
+### Phase 4: Examination Mechanics (Week 2) ✅ COMPLETED
 
 **Goal**: Examination triggers effects (including visibility reveals)
 
-- [ ] Implement `reveal_on_flag` destination reveal logic (check flag state in VisibilityResolver)
-- [ ] Implement `reveal_on_examine` destination reveal logic (examining exit reveals destination)
-- [ ] Update ExamineValidator to handle new entity types
-- [ ] Implement `on_examine` effect processing for details (sets_flag, reveals_item, reveals_exit)
-- [ ] Add examination support for exits
-- [ ] Create ExamineEvent with effect tracking
-- [ ] Add revealed items to perception snapshot
-- [ ] Update `revealed_exits` in game state when flag/examine reveals destination
-- [ ] Implement visibility reveal on examination (hidden items/exits/details revealed by examine)
+- [x] Implement `reveal_destination_on_flag` destination reveal logic (check flag state in VisibilityResolver)
+- [x] Implement `reveal_destination_on_examine` destination reveal logic (examining exit reveals destination)
+- [x] Update ExamineValidator to handle new entity types (exits, details with on_examine)
+- [x] Implement `on_examine` effect processing for details (sets_flag, reveals_exit_destination)
+- [x] Add examination support for exits
+- [x] Create EXIT_EXAMINED event type with effect tracking
+- [x] Update `revealed_exits` in game state when flag/examine reveals destination
+- [x] Add `on_examine: ExaminationEffect` to Item model
+- [x] Rename `reveal_on_flag` → `reveal_destination_on_flag` for clarity
+- [x] Rename `reveal_on_examine` → `reveal_destination_on_examine` for clarity
+- [x] Remove `reveals_item` from ExaminationEffect (use hidden+find_condition pattern)
+- [x] Fix booty-bay: add hidden+find_condition to items that should be hidden
+- [x] Fix booty-bay: change reveals_item to gives_item for NPC handovers
+- [x] Migrate cursed-manor examine interactions to on_examine
+- [x] Migrate booty-bay examine interactions to on_examine
+- [x] Update WorldValidator to recognize on_examine.sets_flag
 
-**Tests**: Integration tests for examine action with effects
+**Tests**: Unit tests for ExamineValidator, ExamineHandler, and destination reveal mechanics
+
+**Implementation Notes** (January 2026):
+- Removed `reveals_item` pattern - confusing and redundant with hidden+find_condition
+- Correct pattern: examine sets flag → flag triggers find_condition → item becomes visible
+- ExamineHandler.checks_victory = True since on_examine may set flags that trigger victory
+- Added `_check_destination_known()` helper to VisibilityResolver for unified destination visibility logic
 
 ### Phase 5: Narrator Integration (Week 2-3)
 
@@ -1846,7 +1859,7 @@ entrance_hall:
       destination: dining_room
       scene_description: "A heavy oak door with iron bands and a tarnished brass handle"
       destination_known: false  # Closed door in unfamiliar mansion
-      reveal_on_flag: found_floor_plan  # Examining floor plan reveals destination
+      reveal_destination_on_flag: found_floor_plan  # Examining floor plan reveals destination
       # Auto-reveals once player visits dining_room
 
     secret:

@@ -196,6 +196,32 @@ class TwoPhaseStateManager:
         """
         self._state.container_states[container_id] = is_open
 
+    def reveal_exit_destination(self, location_id: str, direction: str) -> None:
+        """Mark an exit's destination as revealed.
+
+        This is used by on_examine effects and reveal_destination_on_flag to track
+        which exit destinations the player has learned about.
+
+        Args:
+            location_id: The location where the exit is
+            direction: The exit direction (e.g., "north")
+        """
+        if location_id not in self._state.revealed_exits:
+            self._state.revealed_exits[location_id] = set()
+        self._state.revealed_exits[location_id].add(direction)
+
+    def is_exit_destination_revealed(self, location_id: str, direction: str) -> bool:
+        """Check if an exit's destination has been revealed.
+
+        Args:
+            location_id: The location where the exit is
+            direction: The exit direction
+
+        Returns:
+            True if the destination has been dynamically revealed
+        """
+        return direction in self._state.revealed_exits.get(location_id, set())
+
     def increment_turn(self) -> None:
         """Increment the turn counter."""
         self._state.turn_count += 1

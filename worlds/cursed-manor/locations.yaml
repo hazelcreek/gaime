@@ -33,6 +33,10 @@ entrance_hall:
     portraits:
       name: "Family Portraits"
       scene_description: "Five family portraits hang on the walls - a stern father, a beautiful mother, and three children of varying ages"
+      examine_description: "Upon closer inspection, you notice one portrait - the youngest child - has been slashed across the face"
+      on_examine:
+        sets_flag: examined_portraits
+        narrative_hint: "Upon closer inspection, you notice one portrait - the youngest child - has been slashed across the face"
     chandelier:
       name: "Crystal Chandelier"
       scene_description: "The chandelier must have been magnificent once. Now it hangs crooked, crystals clouded with decades of dust"
@@ -42,15 +46,6 @@ entrance_hall:
     door:
       name: "Front Door"
       scene_description: "The front door is heavy oak, reinforced with iron. The storm rages outside"
-  interactions:
-    examine_portraits:
-      triggers:
-        - "examine portraits"
-        - "look at portraits"
-        - "study paintings"
-        - "look at paintings"
-      narrative_hint: "Upon closer inspection, you notice one portrait - the youngest child - has been slashed across the face"
-      sets_flag: examined_portraits
 
 library:
   name: "The Library"
@@ -245,14 +240,13 @@ kitchen:
     pots:
       name: "Copper Pots"
       scene_description: "Beautiful copper pots, now green with verdigris"
-  interactions:
-    examine_basement_door:
-      triggers:
-        - "examine basement door"
-        - "look at basement door"
-        - "check basement"
-      narrative_hint: "The basement door is secured with a heavy iron lock"
-      sets_flag: found_basement_door
+    basement_door:
+      name: "Basement Door"
+      scene_description: "A heavy door with an iron lock leading to the basement stairs"
+      examine_description: "The basement door is secured with a heavy iron lock"
+      on_examine:
+        sets_flag: found_basement_door
+        narrative_hint: "The basement door is secured with a heavy iron lock"
 
 basement:
   name: "Basement"
@@ -381,20 +375,16 @@ master_bedroom:
     mirror:
       name: "Vanity Mirror"
       scene_description: "The mirror shows the room, but the shadows seem to move independently"
+      examine_description: "For a moment, you see not your reflection, but a woman in a white nightgown, her face twisted in terror"
+      on_examine:
+        sets_flag: saw_ghost_in_mirror
+        narrative_hint: "For a moment, you see not your reflection, but a woman in a white nightgown, her face twisted in terror"
     wardrobe:
       name: "Wardrobe"
       scene_description: "The wardrobe door creaks when touched"
     portrait:
       name: "Portrait"
       scene_description: "A portrait of the lady of the house hangs above the bed"
-  interactions:
-    examine_mirror:
-      triggers:
-        - "examine mirror"
-        - "look in mirror"
-        - "look at mirror"
-      narrative_hint: "For a moment, you see not your reflection, but a woman in a white nightgown, her face twisted in terror"
-      sets_flag: saw_ghost_in_mirror
 
 nursery:
   name: "Nursery"
@@ -426,17 +416,14 @@ nursery:
     drawings:
       name: "Drawings"
       scene_description: "Children's drawings, some happy, some nightmarish"
+      examine_description: "One drawing shows three figures around a circle, with a fourth - smaller - figure in the center. Written in a child's hand: 'They said it would make us live forever'"
+      on_examine:
+        sets_flag: examined_drawings
+        narrative_hint: "One drawing shows three figures around a circle, with a fourth - smaller - figure in the center. Written in a child's hand: 'They said it would make us live forever'"
     rocking_horse:
       name: "Rocking Horse"
       scene_description: "The rocking horse moves on its own, back and forth, back and forth"
   interactions:
-    examine_drawings:
-      triggers:
-        - "examine drawings"
-        - "look at drawings"
-        - "study drawings"
-      narrative_hint: "One drawing shows three figures around a circle, with a fourth - smaller - figure in the center. Written in a child's hand: 'They said it would make us live forever'"
-      sets_flag: examined_drawings
     examine_nursery:
       triggers:
         - "examine nursery"

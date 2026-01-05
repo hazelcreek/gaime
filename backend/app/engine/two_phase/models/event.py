@@ -58,6 +58,7 @@ class EventType(str, Enum):
 
     # Discovery
     DETAIL_EXAMINED = "detail_examined"
+    EXIT_EXAMINED = "exit_examined"  # Player examined an exit
     SECRET_DISCOVERED = "secret_discovered"
     EXIT_REVEALED = "exit_revealed"
 
