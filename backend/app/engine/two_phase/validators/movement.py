@@ -2,7 +2,7 @@
 Movement validator for the two-phase game engine.
 
 This module validates MOVE actions against world rules,
-checking exit availability and access requirements.
+checking exit availability, visibility, and access requirements.
 
 See planning/two-phase-game-loop-spec.md Section: Validation & Rejection Handling
 """
@@ -18,6 +18,7 @@ from app.engine.two_phase.models.validation import (
     valid_result,
     invalid_result,
 )
+from app.engine.two_phase.visibility import _check_entity_visibility
 
 if TYPE_CHECKING:
     from app.engine.two_phase.models.state import TwoPhaseGameState
@@ -85,6 +86,17 @@ class MovementValidator:
             )
 
         exit_def = location.exits[direction]
+
+        # Check exit visibility - hidden exits are treated as nonexistent
+        is_visible, _ = _check_entity_visibility(
+            exit_def.hidden, exit_def.find_condition, state.flags
+        )
+        if not is_visible:
+            return invalid_result(
+                code=RejectionCode.NO_EXIT,
+                reason=f"There's no way to go {direction} from here.",
+            )
+
         destination_id = exit_def.destination
         destination = world.get_location(destination_id)
 
@@ -142,7 +154,8 @@ class MovementValidator:
     ) -> ValidationResult:
         """Handle the 'back' direction.
 
-        For "back", we look for a single exit or common return direction.
+        For "back", we look for a single visible exit or common return direction.
+        Hidden exits are not considered for back navigation.
 
         Args:
             state: Current game state
@@ -152,10 +165,19 @@ class MovementValidator:
         Returns:
             ValidationResult for back movement
         """
-        # If only one exit, use that
-        if len(location.exits) == 1:
-            direction = list(location.exits.keys())[0]
-            exit_def = location.exits[direction]
+        # Filter to only visible exits
+        visible_exits = {
+            direction: exit_def
+            for direction, exit_def in location.exits.items()
+            if _check_entity_visibility(
+                exit_def.hidden, exit_def.find_condition, state.flags
+            )[0]
+        }
+
+        # If only one visible exit, use that
+        if len(visible_exits) == 1:
+            direction = list(visible_exits.keys())[0]
+            exit_def = visible_exits[direction]
             destination_id = exit_def.destination
             destination = world.get_location(destination_id)
 
@@ -177,9 +199,9 @@ class MovementValidator:
                     from_location=state.current_location,
                 )
 
-        # Look for south (common return direction)
-        if "south" in location.exits:
-            exit_def = location.exits["south"]
+        # Look for south (common return direction) - must be visible
+        if "south" in visible_exits:
+            exit_def = visible_exits["south"]
             destination_id = exit_def.destination
             destination = world.get_location(destination_id)
 

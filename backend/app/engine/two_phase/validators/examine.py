@@ -18,7 +18,6 @@ from app.engine.two_phase.models.validation import (
     invalid_result,
     valid_result,
 )
-from app.engine.two_phase.visibility import _check_entity_visibility
 
 if TYPE_CHECKING:
     from app.engine.two_phase.models.state import TwoPhaseGameState
@@ -89,30 +88,28 @@ class ExamineValidator:
         # Check location details (includes on_examine effects)
         if location and location.details:
             if target_id in location.details:
-                detail_def = location.details[target_id]
-                # Check detail visibility
-                is_visible, _ = _check_entity_visibility(
-                    detail_def.hidden, detail_def.find_condition, state.flags
-                )
-                if not is_visible:
+                # Check detail visibility using resolver helper
+                if not self._visibility_resolver.is_detail_visible(
+                    location, target_id, state
+                ):
                     return invalid_result(
                         code=RejectionCode.TARGET_NOT_FOUND,
                         reason="You don't see anything like that here.",
                     )
+                detail_def = location.details[target_id]
                 return self._build_detail_result(detail_def, target_id)
 
         # Check exits (can examine visible exits to learn about them)
         if location and target_id in location.exits:
-            exit_def = location.exits[target_id]
-            # Check exit visibility
-            is_visible, _ = _check_entity_visibility(
-                exit_def.hidden, exit_def.find_condition, state.flags
-            )
-            if not is_visible:
+            # Check exit visibility using resolver helper
+            if not self._visibility_resolver.is_exit_visible(
+                location, target_id, state
+            ):
                 return invalid_result(
                     code=RejectionCode.TARGET_NOT_FOUND,
                     reason="You don't see anything like that here.",
                 )
+            exit_def = location.exits[target_id]
             return self._build_exit_result(exit_def, target_id, world)
 
         # V3: Check items at location via item_placements
@@ -140,6 +137,14 @@ class ExamineValidator:
 
         # V3: Check NPCs via npc_placements
         if location and target_id in location.npc_placements:
+            # Check NPC visibility using resolver helper
+            if not self._visibility_resolver.is_npc_visible(
+                location, target_id, world, state
+            ):
+                return invalid_result(
+                    code=RejectionCode.TARGET_NOT_FOUND,
+                    reason="You don't see anything like that here.",
+                )
             npc = world.get_npc(target_id)
             if npc:
                 return valid_result(

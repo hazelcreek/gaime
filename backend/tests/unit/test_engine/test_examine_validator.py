@@ -231,14 +231,107 @@ class TestExamineValidator:
         assert result.context["on_examine"].get("reveal_destination_on_examine") is True
         assert result.context["on_examine"].get("direction") == "north"
 
-    def test_examine_hidden_exit_fails(
-        self, validator, sample_world_data, examine_intent
+    def test_examine_hidden_exit_fails(self, validator, examine_intent) -> None:
+        """Examining a hidden exit fails with TARGET_NOT_FOUND."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            ExitDefinition,
+            PlayerSetup,
+        )
+
+        # Create a world with a hidden exit
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    exits={
+                        "north": ExitDefinition(destination="hall"),  # Visible
+                        "down": ExitDefinition(
+                            destination="secret",
+                            hidden=True,
+                            find_condition={"requires_flag": "found_trapdoor"},
+                        ),
+                    },
+                ),
+                "hall": Location(name="Hall"),
+                "secret": Location(name="Secret Basement"),
+            },
+            items={},
+            npcs={},
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={},  # Flag NOT set
+        )
+
+        intent = examine_intent("down")
+        result = validator.validate(intent, state, world)
+
+        # Hidden exit should be treated as not found
+        assert result.valid is False
+        assert result.rejection_code == RejectionCode.TARGET_NOT_FOUND
+
+    def test_examine_hidden_exit_visible_with_flag(
+        self, validator, examine_intent
     ) -> None:
-        """Examining a hidden exit fails."""
-        # Create state where there's a hidden exit
-        # In the test world, there isn't one by default, so we'll skip this for now
-        # This test verifies hidden exit logic when it exists
-        pass
+        """Examining a hidden exit succeeds when condition is met."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            ExitDefinition,
+            PlayerSetup,
+        )
+
+        # Create a world with a hidden exit
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    exits={
+                        "down": ExitDefinition(
+                            destination="secret",
+                            scene_description="A trapdoor leading down",
+                            hidden=True,
+                            find_condition={"requires_flag": "found_trapdoor"},
+                        ),
+                    },
+                ),
+                "secret": Location(name="Secret Basement"),
+            },
+            items={},
+            npcs={},
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={"found_trapdoor": True},  # Flag IS set
+        )
+
+        intent = examine_intent("down")
+        result = validator.validate(intent, state, world)
+
+        # Hidden exit should now be examinable
+        assert result.valid is True
+        assert result.context["entity_type"] == "exit"
+        assert result.context["entity_id"] == "down"
 
     # on_examine effects tests (Phase 4)
 
@@ -270,3 +363,126 @@ class TestExamineValidator:
         # The test_key should have on_examine effects
         assert result.context.get("on_examine") is not None
         assert result.context["on_examine"].get("sets_flag") == "key_examined"
+
+    # Hidden NPC tests
+
+    def test_examine_hidden_npc_fails(self, validator, examine_intent) -> None:
+        """Examining a hidden NPC fails with TARGET_NOT_FOUND."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            NPC,
+            NPCPlacement,
+            PlayerSetup,
+        )
+
+        # Create a world with a hidden NPC
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    npc_placements={
+                        "spy": NPCPlacement(
+                            placement="lurking behind the curtain",
+                            hidden=True,
+                            find_condition={"requires_flag": "pulled_curtain"},
+                        ),
+                    },
+                ),
+            },
+            items={},
+            npcs={
+                "spy": NPC(name="Shadowy Figure", location="room"),
+            },
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={},  # Flag NOT set
+        )
+
+        intent = examine_intent("spy")
+        result = validator.validate(intent, state, world)
+
+        # Hidden NPC should be treated as not found
+        assert result.valid is False
+        assert result.rejection_code == RejectionCode.TARGET_NOT_FOUND
+
+    def test_examine_hidden_npc_visible_with_flag(
+        self, validator, examine_intent
+    ) -> None:
+        """Examining a hidden NPC succeeds when condition is met."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            NPC,
+            NPCPlacement,
+            PlayerSetup,
+        )
+
+        # Create a world with a hidden NPC
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    npc_placements={
+                        "spy": NPCPlacement(
+                            placement="lurking behind the curtain",
+                            hidden=True,
+                            find_condition={"requires_flag": "pulled_curtain"},
+                        ),
+                    },
+                ),
+            },
+            items={},
+            npcs={
+                "spy": NPC(
+                    name="Shadowy Figure",
+                    location="room",
+                    appearance="A cloaked figure with piercing eyes",
+                ),
+            },
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={"pulled_curtain": True},  # Flag IS set
+        )
+
+        intent = examine_intent("spy")
+        result = validator.validate(intent, state, world)
+
+        # Hidden NPC should now be examinable
+        assert result.valid is True
+        assert result.context["entity_type"] == "npc"
+        assert result.context["entity_id"] == "spy"
+        assert result.context["entity_name"] == "Shadowy Figure"
+
+    def test_examine_visible_npc(
+        self, validator, state, sample_world_data, examine_intent
+    ) -> None:
+        """Examining a visible NPC at location succeeds."""
+        # test_npc is in npc_placements at start_room and not hidden
+        intent = examine_intent("test_npc")
+
+        result = validator.validate(intent, state, sample_world_data)
+
+        assert result.valid is True
+        assert result.context["entity_type"] == "npc"
+        assert result.context["entity_id"] == "test_npc"

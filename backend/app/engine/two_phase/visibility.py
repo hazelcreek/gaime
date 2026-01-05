@@ -512,6 +512,110 @@ class DefaultVisibilityResolver:
 
         return is_visible
 
+    def is_exit_visible(
+        self,
+        location: "Location",
+        direction: str,
+        state: "GameStateProtocol",
+    ) -> bool:
+        """Check if an exit is visible to the player.
+
+        An exit is visible if:
+        - It exists at the location, AND
+        - It is not hidden OR its find_condition is met
+
+        Args:
+            location: The location to check exits for
+            direction: The exit direction to check
+            state: Current game state
+
+        Returns:
+            True if the exit is visible, False otherwise
+        """
+        if direction not in location.exits:
+            return False
+
+        exit_def = location.exits[direction]
+        is_visible, _ = _check_entity_visibility(
+            exit_def.hidden, exit_def.find_condition, state.flags
+        )
+        return is_visible
+
+    def is_detail_visible(
+        self,
+        location: "Location",
+        detail_id: str,
+        state: "GameStateProtocol",
+    ) -> bool:
+        """Check if a detail is visible to the player.
+
+        A detail is visible if:
+        - It exists at the location, AND
+        - It is not hidden OR its find_condition is met
+
+        Args:
+            location: The location to check details for
+            detail_id: The detail ID to check
+            state: Current game state
+
+        Returns:
+            True if the detail is visible, False otherwise
+        """
+        if not location.details or detail_id not in location.details:
+            return False
+
+        detail_def = location.details[detail_id]
+        is_visible, _ = _check_entity_visibility(
+            detail_def.hidden, detail_def.find_condition, state.flags
+        )
+        return is_visible
+
+    def is_npc_visible(
+        self,
+        location: "Location",
+        npc_id: str,
+        world: "WorldData",
+        state: "GameStateProtocol",
+    ) -> bool:
+        """Check if an NPC is visible to the player.
+
+        An NPC is visible if:
+        - It has a placement at the location, AND
+        - The placement is not hidden OR its find_condition is met, AND
+        - The NPC passes presence checks (location_changes, appears_when)
+
+        Args:
+            location: The location to check NPCs for
+            npc_id: The NPC ID to check
+            world: World data for NPC lookups
+            state: Current game state
+
+        Returns:
+            True if the NPC is visible, False otherwise
+        """
+        # Check if NPC has a placement at this location
+        if npc_id not in location.npc_placements:
+            return False
+
+        placement = location.npc_placements[npc_id]
+
+        # Check placement visibility (hidden + find_condition)
+        is_visible, _ = _check_entity_visibility(
+            placement.hidden, placement.find_condition, state.flags
+        )
+        if not is_visible:
+            return False
+
+        # Check NPC-level presence (location_changes, appears_when)
+        npc = world.get_npc(npc_id)
+        if not npc:
+            return False
+
+        npc_visible, _, _ = self._analyze_npc_visibility(
+            npc, npc_id, state.current_location, state
+        )
+        return npc_visible
+
     # =========================================================================
     # Debug Snapshot Methods
     # =========================================================================

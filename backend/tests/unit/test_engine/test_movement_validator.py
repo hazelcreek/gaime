@@ -239,3 +239,205 @@ class TestMovementValidator:
 
         assert result.valid is False
         assert result.rejection_code == RejectionCode.TARGET_NOT_FOUND
+
+    # Hidden exit tests
+
+    def test_hidden_exit_not_visible_fails(self, validator, move_intent) -> None:
+        """Movement to hidden exit fails with NO_EXIT when condition not met."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            ExitDefinition,
+            PlayerSetup,
+        )
+
+        # Create a world with a hidden exit
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    exits={
+                        "north": ExitDefinition(destination="hall"),  # Visible
+                        "down": ExitDefinition(
+                            destination="secret",
+                            hidden=True,
+                            find_condition={"requires_flag": "found_trapdoor"},
+                        ),
+                    },
+                ),
+                "hall": Location(name="Hall"),
+                "secret": Location(name="Secret Basement"),
+            },
+            items={},
+            npcs={},
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={},  # Flag NOT set
+        )
+
+        intent = move_intent("down")
+        result = validator.validate(intent, state, world)
+
+        # Hidden exit should be treated as nonexistent
+        assert result.valid is False
+        assert result.rejection_code == RejectionCode.NO_EXIT
+        assert "down" in result.rejection_reason.lower()
+
+    def test_hidden_exit_visible_with_flag_succeeds(
+        self, validator, move_intent
+    ) -> None:
+        """Movement to hidden exit succeeds when condition is met."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            ExitDefinition,
+            PlayerSetup,
+        )
+
+        # Create a world with a hidden exit
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    exits={
+                        "down": ExitDefinition(
+                            destination="secret",
+                            hidden=True,
+                            find_condition={"requires_flag": "found_trapdoor"},
+                        ),
+                    },
+                ),
+                "secret": Location(name="Secret Basement"),
+            },
+            items={},
+            npcs={},
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={"found_trapdoor": True},  # Flag IS set
+        )
+
+        intent = move_intent("down")
+        result = validator.validate(intent, state, world)
+
+        # Hidden exit should now be accessible
+        assert result.valid is True
+        assert result.context["destination"] == "secret"
+
+    def test_back_ignores_hidden_exits(self, validator, move_intent) -> None:
+        """Back navigation does not consider hidden exits."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            ExitDefinition,
+            PlayerSetup,
+        )
+
+        # Create a room with one visible exit and one hidden exit
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    exits={
+                        "north": ExitDefinition(destination="hall"),  # Visible
+                        "down": ExitDefinition(
+                            destination="secret",
+                            hidden=True,
+                            find_condition={"requires_flag": "found_trapdoor"},
+                        ),
+                    },
+                ),
+                "hall": Location(name="Hall"),
+                "secret": Location(name="Secret Basement"),
+            },
+            items={},
+            npcs={},
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={},  # Hidden exit not revealed
+        )
+
+        intent = move_intent("back")
+        result = validator.validate(intent, state, world)
+
+        # Only "north" is visible, so back should succeed and go north
+        assert result.valid is True
+        assert result.context["destination"] == "hall"
+        assert result.context["direction"] == "north"
+
+    def test_back_fails_when_only_hidden_exits(self, validator, move_intent) -> None:
+        """Back fails when only hidden exits are available."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            ExitDefinition,
+            PlayerSetup,
+        )
+
+        # Create a room with ONLY hidden exits
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    exits={
+                        "down": ExitDefinition(
+                            destination="secret",
+                            hidden=True,
+                            find_condition={"requires_flag": "found_trapdoor"},
+                        ),
+                    },
+                ),
+                "secret": Location(name="Secret Basement"),
+            },
+            items={},
+            npcs={},
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={},  # Hidden exit not revealed
+        )
+
+        intent = move_intent("back")
+        result = validator.validate(intent, state, world)
+
+        # No visible exits, so back should fail
+        assert result.valid is False
+        assert result.rejection_code == RejectionCode.NO_EXIT
