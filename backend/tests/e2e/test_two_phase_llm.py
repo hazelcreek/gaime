@@ -1,14 +1,17 @@
 """End-to-end tests for InteractorAI and NarratorAI with real LLM calls.
 
 These tests verify that the LLM components work correctly with real API calls.
-They are marked as slow and e2e, so they are skipped by default in CI.
+They are marked as slow and e2e, so they are skipped by default.
 
 Run these tests with:
-    pytest tests/e2e/test_two_phase_llm.py -v --run-slow
+    pytest tests/e2e/ -v --run-slow
+
+Or use the convenience script:
+    ./scripts/run_e2e_tests.sh
 
 Prerequisites:
-    - Set LLM_API_KEY environment variable with valid API key
-    - Have network access to the LLM provider
+    - Configure API key in .env (GEMINI_API_KEY, GOOGLE_API_KEY, or LLM_API_KEY)
+    - .env is loaded automatically by conftest.py
 """
 
 from __future__ import annotations
@@ -391,3 +394,196 @@ class TestNarratorAIE2E:
         assert len(debug.system_prompt) > 100
         assert debug.user_prompt is not None
         assert "SCENE_BROWSED" in debug.user_prompt
+
+
+class TestNarratorVisibilityE2E:
+    """E2E tests for narrator visibility compliance with real LLM."""
+
+    @pytest.fixture
+    def narrator(self, sample_world_data) -> NarratorAI:
+        """Create a NarratorAI instance."""
+        return NarratorAI(
+            world_data=sample_world_data,
+            session_id="test-e2e-visibility",
+            debug=True,
+        )
+
+    async def test_unknown_destination_not_revealed(self, narrator) -> None:
+        """Narrator does NOT mention destination name when destination_known=False.
+
+        This is a critical visibility test - the LLM should never reveal
+        information the player shouldn't have access to.
+        """
+        snapshot = PerceptionSnapshot(
+            location_id="library",
+            location_name="The Library",
+            location_atmosphere="A quiet, dusty room filled with books.",
+            visible_exits=[
+                VisibleExit(
+                    direction="north",
+                    destination_name="The Secret Vault",  # Should NOT appear in output
+                    destination_known=False,
+                    description="A heavy iron door with no markings",
+                ),
+            ],
+            visible_items=[],
+            visible_details=[],
+            visible_npcs=[],
+            inventory=[],
+            first_visit=False,
+        )
+
+        event = Event(
+            type=EventType.SCENE_BROWSED,
+            subject="library",
+            context={
+                "first_visit": False,
+                "is_manual_browse": True,
+                "visible_items": [],
+                "visible_npcs": [],
+                "visible_exits": [
+                    {
+                        "direction": "north",
+                        "destination": "unknown",
+                        "description": "A heavy iron door with no markings",
+                        "destination_known": False,
+                    }
+                ],
+            },
+        )
+
+        narrative, debug = await narrator.narrate([event], snapshot)
+
+        # The narrative should NOT contain the secret destination name
+        narrative_lower = narrative.lower()
+        assert "secret vault" not in narrative_lower
+        assert "vault" not in narrative_lower
+
+        # Should describe the door without revealing where it leads
+        assert len(narrative) > 10
+
+    async def test_visible_npcs_mentioned(self, narrator) -> None:
+        """NPCs in visible_npcs are mentioned in the narrative."""
+        snapshot = PerceptionSnapshot(
+            location_id="library",
+            location_name="The Library",
+            location_atmosphere="A quiet room.",
+            visible_exits=[],
+            visible_items=[],
+            visible_details=[],
+            visible_npcs=[
+                VisibleEntity(
+                    id="librarian",
+                    name="The Librarian",
+                    description="A bespectacled elderly woman",
+                ),
+            ],
+            inventory=[],
+            first_visit=True,
+        )
+
+        event = Event(
+            type=EventType.SCENE_BROWSED,
+            subject="library",
+            context={
+                "first_visit": True,
+                "visible_items": [],
+                "visible_npcs": ["The Librarian"],
+                "visible_exits": [],
+            },
+        )
+
+        narrative, _ = await narrator.narrate([event], snapshot)
+
+        # Should mention the NPC
+        narrative_lower = narrative.lower()
+        assert (
+            "librarian" in narrative_lower
+            or "elderly" in narrative_lower
+            or "woman" in narrative_lower
+        )
+
+    async def test_exit_examined_with_destination_reveal(self, narrator) -> None:
+        """EXIT_EXAMINED event with destination reveal is narrated dramatically."""
+        snapshot = PerceptionSnapshot(
+            location_id="library",
+            location_name="The Library",
+            location_atmosphere="Dusty and quiet.",
+            visible_exits=[
+                VisibleExit(
+                    direction="north",
+                    destination_name="The Secret Chamber",
+                    destination_known=True,  # Now known after reveal
+                    description="A concealed passage",
+                ),
+            ],
+            visible_items=[],
+            visible_details=[],
+            visible_npcs=[],
+            inventory=[],
+        )
+
+        event = Event(
+            type=EventType.EXIT_EXAMINED,
+            subject="north_passage",
+            context={
+                "entity_name": "the concealed passage",
+                "description": "Behind a false bookshelf, a narrow passage opens.",
+                "destination_revealed": True,
+                "destination_name": "The Secret Chamber",
+            },
+        )
+
+        narrative, _ = await narrator.narrate([event], snapshot)
+
+        # Should mention the revealed destination
+        narrative_lower = narrative.lower()
+        assert (
+            "secret" in narrative_lower
+            or "chamber" in narrative_lower
+            or "passage" in narrative_lower
+        )
+
+        # Should be descriptive (not just a one-liner)
+        assert len(narrative) > 30
+
+    async def test_narrative_hint_incorporated(self, narrator) -> None:
+        """narrative_hint from on_examine is incorporated into narration."""
+        snapshot = PerceptionSnapshot(
+            location_id="library",
+            location_name="The Library",
+            location_atmosphere="Quiet and dusty.",
+            visible_exits=[],
+            visible_items=[],
+            visible_details=[
+                VisibleEntity(
+                    id="rug",
+                    name="Persian Rug",
+                    description="An ornate rug with intricate patterns",
+                ),
+            ],
+            visible_npcs=[],
+            inventory=[],
+        )
+
+        event = Event(
+            type=EventType.DETAIL_EXAMINED,
+            subject="rug",
+            context={
+                "entity_name": "Persian Rug",
+                "description": "Lifting the corner of the rug...",
+                "narrative_hint": "Something small and metallic glints underneath!",
+            },
+        )
+
+        narrative, _ = await narrator.narrate([event], snapshot)
+
+        # Should incorporate the hint content
+        narrative_lower = narrative.lower()
+        # The hint mentions "metallic" and "glints" - at least one should appear
+        assert (
+            "glint" in narrative_lower
+            or "metal" in narrative_lower
+            or "shine" in narrative_lower
+            or "something" in narrative_lower
+        )

@@ -130,6 +130,9 @@ class DefaultVisibilityResolver:
         # Build visible details (scenery)
         visible_details = self._get_visible_details(location, state)
 
+        # Build visible NPCs at location (V3: uses npc_placements visibility)
+        visible_npcs = self._get_visible_npcs(location, world, state)
+
         # Build inventory
         inventory = self._get_inventory_entities(state, world)
 
@@ -143,7 +146,7 @@ class DefaultVisibilityResolver:
             visible_items=visible_items,
             visible_details=visible_details,
             visible_exits=visible_exits,
-            visible_npcs=[],  # NPCs not implemented in Phase 1
+            visible_npcs=visible_npcs,
             inventory=inventory,
             affordances={},  # Affordances not implemented in Phase 1
             known_facts=[],  # Known facts not implemented in Phase 1
@@ -303,13 +306,19 @@ class DefaultVisibilityResolver:
             if not is_visible:
                 continue
 
+            # Build description: prefer placement, then scene_description
+            description_parts = []
+            if placement.placement:
+                description_parts.append(placement.placement)
+            if item.scene_description:
+                description_parts.append(item.scene_description)
+            description = ". ".join(description_parts) if description_parts else None
+
             visible.append(
                 VisibleEntity(
                     id=item_id,
                     name=item.name,
-                    description=item.scene_description
-                    or item.examine_description
-                    or None,
+                    description=description,
                     is_new=False,  # TODO: Track newly revealed items
                 )
             )
@@ -354,6 +363,70 @@ class DefaultVisibilityResolver:
                 )
 
         return details
+
+    def _get_visible_npcs(
+        self,
+        location: "Location",
+        world: "WorldData",
+        state: "GameStateProtocol",
+    ) -> list[VisibleEntity]:
+        """Get all visible NPCs at the current location (V3).
+
+        Visibility check order:
+        1. NPC must be in npc_placements for this location (presence)
+        2. Placement must pass visibility check (hidden + find_condition)
+        3. NPC must pass presence check (appears_when, location_changes)
+
+        Args:
+            location: The current location
+            world: World data for NPC lookups
+            state: Current game state
+
+        Returns:
+            List of VisibleEntity objects for visible NPCs
+        """
+        visible_npcs = []
+        location_id = state.current_location
+
+        # V3: Iterate over npc_placements (keys define which NPCs are here)
+        for npc_id, placement in location.npc_placements.items():
+            npc = world.get_npc(npc_id)
+            if not npc:
+                continue
+
+            # V3: Check visibility from placement (hidden + find_condition)
+            is_visible, _ = _check_entity_visibility(
+                placement.hidden, placement.find_condition, state.flags
+            )
+            if not is_visible:
+                continue
+
+            # Check NPC-level presence (location_changes, appears_when)
+            npc_visible, _, _ = self._analyze_npc_visibility(
+                npc, npc_id, location_id, state
+            )
+            if not npc_visible:
+                continue
+
+            # Build description: prefer placement, then appearance
+            description_parts = []
+            if placement.placement:
+                description_parts.append(placement.placement)
+            if npc.appearance:
+                description_parts.append(npc.appearance)
+            description = ". ".join(description_parts) if description_parts else None
+
+            # NPC is visible - add to list
+            visible_npcs.append(
+                VisibleEntity(
+                    id=npc_id,
+                    name=npc.name,
+                    description=description,
+                    is_new=False,
+                )
+            )
+
+        return visible_npcs
 
     def _get_inventory_entities(
         self,

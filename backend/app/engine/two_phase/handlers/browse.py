@@ -113,7 +113,14 @@ class BrowseHandler:
             context["visible_items"] = [item.name for item in snapshot.visible_items]
             context["visible_npcs"] = [npc.name for npc in snapshot.visible_npcs]
             context["visible_exits"] = [
-                {"direction": e.direction, "destination": e.destination_name}
+                {
+                    "direction": e.direction,
+                    "destination": (
+                        e.destination_name if e.destination_known else "unknown"
+                    ),
+                    "description": e.description,
+                    "destination_known": e.destination_known,
+                }
                 for e in snapshot.visible_exits
             ]
 

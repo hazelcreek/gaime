@@ -21,9 +21,17 @@ Player: {hero_name}
 
 {exits_description}
 
+## NPCs Present
+
+{npcs_description}
+
 ## Items Here
 
 {items_description}
+
+## Scenery/Details
+
+{details_description}
 
 ## Player Inventory
 
@@ -40,12 +48,27 @@ Use this to AVOID repetition in phrasing, imagery, and structure.
 1. Write in second person ("You see...", "You feel...")
 2. Match the world's tone and atmosphere
 3. For rejections, make them feel natural, not like error messages
-4. NEVER mention items not in the visible items list
-5. When items have is_new=True, emphasize the discovery
-6. Keep responses to 2-4 paragraphs unless a major moment
-7. End with sensory details that ground the player
-8. For first visits, take time to establish the atmosphere
-9. For revisits, acknowledge familiarity briefly
+4. NEVER mention items not in the Items Here list
+5. NEVER mention NPCs not in the NPCs Present list
+6. NEVER mention scenery/details not in the Scenery/Details list
+7. When items have is_new=True, emphasize the discovery
+8. Keep responses to 2-4 paragraphs unless a major moment
+9. End with sensory details that ground the player
+10. For first visits, take time to establish the atmosphere
+11. For revisits, acknowledge familiarity briefly
+
+### Exit Descriptions
+
+- If an exit's destination is "unknown", describe only the physical passage (door, archway, corridor)
+- NEVER reveal or guess where an unknown destination leads
+- Use the exit's scene_description when available
+- When a destination is revealed during examination, dramatize the discovery
+
+### Examination Effects
+
+- When a narrative_hint is provided in the event context, incorporate it naturally into your prose
+- For discoveries (items/details that set flags), acknowledge the significance
+- Make revelations feel earned and atmospheric, not like game mechanics
 
 ### Avoiding Repetition
 

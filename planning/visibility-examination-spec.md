@@ -2,7 +2,7 @@
 
 A comprehensive specification for unified visibility semantics, visual descriptions, examination mechanics, and destination visibility for exits.
 
-> **Status**: Phase 3.5 Complete — January 2026
+> **Status**: Phase 5 Complete — January 2026
 > **Related**: [Two-Phase Game Loop](./two-phase-game-loop-spec.md) | [Game Mechanics Design](../ideas/game-mechanics-design.md) | [Vision](../docs/VISION.md)
 
 ---
@@ -1784,17 +1784,29 @@ The following fields and patterns are deprecated in V3:
 - ExamineHandler.checks_victory = True since on_examine may set flags that trigger victory
 - Added `_check_destination_known()` helper to VisibilityResolver for unified destination visibility logic
 
-### Phase 5: Narrator Integration (Week 2-3)
+### Phase 5: Narrator Integration (Week 2-3) ✅ COMPLETED
 
 **Goal**: Narrator uses enhanced descriptions and respects visibility
 
-- [ ] Update narrator prompts for destination visibility
-- [ ] Add examination event narration
-- [ ] Handle unknown destination prose generation
-- [ ] Add `narrative_hint` to narration context
-- [ ] Ensure hidden entities are not mentioned in narration
+- [x] Update narrator prompts for destination visibility
+- [x] Add examination event narration
+- [x] Handle unknown destination prose generation
+- [x] Add `narrative_hint` to narration context
+- [x] Ensure hidden entities are not mentioned in narration
 
-**Tests**: E2E tests with real LLM
+**Tests**: E2E tests with real LLM ✅
+
+**Implementation Notes** (January 2026):
+- Added `_get_visible_npcs()` to VisibilityResolver using V3 schema (npc_placements with hidden/find_condition + appears_when)
+- Updated `build_snapshot()` to include visible NPCs in PerceptionSnapshot
+- Updated narrator `_build_system_prompt()` to respect `destination_known` - unknown destinations show "unknown" instead of destination name
+- Added NPCs Present section to narrator system prompt template
+- Added guidance for unknown destinations and `narrative_hint` in prompt template
+- Added `_describe_exit_examined()` handler for EXIT_EXAMINED events with destination reveal support
+- Updated all event handlers (browse, movement, processor) to include `destination_known` in visible_exits context
+- Added narrative_hint support to ITEM_EXAMINED and DETAIL_EXAMINED event descriptions
+- Added 13 new unit tests (4 for NPC visibility in snapshot, 9 for narrator prompt building)
+- Added 4 E2E tests for narrator visibility compliance with real LLM
 
 ### Phase 6: Image Generation (Week 3)
 

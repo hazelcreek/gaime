@@ -943,3 +943,212 @@ class TestDefaultVisibilityResolver:
         assert spy is not None
         assert spy.is_visible is True
         assert spy.visibility_reason == "revealed"
+
+    # ==========================================================================
+    # Phase 5: NPC visibility in PerceptionSnapshot tests
+    # ==========================================================================
+
+    def test_visible_npc_in_snapshot(self, resolver) -> None:
+        """Visible NPCs appear in PerceptionSnapshot.visible_npcs."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            NPC,
+            NPCPlacement,
+            PlayerSetup,
+        )
+
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    npc_placements={
+                        "butler": NPCPlacement(
+                            placement="standing by the door",
+                            hidden=False,
+                        ),
+                    },
+                ),
+            },
+            items={},
+            npcs={
+                "butler": NPC(
+                    name="The Butler", location="room", appearance="A stern man"
+                ),
+            },
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={},
+        )
+
+        snapshot = resolver.build_snapshot(state, world)
+
+        # NPC should appear in visible_npcs with placement + appearance
+        assert len(snapshot.visible_npcs) == 1
+        butler = snapshot.visible_npcs[0]
+        assert butler.id == "butler"
+        assert butler.name == "The Butler"
+        # Description combines placement and appearance
+        assert butler.description == "standing by the door. A stern man"
+
+    def test_hidden_npc_not_in_snapshot(self, resolver) -> None:
+        """Hidden NPCs do NOT appear in PerceptionSnapshot.visible_npcs."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            NPC,
+            NPCPlacement,
+            PlayerSetup,
+        )
+
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    npc_placements={
+                        "spy": NPCPlacement(
+                            placement="lurking behind the curtain",
+                            hidden=True,
+                            find_condition={"requires_flag": "pulled_curtain"},
+                        ),
+                    },
+                ),
+            },
+            items={},
+            npcs={
+                "spy": NPC(name="Shadowy Figure", location="room"),
+            },
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={},  # Flag NOT set
+        )
+
+        snapshot = resolver.build_snapshot(state, world)
+
+        # Hidden NPC should NOT appear in visible_npcs
+        assert len(snapshot.visible_npcs) == 0
+
+    def test_revealed_npc_in_snapshot(self, resolver) -> None:
+        """Hidden NPCs with met condition appear in PerceptionSnapshot.visible_npcs."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            NPC,
+            NPCPlacement,
+            PlayerSetup,
+        )
+
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    npc_placements={
+                        "spy": NPCPlacement(
+                            placement="lurking behind the curtain",
+                            hidden=True,
+                            find_condition={"requires_flag": "pulled_curtain"},
+                        ),
+                    },
+                ),
+            },
+            items={},
+            npcs={
+                "spy": NPC(
+                    name="Shadowy Figure", location="room", appearance="A dark figure"
+                ),
+            },
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={"pulled_curtain": True},  # Flag IS set
+        )
+
+        snapshot = resolver.build_snapshot(state, world)
+
+        # NPC should now appear in visible_npcs
+        assert len(snapshot.visible_npcs) == 1
+        spy = snapshot.visible_npcs[0]
+        assert spy.id == "spy"
+        assert spy.name == "Shadowy Figure"
+
+    def test_npc_appears_when_condition_not_met(self, resolver) -> None:
+        """NPCs with unmet appears_when conditions do NOT appear in visible_npcs."""
+        from app.models.world import (
+            WorldData,
+            World,
+            Location,
+            NPC,
+            NPCPlacement,
+            PlayerSetup,
+            AppearanceCondition,
+        )
+
+        world = WorldData(
+            world=World(
+                name="Test",
+                theme="test",
+                premise="test",
+                player=PlayerSetup(starting_location="room"),
+            ),
+            locations={
+                "room": Location(
+                    name="Room",
+                    npc_placements={
+                        "ghost": NPCPlacement(
+                            placement="floating near the window",
+                            hidden=False,  # Not hidden by placement
+                        ),
+                    },
+                ),
+            },
+            items={},
+            npcs={
+                "ghost": NPC(
+                    name="Ghost",
+                    location="room",
+                    appears_when=[
+                        AppearanceCondition(condition="has_flag", value="lights_off")
+                    ],
+                ),
+            },
+        )
+
+        state = TwoPhaseGameState(
+            session_id="test",
+            current_location="room",
+            flags={},  # lights_off not set
+        )
+
+        snapshot = resolver.build_snapshot(state, world)
+
+        # NPC should NOT appear because appears_when condition is not met
+        assert len(snapshot.visible_npcs) == 0

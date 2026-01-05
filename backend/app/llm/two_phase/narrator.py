@@ -125,16 +125,28 @@ class NarratorAI:
         """
         world = self.world_data.world
 
-        # Format exits
+        # Format exits (respect destination_known)
         exits_lines = []
         for exit in snapshot.visible_exits:
-            exit_desc = f"- {exit.direction}: leads to {exit.destination_name}"
+            if exit.destination_known:
+                exit_desc = f"- {exit.direction}: leads to {exit.destination_name}"
+            else:
+                exit_desc = f"- {exit.direction}: destination unknown"
             if exit.description:
                 exit_desc += f" ({exit.description})"
             exits_lines.append(exit_desc)
         exits_description = (
             "\n".join(exits_lines) if exits_lines else "No visible exits"
         )
+
+        # Format visible NPCs
+        npcs_lines = []
+        for npc in snapshot.visible_npcs:
+            npc_desc = f"- {npc.name}"
+            if npc.description:
+                npc_desc += f": {npc.description}"
+            npcs_lines.append(npc_desc)
+        npcs_description = "\n".join(npcs_lines) if npcs_lines else "No one else here"
 
         # Format visible items
         items_lines = []
@@ -146,6 +158,17 @@ class NarratorAI:
                 item_desc += " [NEWLY DISCOVERED]"
             items_lines.append(item_desc)
         items_description = "\n".join(items_lines) if items_lines else "Nothing of note"
+
+        # Format visible details (scenery)
+        details_lines = []
+        for detail in snapshot.visible_details:
+            detail_desc = f"- {detail.name}"
+            if detail.description:
+                detail_desc += f": {detail.description}"
+            details_lines.append(detail_desc)
+        details_description = (
+            "\n".join(details_lines) if details_lines else "Nothing notable"
+        )
 
         # Format inventory
         inventory_lines = [item.name for item in snapshot.inventory]
@@ -170,7 +193,9 @@ class NarratorAI:
             location_name=snapshot.location_name,
             location_atmosphere=snapshot.location_atmosphere or "",
             exits_description=exits_description,
+            npcs_description=npcs_description,
             items_description=items_description,
+            details_description=details_description,
             inventory_description=inventory_description,
             narration_history=history_section,
         )
@@ -271,6 +296,8 @@ class NarratorAI:
             return self._describe_item_examined(event)
         elif event.type == EventType.DETAIL_EXAMINED:
             return self._describe_detail_examined(event)
+        elif event.type == EventType.EXIT_EXAMINED:
+            return self._describe_exit_examined(event)
         elif event.type == EventType.ITEM_TAKEN:
             return self._describe_item_taken(event)
         elif event.type == EventType.FLAVOR_ACTION:
@@ -288,6 +315,9 @@ class NarratorAI:
 
         This event triggers comprehensive scene description including all
         visible items, NPCs, exits, and location details.
+
+        Note: Visible entities are already in the system prompt, so we only
+        include contextual instructions here.
 
         Args:
             event: The scene browsed event
@@ -347,37 +377,11 @@ class NarratorAI:
             from_name = from_loc.name if from_loc else from_location
             lines.append(f"- Came from: {from_name}")
 
-        lines.append(f"\n- Atmosphere: {snapshot.location_atmosphere or 'unspecified'}")
-
-        # Visible items
-        visible_items = context.get("visible_items", [])
-        if visible_items:
-            lines.append("\n### Visible Items to Mention:")
-            for item_name in visible_items:
-                lines.append(f"- {item_name}")
-        else:
-            lines.append("\n### Items: None visible")
-
-        # Visible NPCs
-        visible_npcs = context.get("visible_npcs", [])
-        if visible_npcs:
-            lines.append("\n### NPCs Present:")
-            for npc_name in visible_npcs:
-                lines.append(f"- {npc_name}")
-
-        # Visible exits
-        visible_exits = context.get("visible_exits", [])
-        if visible_exits:
-            lines.append("\n### Available Exits:")
-            for exit_info in visible_exits:
-                lines.append(
-                    f"- {exit_info['direction']}: leads to {exit_info['destination']}"
-                )
-
+        # Instructions reference entities from system prompt
         lines.append("\n### Instructions:")
-        lines.append("- Weave ALL visible elements naturally into prose (not a list)")
+        lines.append("- Weave ALL visible elements from system prompt into prose")
         lines.append("- Make exits feel like natural parts of the space")
-        lines.append("- Give items presence without over-describing")
+        lines.append("- Give items and details presence without over-describing")
         lines.append("- If NPCs present, briefly note their presence/activity")
 
         return "\n".join(lines)
@@ -388,6 +392,9 @@ class NarratorAI:
         snapshot: "PerceptionSnapshot",
     ) -> str:
         """Describe a LOCATION_CHANGED event.
+
+        Note: Visible entities are already in the system prompt, so we only
+        include contextual instructions here.
 
         Args:
             event: The location change event
@@ -427,36 +434,12 @@ class NarratorAI:
             from_name = from_loc.name if from_loc else from_location
             lines.append(f"- Came from: {from_name}")
 
-        lines.append(f"- Atmosphere: {snapshot.location_atmosphere or 'unspecified'}")
-
-        # For first visits, include visible entities for comprehensive description
+        # For first visits, include instructions for comprehensive description
         if first_visit or is_opening:
-            visible_items = context.get("visible_items", [])
-            if visible_items:
-                lines.append("\n### Visible Items to Mention:")
-                for item_name in visible_items:
-                    lines.append(f"- {item_name}")
-
-            visible_npcs = context.get("visible_npcs", [])
-            if visible_npcs:
-                lines.append("\n### NPCs Present:")
-                for npc_name in visible_npcs:
-                    lines.append(f"- {npc_name}")
-
-            visible_exits = context.get("visible_exits", [])
-            if visible_exits:
-                lines.append("\n### Available Exits:")
-                for exit_info in visible_exits:
-                    lines.append(
-                        f"- {exit_info['direction']}: leads to {exit_info['destination']}"
-                    )
-
             lines.append("\n### Instructions:")
-            lines.append(
-                "- Weave ALL visible elements naturally into prose (not a list)"
-            )
+            lines.append("- Weave ALL visible elements from system prompt into prose")
             lines.append("- Make exits feel like natural parts of the space")
-            lines.append("- Give items presence without over-describing")
+            lines.append("- Give items and details presence without over-describing")
             lines.append("- If NPCs present, briefly note their presence/activity")
 
         return "\n".join(lines)
@@ -508,6 +491,7 @@ class NarratorAI:
         entity_name = context.get("entity_name", event.subject or "something")
         description = context.get("description", "")
         in_inventory = context.get("in_inventory", False)
+        narrative_hint = context.get("narrative_hint")
 
         lines = [
             f"### ITEM_EXAMINED: Player examined {entity_name}",
@@ -523,6 +507,10 @@ class NarratorAI:
 
         lines.append("- Keep the tone consistent with the location atmosphere")
 
+        if narrative_hint:
+            lines.append("\n### Narrative Hint (incorporate naturally):")
+            lines.append(f"- {narrative_hint}")
+
         return "\n".join(lines)
 
     def _describe_detail_examined(self, event: Event) -> str:
@@ -537,6 +525,7 @@ class NarratorAI:
         context = event.context
         entity_name = context.get("entity_name", event.subject or "something")
         description = context.get("description", "")
+        narrative_hint = context.get("narrative_hint")
 
         lines = [
             f"### DETAIL_EXAMINED: Player examined {entity_name} (scenery/detail)",
@@ -545,6 +534,59 @@ class NarratorAI:
             "- Provide an atmospheric description fitting the location",
             "- Keep the response focused on this detail",
         ]
+
+        if narrative_hint:
+            lines.append("\n### Narrative Hint (incorporate naturally):")
+            lines.append(f"- {narrative_hint}")
+
+        return "\n".join(lines)
+
+    def _describe_exit_examined(self, event: Event) -> str:
+        """Describe an EXIT_EXAMINED event.
+
+        Args:
+            event: The examine event for an exit
+
+        Returns:
+            Event description
+        """
+        context = event.context
+        entity_name = context.get("entity_name", event.subject or "the exit")
+        description = context.get("description", "")
+        scene_description = context.get("scene_description", "")
+        destination_name = context.get("destination_name")
+        destination_known = context.get("destination_known", False)
+        destination_revealed = context.get("destination_revealed", False)
+        narrative_hint = context.get("narrative_hint")
+
+        lines = [
+            f"### EXIT_EXAMINED: Player examined {entity_name}",
+        ]
+
+        if description:
+            lines.append(f"- Examination description: {description}")
+        if scene_description:
+            lines.append(f"- Visual appearance: {scene_description}")
+
+        if destination_revealed:
+            lines.append("\n### DESTINATION REVEALED!")
+            lines.append(
+                f"- The player just discovered this leads to: {destination_name}"
+            )
+            lines.append("- Dramatize this revelation appropriately")
+            lines.append("- This is a discovery moment - make it feel meaningful")
+        elif destination_known and destination_name:
+            lines.append(f"- Known to lead to: {destination_name}")
+        else:
+            lines.append("- Destination is unknown to the player")
+            lines.append("- DO NOT reveal where this exit leads")
+            lines.append("- Describe only the physical characteristics of the exit")
+
+        if narrative_hint:
+            lines.append("\n### Narrative Hint (incorporate naturally):")
+            lines.append(f"- {narrative_hint}")
+
+        lines.append("\n- Keep the response focused on the exit examination")
 
         return "\n".join(lines)
 

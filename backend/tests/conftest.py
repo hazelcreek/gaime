@@ -6,6 +6,10 @@ This module provides:
 - sample_game_state: GameState with predictable values
 - mock_llm_client: Mock LLM client for deterministic testing
 - Custom markers for test categorization
+- Automatic .env loading for E2E tests
+
+Run E2E tests with:
+    pytest tests/e2e/ -v --run-slow
 """
 
 from __future__ import annotations
@@ -15,6 +19,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
+from dotenv import load_dotenv
+
+# Load environment variables from .env file (for E2E tests with real LLM)
+# Looks in backend/.env first, then project root .env
+_backend_dir = Path(__file__).parent.parent
+_project_root = _backend_dir.parent
+load_dotenv(_backend_dir / ".env")  # backend/.env (if exists)
+load_dotenv(_project_root / ".env")  # project root .env
 
 # Add backend to path for imports
 backend_path = Path(__file__).parent.parent
