@@ -329,11 +329,18 @@ class ImageHashTracker:
             for npc_id in variant_npc_ids:
                 npc_data = npcs_data.get(npc_id, {})
                 if npc_data:
+                    # V3: Parse placement from structured or string format
+                    placement_info = npc_placements.get(npc_id, "")
+                    if isinstance(placement_info, dict):
+                        placement = placement_info.get("placement", "")
+                    else:
+                        placement = placement_info
+
                     npcs_to_add.append(NPCInfo(
                         name=npc_data.get("name", npc_id),
                         appearance=npc_data.get("appearance", ""),
                         role=npc_data.get("role", ""),
-                        placement=npc_placements.get(npc_id, "")
+                        placement=placement
                     ))
 
             return get_edit_prompt(loc_name, npcs_to_add, theme, tone, style_block)
@@ -363,46 +370,96 @@ class ImageHashTracker:
             ExitInfo,
             ItemInfo,
             NPCInfo,
+            DetailInfo,
         )
 
         context = LocationContext()
 
-        # Build exits
+        # Build details (scene elements like furniture, decorations, etc.)
+        details_data = loc_data.get("details", {})
+        for detail_id, detail_info in details_data.items():
+            if isinstance(detail_info, dict):
+                name = detail_info.get("name", detail_id)
+                scene_description = detail_info.get("scene_description", "")
+            else:
+                # Simple string format (just the description)
+                name = detail_id
+                scene_description = detail_info if detail_info else ""
+
+            context.details.append(DetailInfo(
+                name=name,
+                scene_description=scene_description,
+            ))
+
+        # Build exits (V3: structured ExitDefinition format)
         exits_data = loc_data.get("exits", {})
-        for direction, destination_id in exits_data.items():
+        for direction, exit_info in exits_data.items():
+            if isinstance(exit_info, dict):
+                # V3 structured format
+                destination_id = exit_info.get("destination", direction)
+                scene_description = exit_info.get("scene_description", "")
+                destination_known = exit_info.get("destination_known", True)
+                hidden = exit_info.get("hidden", False)
+                locked = exit_info.get("locked", False)
+                requires_key = exit_info.get("requires_key")
+            else:
+                # Legacy string format (just destination)
+                destination_id = exit_info
+                scene_description = ""
+                destination_known = True
+                hidden = False
+                locked = False
+                requires_key = None
+
+            # Get destination info
             destination_data = locations_data.get(destination_id, {})
             destination_name = destination_data.get("name", destination_id)
             dest_requires = destination_data.get("requires", {})
 
+            # Determine is_secret from destination requirements (legacy pattern)
+            is_secret = bool(dest_requires.get("flag") if dest_requires else False)
+
             context.exits.append(ExitInfo(
                 direction=direction,
                 destination_name=destination_name,
-                is_secret=bool(dest_requires.get("flag") if dest_requires else False),
-                requires_key=bool(dest_requires.get("item") if dest_requires else False)
+                scene_description=scene_description,
+                destination_known=destination_known,
+                hidden=hidden,
+                is_secret=is_secret,
+                requires_key=bool(locked or requires_key),
             ))
 
-        # Build items
-        location_items = loc_data.get("items", [])
+        # Build items (V3: item_placements is source of truth)
         item_placements = loc_data.get("item_placements", {})
-        for item_id in location_items:
+        for item_id, placement_info in item_placements.items():
+            # Parse placement info (V3 structured or simple string)
+            if isinstance(placement_info, dict):
+                placement = placement_info.get("placement", "")
+                hidden = placement_info.get("hidden", False)
+            else:
+                # Simple string placement (visible by default)
+                placement = placement_info
+                hidden = False
+
             item_data = items_data.get(item_id, {})
             if item_data:
                 context.items.append(ItemInfo(
                     name=item_data.get("name", item_id),
-                    description=item_data.get("found_description", ""),
-                    is_hidden=item_data.get("hidden", False),
+                    description=item_data.get("scene_description", ""),
+                    placement=placement,
+                    hidden=hidden,
                     is_artifact=item_data.get("properties", {}).get("artifact", False),
-                    placement=item_placements.get(item_id, "")
                 ))
 
         # Build NPCs - for base image, exclude variant NPCs
         # For variant prompt, NPCs are handled separately via get_edit_prompt
         if variant_npc_ids is None:
-            location_npcs = loc_data.get("npcs", [])
             npc_placements = loc_data.get("npc_placements", {})
 
-            # Get all NPCs at this location
-            all_npc_ids = set(location_npcs)
+            # V3: Get NPCs from npc_placements at this location
+            all_npc_ids = set(npc_placements.keys())
+
+            # Also include NPCs that have location/locations pointing here
             for npc_id, npc_data in npcs_data.items():
                 if npc_data.get("location") == location_id:
                     all_npc_ids.add(npc_id)
@@ -415,6 +472,19 @@ class ImageHashTracker:
                 if not npc_data:
                     continue
 
+                # V3: Parse placement from structured or string format
+                placement_info = npc_placements.get(npc_id, "")
+                if isinstance(placement_info, dict):
+                    placement = placement_info.get("placement", "")
+                    hidden = placement_info.get("hidden", False)
+                else:
+                    placement = placement_info
+                    hidden = False
+
+                # Skip hidden NPCs at build time
+                if hidden:
+                    continue
+
                 # Skip conditional NPCs (they get variant images)
                 if self._is_npc_conditional(npc_data, location_id):
                     continue
@@ -423,7 +493,7 @@ class ImageHashTracker:
                     name=npc_data.get("name", npc_id),
                     appearance=npc_data.get("appearance", ""),
                     role=npc_data.get("role", ""),
-                    placement=npc_placements.get(npc_id, "")
+                    placement=placement
                 ))
 
         return context
@@ -732,43 +802,94 @@ class StyleTestHashTracker:
             ExitInfo,
             ItemInfo,
             NPCInfo,
+            DetailInfo,
         )
 
         context = LocationContext()
 
-        # Build exits
+        # Build details (scene elements like furniture, decorations, etc.)
+        details_data = loc_data.get("details", {})
+        for detail_id, detail_info in details_data.items():
+            if isinstance(detail_info, dict):
+                name = detail_info.get("name", detail_id)
+                scene_description = detail_info.get("scene_description", "")
+            else:
+                # Simple string format (just the description)
+                name = detail_id
+                scene_description = detail_info if detail_info else ""
+
+            context.details.append(DetailInfo(
+                name=name,
+                scene_description=scene_description,
+            ))
+
+        # Build exits (V3: structured ExitDefinition format)
         exits_data = loc_data.get("exits", {})
-        for direction, destination_id in exits_data.items():
+        for direction, exit_info in exits_data.items():
+            if isinstance(exit_info, dict):
+                # V3 structured format
+                destination_id = exit_info.get("destination", direction)
+                scene_description = exit_info.get("scene_description", "")
+                destination_known = exit_info.get("destination_known", True)
+                hidden = exit_info.get("hidden", False)
+                locked = exit_info.get("locked", False)
+                requires_key = exit_info.get("requires_key")
+            else:
+                # Legacy string format (just destination)
+                destination_id = exit_info
+                scene_description = ""
+                destination_known = True
+                hidden = False
+                locked = False
+                requires_key = None
+
+            # Get destination info
             destination_data = locations_data.get(destination_id, {})
             destination_name = destination_data.get("name", destination_id)
             dest_requires = destination_data.get("requires", {})
 
+            # Determine is_secret from destination requirements (legacy pattern)
+            is_secret = bool(dest_requires.get("flag") if dest_requires else False)
+
             context.exits.append(ExitInfo(
                 direction=direction,
                 destination_name=destination_name,
-                is_secret=bool(dest_requires.get("flag") if dest_requires else False),
-                requires_key=bool(dest_requires.get("item") if dest_requires else False)
+                scene_description=scene_description,
+                destination_known=destination_known,
+                hidden=hidden,
+                is_secret=is_secret,
+                requires_key=bool(locked or requires_key),
             ))
 
-        # Build items
-        location_items = loc_data.get("items", [])
+        # Build items (V3: item_placements is source of truth)
         item_placements = loc_data.get("item_placements", {})
-        for item_id in location_items:
+        for item_id, placement_info in item_placements.items():
+            # Parse placement info (V3 structured or simple string)
+            if isinstance(placement_info, dict):
+                placement = placement_info.get("placement", "")
+                hidden = placement_info.get("hidden", False)
+            else:
+                # Simple string placement (visible by default)
+                placement = placement_info
+                hidden = False
+
             item_data = items_data.get(item_id, {})
             if item_data:
                 context.items.append(ItemInfo(
                     name=item_data.get("name", item_id),
-                    description=item_data.get("found_description", ""),
-                    is_hidden=item_data.get("hidden", False),
+                    description=item_data.get("scene_description", ""),
+                    placement=placement,
+                    hidden=hidden,
                     is_artifact=item_data.get("properties", {}).get("artifact", False),
-                    placement=item_placements.get(item_id, "")
                 ))
 
         # Build NPCs - for style tests, include all unconditional NPCs
-        location_npcs = loc_data.get("npcs", [])
         npc_placements = loc_data.get("npc_placements", {})
 
-        all_npc_ids = set(location_npcs)
+        # V3: Get NPCs from npc_placements at this location
+        all_npc_ids = set(npc_placements.keys())
+
+        # Also include NPCs that have location/locations pointing here
         for npc_id, npc_data in npcs_data.items():
             if npc_data.get("location") == location_id:
                 all_npc_ids.add(npc_id)
@@ -780,6 +901,19 @@ class StyleTestHashTracker:
             if not npc_data:
                 continue
 
+            # V3: Parse placement from structured or string format
+            placement_info = npc_placements.get(npc_id, "")
+            if isinstance(placement_info, dict):
+                placement = placement_info.get("placement", "")
+                hidden = placement_info.get("hidden", False)
+            else:
+                placement = placement_info
+                hidden = False
+
+            # Skip hidden NPCs at build time
+            if hidden:
+                continue
+
             # Skip conditional NPCs
             if self._is_npc_conditional(npc_data, location_id):
                 continue
@@ -788,7 +922,7 @@ class StyleTestHashTracker:
                 name=npc_data.get("name", npc_id),
                 appearance=npc_data.get("appearance", ""),
                 role=npc_data.get("role", ""),
-                placement=npc_placements.get(npc_id, "")
+                placement=placement
             ))
 
         return context

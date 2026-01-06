@@ -2,7 +2,7 @@
 
 A comprehensive specification for unified visibility semantics, visual descriptions, examination mechanics, and destination visibility for exits.
 
-> **Status**: Phase 5 Complete — January 2026
+> **Status**: Phase 6 Complete — January 2026
 > **Related**: [Two-Phase Game Loop](./two-phase-game-loop-spec.md) | [Game Mechanics Design](../ideas/game-mechanics-design.md) | [Vision](../docs/VISION.md)
 
 ---
@@ -1808,17 +1808,30 @@ The following fields and patterns are deprecated in V3:
 - Added 13 new unit tests (4 for NPC visibility in snapshot, 9 for narrator prompt building)
 - Added 4 E2E tests for narrator visibility compliance with real LLM
 
-### Phase 6: Image Generation (Week 3)
+### Phase 6: Image Generation (Week 3) ✅ COMPLETED
 
 **Goal**: Image generator uses authored descriptions and respects visibility
 
-- [ ] Update `ExitInfo` dataclass with `scene_description` and `hidden` flag
-- [ ] Modify `_build_exits_description` to use authored content
-- [ ] Update `_get_exits_for_image` to extract from V3 schema
-- [ ] Filter out hidden exits from image generation
-- [ ] Add minimal fallback for missing descriptions
+- [x] Update `ExitInfo` dataclass with `scene_description`, `destination_known`, and `hidden` fields
+- [x] Update `ItemInfo` dataclass to use V3 placement-based visibility
+- [x] Add `_is_entity_visible_at_build_time()` helper for static visibility checks
+- [x] Modify `_build_exits_description` to use authored content with destination hints
+- [x] Update `_build_location_context` to parse V3 schema (exits, item_placements, npc_placements)
+- [x] Filter out hidden exits, items, and NPCs from image generation
+- [x] Add minimal fallback for missing descriptions
+- [x] Update `_get_conditional_npcs` and `_get_unconditional_npcs` for V3 schema
+- [x] Update variant generation methods for V3 npc_placements format
 
-**Tests**: Unit tests for image prompt generation
+**Tests**: Manual testing with V3 worlds verified correct prompt generation
+
+**Implementation Notes** (January 2026):
+- Image generator now uses authored `scene_description` for exits instead of generic direction mappings
+- Destination names included when `destination_known: true`, omitted when false
+- Directional context added as suffix hints (e.g., "(ahead)", "(to the right)")
+- Hidden entities filtered at build time - `hidden: true` entities don't appear in base images
+- Items parsed from `item_placements` (V3), not legacy `items` list
+- NPCs parsed from `npc_placements` (V3), not legacy `npcs` list
+- Placement descriptions properly extracted from V3 structured format (dict with `placement` key)
 
 ### Phase 7: World Builder Updates (Week 3-4)
 

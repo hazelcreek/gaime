@@ -49,21 +49,42 @@ class ImageGenerationError(Exception):
 
 @dataclass
 class ExitInfo:
-    """Information about an exit for visual representation."""
+    """Information about an exit for visual representation (V3).
+
+    Attributes:
+        direction: Cardinal direction or named exit (e.g., "north", "secret")
+        destination_name: Display name of the destination location
+        scene_description: Authored visual description of the exit
+        destination_known: Whether to include destination name in prompt
+        hidden: Whether exit is hidden at build time (not rendered if true)
+        is_secret: Legacy flag for subtle environmental hints
+        requires_key: Whether exit is locked (adds lock visual)
+    """
     direction: str
     destination_name: str
-    is_secret: bool = False
+    scene_description: str = ""  # V3: Authored visual description
+    destination_known: bool = True  # V3: Whether to hint at destination
+    hidden: bool = False  # V3: For filtering (not rendered if true)
+    is_secret: bool = False  # Legacy: subtle hints for secret passages
     requires_key: bool = False
 
 
 @dataclass
 class ItemInfo:
-    """Information about an item for visual representation."""
+    """Information about an item for visual representation (V3).
+
+    Attributes:
+        name: Display name of the item
+        description: Scene description from Item definition
+        placement: Placement description from ItemPlacement
+        hidden: Whether item is hidden at build time (from ItemPlacement.hidden)
+        is_artifact: Whether item is a significant artifact
+    """
     name: str
-    description: str = ""
-    is_hidden: bool = False
+    description: str = ""  # From Item.scene_description
+    placement: str = ""  # From ItemPlacement.placement
+    hidden: bool = False  # V3: From ItemPlacement.hidden
     is_artifact: bool = False
-    placement: str = ""
 
 
 @dataclass
@@ -76,11 +97,28 @@ class NPCInfo:
 
 
 @dataclass
+class DetailInfo:
+    """Information about a scene detail for visual representation.
+
+    Details are interactive/scenic elements defined in locations.yaml
+    that aren't items or NPCs, such as furniture, decorations, or
+    environmental features.
+
+    Attributes:
+        name: Display name of the detail
+        scene_description: How the detail appears in the scene
+    """
+    name: str
+    scene_description: str = ""
+
+
+@dataclass
 class LocationContext:
     """Full context for a location to generate appropriate imagery."""
     exits: list[ExitInfo] = field(default_factory=list)
     items: list[ItemInfo] = field(default_factory=list)
     npcs: list[NPCInfo] = field(default_factory=list)
+    details: list[DetailInfo] = field(default_factory=list)
 
 
 @dataclass
@@ -106,19 +144,53 @@ class ImageVariantManifest:
         )
 
 
+def _is_entity_visible_at_build_time(hidden: bool) -> bool:
+    """Check if entity is visible at world-building time.
+
+    At build time, we only check the hidden flag - find_condition
+    is runtime state that we ignore. This is used to filter out
+    entities that should not appear in the base image.
+
+    Args:
+        hidden: Whether the entity is marked as hidden in the schema
+
+    Returns:
+        True if the entity should be included in image generation
+    """
+    return not hidden
+
+
 def _build_exits_description(exits: list[ExitInfo]) -> str:
-    """Build a description of exits for the image prompt."""
+    """Build a description of exits for the image prompt (V3).
+
+    V3: Uses authored scene_description instead of generic direction mappings.
+    Adds destination hints when destination_known is true.
+
+    Args:
+        exits: List of ExitInfo objects (already filtered for visibility)
+
+    Returns:
+        Text description of exits for the image prompt
+    """
     if not exits:
         return ""
 
-    direction_mappings = {
-        "north": "a doorway or passage visible ahead in the distance",
-        "south": "an opening or exit behind, perhaps suggested by light or shadows",
-        "east": "a passage or doorway visible to the right side of the scene",
-        "west": "a passage or doorway visible to the left side of the scene",
-        "up": "stairs leading upward, or a visible upper level or balcony",
-        "down": "stairs descending, a trapdoor, or a passage leading below",
-        "back": "the way you came, perhaps a doorway with light streaming through",
+    # Minimal directional context hints (used as suffix, not primary description)
+    direction_hints = {
+        "north": "ahead",
+        "south": "behind",
+        "east": "to the right",
+        "west": "to the left",
+        "up": "above",
+        "down": "below",
+        "back": "behind",
+    }
+
+    # Secret hint templates for hidden exits that might show subtle clues
+    secret_hint_templates = {
+        "horizontal": "a faint draft or subtle irregularity in the wall",
+        "up": "shadows on the ceiling that hint at an unseen passage",
+        "down": "a barely visible crack in the floor or subtle depression",
     }
 
     exit_descriptions = []
@@ -127,21 +199,41 @@ def _build_exits_description(exits: list[ExitInfo]) -> str:
     for exit in exits:
         direction = exit.direction.lower()
 
-        if exit.is_secret:
-            if direction in ["north", "south", "east", "west"]:
-                secret_hints.append("a faint draft or subtle irregularity in the wall")
-            elif direction == "up":
-                secret_hints.append("shadows on the ceiling that hint at an unseen passage")
-            elif direction == "down":
-                secret_hints.append("a barely visible crack in the floor or subtle depression")
-        elif exit.requires_key:
-            if direction in direction_mappings:
-                exit_descriptions.append(f"{direction_mappings[direction]}, but secured with a heavy lock")
+        # Handle hidden exits - only show subtle hints if marked as secret
+        if exit.hidden:
+            if exit.is_secret:
+                if direction in ["north", "south", "east", "west"]:
+                    secret_hints.append(secret_hint_templates["horizontal"])
+                elif direction == "up":
+                    secret_hints.append(secret_hint_templates["up"])
+                elif direction == "down":
+                    secret_hints.append(secret_hint_templates["down"])
+            # Skip hidden non-secret exits entirely
+            continue
+
+        # Build description from authored content or fallback
+        if exit.scene_description:
+            # V3: Use authored description as primary
+            desc = exit.scene_description
         else:
-            if direction in direction_mappings:
-                exit_descriptions.append(direction_mappings[direction])
-            else:
-                exit_descriptions.append(f"a passage leading toward {exit.destination_name}")
+            # Minimal fallback for missing descriptions
+            hint = direction_hints.get(direction, direction)
+            desc = f"a passage {hint}"
+
+        # Add lock visual if required
+        if exit.requires_key:
+            desc = f"{desc}, secured with a heavy lock"
+
+        # Add destination hint when known
+        if exit.destination_known and exit.destination_name:
+            desc = f"{desc}, leading to {exit.destination_name}"
+
+        # Add directional context if not already implied
+        dir_hint = direction_hints.get(direction, "")
+        if dir_hint and dir_hint not in desc.lower():
+            desc = f"{desc} ({dir_hint})"
+
+        exit_descriptions.append(desc)
 
     parts = []
     if exit_descriptions:
@@ -153,22 +245,31 @@ def _build_exits_description(exits: list[ExitInfo]) -> str:
 
 
 def _build_items_description(items: list[ItemInfo]) -> str:
-    """Build a description of items for the image prompt."""
+    """Build a description of items for the image prompt (V3).
+
+    V3: Hidden items should already be filtered out in _build_location_context.
+    This function only receives visible items.
+
+    Args:
+        items: List of ItemInfo objects (already filtered for visibility)
+
+    Returns:
+        Text description of items for the image prompt
+    """
     if not items:
         return ""
 
     visible_items = []
-    hidden_hints = []
     artifact_items = []
 
     for item in items:
+        # Skip any hidden items that made it through (defensive)
+        if item.hidden:
+            continue
+
         placement_desc = item.placement if item.placement else "placed naturally within the scene"
 
-        if item.is_hidden:
-            hidden_hints.append(
-                f"something barely visible that could be {item.name.lower()}"
-            )
-        elif item.is_artifact:
+        if item.is_artifact:
             if item.placement:
                 artifact_items.append(
                     f"a notable object ({item.name}) {item.placement}"
@@ -185,8 +286,6 @@ def _build_items_description(items: list[ItemInfo]) -> str:
         parts.append("Objects in the scene: " + "; ".join(visible_items))
     if artifact_items:
         parts.append("Significant objects: " + "; ".join(artifact_items))
-    if hidden_hints:
-        parts.append("Barely perceptible elements: " + "; ".join(hidden_hints[:2]))
 
     return "\n".join(parts)
 
@@ -216,6 +315,35 @@ def _build_npcs_description(npcs: list[NPCInfo]) -> str:
     return ""
 
 
+def _build_details_description(details: list[DetailInfo]) -> str:
+    """Build a description of scene details for the image prompt.
+
+    Details are interactive/scenic elements like furniture, decorations,
+    or environmental features that should appear in the generated image.
+
+    Args:
+        details: List of DetailInfo objects
+
+    Returns:
+        Text description of details for the image prompt
+    """
+    if not details:
+        return ""
+
+    detail_descriptions = []
+    for detail in details:
+        if detail.scene_description:
+            # Clean up multi-line descriptions
+            desc_clean = " ".join(detail.scene_description.split())
+            detail_descriptions.append(f"{detail.name}: {desc_clean}")
+        else:
+            detail_descriptions.append(detail.name)
+
+    if detail_descriptions:
+        return "Scene elements: " + "; ".join(detail_descriptions)
+    return ""
+
+
 def get_image_prompt(
     location_name: str,
     atmosphere: str,
@@ -230,13 +358,17 @@ def get_image_prompt(
     exits_desc = ""
     items_desc = ""
     npcs_desc = ""
+    details_desc = ""
 
     if context:
         exits_desc = _build_exits_description(context.exits)
         items_desc = _build_items_description(context.items)
         npcs_desc = _build_npcs_description(context.npcs)
+        details_desc = _build_details_description(context.details)
 
     interactive_elements = []
+    if details_desc:
+        interactive_elements.append(details_desc)
     if exits_desc:
         interactive_elements.append(exits_desc)
     if items_desc:
@@ -790,11 +922,18 @@ class ImageGenerator:
             if not npc_data:
                 continue
 
+            # V3: Parse placement from structured or string format
+            placement_info = npc_placements.get(npc_id, "")
+            if isinstance(placement_info, dict):
+                placement = placement_info.get("placement", "")
+            else:
+                placement = placement_info
+
             npc_to_add = NPCInfo(
                 name=npc_data.get("name", npc_id),
                 appearance=npc_data.get("appearance", ""),
                 role=npc_data.get("role", ""),
-                placement=npc_placements.get(npc_id, "")
+                placement=placement
             )
 
             variant_filename = get_variant_image_filename(location_id, [npc_id])
@@ -940,59 +1079,154 @@ class ImageGenerator:
         items_data: dict,
         include_npc_ids: Optional[list[str]] = None
     ) -> LocationContext:
-        """Build a LocationContext from world data."""
+        """Build a LocationContext from world data (V3 schema).
+
+        V3 changes:
+        - Exits are dicts with ExitDefinition structure (not just destination strings)
+        - Items are defined by item_placements keys (not items list)
+        - NPCs are defined by npc_placements keys (not npcs list)
+        - Details are scene elements defined in the details field
+        - Hidden entities are filtered out at build time
+
+        Args:
+            location_id: The location being processed
+            loc_data: Raw location data from YAML
+            locations: All locations data for destination lookups
+            npcs_data: All NPC definitions
+            items_data: All item definitions
+            include_npc_ids: Optional filter for specific NPCs (for variants)
+
+        Returns:
+            LocationContext with exits, items, NPCs, and details for image generation
+        """
         context = LocationContext()
 
-        # Build exits
+        # Build details (scene elements like furniture, decorations, etc.)
+        details_data = loc_data.get("details", {})
+        for detail_id, detail_info in details_data.items():
+            if isinstance(detail_info, dict):
+                name = detail_info.get("name", detail_id)
+                scene_description = detail_info.get("scene_description", "")
+            else:
+                # Simple string format (just the description)
+                name = detail_id
+                scene_description = detail_info if detail_info else ""
+
+            context.details.append(DetailInfo(
+                name=name,
+                scene_description=scene_description,
+            ))
+
+        # Build exits (V3: structured ExitDefinition format)
         exits_data = loc_data.get("exits", {})
-        for direction, destination_id in exits_data.items():
+        for direction, exit_info in exits_data.items():
+            if isinstance(exit_info, dict):
+                # V3 structured format
+                destination_id = exit_info.get("destination", direction)
+                scene_description = exit_info.get("scene_description", "")
+                destination_known = exit_info.get("destination_known", True)
+                hidden = exit_info.get("hidden", False)
+                locked = exit_info.get("locked", False)
+                requires_key = exit_info.get("requires_key")
+            else:
+                # Legacy string format (just destination)
+                destination_id = exit_info
+                scene_description = ""
+                destination_known = True
+                hidden = False
+                locked = False
+                requires_key = None
+
+            # Get destination info
             destination_data = locations.get(destination_id, {})
             destination_name = destination_data.get("name", destination_id)
             dest_requires = destination_data.get("requires", {})
 
+            # Determine is_secret from destination requirements (legacy pattern)
+            is_secret = bool(dest_requires.get("flag") if dest_requires else False)
+
             context.exits.append(ExitInfo(
                 direction=direction,
                 destination_name=destination_name,
-                is_secret=bool(dest_requires.get("flag") if dest_requires else False),
-                requires_key=bool(dest_requires.get("item") if dest_requires else False)
+                scene_description=scene_description,
+                destination_known=destination_known,
+                hidden=hidden,
+                is_secret=is_secret,
+                requires_key=bool(locked or requires_key),
             ))
 
-        # Build items
-        location_items = loc_data.get("items", [])
+        # Build items (V3: item_placements is source of truth)
         item_placements = loc_data.get("item_placements", {})
-        for item_id in location_items:
+        for item_id, placement_info in item_placements.items():
+            # Parse placement info (V3 structured or simple string)
+            if isinstance(placement_info, dict):
+                placement = placement_info.get("placement", "")
+                hidden = placement_info.get("hidden", False)
+            else:
+                # Simple string placement (visible by default)
+                placement = placement_info
+                hidden = False
+
+            # Filter hidden items at build time
+            if not _is_entity_visible_at_build_time(hidden):
+                continue
+
+            # Get item definition
             item_data = items_data.get(item_id, {})
             if item_data:
                 context.items.append(ItemInfo(
                     name=item_data.get("name", item_id),
-                    description=item_data.get("found_description", ""),
-                    is_hidden=item_data.get("hidden", False),
+                    description=item_data.get("scene_description", ""),
+                    placement=placement,
+                    hidden=hidden,
                     is_artifact=item_data.get("properties", {}).get("artifact", False),
-                    placement=item_placements.get(item_id, "")
                 ))
 
-        # Build NPCs
+        # Build NPCs (V3: npc_placements is source of truth for this location)
         if include_npc_ids is not None and len(include_npc_ids) == 0:
             return context
 
-        location_npcs = loc_data.get("npcs", [])
         npc_placements = loc_data.get("npc_placements", {})
-
         all_potential_npcs = []
-        for npc_id in location_npcs:
-            npc_data = npcs_data.get(npc_id, {})
-            if npc_data:
-                all_potential_npcs.append((npc_id, npc_data))
 
+        # V3: Get NPCs from npc_placements at this location
+        for npc_id, placement_info in npc_placements.items():
+            npc_data = npcs_data.get(npc_id, {})
+            if not npc_data:
+                continue
+
+            # Parse placement info
+            if isinstance(placement_info, dict):
+                placement = placement_info.get("placement", "")
+                hidden = placement_info.get("hidden", False)
+            else:
+                placement = placement_info
+                hidden = False
+
+            # Filter hidden NPCs at build time
+            if not _is_entity_visible_at_build_time(hidden):
+                continue
+
+            all_potential_npcs.append((npc_id, npc_data, placement))
+
+        # Also include NPCs that have location/locations pointing here
+        # (for backward compatibility and roaming NPCs)
         for npc_id, npc_data in npcs_data.items():
-            if npc_id in location_npcs:
+            # Skip if already in npc_placements
+            if npc_id in npc_placements:
                 continue
             npc_location = npc_data.get("location")
             npc_locations = npc_data.get("locations", [])
             if npc_location == location_id or location_id in npc_locations:
-                all_potential_npcs.append((npc_id, npc_data))
+                # Use placement from npc_placements if available, else empty
+                placement = ""
+                if npc_id in npc_placements:
+                    pi = npc_placements[npc_id]
+                    placement = pi.get("placement", "") if isinstance(pi, dict) else pi
+                all_potential_npcs.append((npc_id, npc_data, placement))
 
-        for npc_id, npc_data in all_potential_npcs:
+        # Build NPC context, respecting include_npc_ids filter
+        for npc_id, npc_data, placement in all_potential_npcs:
             if include_npc_ids is not None and npc_id not in include_npc_ids:
                 continue
 
@@ -1000,23 +1234,32 @@ class ImageGenerator:
                 name=npc_data.get("name", npc_id),
                 appearance=npc_data.get("appearance", ""),
                 role=npc_data.get("role", ""),
-                placement=npc_placements.get(npc_id, "")
+                placement=placement,
             ))
 
         return context
 
     def _get_conditional_npcs(self, location_id: str, loc_data: dict, npcs_data: dict) -> list[str]:
-        """Get list of NPC IDs that are conditional at this location."""
-        conditional_npcs = []
-        location_npcs = loc_data.get("npcs", [])
+        """Get list of NPC IDs that are conditional at this location (V3).
 
-        for npc_id in location_npcs:
+        V3: Uses npc_placements instead of npcs list. Hidden NPCs are excluded.
+        """
+        conditional_npcs = []
+        npc_placements = loc_data.get("npc_placements", {})
+
+        # V3: Get NPCs from npc_placements
+        for npc_id, placement_info in npc_placements.items():
+            # Skip hidden NPCs
+            if isinstance(placement_info, dict) and placement_info.get("hidden", False):
+                continue
+
             npc_data = npcs_data.get(npc_id, {})
             if npc_data and self._is_npc_conditional(npc_data, location_id):
                 conditional_npcs.append(npc_id)
 
+        # Also check NPCs with location/locations pointing here
         for npc_id, npc_data in npcs_data.items():
-            if npc_id in location_npcs or npc_id in conditional_npcs:
+            if npc_id in npc_placements or npc_id in conditional_npcs:
                 continue
 
             if self._npc_can_be_at_location(npc_id, npc_data, location_id):
@@ -1026,17 +1269,26 @@ class ImageGenerator:
         return conditional_npcs
 
     def _get_unconditional_npcs(self, location_id: str, loc_data: dict, npcs_data: dict) -> list[str]:
-        """Get list of NPC IDs that are NOT conditional at this location."""
-        unconditional_npcs = []
-        location_npcs = loc_data.get("npcs", [])
+        """Get list of NPC IDs that are NOT conditional at this location (V3).
 
-        for npc_id in location_npcs:
+        V3: Uses npc_placements instead of npcs list. Hidden NPCs are excluded.
+        """
+        unconditional_npcs = []
+        npc_placements = loc_data.get("npc_placements", {})
+
+        # V3: Get NPCs from npc_placements
+        for npc_id, placement_info in npc_placements.items():
+            # Skip hidden NPCs
+            if isinstance(placement_info, dict) and placement_info.get("hidden", False):
+                continue
+
             npc_data = npcs_data.get(npc_id, {})
             if npc_data and not self._is_npc_conditional(npc_data, location_id):
                 unconditional_npcs.append(npc_id)
 
+        # Also check NPCs with location/locations pointing here
         for npc_id, npc_data in npcs_data.items():
-            if npc_id in location_npcs or npc_id in unconditional_npcs:
+            if npc_id in npc_placements or npc_id in unconditional_npcs:
                 continue
 
             if self._npc_can_be_at_location(npc_id, npc_data, location_id):
@@ -1325,11 +1577,18 @@ class ImageGenerator:
                 if not npc_data:
                     continue
 
+                # V3: Parse placement from structured or string format
+                placement_info = npc_placements.get(npc_id, "")
+                if isinstance(placement_info, dict):
+                    placement = placement_info.get("placement", "")
+                else:
+                    placement = placement_info
+
                 npc_to_add = NPCInfo(
                     name=npc_data.get("name", npc_id),
                     appearance=npc_data.get("appearance", ""),
                     role=npc_data.get("role", ""),
-                    placement=npc_placements.get(npc_id, "")
+                    placement=placement
                 )
 
                 # Generate one variant per NPC (matching _generate_variants pattern)
