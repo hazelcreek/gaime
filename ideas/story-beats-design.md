@@ -428,6 +428,205 @@ acts:
 
 ---
 
+### Enforcing Act Boundaries: Location Gating
+
+A natural question arises: what actually *prevents* the player from wandering into Act 2 locations during Act 1? If the nursery exists in `locations.yaml`, can't the player just walk upstairs and explore it early?
+
+The answer is **hard gating at the engine level**. Locations not in the current act's `available_locations` are simply inaccessible—their exits don't appear, or attempting to use them is blocked with narrative justification.
+
+#### How It Works
+
+The movement system enforces act boundaries through three mechanisms:
+
+**1. Exit Filtering**
+
+When building the player's perception of a location, the engine only shows exits to locations that are:
+- Defined in `locations.yaml` AND
+- Listed in `acts[current_act].available_locations`
+
+If Act 1 doesn't include `upper_landing`, the player won't see "stairs leading up" as a valid exit, even if those stairs are defined in the location data.
+
+**2. Movement Validation**
+
+If a player somehow attempts to move to an unavailable location (perhaps typing "go upstairs" when no such exit is visible), the validator rejects the action:
+
+```python
+def validate_movement(self, destination: str, state: GameState) -> ValidationResult:
+    current_act = state.current_act
+    available = self.world.acts[current_act].available_locations
+
+    if destination not in available:
+        return ValidationResult(
+            valid=False,
+            code="LOCATION_LOCKED",
+            reason="That area is not accessible yet."
+        )
+    # ... continue with normal exit validation ...
+```
+
+**3. Narrative Justification**
+
+Rather than breaking immersion with "You can't go there," the Narrator provides in-world reasons. These can be defined per-location or generated contextually:
+
+| Blocked Access | Narrative Justification |
+|----------------|------------------------|
+| Stairs to upper floor | *"The upper landing is shrouded in impenetrable darkness. Something feels deeply wrong about ascending... not yet."* |
+| Basement door | *"The basement door is locked. Jenkins eyes it nervously—'Best leave that be for now.'"* |
+| Garden gate | *"The storm has made the garden path impassable. Fallen branches block your way."* |
+| Secret passage | *"The bookshelf looks ordinary. Perhaps you're missing something."* |
+
+#### Example: The Cursed Manor
+
+Consider how Act 1 → Act 2 location gating works:
+
+**Act 1 State:**
+```
+Player Location: entrance_hall
+Available Locations: [entrance_hall, library, dining_room, kitchen, sitting_room]
+Visible Exits from entrance_hall:
+  - north → library ✓ (in available_locations)
+  - east → dining_room ✓ (in available_locations)
+  - stairs → upper_landing ✗ (NOT in available_locations, hidden or blocked)
+```
+
+**Player tries:** `> go upstairs`
+
+**Response (Act 1):**
+> *The grand staircase curves upward into shadow. As you place your foot on the first step, a chill runs through you—an almost physical resistance. Jenkins appears at your elbow. "I wouldn't, if I were you. Not until we understand what's happening here." The darkness above seems to pulse with unspoken warning.*
+
+**After Act 1 Gate opens (The Revelation beat triggers):**
+
+```
+Available Locations: [entrance_hall, library, dining_room, kitchen,
+                      sitting_room, basement, upper_landing, nursery, master_bedroom]
+Visible Exits from entrance_hall:
+  - north → library ✓
+  - east → dining_room ✓
+  - stairs → upper_landing ✓ (NOW available)
+  - basement_door → basement ✓ (NOW available, Jenkins gave key)
+```
+
+**Player tries:** `> go upstairs`
+
+**Response (Act 2):**
+> *You ascend the grand staircase. The darkness that once repelled you has lifted—or perhaps you've earned the right to pass. The upper landing stretches before you, doors leading to rooms that have waited decades for someone brave enough to enter.*
+
+#### Design Implications
+
+This hard gating has important consequences for world authoring:
+
+1. **Exits must be act-aware**: When designing locations, authors should consider which exits are available per act and provide appropriate blocking descriptions.
+
+2. **Narrative coherence matters**: The *reason* a location is blocked should fit the story. Physical obstacles (locked doors, debris) work for mundane settings; supernatural resistance fits horror; authority figures blocking access fits institutional settings.
+
+3. **Unlocking should feel earned**: The transition narrative should acknowledge that previously blocked areas are now accessible, making the player feel their progress.
+
+4. **Some locations may span acts**: Core hub areas (like `entrance_hall`) typically remain available across acts. Only newly-accessible areas need gating.
+
+#### Transitions as Active Revelation
+
+Critically, **players should never have to wander around testing doors** to discover what changed after an act transition. The transition beat itself must actively communicate the new possibilities—through NPC guidance, dramatic narrative, or explicit revelation.
+
+**The Anti-Pattern: Silent Unlocking**
+
+Bad design leaves the player guessing:
+> *The clock strikes midnight.* [Flag silently set: basement_unlocked = true]
+>
+> Player now has to remember "Hey, I couldn't go to the basement before... maybe I should try again?" This breaks immersion and feels like a video game.
+
+**The Pattern: Dramatic Revelation**
+
+Good design makes new access part of the story moment:
+
+> *The clock strikes midnight. Jenkins appears at the library door, his face ashen in the candlelight.*
+>
+> *"I've kept silent long enough," he says, pressing a cold iron key into your palm. "The basement. That's where it all began—where Edmund performed his... rituals." He gestures toward the main hall. "The door is behind the stairs. I'll show you."*
+>
+> *As he leads you through the entrance hall, you notice something else has changed. The oppressive darkness that clung to the upper staircase has lifted. The way up stands open now, as if the house itself has decided you're ready.*
+
+In this transition:
+- **The NPC actively guides** the player to the new area (basement)
+- **Physical/narrative change** draws attention to other new access (upper floor)
+- **No guessing required**—the story tells you what's possible
+
+**Techniques for Active Revelation**
+
+| Technique | Example | Best For |
+|-----------|---------|----------|
+| **NPC Guide** | "Follow me—there's something you need to see in the basement." | Any genre; feels natural |
+| **Item Grant** | Jenkins hands you a key, explicitly stating what it opens | Mystery, exploration |
+| **Environmental Change** | "The shadows retreat from the staircase" / "The floodwaters have receded" | Horror, adventure |
+| **Direct Announcement** | "The path to the north is clear now" (narrator voice) | Fairy tale, lighter tone |
+| **Sensory Cue** | "A door slams open somewhere above you" / "You hear footsteps upstairs" | Horror, tension |
+| **Map/Journal Update** | "You mark the basement entrance on your mental map" | Investigation, exploration |
+
+**Multiple Unlocks in One Transition**
+
+When a gate opens multiple locations, the transition should acknowledge all of them naturally:
+
+> *Jenkins leads you to the basement door, but pauses at the foot of the grand staircase.*
+>
+> *"The children's rooms are up there," he says quietly. "The nursery. The master bedroom where Lady Margaret..." He trails off. "You'll need to search everywhere if you're to understand what happened. The whole house is open to you now—for better or worse."*
+
+This single transition communicates:
+1. Basement is now accessible (primary, guided)
+2. Nursery exists and is relevant (secondary, mentioned)
+3. Master bedroom exists and is relevant (secondary, mentioned)
+4. The entire upper floor is now available (summary)
+
+The player knows exactly where to explore without trial-and-error.
+
+**Schema Support for Transition Revelation**
+
+The gate definition should include explicit guidance for what to reveal:
+
+```yaml
+gate:
+  transition_beat: the_revelation
+
+  unlocks_locations:
+    - basement
+    - upper_landing
+    - nursery
+    - master_bedroom
+
+  # How to communicate these unlocks in the transition narrative
+  revelation:
+    primary_focus: basement  # NPC leads here or narrative emphasizes
+    secondary_mentions:
+      - upper_landing: "The darkness has lifted from the stairs"
+      - nursery: "The children's rooms..."
+      - master_bedroom: "Where Lady Margaret spent her final days"
+
+    # Optional: NPC who guides/reveals
+    revealed_by: butler_jenkins
+
+    # Transition narrative (can reference {locations} dynamically)
+    narrative: |
+      Jenkins presses a key into your hand and leads you toward the basement.
+      As you pass the grand staircase, you notice the oppressive shadows have
+      retreated. The upper floor, previously forbidden, now stands accessible.
+```
+
+This ensures the Narrator has clear guidance on *how* to communicate the transition, not just *what* changed.
+
+```yaml
+# In locations.yaml, you can optionally define blocked descriptions
+upper_landing:
+  name: "Upper Landing"
+  description: "A shadowy corridor stretches before you..."
+
+  # Optional: Used when player tries to access before this location is available
+  blocked_description: |
+    The stairs leading up seem to reject your presence. The shadows
+    above are too thick, too watchful. You're not ready—not yet.
+  blocked_reason: supernatural  # Helps Narrator match tone
+```
+
+This approach preserves the String of Pearls structure: players have freedom *within* each hub (pearl), but the connections between hubs (string) are firmly controlled until the dramatic gate opens.
+
+---
+
 ## Managing Non-Linearity
 
 Freedom within hubs is essential, but unmanaged freedom creates problems. If Puzzle B triggers a flood, but the player hasn't finished Puzzle A (which requires a dry floor), the game breaks. GAIME needs strategies to allow freedom while preventing catastrophe.
