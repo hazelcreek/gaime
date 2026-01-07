@@ -7,6 +7,10 @@ entrance_hall:
     with painted eyes that seem to follow your movement. The air smells
     of old wood, dust, and something faintly metallic. Rain hammers
     against the windows, and occasional lightning illuminates the decay.
+  visual_description: |
+    A cavernous entrance hall with vaulted ceilings lost in shadow, dominated by a grand staircase that sweeps upward into darkness toward the upper landing. The walls are paneled in dark mahogany, carved with elaborate Victorian motifs now fuzzy with dust.
+    To the north, an ornate archway leads into a book-lined library. To the east, a heavy oak door with tarnished brass handles stands closed. To the west, a set of double doors stands slightly ajar, revealing a darkened parlor beyond.
+    A massive crystal chandelier hangs askew, its crystals clouded gray. Black and white marble tiles checker the floor, cracked and gapping. Cobwebs connect every surface like gray lace, and lightning flashes through rain-lashed windows.
   exits:
     north:
       destination: library
@@ -55,6 +59,10 @@ library:
     through the room, making the pages of an open book flutter. Moonlight
     filters through a grimy window, illuminating dust motes that drift like
     snow. A massive oak desk dominates the center, covered in papers.
+  visual_description: |
+    A two-story library with towering bookshelves of dark wood reaching toward a shadowed ceiling, connected by a narrow wrought-iron gallery. To the south, an ornate archway leads back to the entrance hall beyond.
+    Thousands of leather-bound books in deep reds, greens, and browns crowd every shelf. A massive oak desk sits in the center, buried under scattered papers and quills. Moonlight filters through a tall grimy window.
+    A library ladder on brass rails leans against one bookcase. One red book on the middle shelf protrudes slightly, as if waiting to be pulled. The carpets are threadbare Persian, their patterns faded to ghosts.
   exits:
     south:
       destination: entrance_hall
@@ -112,6 +120,10 @@ secret_passage:
     Cobwebs hang like curtains, and the walls are cold, damp stone - far
     older than the manor above. The air is stale and carries a faint
     scent of earth and something else... incense, perhaps, or old blood.
+  visual_description: |
+    A narrow stone corridor of ancient construction, far older than the Victorian manor above. Behind you, the hidden bookshelf door stands open, revealing the warm glow of the library beyond.
+    The rough-hewn walls are damp with moisture, covered in lichen and strange carved symbols. Cobwebs hang in thick curtains, parting like gray veils. The floor is uneven flagstone, worn smooth by generations of secret footsteps.
+    Ahead, a narrow stone stairway descends into deeper darkness. Rusted iron sconces hold the stubs of candles never relit. Water drips somewhere below, echoing off ancient stone.
   exits:
     back:
       destination: library
@@ -141,6 +153,10 @@ ritual_chamber:
     Three pedestals stand at points around the circle, two of them empty.
     Candles line the walls, unlit but leaving trails of ancient wax.
     The air feels heavy, charged with something unnatural.
+  visual_description: |
+    A perfectly circular chamber carved from living rock, its domed ceiling lost in shadow above. The narrow stone stairs ascend back toward the secret passage and the manor above.
+    The floor is smooth black stone, painted with an elaborate ritual circle of concentric rings and arcane symbols in dark rusty red. Three stone pedestals stand at equidistant points around the circle, their surfaces carved with warning glyphs.
+    Hundreds of candles line ledges around the walls, their wax frozen in long drips. The air shimmers faintly, charged with unnatural energy. Ancient iron chains hang from the ceiling above the circle's center.
   exits:
     up:
       destination: secret_passage
@@ -182,6 +198,10 @@ dining_room:
     candlesticks, the crystal glasses. A grandfather clock ticks steadily
     in the corner, impossibly still working. The east wall features a
     large fireplace, cold and dark.
+  visual_description: |
+    A formal dining room dominated by a long mahogany table set for six, the place settings frozen in time - bone china bearing the family crest, tarnished silver flatware, crystal glasses clouded with dust.
+    To the west, the heavy oak door with tarnished brass handles leads back to the entrance hall. To the north, a service door provides access to the kitchen beyond.
+    A massive fireplace of carved marble dominates one wall, cold and dark. A grandfather clock stands in the corner, its pendulum swinging impossibly. Heavy burgundy drapes frame windows rattling with the storm.
   exits:
     west:
       destination: entrance_hall
@@ -218,6 +238,10 @@ kitchen:
     hang from the ceiling, tarnished green with age. The large hearth
     is cold, and the preparation tables are covered in dust. A door
     leads to what must be a pantry. The smell of decay lingers.
+  visual_description: |
+    A large servants' kitchen with a massive stone hearth cold and dark, its iron crane and hooks still in place. To the south, the service door leads back to the dining room. A heavy door with an iron lock leads down to the basement.
+    Copper pots hang from ceiling racks, their surfaces green with verdigris. Stone preparation tables line the walls, covered in dust and the residue of long-ago meals. Cast iron stoves sit dormant.
+    Pantry shelves visible through an open door are bare. A dumbwaiter shaft stands open and dark. A single window high on the wall shows only storm-darkness.
   exits:
     south:
       destination: dining_room
@@ -255,6 +279,10 @@ basement:
     Wine racks line one wall, bottles covered in decades of dust and
     cobwebs. Strange stains mark the floor, and the walls are rough-hewn
     stone. In the far corner, something glints in the darkness.
+  visual_description: |
+    A cold cellar of rough-hewn stone walls, the floor hard-packed earth scattered with debris. The stone stairs ascend toward the kitchen above, dim light filtering down from the doorway.
+    Wine racks line one wall from floor to ceiling, hundreds of dust-covered bottles resting in their slots. The ceiling is low, supported by thick timber beams dark with age. Cobwebs connect every surface.
+    Old furniture and crates are stacked against the walls, draped in rotting canvas. A glint of something metallic catches what little light descends. The far corners disappear into impenetrable darkness.
   exits:
     up:
       destination: kitchen
@@ -284,6 +312,10 @@ sitting_room:
     sits in one corner, its keys yellowed. Family photographs crowd
     the mantelpiece, showing happier times. Heavy curtains block the
     windows, holding back the storm.
+  visual_description: |
+    An intimate parlor with velvet furniture arranged around a marble fireplace, the upholstery faded from crimson to dusty rose, moth-eaten but still arranged as if expecting guests. To the east, the double doors stand slightly ajar, leading back to the entrance hall.
+    A grand piano occupies one corner. Family photographs in tarnished silver frames crowd the mantelpiece, showing smiling faces frozen in happier times. Lace doilies cover every surface, yellowed with age.
+    Heavy brocade curtains block the windows, muffling the storm outside. An ornate music box sits on a side table, and fresh logs are inexplicably laid in the cold fireplace. The wallpaper peels in long curling strips.
   exits:
     east:
       destination: entrance_hall
@@ -322,6 +354,10 @@ upper_landing:
     A window at the end shows the storm still raging. The floorboards
     creak with every step, and sometimes you hear creaking when you
     stand still...
+  visual_description: |
+    A long upper hallway stretching into shadow in both directions, lit by wall sconces burning with an unnatural blue flame. The grand staircase descends to the entrance hall below, its banister worn smooth by countless hands.
+    To the north, an imposing dark door leads to the master bedroom. To the south, a smaller door painted faded blue leads to the nursery. To the east, a plain door accesses the guest room.
+    Closed doors of dark wood with tarnished brass handles line the walls. A threadbare carpet runner absorbs footsteps. Portraits of ancestors watch with painted eyes that seem to track movement.
   exits:
     down:
       destination: entrance_hall
@@ -360,6 +396,10 @@ master_bedroom:
     the room, its curtains torn and moth-eaten. A vanity mirror reflects
     the room, but something about the reflection seems... wrong. A
     wardrobe stands against one wall, its doors slightly ajar.
+  visual_description: |
+    A grand but cold bedroom dominated by an enormous four-poster bed of dark carved wood, its velvet curtains torn and moth-eaten. To the south, the imposing door leads back to the upper landing's blue-flamed sconces.
+    A vanity mirror in an ornate gilt frame reflects the room, the glass clouded with age, distorting the reflection subtly. A massive wardrobe of dark wood stands against one wall, its doors slightly ajar.
+    A portrait of a beautiful woman in Victorian dress hangs above the bed, her painted eyes sad. Heavy drapes block the windows, and dust covers every surface like gray snow. A music box sits on the dresser, silent.
   exits:
     south:
       destination: upper_landing
@@ -394,6 +434,10 @@ nursery:
     there's no breeze. Three small beds line one wall, their covers
     thrown back. Childish drawings paper the walls, but some show
     disturbing imagery - dark figures, flames, crying faces.
+  visual_description: |
+    A children's nursery frozen in interrupted play, toys scattered across the faded carpet - wooden soldiers fallen in mid-battle, a ball abandoned, a doll with missing eyes staring blankly. To the north, the faded blue door leads back to the upper landing.
+    Three small iron-frame beds line one wall, their covers thrown back as if the occupants just rose. A rocking horse in the corner sways gently on its own, its paint chipped to reveal darker layers beneath.
+    Childish drawings paper every wall - some showing happy family scenes, others depicting disturbing imagery: dark figures, fire, crying faces. A toy chest stands open, its contents spilled. Moonlight casts long shadows.
   exits:
     north:
       destination: upper_landing
@@ -443,6 +487,10 @@ guest_room:
     comfortable enough. The bed appears recently made - odd, in a
     house this abandoned. A writing desk sits by the window, and
     a wardrobe stands in the corner.
+  visual_description: |
+    A modest guest bedroom with simpler furnishings than the rest of the manor, but still elegant in decay. To the west, the plain door leads back to the upper landing with its uncanny blue-flamed sconces.
+    A single brass bed with an inexplicably fresh-made quilt occupies the center, as if expecting a visitor. A writing desk of dark wood sits by the rain-lashed window, equipped with paper and dried inkwell.
+    Floral wallpaper peels at the seams, and a water stain spreads across the ceiling from some long-ago leak. A plain wardrobe stands in the corner, its door closed tight. The floorboards creak with every movement.
   exits:
     west:
       destination: upper_landing

@@ -2,6 +2,11 @@ docks_landing:
   name: The Docks
   atmosphere: |
     The smell of salt and questionable fish stew hangs heavy in the air. Seagulls squawk insults from above. To the north, the bustling Town Square awaits. To the east, your own trusty (and rusty) ship, 'The Leaky Tub', is moored.
+  visual_description: |
+    A sun-bleached wooden pier extending into murky green harbor water, the planks warped and gap-toothed from years of salt exposure. Leaning dock posts wrapped in frayed rope and crusted with barnacles catch the harsh Caribbean sunlight.
+    Crates and barrels are stacked haphazardly along the pier edge, some marked with skull-and-crossbones shipping labels. Fishing nets hang drying on racks beside coils of thick hempen rope.
+    To the north, a worn cobblestone path climbs uphill toward the bustling Town Square, passing under a weathered wooden archway. To the east, a rickety gangplank with rope railings leads to a battered ship at anchor.
+    Seagulls perch on every available surface, eyeing passersby with suspicious, beady eyes. In the background, colorful but crooked buildings climb the hillside, their painted signs swinging in the sea breeze.
   exits:
     north:
       destination: town_square
@@ -33,6 +38,11 @@ town_square:
   name: Town Square
   atmosphere: |
     The heart of Booty Bay. Pirates haggle over parrots and peg legs. In the center stands a grand statue of Captain No-Beard McGee, looking heroic and surprisingly clean-shaven.
+  visual_description: |
+    A bustling cobblestone plaza surrounded by ramshackle two-story buildings with crooked balconies draped in laundry and pirate flags. The warm ochre and faded teal storefronts display hand-painted signs advertising "Peg Legs - Buy 2 Get 1 Free" and "Parrots Taught Bad Words".
+    To the west, a lively tavern with weather-beaten green swinging saloon doors beckons, its sign "The Rusty Cutlass" creaking overhead. To the east, a squat stone building with an imposing iron-banded oak door houses the town Brig.
+    Market stalls with striped canvas awnings ring the square, selling exotic fruits, rusty weapons, and suspiciously fresh maps. Barrels serve as impromptu tables where pirates play dice and cards.
+    Background characters mill about - a one-legged pirate argues with a parrot vendor, a rotund sailor carries an absurdly large fish, and children in tiny tricorn hats chase a three-legged cat. Wanted posters flutter on every available post.
   exits:
     south:
       destination: docks_landing
@@ -40,11 +50,11 @@ town_square:
       destination_known: true
     west:
       destination: tavern_entrance
-      scene_description: The swinging doors of The Rusty Cutlass Tavern
+      scene_description: Weather-beaten green swinging saloon doors of The Rusty Cutlass Tavern
       destination_known: true
     east:
       destination: brig_entrance
-      scene_description: The imposing iron-reinforced door of the Brig
+      scene_description: An imposing iron-banded oak door set into a squat stone building - the Brig
       destination_known: true
     down:
       destination: smugglers_cove_entrance
@@ -74,14 +84,19 @@ tavern_entrance:
   name: The Rusty Cutlass Tavern
   atmosphere: |
     Raucous laughter and terrible music fill the room. The air is thick with smoke and the smell of spilled ale. Pirates arm-wrestle at sticky tables.
+  visual_description: |
+    A dimly lit tavern interior with low wooden beams draped in tattered flags and fishing nets. Lanterns cast warm pools of amber light across sticky wooden tables scarred with carved initials and knife marks.
+    The bar runs along one wall, backed by shelves of mismatched bottles in greens, browns, and ambers. Brass nautical instruments hang as decoration alongside mounted fish of dubious taxidermy quality.
+    To the east, weather-beaten green swinging saloon doors let in slashes of bright Caribbean sunlight from the Town Square. To the north, a heavy burgundy velvet curtain with tarnished brass rings conceals the private backroom.
+    Roughhewn wooden stools and benches crowd the floor, occupied by silhouetted pirate figures hunched over mugs. Pipe smoke curls toward the ceiling, and playing cards and coins litter every surface.
   exits:
     east:
       destination: town_square
-      scene_description: The swinging doors leading back to the Town Square
+      scene_description: Weather-beaten green swinging saloon doors letting in bright sunlight from the Town Square
       destination_known: true
     north:
       destination: tavern_backroom
-      scene_description: A curtained doorway leading to the private backroom
+      scene_description: A heavy burgundy velvet curtain with tarnished brass rings concealing the private backroom
       destination_known: true
   item_placements:
     ceramic_parrot:
@@ -118,6 +133,11 @@ brig_entrance:
   name: The Brig
   atmosphere: |
     A gloomy stone building. The only sound is the dripping of water and the mournful harmonica playing of a prisoner.
+  visual_description: |
+    A dim stone anteroom just inside the Brig's iron-banded oak entrance door, which stands open to the west letting in a wedge of bright sunlight from the Town Square beyond.
+    The interior walls are thick blocks of moss-covered gray stone, with iron torch sconces holding sputtering candles. Rusty chains and manacles hang from hooks, and old "ESCAPED" wanted posters are nailed everywhere.
+    A guard's wooden desk sits against one wall with an abandoned sandwich and playing cards, next to a heavy iron door with a massive rusty padlock leading deeper into the cells.
+    Water drips from the low ceiling, collecting in puddles on the uneven stone floor. The air is damp and smells of mildew and regret.
   exits:
     west:
       destination: town_square
@@ -141,6 +161,11 @@ jail_cell:
   name: Jail Cell
   atmosphere: |
     Damp, cold, and smelling of regret. Navigator Ned sits on a wooden bench, looking miserable.
+  visual_description: |
+    A cramped stone cell viewed through its now-open heavy iron door, which leads back to the Brig's dim anteroom. The door's rusty hinges and massive padlock dangle uselessly.
+    Dripping stone walls are covered in scratched tally marks and crude graffiti drawings of ships. A small barred window high on the wall lets in a thin shaft of dusty light.
+    A rickety wooden bunk with a moth-eaten straw mattress occupies one corner. A rusty bucket serves as the only amenity, accompanied by a chipped ceramic plate with suspicious crumbs.
+    Chains hang from iron rings in the walls, and old bones (possibly chicken, hopefully chicken) are scattered in the corner. A rat peers out from a crack between stones.
   exits:
     out:
       destination: brig_entrance
@@ -165,6 +190,11 @@ ships_deck:
   name: Deck of The Leaky Tub
   atmosphere: |
     The deck of your ship. It's seen better days. Ropes coil like snakes and the main mast stretches up into the blue sky.
+  visual_description: |
+    A weathered ship deck of warped wooden planks, patched in places with mismatched boards. The main mast rises skyward, draped in a tangle of ropes, with patched sails furled and sun-faded to a dingy cream.
+    To the west, a rickety gangplank with rope railings connects to the sun-bleached dock. High above, a rope ladder with wooden rungs leads up through the rigging to the distant crow's nest. Near the mast, a narrow wooden hatch with brass handles leads down to the galley below.
+    Coiled ropes cover every surface like sleeping snakes, alongside buckets, mops, and a barrel with a suspicious leak leaving a trail of amber liquid. The ship's wheel stands at the stern, missing two spokes.
+    The railing is held together with optimism and twine, offering a view of the harbor. A pelican has made a nest in an unused cannon, and a ship's cat lounges in a patch of sunlight.
   exits:
     west:
       destination: docks_landing
@@ -189,6 +219,11 @@ galley:
   name: Ship's Galley
   atmosphere: |
     A cramped kitchen. Dirty dishes are piled high. It smells faintly of sawdust and despair.
+  visual_description: |
+    A cramped below-deck kitchen with low timber ceiling beams blackened by decades of cooking smoke. Above, a narrow wooden hatch with brass handles leads up to the deck, with worn ladder rungs nailed to the wall.
+    A cast-iron stove squats in the corner, covered in crusty pots and pans of alarming colors. Open shelves line the walls, stocked with unlabeled jars, hardtack biscuits, and suspiciously bulging sacks.
+    Dirty dishes tower in precarious stacks, and a cutting board displays evidence of crimes against vegetables. Dim light filters through a grimy porthole, illuminating dancing dust motes.
+    Cockroaches patrol the corners, and a mouse peeks out from behind a flour sack, judging the sanitation.
   exits:
     up:
       destination: ships_deck
@@ -207,6 +242,11 @@ crows_nest:
   name: Crow's Nest
   atmosphere: |
     High above the bay. The wind whips your hair. You can see the whole island from here.
+  visual_description: |
+    A small wooden platform at the top of the mast, enclosed by a waist-high railing of weathered timber. The platform is barely big enough for two people, cluttered with a battered spyglass and wind-torn signal flags.
+    A rope ladder with worn wooden rungs descends through the tangle of rigging toward the distant deck far below. The ropes and rigging converge at this point like a spider's web.
+    From this vantage point, the entire harbor spreads out below - colorful rooftops, the glittering bay, distant islands on the horizon. The sky is a brilliant blue dome stretching in every direction, with fluffy clouds drifting lazily past.
+    A territorial seagull has claimed one corner, surrounded by the remains of unfortunate fish.
   exits:
     down:
       destination: ships_deck
@@ -246,6 +286,11 @@ smugglers_cove_entrance:
   name: Smuggler's Cove Entrance
   atmosphere: |
     A dark, rocky tunnel revealed beneath the statue. The air is cool and smells of gold and mildew.
+  visual_description: |
+    A rough-hewn stone staircase carved beneath the Town Square, with the rectangular opening above framed by the shifted statue plinth letting in bright Caribbean sunlight. The stone steps descend into cool darkness.
+    The walls glisten with moisture and are veined with mineral deposits that catch the faint light from above. Cobwebs drape the corners like tattered curtains, and puddles of dark water collect in the uneven steps.
+    Carved into the walls are old pirate symbols and crude arrows pointing deeper - generations of smugglers left their marks here. The last rays of daylight barely reach the first landing where old wooden crates and rusted anchor chains lie abandoned.
+    Below, a winding tunnel mouth yawns into pitch blackness, the passage twisting out of sight.
   exits:
     up:
       destination: town_square
@@ -270,6 +315,11 @@ treasure_cave:
   name: The Treasure Cave
   atmosphere: |
     A massive cavern illuminated by glowing moss. In the center, a pile of gold glitters.
+  visual_description: |
+    A vast underground cavern with a domed ceiling covered in bioluminescent moss casting an ethereal blue-green glow. Stalactites hang like stone chandeliers, some dripping into crystal-clear pools.
+    At one end, a winding tunnel mouth emerges from the darkness - the passage back up to the smuggler's entrance and the surface world above.
+    Mountains of gold coins, jeweled goblets, and glittering treasures are piled throughout the cave, spilling from rotted wooden chests. Precious gems catch the moss-light and scatter rainbow reflections across the walls.
+    Ancient pirate skeletons in tattered finery are scattered among the treasure, eternal guardians who never spent their ill-gotten gains. A crown sits crookedly on one skull.
   exits:
     up:
       destination: smugglers_cove_entrance
@@ -285,10 +335,15 @@ tavern_backroom:
   name: Tavern Backroom
   atmosphere: |
     A private room for high-stakes card games. It's surprisingly quiet.
+  visual_description: |
+    An intimate private room accessed through a heavy burgundy velvet curtain with tarnished brass rings, which hangs in the doorway to the south leading back to the main tavern's noise and smoke.
+    The walls are paneled in dark wood, adorned with faded paintings of naval battles. A single brass chandelier with half its candles burnt out casts dim, uneven light across the space.
+    A large round table covered in green felt dominates the center, surrounded by high-backed chairs in cracked leather. Playing cards, coins, and a crystal decanter with amber liquid sit ready for use.
+    Heavy drapes cover a single window, and the room has no other exits. A stuffed parrot in a glass case watches with glass eyes, and cigar smoke has permanently stained the ceiling.
   exits:
     south:
       destination: tavern_entrance
-      scene_description: The curtained doorway leading back to the main tavern
+      scene_description: The heavy burgundy velvet curtain leading back to the main tavern
       destination_known: true
   item_placements: {}
   npc_placements: {}
@@ -300,6 +355,11 @@ captains_cabin:
   name: Captain's Cabin
   atmosphere: |
     Located at the stern of the ship (accessed from deck, though door was stuck before). Wait, this is just a narrative flavor room attached to the deck logic.
+  visual_description: |
+    A cramped but cozy cabin at the ship's stern, with the cabin door to the main deck standing ajar, letting in the sounds of creaking rigging and distant seagulls.
+    Large stern windows offer a view of the ship's wake and the open sea. Sun streams through the salt-encrusted glass, illuminating dancing dust motes.
+    A bunk with threadbare blankets is built into one wall, while a writing desk cluttered with maps, quills, and empty rum bottles occupies another. A hammock hangs ready as backup bedding.
+    Maritime decorations cover every surface - a sextant, a ship in a bottle, framed charts, and a portrait of someone's mother glaring disapprovingly. The floorboards creak with every wave.
   exits:
     out:
       destination: ships_deck
@@ -323,6 +383,10 @@ captains_cabin:
 zipline_descent:
   name: Mid-Air Zipline
   atmosphere: WHEEEEEEEEEE!
+  visual_description: |
+    A dizzying view of the ship's deck rushing up from below, seen from a taut rope stretched between the crow's nest and a lower point. The harbor spreads out in miniature, with the town a colorful jumble in the distance.
+    Wind-blurred motion lines suggest the speed of descent. The rope vibrates with tension, and a seagull flaps out of the way with an indignant squawk.
+    The deck below grows rapidly larger, with coiled ropes and barrels becoming more distinct by the second. A concerned ship's cat looks up with wide eyes.
   exits:
     land:
       destination: ships_deck

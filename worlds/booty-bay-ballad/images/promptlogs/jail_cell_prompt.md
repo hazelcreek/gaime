@@ -6,19 +6,27 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: Jail Cell
 
 Scene Description:
-Damp, cold, and smelling of regret. Navigator Ned sits on a wooden bench, looking miserable.
+A cramped stone cell viewed through its now-open heavy iron door, which leads back to the Brig's dim anteroom. The door's rusty hinges and massive padlock dangle uselessly.
+Dripping stone walls are covered in scratched tally marks and crude graffiti drawings of ships. A small barred window high on the wall lets in a thin shaft of dusty light.
+A rickety wooden bunk with a moth-eaten straw mattress occupies one corner. A rusty bucket serves as the only amenity, accompanied by a chipped ceramic plate with suspicious crumbs.
+Chains hang from iron rings in the walls, and old bones (possibly chicken, hopefully chicken) are scattered in the corner. A rat peers out from a crack between stones.
 
-Interactive Elements to Include:
-Visible pathways: a passage leading toward The Brig
-Objects in the scene: Ancient Compass Held tightly by Navigator Ned.
-Characters visible in the scene:
-
+Scene Elements to Include:
+- Visible pathway: The iron door leading back to the Brig entrance, leading to The Brig
+- Ancient Compass Held tightly by Navigator Ned.
 - Navigator Ned (Quest Giver), Sitting on the bunk, trying to read a map in the dark.: A thin man with thick glasses and ink-stained fingers.
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
+
+World Visual Setting: Caribbean port town in the golden age of piracy with a comedic, exaggerated aesthetic. Buildings are constructed from weathered driftwood planks and sun-bleached timbers, with salt-stained brick foundations and roofs patched with canvas, barrel staves, and rusted metal sheets.
+The color palette centers on warm ochres, faded teals, sun-yellowed whites, and murky sea-greens, punctuated by bold pirate-red and gold accents on flags, banners, and painted signs.
+Architecture is ramshackle colonial style with crooked balconies, rope rigging used as railings, and barnacle-encrusted dock posts. Windows are often missing panes, replaced with shutters hanging at odd angles.
+Pirates wear tattered but colorful garb - tricorn hats with bent feathers, bandanas, striped shirts, oversized belt buckles, and mismatched boots. Many sport eyepatches, hook hands, and exaggerated facial hair (or conspicuous lack thereof in honor of No-Beard McGee).
+Environmental details include seagulls perched everywhere, coiled rope piles, stacked barrels and crates, rusty anchors as decoration, and "wanted" posters flapping in the breeze. The lighting is bright Caribbean sunshine with harsh shadows, and the sky is a vibrant blue with fluffy white clouds.
+Everything has a slightly cartoony, exaggerated quality - expressions are dramatic, objects are slightly oversized, and details lean into pirate clichés with a wink.
 
 World Context: Humorous Pirate Adventure, Silly, satirical, salty
 

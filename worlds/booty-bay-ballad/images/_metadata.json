@@ -1,0 +1,106 @@
+{
+  "docks_landing": {
+    "location_id": "docks_landing",
+    "prompt_hash": "199363751bcf2b96",
+    "generated_at": "2026-01-07T01:31:26.452306",
+    "generator_version": "dry-run-hash",
+    "style_preset": "pixel-art",
+    "variant_npc_ids": []
+  },
+  "town_square": {
+    "location_id": "town_square",
+    "prompt_hash": "57e308e14a8ab33f",
+    "generated_at": "2026-01-07T01:31:50.036860",
+    "generator_version": "dry-run-hash",
+    "style_preset": "pixel-art",
+    "variant_npc_ids": []
+  },
+  "tavern_entrance": {
+    "location_id": "tavern_entrance",
+    "prompt_hash": "9465c4c38709ae7a",
+    "generated_at": "2026-01-07T01:32:11.770530",
+    "generator_version": "dry-run-hash",
+    "style_preset": "pixel-art",
+    "variant_npc_ids": []
+  },
+  "brig_entrance": {
+    "location_id": "brig_entrance",
+    "prompt_hash": "7c6223e7ebdf133d",
+    "generated_at": "2026-01-07T01:32:29.871432",
+    "generator_version": "dry-run-hash",
+    "style_preset": "pixel-art",
+    "variant_npc_ids": []
+  },
+  "jail_cell": {
+    "location_id": "jail_cell",
+    "prompt_hash": "be7feb5aa3d779c1",
+    "generated_at": "2026-01-07T01:32:47.477609",
+    "generator_version": "dry-run-hash",
+    "style_preset": "pixel-art",
+    "variant_npc_ids": []
+  },
+  "ships_deck": {
+    "location_id": "ships_deck",
+    "prompt_hash": "b37666e982da55ab",
+    "generated_at": "2026-01-07T01:33:05.290351",
+    "generator_version": "dry-run-hash",
+    "style_preset": "pixel-art",
+    "variant_npc_ids": []
+  },
+  "galley": {
+    "location_id": "galley",
+    "prompt_hash": "013637c7cec6fb72",
+    "generated_at": "2026-01-07T01:33:23.834458",
+    "generator_version": "dry-run-hash",
+    "style_preset": "pixel-art",
+    "variant_npc_ids": []
+  },
+  "crows_nest": {
+    "location_id": "crows_nest",
+    "prompt_hash": "553919b104ff909c",
+    "generated_at": "2026-01-07T01:33:41.961730",
+    "generator_version": "dry-run-hash",
+    "style_preset": "pixel-art",
+    "variant_npc_ids": []
+  },
+  "smugglers_cove_entrance": {
+    "location_id": "smugglers_cove_entrance",
+    "prompt_hash": "7d9803a1cda2d42f",
+    "generated_at": "2026-01-07T01:34:01.610718",
+    "generator_version": "dry-run-hash",
+    "style_preset": "pixel-art",
+    "variant_npc_ids": []
+  },
+  "treasure_cave": {
+    "location_id": "treasure_cave",
+    "prompt_hash": "294b6ad29c5e55f4",
+    "generated_at": "2026-01-07T01:34:19.511692",
+    "generator_version": "dry-run-hash",
+    "style_preset": "pixel-art",
+    "variant_npc_ids": []
+  },
+  "tavern_backroom": {
+    "location_id": "tavern_backroom",
+    "prompt_hash": "fdd1e9f741dc00a5",
+    "generated_at": "2026-01-07T01:34:37.331624",
+    "generator_version": "dry-run-hash",
+    "style_preset": "pixel-art",
+    "variant_npc_ids": []
+  },
+  "captains_cabin": {
+    "location_id": "captains_cabin",
+    "prompt_hash": "ae2330751857044b",
+    "generated_at": "2026-01-07T01:34:54.450615",
+    "generator_version": "dry-run-hash",
+    "style_preset": "pixel-art",
+    "variant_npc_ids": []
+  },
+  "zipline_descent": {
+    "location_id": "zipline_descent",
+    "prompt_hash": "58954a272c535c42",
+    "generated_at": "2026-01-07T01:35:15.005294",
+    "generator_version": "dry-run-hash",
+    "style_preset": "pixel-art",
+    "variant_npc_ids": []
+  }
+}

@@ -4,6 +4,14 @@ tone: "Awkward, Rebellious, Nostalgic"
 style: teen-comedy
 hero_name: "Jamie Parker"
 
+visual_setting: |
+  A quintessential American public high school frozen in the late 1990s/early 2000s, all institutional architecture and accidental nostalgia. The building is red brick exterior with aluminum-frame windows, fluorescent-lit hallways, and that specific shade of institutional beige on every wall.
+  The color palette features locker-gray, linoleum-tan, trophy-case gold, and the orange-tinted afternoon sunlight that streams through every window at 4 PM. Accents include hand-painted spirit banners, faded motivational posters, and outdated safety notices.
+  Materials include cold metal lockers, sticky cafeteria tables, scuffed gymnasium floors of honey-colored hardwood, and the eternal linoleum that remembers every sneaker that ever squeaked across it.
+  Environmental details include trophy cases full of participation awards, bulletin boards with outdated announcements, water fountains that never have enough pressure, and vending machines glowing in alcoves. The ceiling tiles are that perforated acoustic type, some stained by ancient leaks.
+  The lighting is harsh fluorescent with that characteristic buzz, except where late afternoon sun creates golden shafts through dusty windows. The aesthetic is John Hughes meets detention - simultaneously nostalgic and oppressive.
+  Background extras would include abandoned backpacks, forgotten hall passes, and the evidence of student life just departed - erasers on desks, gum under tables, and doodles on every available surface.
+
 premise: |
   It's 4:00 PM on a Friday. The final bell rang an hour ago, but you're still here. Why? Because Principal Skinner locked the front gates to keep skateboarders out, and you forgot your backpack in the gym. Now you need to navigate the uncanny silence of an empty high school, avoid the overzealous hall monitor who thinks school never ends, and find a way to escape before the janitor locks the building down for the weekend.
 

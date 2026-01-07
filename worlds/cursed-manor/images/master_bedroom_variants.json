@@ -6,7 +6,8 @@
       "npcs": [
         "lady_margaret"
       ],
-      "image": "master_bedroom__with__lady_margaret.png"
+      "image": "master_bedroom__with__lady_margaret.png",
+      "default": false
     }
   ]
 }

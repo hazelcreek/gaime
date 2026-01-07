@@ -1,0 +1,66 @@
+{
+  "main_hallway": {
+    "location_id": "main_hallway",
+    "prompt_hash": "1901245bd98be653",
+    "generated_at": "2026-01-07T01:52:22.371146",
+    "generator_version": "dry-run-hash",
+    "style_preset": "teen-comedy",
+    "variant_npc_ids": []
+  },
+  "principal_office": {
+    "location_id": "principal_office",
+    "prompt_hash": "072d77b41a95321f",
+    "generated_at": "2026-01-07T01:52:39.094920",
+    "generator_version": "dry-run-hash",
+    "style_preset": "teen-comedy",
+    "variant_npc_ids": []
+  },
+  "cafeteria": {
+    "location_id": "cafeteria",
+    "prompt_hash": "2000080670cc8b80",
+    "generated_at": "2026-01-07T01:52:55.353149",
+    "generator_version": "dry-run-hash",
+    "style_preset": "teen-comedy",
+    "variant_npc_ids": []
+  },
+  "science_lab": {
+    "location_id": "science_lab",
+    "prompt_hash": "dc7167c0c76eb650",
+    "generated_at": "2026-01-07T01:53:12.685570",
+    "generator_version": "dry-run-hash",
+    "style_preset": "teen-comedy",
+    "variant_npc_ids": []
+  },
+  "gymnasium": {
+    "location_id": "gymnasium",
+    "prompt_hash": "98497272314bb05c",
+    "generated_at": "2026-01-07T01:53:29.189262",
+    "generator_version": "dry-run-hash",
+    "style_preset": "teen-comedy",
+    "variant_npc_ids": []
+  },
+  "locker_room": {
+    "location_id": "locker_room",
+    "prompt_hash": "f576eac3d860e06c",
+    "generated_at": "2026-01-07T01:53:43.835677",
+    "generator_version": "dry-run-hash",
+    "style_preset": "teen-comedy",
+    "variant_npc_ids": []
+  },
+  "kitchen": {
+    "location_id": "kitchen",
+    "prompt_hash": "4fb099f75a1e2f80",
+    "generated_at": "2026-01-07T01:53:59.547473",
+    "generator_version": "dry-run-hash",
+    "style_preset": "teen-comedy",
+    "variant_npc_ids": []
+  },
+  "front_gate": {
+    "location_id": "front_gate",
+    "prompt_hash": "3456e67bc05c1bb3",
+    "generated_at": "2026-01-07T01:54:15.689340",
+    "generator_version": "dry-run-hash",
+    "style_preset": "teen-comedy",
+    "variant_npc_ids": []
+  }
+}

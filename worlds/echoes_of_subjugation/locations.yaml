@@ -2,6 +2,10 @@ cell_block_c:
   name: "Cell Block C"
   atmosphere: |
     You stand in your cramped cell in Cell Block C. The air smells of ozone and unwashed bodies. Rows of hexagonal energy barriers normally seal each cell, humming with a headache-inducing frequency. But right now, YOUR barrier has failed - the violet shimmer that kept you caged flickers weakly, then dies completely. The power fluctuation has created your window of escape. The concrete floor is cold and stained with decades of grime.
+  visual_description: |
+    A narrow corridor of cramped cells carved into old subway tunnels, hexagonal energy barriers casting violet light across stained concrete walls. Your barrier is dead, its projectors sparking - the way north to the mess hall now open.
+    Cell after cell stretches into shadow, each containing a metal bed slab bolted to the wall, a drain in the floor, nothing else. Prisoners' faces press against the glowing barriers, watching with desperate hope.
+    Exposed pipes run along the ceiling dripping condensation, and decades of grime coat every surface. Fluorescent strips buzz overhead, half dead or dying.
   exits:
     north:
       destination: mess_hall
@@ -28,6 +32,10 @@ mess_hall:
   name: "Nutrient Dispensary"
   atmosphere: |
     A cavernous room lit by flickering halogen strips. Rows of metal tables are bolted to the floor. A large screen on the wall plays endless propaganda about the Protectors' mercy. The dispensing machines grind loudly.
+  visual_description: |
+    A cavernous hall carved from an old subway platform, rows of bolted-down metal tables stretching under flickering halogen lights. To the south, the corridor leads back to Cell Block C and its flickering violet barriers.
+    To the east, steam billows from the Scullery doorway. To the west, heavy blast doors mark the Courtyard Access airlock. Giant propaganda screens show looping videos of alien Protector benevolence.
+    Industrial dispensing machines line one wall, oozing gray paste. Hollow-eyed prisoners shuffle in queues. Security cameras blink red at every angle.
   exits:
     south:
       destination: cell_block_c
@@ -56,6 +64,10 @@ kitchen_scullery:
   name: "Scullery"
   atmosphere: |
     Steaming vents hiss constantly. The room is filled with industrial dishwashers and waste chutes. It's surprisingly unguarded, considered too filthy for the Protectors to patrol often.
+  visual_description: |
+    A steaming industrial space of stainless steel and crusted grime, massive dishwashing machines rumbling in cycles. To the west, the doorway leads back to the Nutrient Dispensary's flickering lights. In the floor, a dark waste chute drops into darkness below.
+    Vents hiss constantly, filling the air with hot moisture that obscures the far walls. Stacks of metal trays tower precariously, and pipes of every size crisscross the low ceiling.
+    The floor is perpetually wet, covered in spilled slop and cleaning chemicals. The dark waste chute exhales the smell of rot from the processing level below.
   exits:
     west:
       destination: mess_hall
@@ -77,6 +89,10 @@ courtyard_access:
   name: "Courtyard Airlock"
   atmosphere: |
     A heavy blast door separates the interior from the exercise yard. A security kiosk sits behind reinforced glass. The scanner light blinks rhythmically red.
+  visual_description: |
+    A transitional space between underground and surface, dominated by a massive blast door of reinforced steel leading west to the Exercise Yard. To the east, the corridor leads back to the Nutrient Dispensary.
+    A security kiosk of reinforced glass and alien chrome sits to the north, its door ajar, interior filled with blinking monitors. A retinal scanner glows red beside the blast door, pulsing rhythmically.
+    The walls are bare concrete painted with faded warning stripes and biohazard symbols. The ceiling is lined with decontamination nozzles and UV strips.
   exits:
     east:
       destination: mess_hall
@@ -99,6 +115,10 @@ security_kiosk:
   name: "Guard Station Alpha"
   atmosphere: |
     Sterile and white. Monitors cover every wall, showing feeds from across the camp. A dead Protector drone lies sparked out on a workbench, half-disassembled.
+  visual_description: |
+    A sterile control room of clinical white walls and banks of surveillance monitors, each screen showing a different angle of the facility. To the south, the door leads back to the Courtyard Access airlock.
+    A control console of alien design curves across one wall, covered in holographic displays and physical switches. A half-disassembled Protector drone lies sparking on a workbench, chrome carapace opened like a dissected insect.
+    The blue-white lighting is harsh and shadowless. File cabinets of human design clash with sleek alien tech. Every angle of the room is visible on at least three screens.
   exits:
     south:
       destination: courtyard_access
@@ -119,6 +139,10 @@ exercise_yard:
   name: "The Cage"
   atmosphere: |
     An open-air section surrounded by thirty-foot high electrified fences. The sky above is choked with smog and Protector surveillance ships. Searchlights sweep the mud.
+  visual_description: |
+    An open-air rectangle of churned mud and concrete, surrounded by thirty-foot electrified fences topped with razor wire. To the east, the blast door leads back to the Courtyard Access airlock. To the north, a small maintenance shed is barely visible.
+    Guard towers loom at each corner, their searchlights sweeping in patterns. The sky above is choked with brown smog, pierced by the running lights of Protector surveillance ships. No stars are visible.
+    The ground is a morass of boot-churned mud and puddles reflecting the security lights. Prisoners shuffle in small groups, heads down, monitored by floating drones.
   exits:
     east:
       destination: courtyard_access
@@ -146,6 +170,10 @@ maintenance_shed:
   name: "Maintenance Shed"
   atmosphere: |
     A cramped structure filled with old tools and cleaning supplies. A hidden hatch is barely visible under a pile of oily rags.
+  visual_description: |
+    A cramped prefab structure of corrugated metal, cluttered with old tools and cleaning supplies. To the south, the shed door opens to the Exercise Yard and its sweeping searchlights.
+    Shelves of rusting equipment line the walls, and the floor is covered in oily rags and broken tools. A workbench against one wall is covered in half-disassembled machinery.
+    Beneath the scattered rags, a rusted metal hatch is barely visible, scratched with a broken chain symbol - the Resistance mark. The air smells of machine oil and the earthier tunnels below.
   exits:
     south:
       destination: exercise_yard
@@ -167,6 +195,10 @@ waste_processing:
   name: "Waste Processing"
   atmosphere: |
     The bowels of the facility. Sludge moves slowly along conveyor belts toward an incinerator. The heat is intense, and the noise is deafening.
+  visual_description: |
+    The deepest level of the facility, a hellish chamber of roaring machinery and intense heat. Above, the waste chute leads back up to the Scullery. To the north, a crumbling passage leads into older tunnels.
+    Conveyor belts carry sludge and debris toward a massive incinerator, its furnace mouth glowing orange. The ceiling is lost in steam and smoke, pipes running in every direction.
+    The walls are stained black with decades of ash and grime. Industrial fans roar, trying to clear the air, and the noise is deafening. Catwalks cross above the machinery.
   exits:
     up:
       destination: kitchen_scullery
@@ -185,6 +217,10 @@ old_sewers:
   name: "Forgotten Tunnels"
   atmosphere: |
     These tunnels predate the invasion. The brickwork is crumbling, and water trickles down the walls. It's dark, damp, and smells of freedom. This is it - the path out of Omega-9.
+  visual_description: |
+    Pre-invasion tunnels of crumbling Victorian brickwork, arching overhead in a rounded ceiling that drips with condensation. Above, a ladder leads up to the maintenance shed hatch. To the south, a passage connects to the prison's Waste Processing.
+    The architecture is clearly human, clearly old - a remnant of the world before. Water trickles down the walls and pools in the curved floor, reflecting what little light exists.
+    Graffiti covers sections of wall - "THEY BLEED LIKE US" in red spray paint, the mark of the Resistance. The tunnel stretches into darkness, promising freedom or the unknown.
   exits:
     up:
       destination: maintenance_shed

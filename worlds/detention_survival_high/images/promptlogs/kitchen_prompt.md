@@ -6,22 +6,32 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: The Kitchen
 
 Scene Description:
-Behind the serving line. Industrial sized mixers and ovens loom like metal giants. It's surprisingly clean, except for a pile of unfinished tater tots.
+A commercial kitchen of stainless steel and industrial efficiency, with massive ovens, walk-in freezers, and mixing equipment large enough to feed an army of hungry teenagers. To the south, the swinging door leads back to the cafeteria.
+Racks of industrial-sized cans line the walls - "NACHO CHEESE SAUCE 5 GAL" and "FRUIT COCKTAIL INSTITUTIONAL SIZE." A massive griddle shows the ghostly outlines of a thousand burger patties.
+Every surface gleams under harsh overhead lights. Hanging utensils include spatulas and ladles of terrifying scale. A whiteboard displays the week's menu with notes like "MYSTERY MEAT DAY."
 
-Interactive Elements to Include:
-Visible pathways: an opening or exit behind, perhaps suggested by light or shadows
-Objects in the scene: Jug of Vinegar sits on the counter by the industrial sink, its plastic jug half-empty and smelling sharply acidic
+Scene Elements to Include:
+- Industrial Freezer: Locked tight. Probably full of ice cream sandwiches.
+- Visible pathway behind: The swinging door back to the cafeteria, leading to The Cafeteria
+- Jug of Vinegar sits on the counter by the industrial sink, its plastic jug half-empty and smelling sharply acidic
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
+World Visual Setting: A quintessential American public high school frozen in the late 1990s/early 2000s, all institutional architecture and accidental nostalgia. The building is red brick exterior with aluminum-frame windows, fluorescent-lit hallways, and that specific shade of institutional beige on every wall.
+The color palette features locker-gray, linoleum-tan, trophy-case gold, and the orange-tinted afternoon sunlight that streams through every window at 4 PM. Accents include hand-painted spirit banners, faded motivational posters, and outdated safety notices.
+Materials include cold metal lockers, sticky cafeteria tables, scuffed gymnasium floors of honey-colored hardwood, and the eternal linoleum that remembers every sneaker that ever squeaked across it.
+Environmental details include trophy cases full of participation awards, bulletin boards with outdated announcements, water fountains that never have enough pressure, and vending machines glowing in alcoves. The ceiling tiles are that perforated acoustic type, some stained by ancient leaks.
+The lighting is harsh fluorescent with that characteristic buzz, except where late afternoon sun creates golden shafts through dusty windows. The aesthetic is John Hughes meets detention - simultaneously nostalgic and oppressive.
+Background extras would include abandoned backpacks, forgotten hall passes, and the evidence of student life just departed - erasers on desks, gum under tables, and doodles on every available surface.
+
 World Context: High School Comedy, Awkward, Rebellious, Nostalgic
 
 Mood: The atmosphere is lighthearted, nostalgic, warm, comedic, slightly irreverent. bright natural daylight, warm golden hour glow, soft shadows, slightly overexposed highlights, sunlight streaming through windows. The color palette features warm and saturated, golden yellows, soft oranges, blue skies, green grass, the warm tones of late 90s film stock.
 
-Artistic style (most important): Cinematic photography in the style of late 90s teen comedy films like American Pie
+Visual style (most important): Cinematic photography in the style of late 90s teen comedy films like American Pie
 and 10 Things I Hate About You. Warm color grading with slightly lifted shadows.
 Natural lighting that feels sunny and optimistic. The aesthetic should feel like
 a film still from a beloved coming-of-age movie - nostalgic, warm, and inviting.
@@ -29,7 +39,7 @@ Shot on 35mm film with natural bokeh and gentle lens flares from sunlight.
 The photographic quality is paramount.
 This style must be maintained consistently throughout the entire image.
 
-Composition: first-person perspective, medium wide shot from eye level, 35mm lens. Effects: subtle film grain, warm color grading, natural lens flare, soft focus backgrounds
+Composition: first-person perspective, medium wide shot from eye level, 35mm lens. subtle film grain, warm color grading, natural lens flare, soft focus backgrounds
 
 Critical constraints - the image must NOT include:
 - dark or gritty

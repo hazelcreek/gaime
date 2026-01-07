@@ -6,16 +6,26 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: The Tinkerer's Floor
 
 Scene Description:
-Workbenches are littered with half-finished child-sized robots. A massive water wheel dominates the back wall.
+A cavernous workshop interior with high ceilings supported by iron beams. To the south, the massive iron gates with gear-shaped scrollwork lead back to the memorial grounds. To the north, a drawbridge spans a chasm toward the distant cliffs.
+Every surface is covered with the debris of invention - gears, springs, wire coils. Child-sized automaton bodies rest on several benches, some nearly complete with painted porcelain faces and glass eyes, others just brass skeletons.
+A massive water wheel dominates the back wall, its paddles still and dripping. Natural light filters through grimy skylights, and technical drawings paper the walls alongside a child's crayon drawing.
 
-Interactive Elements to Include:
-Visible pathways: an opening or exit behind, perhaps suggested by light or shadows, but secured with a heavy lock; a doorway or passage visible ahead in the distance
-Objects in the scene: Industrial Machete A heavy industrial machete is stuck into a wooden vice.
+Scene Elements to Include:
+- Visible pathway behind: The iron gates leading back to the memorial grounds, leading to Iron Gates
+- Visible pathway ahead: A drawbridge leading across a chasm toward the cliffs
+- Industrial Machete A heavy industrial machete is stuck into a wooden vice.
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
+
+World Visual Setting: A remote island where Victorian-era steam technology has grown wild and organic over decades of abandonment. The dominant materials are oxidized brass, corroded copper, and rusted iron, interwoven with black volcanic rock and dense mechanical vegetation.
+The color palette centers on deep brass golds, verdigris greens, rust oranges, and oil-slick iridescence, set against the dark grays of volcanic stone and the deep blue-green of surrounding ocean.
+Architecture follows industrial Victorian sensibilities - riveted metal plates, exposed pipes, pressure gauges, and decorative ironwork - but overgrown and reclaimed by mechanical flora. Buildings have domed roofs, porthole windows, and pneumatic tube networks.
+Automatons range from small scuttling crabs to humanoid figures in tattered Victorian clothing. Their brass bodies are patinated green, their glass eyes glowing faintly amber, joints leaking wisps of steam.
+Environmental details include steam venting from ground pipes, gear-shaped flowers, solar-panel leaves on metal trees, oil pooling in rock crevices, and the constant quiet ticking of clockwork. The light is diffused through an ever-present sea mist, creating a melancholy, golden-hour atmosphere.
+Everything has a sense of beautiful decay - elegant engineering slowly surrendering to entropy, still functioning but worn and waiting.
 
 World Context: Steampunk Survival, Melancholy yet Wondrous
 

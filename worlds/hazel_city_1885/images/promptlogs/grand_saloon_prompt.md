@@ -6,21 +6,28 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: The Grand Saloon
 
 Scene Description:
-Smoke hangs in the air like a thick fog. The piano player stops abruptly as you enter. Tables are overturned, save for the large poker table in the center where the gang holds court.
+A large saloon interior hazy with tobacco smoke. To the south, the swinging bat-wing doors lead back to the porch and freedom. Above, a grand staircase curves up to the balcony overlooking the room.
+The main floor is dominated by overturned tables and chairs - all except for the central poker table where the gang holds court. A long bar runs along one wall, its mirror cracked. An upright piano sits in the corner.
+Oil lamps hang from the ceiling, casting warm pools of light through the smoke. Spittoons, playing cards, and whiskey glasses scatter every surface. A mounted buffalo head watches with glass eyes.
 
-Interactive Elements to Include:
-Visible pathways: an opening or exit behind, perhaps suggested by light or shadows; stairs leading upward, or a visible upper level or balcony
-Objects in the scene: Glass of Whiskey sits abandoned on a sticky table near the door
-Characters visible in the scene:
-
+Scene Elements to Include:
+- Visible pathway behind: The swinging doors leading back to the porch and freedom, leading to Saloon Porch
+- Visible pathway above: A grand staircase curving up to the balcony overlooking the room, leading to Saloon Balcony
+- Glass of Whiskey sits abandoned on a sticky table near the door
 - Jackal Boone (Villain), sits at the center table, cleaning a massive revolver: Lean and coiled like a rattlesnake, with the cold blue eyes of a killer. His face is angular, almost handsome, framed by slicked-back dark hair and a meticulously trimmed goatee. He wears a long black duster over a blood-red vest, and twin silver revolvers with pearl handles sit in tooled leather holsters. A gold tooth glints when he smiles - which he does often, and without warmth.
-
 - Fingers McCoy (Hostage), freezes at the keys of the upright piano in the corner: A thin, pale man who looks desperately out of place in this dusty hellhole. His once-fine Eastern clothes are rumpled and sweat-stained, his bowler hat askew. Long, delicate fingers - a pianist's hands - tremble over the yellowed keys. His eyes dart constantly toward the door, calculating escape routes he's too afraid to take.
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
+
+World Visual Setting: A quintessential 1880s Arizona frontier town, all sun-bleached wood and dust, baking under a merciless high-noon sun. The architecture is classic American West - false-fronted wooden buildings, covered boardwalks, hitching posts, and water troughs.
+The color palette is dominated by bleached tans, dusty browns, weathered gray wood, and the harsh white of the desert sun. Accents come from painted signs, the red of rust, and occasional splashes of faded color on fabric and posters.
+Materials include rough-hewn lumber, adobe, and sun-baked earth. Everything is coated in a fine layer of dust, and the streets are packed dirt showing the tracks of horses and wagon wheels.
+Environmental details include tumbleweeds actually tumbling, heat shimmer rising from the road, horses tied to posts switching their tails against flies, and vultures circling in the distance. The sun casts harsh shadows and bleaches everything.
+Lighting is brutally bright - the harsh overhead sun of high noon, creating stark shadows under awnings and in doorways. The sky is vast and cloudless, an oppressive pale blue.
+Character dress includes dusters, wide-brimmed hats, bandanas, and worn leather boots. Everything is dusty, sun-faded, and practical for desert life.
 
 World Context: Spaghetti Western, Gritty, tense, sun-bleached
 

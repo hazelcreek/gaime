@@ -6,26 +6,38 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: Jeffries Tubes
 
 Scene Description:
-A horizontal maintenance tube with a hexagonal cross-section, approximately one meter in diameter — far too narrow to stand, forcing you to crawl on hands and knees. The bare metal walls curve close on all sides; your shoulders nearly touch both walls at once. Metal ladder rungs are welded to the tube walls for climbing vertical sections. Bundles of ODN cables and EPS conduits run along the ceiling just above your head. Recessed utility lights every few meters cast harsh pools of white in an otherwise dim tunnel. Access hatches, junction boxes, and manual bypass panels are set into the hexagonal walls at intervals. This is a maintenance crawlspace, not a corridor — cramped, industrial, and claustrophobic. The bare duranium plating hums with power transfer.
+A narrow, hexagonal maintenance tube barely a meter across, forcing you to crawl on hands and knees. To the south, the access hatch leads back up. To the north, the tube stretches toward Engineering.
+The bare duranium walls curve close on all sides, claustrophobic and industrial. Bundles of ODN cables and EPS conduits run along the ceiling, some warm to the touch.
+Recessed utility lights cast harsh pools of white in the dim tunnel. Junction boxes show scorch marks - evidence of feedback surges. The hum of power transfer is tangible through the metal.
 
-Interactive Elements to Include:
-Visible pathways: a doorway or passage visible ahead in the distance
-Subtle environmental details: a faint draft or subtle irregularity in the wall suggesting something hidden
-Barely perceptible elements: something barely visible that could be phase inverter, perhaps catching a sliver of light or partially obscured
+Scene Elements to Include:
+- Junction Box: A junction box with scorch marks: evidence of a brief but intense feedback surge.
+- Access Ports: Ports for diagnostics and manual rerouting — if you know what you're doing.
+- Tube Structure: Hexagonal metal tube walls press in from all sides — you can touch both walls with your elbows while crawling.
+- Cables and Conduits: ODN cables and EPS conduits bundled overhead, close enough to bump your head on.
+- Visible pathway behind: Back toward the access hatch and the corridor above, leading to Jeffries Tube Access
+- Visible pathway ahead: The tube stretches ahead into shadow — more crawling on hands and knees, leading to Main Engineering
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
+World Visual Setting: The interior of a Galaxy-class Federation starship, all clean curves, soft lighting, and optimistic 24th-century design. The architecture is LCARS aesthetic - rounded corners, beige and coral wall panels, with accent lighting in warm amber and blue.
+The color palette centers on warm beige, rust brown, and coral, with accent colors from LCARS displays in orange, blue, and purple. Carpeting is a calm mauve, and the overall effect is more hotel than military vessel.
+Materials include smooth polymer wall panels, transparent aluminum viewports, the subtle texture of carpet underfoot, and the gleaming surfaces of control consoles. Everything is immaculate and well-maintained.
+Environmental details include LCARS displays on every wall, the gentle curve of corridors following the ship's saucer shape, replicator alcoves, and the ever-present stars drifting past viewports. Plants bring life to communal spaces.
+Lighting is warm and diffuse, designed for long-term human comfort. The warp core pulses with blue light in Engineering, and Ten Forward glows with the light of passing stars.
+Crew members wear Starfleet uniforms - command red, operations gold, sciences blue - and carry themselves with quiet competence. The ship feels like a working community, not a military installation.
+
 World Context: Star Trek: The Next Generation — life aboard a Federation starship on the frontier, philosophical, optimistic, ethical, adventurous, and grounded in teamwork under pressure
 
 Mood: The atmosphere is optimistic, thoughtful, exploratory, calm under pressure, ethical. soft studio lighting with gentle falloff, practical set lighting, subtle rim light, minimal harsh shadows. The color palette features warm beige and soft grays, muted primaries, LCARS oranges/ambers/magentas as accents, clean whites and Federation blues.
 
-Artistic style (most important): High-quality photographic image that feels like a still frame from a late-80s/90s science-fiction television show
+Visual style (most important): High-quality photographic image that feels like a still frame from a late-80s/90s science-fiction television show
 set aboard a Federation starship. Practical set realism: carpeted decks, smooth bulkheads, LCARS panels,
 and believable starship materials (brushed metal, composite panels, glass). The image should feel calm,
-composed, and human — never grimdark. The artistic style is paramount and must remain consistent across
+composed, and human — never grimdark. The visual style is paramount and must remain consistent across
 all locations in the world.
 This style must be maintained consistently throughout the entire image.
 

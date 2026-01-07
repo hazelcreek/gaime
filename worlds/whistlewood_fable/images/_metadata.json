@@ -1,0 +1,66 @@
+{
+  "fox_burrow": {
+    "location_id": "fox_burrow",
+    "prompt_hash": "1d70ee7237f09849",
+    "generated_at": "2026-01-07T02:07:44.371298",
+    "generator_version": "dry-run-hash",
+    "style_preset": "watercolor",
+    "variant_npc_ids": []
+  },
+  "mossy_clearing": {
+    "location_id": "mossy_clearing",
+    "prompt_hash": "8cf577246fe7e316",
+    "generated_at": "2026-01-07T02:08:03.060065",
+    "generator_version": "dry-run-hash",
+    "style_preset": "watercolor",
+    "variant_npc_ids": []
+  },
+  "babbling_brook": {
+    "location_id": "babbling_brook",
+    "prompt_hash": "805d422909b318e3",
+    "generated_at": "2026-01-07T02:08:20.979085",
+    "generator_version": "dry-run-hash",
+    "style_preset": "watercolor",
+    "variant_npc_ids": []
+  },
+  "whispering_woods": {
+    "location_id": "whispering_woods",
+    "prompt_hash": "85476f734e67379f",
+    "generated_at": "2026-01-07T02:08:41.717722",
+    "generator_version": "dry-run-hash",
+    "style_preset": "watercolor",
+    "variant_npc_ids": []
+  },
+  "witch_cottage": {
+    "location_id": "witch_cottage",
+    "prompt_hash": "cc42257b5bd5e0ed",
+    "generated_at": "2026-01-07T02:08:59.839733",
+    "generator_version": "dry-run-hash",
+    "style_preset": "watercolor",
+    "variant_npc_ids": []
+  },
+  "glitter_caves": {
+    "location_id": "glitter_caves",
+    "prompt_hash": "5cd744380a386c9d",
+    "generated_at": "2026-01-07T02:09:17.138799",
+    "generator_version": "dry-run-hash",
+    "style_preset": "watercolor",
+    "variant_npc_ids": []
+  },
+  "crystal_chamber": {
+    "location_id": "crystal_chamber",
+    "prompt_hash": "9f351dff97e680de",
+    "generated_at": "2026-01-07T02:09:36.388942",
+    "generator_version": "dry-run-hash",
+    "style_preset": "watercolor",
+    "variant_npc_ids": []
+  },
+  "elder_grove": {
+    "location_id": "elder_grove",
+    "prompt_hash": "01e322a69dc4c042",
+    "generated_at": "2026-01-07T02:09:55.167189",
+    "generator_version": "dry-run-hash",
+    "style_preset": "watercolor",
+    "variant_npc_ids": []
+  }
+}

@@ -1,5 +1,11 @@
 name: "Whistlewood Fable"
 theme: "Quaint Fairy Tale"
+visual_setting: |
+  The Whistlewood is an enchanted forest rendered in a soft, watercolor aesthetic with gentle, bleeding edges and muted, dreamlike colors. Currently, the forest is stuck in a perpetual, chilly twilight, its colors fading to grey.
+  Flora is whimsical and oversized: giant toadstools, flowers that glow faintly, trees with faces in their bark. Moss carpets everything in soft greens that are slowly draining to grey. Leaves are golden and russet where they still have color.
+  The creatures are anthropomorphized woodland animals: foxes with clever eyes, grumpy badgers with pocket watches, wise owls, industrious moles. They wear bits of natural clothing—scarves of woven grass, hats made from acorn caps.
+  Architecture is organic and fairy-tale: houses grown from giant mushrooms, cottages with windows of crystallized sugar, burrows beneath ancient roots. Light comes from fireflies, glowing crystals, and jars of captured moonlight.
+  The overall mood is gentle melancholy tinged with hope. Even in the grey twilight, there's a sense that warmth and color are just waiting to return if someone brave and kind can restore the song.
 hero_name: "Finnick"
 
 # Visual style preset for image generation

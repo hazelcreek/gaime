@@ -6,18 +6,28 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: Distillery Courtyard
 
 Scene Description:
-Rain lashes against the grey cobblestones of the Lochindaal Distillery courtyard. The smell of burning peat and salt spray is overwhelming. To the north, the looming shape of the Malt Barn offers shelter. To the east, the administrative wing houses the Manager's Office. A path winds west towards the shoreline and the Sea Caves.
+A rain-swept courtyard of grey cobblestones glistening in the downpour, surrounded by whitewashed stone buildings with slate roofs. To the north, the heavy wooden doors of the Malt Barn stand slightly ajar. To the east, the administrative wing shows a flickering light.
+To the west, a treacherous muddy path descends toward the roaring ocean and sea caves below. Stacked barrels line the walls under covered eaves. A wrought-iron lamp sways in the wind.
+Peat smoke rises from a kiln chimney, beaten down by the rain. In the distance, the grey Atlantic churns and the outline of Jura is barely visible through the mist.
 
-Interactive Elements to Include:
-Visible pathways: a doorway or passage visible ahead in the distance; a passage or doorway visible to the right side of the scene; a passage or doorway visible to the left side of the scene
-Characters visible in the scene:
-
+Scene Elements to Include:
+- Cobblestones: Slick with rain and moss.
+- Visible pathway ahead: Heavy wooden doors of the Malt Barn, slightly ajar and dripping with rain, leading to The Malt Barn
+- Visible pathway to the right: The administrative wing with a flickering light in the window, leading to Manager's Office
+- Visible pathway to the left: A treacherous muddy path descending toward the roaring ocean
 - Old Tam, Groundskeeper, Huddled under the eaves near the barn entrance, smoking a pipe.
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
+
+World Visual Setting: A remote Scottish island distillery in perpetual rain and mist, all grey stone, copper stills, and weathered wood. The architecture is Victorian industrial merged with ancient Celtic - stone buildings with moss-covered walls and peaked slate roofs.
+The color palette is dominated by rain-grey, whisky amber, copper patina green, and the deep brown of peat. Accents include the golden glow of lamp light through rain-streaked windows and the silver of wet cobblestones.
+Materials include rough-hewn granite, whitewashed stone, weathered oak barrels stacked in pyramids, and the gleaming copper of pot stills. Everything is damp, from the air to the ancient wood.
+Environmental details include rain lashing against every surface, mist rolling in from the sea, smoke rising from peat kilns, and the distant outline of other islands through the murk. Seabirds wheel and cry.
+Lighting is diffuse and grey during the day, warm amber from windows and lanterns at night. The Atlantic storms are ever-present, rain drumming on stone and running in rivulets down walls.
+The aesthetic is noir meets Celtic folklore - wet trench coats, standing stones glimpsed through mist, the smell of peat smoke and salt spray, and secrets hidden in cellars older than memory.
 
 World Context: Scottish Noir, Distillery Mystery, Celtic Folklore, Atmospheric, Rain-soaked, Tense, Peaty
 

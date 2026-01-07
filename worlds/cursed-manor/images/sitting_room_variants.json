@@ -6,7 +6,8 @@
       "npcs": [
         "ghost_child"
       ],
-      "image": "sitting_room__with__ghost_child.png"
+      "image": "sitting_room__with__ghost_child.png",
+      "default": false
     }
   ]
 }

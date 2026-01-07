@@ -2,6 +2,10 @@ shipwreck_beach:
   name: Soot-Stained Sands
   atmosphere: |
     Black sand clings to your boots. To the west, the ocean churns with wreckage. To the east, a dense jungle hums with mechanical clicking sounds.
+  visual_description: |
+    A stretch of jet-black volcanic sand meets churning gray-green ocean, scattered with twisted metal debris and smoldering wreckage from a distant burning ship on the horizon. Waves deposit fragments of brass and wood with each surge.
+    To the north, rocky outcrops of black basalt climb toward shimmering tide pools. To the east, a gap in the dense mechanical jungle opens into clicking darkness, bronze vines framing the entrance.
+    A chunk of a ship's cabin lies tilted on the sand nearby, its mahogany paneling splintered and windows shattered. Steam rises from vents in the dark rock, and clockwork crabs scuttle between debris. The sky is heavy with mist.
   exits:
     north:
       destination: tidal_pools
@@ -32,6 +36,10 @@ captains_quarters:
   name: Wrecked Cabin
   atmosphere: |
     The splintered remains of the ship's bridge. It's tilted at a sickening angle.
+  visual_description: |
+    The shattered remains of a ship's cabin, tilted at a disorienting angle with the floor becoming almost a wall. A jagged opening in the hull frames a view of black volcanic sand and gray sky outside.
+    The ship's wheel hangs askew, nautical charts flutter loose, and brass instruments lie scattered across the tilted deck. Seawater pools in the lower corner, reflecting watery light.
+    Broken furniture slides against the downward wall - an overturned desk, scattered books swollen with moisture. The ceiling has partially caved in, letting shafts of gray light illuminate drifting dust motes.
   exits:
     out:
       destination: shipwreck_beach
@@ -46,6 +54,10 @@ tidal_pools:
   name: Oily Tide Pools
   atmosphere: |
     Pools of iridescent water trapped in basalt rock. Small mechanical crabs scuttle about, harvesting rust flakes.
+  visual_description: |
+    Shallow pools of iridescent water trapped in jagged basalt formations, the surface swirling with oil-slick rainbow patterns. The black volcanic rock is worn smooth by centuries of waves, carved into organic channels and bowls.
+    To the south, the rocky path descends to the black sand beach with its shipwreck debris. To the north, a rugged path of basalt outcrops climbs toward the towering rusty lighthouse, its iron spire looming against the misty sky.
+    Mechanical organisms inhabit the pools - clockwork anemones with brass tendrils, gear-shelled crabs harvesting rust flakes. Steam vents create constant whisps of vapor, and the oily water shimmers in the diffused light.
   exits:
     south:
       destination: shipwreck_beach
@@ -74,6 +86,10 @@ lighthouse_base:
   name: The Rusty Spire
   atmosphere: |
     The base of a towering lighthouse. Massive pneumatic tubes run up the walls, currently silent and cold.
+  visual_description: |
+    The massive circular base of an iron lighthouse, its riveted walls streaked with rust and verdigris climbing toward the misty heights above. Enormous pneumatic tubes run up the exterior like mechanical arteries, currently silent and cold.
+    To the south, the rocky basalt path descends toward the iridescent tide pools below. A massive steam elevator shaft with ornate brass doors dominates the interior, ready to ascend into the tower above.
+    The ground is paved with hexagonal metal plates, some buckled and weeping condensation. Pressure gauges mounted on brass panels all read zero. Mechanical gulls nest in the iron framework, their brass feathers ruffling.
   exits:
     south:
       destination: tidal_pools
@@ -99,6 +115,10 @@ lighthouse_balcony:
   name: The Beacon Deck
   atmosphere: |
     The wind whips around you. The massive brass lamp housing stands dark in the center, missing its primary lens.
+  visual_description: |
+    A circular observation deck atop the iron lighthouse, surrounded by ornate Victorian railings with brass scrollwork. The massive brass lamp housing dominates the center, its mirrors tarnished and the lens mount conspicuously empty.
+    The steam elevator shaft with ornate brass doors provides access down to the lighthouse base far below. A broken zipline cable dangles over the railing toward the distant black sand beach.
+    The view stretches in all directions - the island's mechanical jungle below, the churning sea, distant fog banks. Wind whips the air, and mechanical seabirds wheel in the updrafts. The deck plates are slick with condensation.
   exits:
     down:
       destination: lighthouse_base
@@ -132,6 +152,10 @@ jungle_path:
   name: Clockwork Jungle
   atmosphere: |
     Bronze vines coil around ironwood trees. The canopy is a mesh of solar-gathering leaves.
+  visual_description: |
+    A dense forest of mechanical trees with iron trunks and solar-panel leaves that angle toward the diffused light. Bronze vines coil around the structures, their surfaces etched with intricate gear patterns, occasionally twitching with internal mechanisms.
+    To the west, the mechanical foliage opens toward the black sand beach. To the east, a trail of rusted gears leads deeper into the island. To the north, a dark tunnel entrance is carved into the rocky hillside, mine cart tracks disappearing into shadow.
+    The path is paved with interlocking metal grates, obscured by fallen gear-shaped flowers. Small automata scurry through the underbrush with glowing amber eyes. The constant quiet clicking of hidden mechanisms fills the air.
   exits:
     west:
       destination: shipwreck_beach
@@ -167,6 +191,10 @@ hidden_hollow:
   name: Hollow Tree Cache
   atmosphere: |
     A small stash inside the artificial tree.
+  visual_description: |
+    A secret compartment carved into the interior of a massive mechanical tree, the walls smooth brass with embedded fiber-optic lights creating a warm amber glow. The space is just large enough for a person to crouch inside.
+    Through the narrow opening cut through bronze vines, the clockwork jungle is visible as a maze of bronze and iron, clicking softly in the filtered light.
+    Velvet-lined shelves carved into the metal walls hold a few carefully preserved objects. The smell of machine oil and aged metal fills the cramped space - a secret sanctuary hidden in the mechanical forest.
   exits:
     out:
       destination: jungle_path
@@ -181,6 +209,10 @@ graveyard:
   name: Memorial of Gears
   atmosphere: |
     Rows of rusting chassis stand like tombstones. In the center, a single human grave: 'My Beloved Daughter'.
+  visual_description: |
+    A solemn clearing where rows of deactivated automaton chassis stand upright like metal tombstones, their glass eyes dark, their forms frozen in poses of rest. Verdigris and rust streak their once-gleaming bodies.
+    To the west, the trail of rusted gears leads back through the clockwork jungle. To the north, imposing iron gates twice a person's height block further passage, their bars thick and decorated with mechanical scrollwork.
+    At the center, a single human headstone of polished obsidian stands out - an inscription reads "My Beloved Daughter." A stone chess table sits before a statue of the Inventor, whose bronze eyes seem to watch the board. Fallen solar-panel leaves carpet the ground.
   exits:
     west:
       destination: jungle_path
@@ -218,6 +250,10 @@ memory_archive:
   name: Underground Archive
   atmosphere: |
     A cramped bunker lined with reel-to-reel tapes playing the Inventor's voice, lamenting the loss of his daughter.
+  visual_description: |
+    A cramped underground bunker accessed via stone stairs from the statue base above, the passage visible as a rectangle of gray light at the top of the steps. Walls are lined floor to ceiling with brass reel-to-reel tape machines, their spools slowly turning.
+    Warm amber vacuum tubes glow behind glass panels, casting soft light. A single worn leather chair faces a speaking horn, surrounded by scattered papers and tear-stained letters. Photographs in brass frames show a young girl with pigtails.
+    The low ceiling is a maze of pipes and cables, and the air is thick with the smell of old electronics and machine oil. A small mechanical mouse sits motionless in the corner, seemingly listening.
   exits:
     out:
       destination: graveyard
@@ -230,6 +266,10 @@ workshop_gate:
   name: Iron Gates
   atmosphere: |
     A formidable iron gate blocks the path north. The keyhole is shaped like a complex gear.
+  visual_description: |
+    Massive iron gates twice the height of a person, their bars as thick as arms, decorated with intricate mechanical scrollwork depicting gears within gears. A complex gear-shaped keyhole is set in a central brass mechanism.
+    To the south, the path leads back through the memorial of rusting automaton chassis. Beyond the bars to the north, a glimpse of workshops and larger structures is visible through the mist.
+    The gates are set into stone pillars carved with warnings and industrial symbols. A skeleton in a tattered white coat is slumped against the gate's base, mechanical vines weaving through the ribcage.
   exits:
     south:
       destination: graveyard
@@ -251,6 +291,10 @@ workshop_interior:
   name: The Tinkerer's Floor
   atmosphere: |
     Workbenches are littered with half-finished child-sized robots. A massive water wheel dominates the back wall.
+  visual_description: |
+    A cavernous workshop interior with high ceilings supported by iron beams. To the south, the massive iron gates with gear-shaped scrollwork lead back to the memorial grounds. To the north, a drawbridge spans a chasm toward the distant cliffs.
+    Every surface is covered with the debris of invention - gears, springs, wire coils. Child-sized automaton bodies rest on several benches, some nearly complete with painted porcelain faces and glass eyes, others just brass skeletons.
+    A massive water wheel dominates the back wall, its paddles still and dripping. Natural light filters through grimy skylights, and technical drawings paper the walls alongside a child's crayon drawing.
   exits:
     south:
       destination: workshop_gate
@@ -284,6 +328,10 @@ observatory_cliffs:
   name: Star-Gazer's Ridge
   atmosphere: |
     A high cliff overlooking the sea. A domed telescope building sits here, its door swinging in the wind.
+  visual_description: |
+    A windswept cliff edge overlooking the churning ocean far below, the rock face sheer and dramatic. To the south, a drawbridge spans the chasm back to the tinkerer's workshop, its iron chains creaking in the wind.
+    A copper-domed observatory building perches on the precipice, its surface oxidized to a beautiful verdigris green. The observatory door swings in the constant wind, revealing glimpses of a massive brass telescope within.
+    The panoramic view shows the entire island spread below - the mechanical jungle, the lighthouse spire, the distant beach. Clouds race past at eye level, and hardy mechanical plants cling to the rock crevices.
   exits:
     south:
       destination: workshop_interior
@@ -298,6 +346,10 @@ abandoned_mines:
   name: Coal Seam
   atmosphere: |
     A dark tunnel hacked into the rock. Tracks lead down into the dark.
+  visual_description: |
+    A rough-hewn tunnel carved into black volcanic rock. To the south, the entrance opens to the clockwork jungle, filtered sunlight visible through the mechanical foliage. Deeper in, rusted mine cart tracks descend into impenetrable darkness.
+    The tunnel is framed by rusted iron supports and timber pit props, some cracked and bowing. Dim bioluminescent fungi growing on the walls cast an eerie blue-green glow on overturned ore carts spilling anthracite coal.
+    Pickaxes, shovels, and mining helmets lie abandoned where workers dropped them decades ago. Dust motes drift in the thin light from the entrance.
   exits:
     south:
       destination: jungle_path
@@ -316,6 +368,10 @@ boiler_room:
   name: The Heart of the Island
   atmosphere: |
     An intense heat radiates from the central furnace. Pipes hiss softly, waiting for pressure.
+  visual_description: |
+    A massive underground chamber dominated by an enormous iron furnace, its riveted bulk rising toward the cavern ceiling like a mechanical heart. The mine cart tracks emerge from a tunnel above, descending from the abandoned mines.
+    Hundreds of pipes branch from the furnace in all directions, disappearing into the rock walls. Pressure gauges the size of dinner plates line control panels, their needles quivering near zero.
+    The air shimmers with residual heat, and coal dust covers every surface in a fine black layer. Valves and wheels cluster around access points, and banks of dials glow with faint amber light.
   exits:
     up:
       destination: abandoned_mines

@@ -5,6 +5,10 @@ cadet_quarters:
     Your uniform hangs perfectly aligned. A PADD rests beside a neatly folded field manual. Through
     a narrow viewport, the stars are steady and indifferent to human schedules. The ship's carpeted
     deck and gentle ambient hum make even urgency feel… civilized.
+  visual_description: |
+    A compact, orderly cabin with warm beige carpeting and curved walls in muted grey and burgundy. To the west, the door slides open onto the main corridor with a soft pneumatic whisper.
+    A narrow viewport reveals the endless starfield outside. The built-in desk features a small LCARS panel glowing with soft orange and blue. A crisp cadet uniform hangs on the wall.
+    Personal touches are minimal but meaningful: a few holo-photos, a neatly folded blanket. The space is efficient, designed for focus rather than comfort.
   exits:
     west:
       destination: main_corridor
@@ -38,6 +42,10 @@ main_corridor:
     oranges and muted reds. Crew members move with efficient calm, exchanging brief nods and clipped
     updates — professional, not fearful. Somewhere deeper in the ship, the ambient hum wavers like a
     cello string touched by an unsteady hand.
+  visual_description: |
+    A wide, gently curving corridor with warm beige carpeting and walls of soft grey and burgundy. To the east, the door to cadet quarters. To the north, turbolift doors glow with a thin line of white. To the south, Ten Forward's murmur drifts.
+    To the west, a red medical marker indicates Sickbay. Up ahead, a branch leads toward the holodecks. A maintenance hatch is set into the deck plating below.
+    LCARS panels line the walls, glowing orange and blue. Crew members pass in colorful uniforms. The subtle hum of the ship's systems is ever-present.
   exits:
     east:
       destination: cadet_quarters
@@ -106,6 +114,10 @@ turbolift:
     A clean, compact lift car lined with smooth panels and subtle illumination. The control interface
     offers destinations in calm LCARS categories. Normally, the turbolift feels like effortless
     certainty — today, there's a slight hesitation in its response, like a breath held too long.
+  visual_description: |
+    A compact, cylindrical lift car with smooth, curved panels in warm grey and beige. To the south, the doors open back onto the corridor traffic. Up leads to the Bridge, down toward Engineering.
+    A small LCARS interface glows near the door, displaying destination options in the familiar orange and blue palette. The floor is the same warm carpet as the corridors.
+    The lift moves with barely perceptible motion, the only sound a faint, reassuring chime. The walls seem to curve protectively around you.
   exits:
     south:
       destination: main_corridor
@@ -146,6 +158,10 @@ bridge:
     in a circle that implies collaboration rather than hierarchy. The forward viewscreen is a window
     into the unknown. Today it shows a calm starfield… but the faint shimmer at the edge of sensor
     overlays suggests the ship is not as calm as it appears.
+  visual_description: |
+    The command center of the Enterprise: a spacious, circular room with warm burgundy carpet and curved walls. The turbolift doors are aft. To the east, the Ready Room door. To the west, the Observation Lounge.
+    The massive viewscreen dominates the forward wall, displaying a calm starfield. Workstations arc around the perimeter, their LCARS displays glowing. The captain's chair sits center, flanked by counselor seating.
+    The lighting is soft and even, designed to reduce eye strain. The overall impression is one of calm authority and collaborative purpose.
   exits:
     down:
       destination: turbolift
@@ -210,6 +226,10 @@ observation_lounge:
     A quiet room with a long table and a wide forward window. Stars drift past with impossible calm.
     This is where events become meaning — where raw sensor data becomes a choice the crew must live
     with. The air feels like discipline: not rigid, but intentional.
+  visual_description: |
+    A serene conference room with a long, dark wood table and high-backed chairs. To the east, the door leads back onto the Bridge, where decisions become actions.
+    The forward wall is almost entirely a wide window, offering a breathtaking view of the slowly drifting stars. LCARS panels are embedded discreetly into the table surface.
+    The walls display models of previous Enterprise ships, honoring a legacy of exploration. The lighting is subdued and warm, designed for contemplation.
   exits:
     east:
       destination: bridge
@@ -241,6 +261,10 @@ ready_room:
     Warm wood tones and quiet order. Books — real books — are shelved with care. A small desk sits
     beneath soft lighting, and a cup of tea waits with the patience of habit. This is not a place of
     authority so much as reflection: the calm that makes ethical action possible.
+  visual_description: |
+    A private office of warm wood tones and quiet elegance. To the west, the door leads back out to the Bridge. Bookshelves line one wall, filled with real, physical books and archaeological artifacts.
+    A small fish tank glows softly in a corner. The captain's desk is modest but dignified, with a small LCARS terminal and a steaming cup of Earl Grey.
+    A wide window offers a view of the stars, the same view as the bridge but more personal. The space feels like a sanctuary for reflection and ethical contemplation.
   exits:
     west:
       destination: bridge
@@ -279,6 +303,10 @@ engineering_corridor:
     The air here is warmer, the hum louder — less like background ambience and more like a heartbeat.
     Crew members in gold uniforms move between access points, reading diagnostics off PADDs, speaking
     in calm bursts of technical language. The ship is not panicking; it is solving itself.
+  visual_description: |
+    A utilitarian corridor, warmer and more industrial than the passenger decks above. The turbolift is back up. To the north, the wide doors to Main Engineering beckon.
+    The walls are a functional grey with exposed conduit runs. Crew members in gold Starfleet uniforms move with purpose, consulting PADDs and exchanging technical jargon.
+    The hum of the ship's systems is louder here, a tangible presence. You can feel the vibration of the warp core through the deck plating.
   exits:
     up:
       destination: turbolift
@@ -302,6 +330,10 @@ engineering:
     Main Engineering feels like standing inside a controlled star. The warp core rises like a luminous
     pillar, blue light pulsing with restrained power. Consoles ring the space, and above, catwalks
     and conduits form a practical cathedral. The crew's competence is almost a kind of prayer.
+  visual_description: |
+    The heart of the ship: a vast, multi-level space dominated by the towering warp core. To the south, the corridor leads back out. To the north, a reinforced accessway toward the warp core control alcove. To the east, a corridor leads to the computer core.
+    The warp core rises as a column of pulsing blue light stretching floor to ceiling. Workstations ring the main floor, their LCARS displays flickering. Above, catwalks and gantries.
+    The air hums with barely contained power, matter and antimatter in controlled annihilation. It is both terrifying and beautiful.
   exits:
     south:
       destination: engineering_corridor
@@ -353,6 +385,10 @@ warp_core:
     Behind reinforced panels, the warp core's presence is louder — not in volume, but in consequence.
     Every flicker of light is an equation made physical. The safety fields hold with quiet confidence,
     but EPS indicators show a feedback pattern that shouldn't exist outside a simulation.
+  visual_description: |
+    A small, reinforced alcove directly adjacent to the warp core, the pulsing blue light almost blinding at this proximity. To the south, the doorway leads back into Main Engineering.
+    Safety interlocks and warning indicators line the walls in orange and red. Control panels display intricate EPS routing diagrams and plasma injection parameters.
+    The air itself seems to vibrate, the raw power of the core palpable through the reinforced bulkhead. A single miscalculation here could be catastrophic.
   exits:
     south:
       destination: engineering
@@ -388,6 +424,10 @@ computer_core:
     Banks of isolinear pathways rise in orderly columns, each a physical manifestation of logic.
     Cooling air moves in constant, disciplined flow. The LCARS panels here feel less like interfaces
     and more like conversations — silent, swift, and relentlessly precise.
+  visual_description: |
+    A vast, cool chamber filled with towering banks of isolinear chips, arranged in orderly columns that stretch up into the shadows. To the west, the corridor leads back toward Engineering.
+    The chips glow faintly with data transfer, a forest of crystalline logic. Cooling fans hum in a constant, disciplined rhythm. Access panels are set into the columns at regular intervals.
+    The lighting is cool and blue, designed for precision work. This is the ship's mind, its memory and processing power made physical.
   exits:
     west:
       destination: engineering
@@ -428,6 +468,10 @@ ten_forward:
     A wide room of conversation and starlight, with the curve of the saucer's windows giving the
     galaxy a gentle, social intimacy. The lighting is warm. The mood is relaxed — even when the ship
     isn't. People come here to remember they are more than their duty rosters.
+  visual_description: |
+    A spacious lounge at the forward edge of the saucer section, with sweeping panoramic windows offering a breathtaking view of the starfield. To the north, the corridor leads back into the ship's purposeful motion. To the east, a corner area for celebrations.
+    The lighting is warm and subdued, with small lamps on each table and soft sconces on the walls. A polished bar stands to one side, bottles gleaming. Comfortable seating is arranged in intimate groupings.
+    Crew members in off-duty attire sit and talk, their voices a comfortable murmur. Plants add splashes of green. The atmosphere is one of relaxed camaraderie.
   exits:
     north:
       destination: main_corridor
@@ -473,6 +517,10 @@ ten_forward_celebration:
     shifted from problem-solving to togetherness. A corner table has been claimed for an impromptu
     celebration — small, sincere, and unmistakably Starfleet: pride in the work, gratitude for each
     other, and the quiet belief that doing the right thing matters.
+  visual_description: |
+    The same lounge, but transformed by shared relief and celebration. To the west, the main seating area of Ten Forward continues. Tables have been pushed together in a corner, laden with drinks and small plates.
+    Crew members cluster around the joined tables, their postures relaxed and open, smiles genuine. Someone has made a small decoration from whatever was at hand, a touch of handmade festivity.
+    The usual calm murmur has been replaced by animated conversation and laughter. The galaxy drifts past the windows, indifferent but somehow approving.
   exits:
     west:
       destination: ten_forward
@@ -499,6 +547,10 @@ sickbay:
     Clean, bright, and quietly reassuring. The biobeds and monitors look clinical, but the human
     energy here is gentle: care as a discipline. The ship's instability reaches even this far — a
     minor fluctuation in the lights — but Sickbay's calm is a kind of shield.
+  visual_description: |
+    A clean, bright medical facility with smooth, curved walls in soothing blues and greys. To the east, the red-marked door leads back into the corridor.
+    Biobeds with integrated diagnostic monitors line the walls, their displays glowing with patient data. The lighting is bright but not harsh, designed to be both functional and calming.
+    Medical equipment is stored in neat, labeled cabinets. The air smells faintly of antiseptic, but the atmosphere is one of competent, compassionate care.
   exits:
     east:
       destination: main_corridor
@@ -534,6 +586,10 @@ holodeck_corridor:
     still. A small warning indicator is lit over one door: a polite red that suggests the ship is
     asking for permission before it panics. The faintest sound leaks through: footsteps where there
     should be none.
+  visual_description: |
+    A short corridor with several large, distinctive holodeck doors, their arched frames marking them as portals to simulated worlds. Down leads back to the main corridor. To the north, Holodeck 2 - if you're cleared to enter.
+    One door has a small warning indicator lit in red, a quiet alarm. The lighting is slightly cooler, more neutral. The air is still, and ship sounds seem muffled.
+    A faint, unidentifiable sound echoes from behind one of the doors. The corridor is empty, the usual traffic conspicuously absent.
   exits:
     down:
       destination: main_corridor
@@ -571,6 +627,10 @@ holodeck:
     but its controls lag, as if arguing. The simulation is running with a fraction too much reality:
     edges feel sharp, light feels heavy, and the air holds the charged stillness of a storm that
     hasn't decided where to break.
+  visual_description: |
+    The holodeck interior is a disorienting blend of projected reality and underlying grid. To the south, the exit leads back to the corridor - if the holodeck will let you leave.
+    The control arch stands near the entrance, its LCARS interface lagging. The simulation flickers at the edges, revealing the yellow-and-black holographic matrix beneath.
+    The projected environment feels too sharp, too real, the light too heavy. The air is charged with strange energy. The boundary between simulation and reality feels dangerously thin.
   exits:
     south:
       destination: holodeck_corridor
@@ -640,6 +700,10 @@ jeffries_hatch:
     The maintenance hatch opens onto a narrow, utilitarian tunnel — the ship's hidden anatomy.
     Cables and conduits run like veins. The air is warm and smells faintly of ozone. It is not
     glamorous work, but it is honest: the kind of place that proves ideals require infrastructure.
+  visual_description: |
+    A small, utilitarian access point where a floor hatch opens onto a narrow maintenance ladder. Up leads back to the corridor and normal ship life. To the north, the Jeffries tubes stretch deeper into shadow.
+    Conduits and cables run along the walls, exposed and functional. The lighting is harsher here, simple utility lights illuminating bare metal.
+    The air is warm from nearby EPS conduits, the smell of ozone faint but present. Tool racks and emergency equipment are mounted on the walls.
   exits:
     up:
       destination: main_corridor
@@ -671,6 +735,10 @@ jeffries_tube:
     in an otherwise dim tunnel. Access hatches, junction boxes, and manual bypass panels are set into
     the hexagonal walls at intervals. This is a maintenance crawlspace, not a corridor — cramped,
     industrial, and claustrophobic. The bare duranium plating hums with power transfer.
+  visual_description: |
+    A narrow, hexagonal maintenance tube barely a meter across, forcing you to crawl on hands and knees. To the south, the access hatch leads back up. To the north, the tube stretches toward Engineering.
+    The bare duranium walls curve close on all sides, claustrophobic and industrial. Bundles of ODN cables and EPS conduits run along the ceiling, some warm to the touch.
+    Recessed utility lights cast harsh pools of white in the dim tunnel. Junction boxes show scorch marks - evidence of feedback surges. The hum of power transfer is tangible through the metal.
   exits:
     south:
       destination: jeffries_hatch

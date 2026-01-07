@@ -6,15 +6,24 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: Mid-Air Zipline
 
 Scene Description:
-WHEEEEEEEEEE!
+A dizzying view of the ship's deck rushing up from below, seen from a taut rope stretched between the crow's nest and a lower point. The harbor spreads out in miniature, with the town a colorful jumble in the distance.
+Wind-blurred motion lines suggest the speed of descent. The rope vibrates with tension, and a seagull flaps out of the way with an indignant squawk.
+The deck below grows rapidly larger, with coiled ropes and barrels becoming more distinct by the second. A concerned ship's cat looks up with wide eyes.
 
-Interactive Elements to Include:
-Visible pathways: a passage leading toward Deck of The Leaky Tub
+Scene Elements to Include:
+- Visible pathway: The deck of your ship rushing up to meet you, leading to Deck of The Leaky Tub
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
+
+World Visual Setting: Caribbean port town in the golden age of piracy with a comedic, exaggerated aesthetic. Buildings are constructed from weathered driftwood planks and sun-bleached timbers, with salt-stained brick foundations and roofs patched with canvas, barrel staves, and rusted metal sheets.
+The color palette centers on warm ochres, faded teals, sun-yellowed whites, and murky sea-greens, punctuated by bold pirate-red and gold accents on flags, banners, and painted signs.
+Architecture is ramshackle colonial style with crooked balconies, rope rigging used as railings, and barnacle-encrusted dock posts. Windows are often missing panes, replaced with shutters hanging at odd angles.
+Pirates wear tattered but colorful garb - tricorn hats with bent feathers, bandanas, striped shirts, oversized belt buckles, and mismatched boots. Many sport eyepatches, hook hands, and exaggerated facial hair (or conspicuous lack thereof in honor of No-Beard McGee).
+Environmental details include seagulls perched everywhere, coiled rope piles, stacked barrels and crates, rusty anchors as decoration, and "wanted" posters flapping in the breeze. The lighting is bright Caribbean sunshine with harsh shadows, and the sky is a vibrant blue with fluffy white clouds.
+Everything has a slightly cartoony, exaggerated quality - expressions are dramatic, objects are slightly oversized, and details lean into pirate clichés with a wink.
 
 World Context: Humorous Pirate Adventure, Silly, satirical, salty
 

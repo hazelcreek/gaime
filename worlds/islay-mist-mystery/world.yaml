@@ -6,6 +6,14 @@ style: folk-noir
 tone: "Atmospheric, Rain-soaked, Tense, Peaty"
 hero_name: "DI Alasdair Ross"
 
+visual_setting: |
+  A remote Scottish island distillery in perpetual rain and mist, all grey stone, copper stills, and weathered wood. The architecture is Victorian industrial merged with ancient Celtic - stone buildings with moss-covered walls and peaked slate roofs.
+  The color palette is dominated by rain-grey, whisky amber, copper patina green, and the deep brown of peat. Accents include the golden glow of lamp light through rain-streaked windows and the silver of wet cobblestones.
+  Materials include rough-hewn granite, whitewashed stone, weathered oak barrels stacked in pyramids, and the gleaming copper of pot stills. Everything is damp, from the air to the ancient wood.
+  Environmental details include rain lashing against every surface, mist rolling in from the sea, smoke rising from peat kilns, and the distant outline of other islands through the murk. Seabirds wheel and cry.
+  Lighting is diffuse and grey during the day, warm amber from windows and lanterns at night. The Atlantic storms are ever-present, rain drumming on stone and running in rivulets down walls.
+  The aesthetic is noir meets Celtic folklore - wet trench coats, standing stones glimpsed through mist, the smell of peat smoke and salt spray, and secrets hidden in cellars older than memory.
+
 premise: |
   You are Detective Inspector Alasdair Ross, sent from Glasgow to the remote Isle of Islay. The famous master distiller Angus MacNeil has been found drowned in a vat of his own award-winning whisky. The ferry leaves at dawn, and with it, your only suspect. The island is closing ranks, and the distillery itself seems to be hiding secrets in its copper stills and dark cellars.
 

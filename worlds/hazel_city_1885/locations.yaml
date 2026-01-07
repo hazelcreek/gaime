@@ -2,6 +2,10 @@ sheriff_office:
   name: "Sheriff's Office"
   atmosphere: |
     Dust motes dance in the shafts of harsh sunlight cutting through the barred windows. The smell of stale coffee and gun oil hangs heavy. The jail cell in the corner stands empty, its door swinging slightly on rusty hinges.
+  visual_description: |
+    A cramped frontier office of rough plank walls and a low ceiling, shafts of harsh sunlight cutting through barred windows. To the north, the open doorway leads out to the sun-bleached main street.
+    A heavy oak desk dominates the room, scarred by years of frustration. A gun rack on the wall holds the outlines where rifles should be, mostly empty now. Wanted posters paper one wall, the Red Jackal Gang prominent.
+    An iron-barred jail cell occupies the back, its door swinging open on rusty hinges. The floorboards are worn smooth by years of pacing boots. A pot-bellied stove sits cold in the corner.
   exits:
     north:
       destination: main_street_south
@@ -22,6 +26,10 @@ main_street_south:
   name: "Main Street (South)"
   atmosphere: |
     The sun beats down on the packed dirt road. Tumbleweeds actually roll past, cliche as it is. To the south is the Sheriff's Office. To the north, the street continues toward the Saloon. To the east lies the General Store.
+  visual_description: |
+    A wide dusty street of packed earth baking under the merciless noon sun, lined by false-fronted wooden buildings. To the south, the sturdy door of the Sheriff's Office stands as a last bastion of law. To the north, rowdy noise drifts from the distant Saloon.
+    To the east, the General Store's creaking sign sways in the hot wind. Hitching posts stand at regular intervals, some with horses drowsing in the heat. Tumbleweeds drift across the road.
+    The street is eerily quiet for a frontier town. Heat shimmer rises from the packed earth, distorting the view. The sky is vast and oppressively bright.
   exits:
     south:
       destination: sheriff_office
@@ -41,6 +49,10 @@ general_store:
   name: "Mercantile & Goods"
   atmosphere: |
     It's cooler in here, smelling of dry grain and peppermint. Shelves are stocked with canned peaches and bolts of fabric, but the ammunition shelf is suspiciously empty.
+  visual_description: |
+    A cluttered mercantile with floor-to-ceiling wooden shelves packed with frontier necessities - canned goods, bolts of fabric, mining equipment. To the west, the bright doorway leads back to the sweltering street.
+    A long wooden counter runs across the back, its surface worn smooth by countless transactions. Glass jars of penny candy line the counter, and a brass scale sits ready. The ammunition shelf is conspicuously empty.
+    Barrels of flour, sugar, and pickles cluster near the entrance. The air is cooler here, shaded from the brutal sun. Light filters through a dusty front window, illuminating floating dust motes.
   exits:
     west:
       destination: main_street_south
@@ -74,6 +86,10 @@ main_street_center:
   name: "Main Street (Center)"
   atmosphere: |
     The heart of Hazel City. The imposing Grand Saloon dominates the northern view. A water trough sits dry and cracking nearby. To the west is the Livery Stable.
+  visual_description: |
+    The heart of Hazel City's main street, the packed dirt widening slightly. To the south, the dusty road leads back toward the Sheriff's Office. To the north, the Grand Saloon's weathered bat-wing doors swing, tinny piano music drifting out.
+    To the west, the open barn doors of the Livery Stable smell of horses and hay. A wooden water trough sits cracked and bone-dry, and a vulture perches on a nearby hitching post.
+    The noon sun casts almost no shadows, leaving everything bleached and exposed. The Saloon dominates the view - two stories of weathered wood. A distant train whistle carries on the wind.
   exits:
     south:
       destination: main_street_south
@@ -99,6 +115,10 @@ livery_stable:
   name: "Livery Stable"
   atmosphere: |
     Shadowy and smelling of manure and sweet hay. Horses shift restlessly in their stalls. A heavy anvil sits near a cold forge.
+  visual_description: |
+    A large wooden barn structure with wide-open doors, the interior dim and cool compared to the blazing street. To the east, the bright street shimmers with heat outside.
+    Horses shift restlessly in straw-filled stalls along both walls, their tack hanging from hooks nearby. A cold forge sits in one corner, its anvil still bearing the last horseshoe's hammer marks.
+    Hay bales are stacked to the rafters, the smell of sweet hay mingling with manure and leather. Saddles, bridles, and coils of rope hang from pegs. Shafts of light pierce through gaps in the walls.
   exits:
     east:
       destination: main_street_center
@@ -119,6 +139,10 @@ grand_saloon_porch:
   name: "Saloon Porch"
   atmosphere: |
     The wooden planks creak underfoot. Laughter and piano music spill from inside, sounding menacingly cheerful given the town's plight. A 'Wanted' poster flutters on a pillar.
+  visual_description: |
+    A wide wooden porch fronting the Grand Saloon, its planks worn smooth and creaking underfoot. To the south, the dusty main street stretches back toward town. To the north, swinging bat-wing doors lead into the gang's den.
+    To the east, a narrow trash-strewn alley winds around the side of the building. Wanted posters are tacked to support posts, the Red Jackal Gang prominent among them.
+    Rocking chairs sit empty, and spittoons bracket the doors. The bat-wing doors swing slightly, releasing wafts of tobacco smoke and tinny piano music. From here, the entire main street is visible - quiet, tense.
   exits:
     south:
       destination: main_street_center
@@ -144,6 +168,10 @@ back_alley:
   name: "Muddy Alley"
   atmosphere: |
     A narrow strip of mud and broken bottles between the Saloon and the bank. It reeks of refuse. A ladder leads up to the Saloon's balcony, but the bottom rungs are missing.
+  visual_description: |
+    A narrow, trash-strewn alley between the Saloon and the neighboring bank, the ground churned to permanent mud. To the west, the alley opens back to the Saloon's front porch. Above, a rickety ladder climbs to an open window on the balcony level.
+    The ladder's bottom rungs are broken - too high to reach without something to stand on. Overturned crates are scattered nearby. Broken bottles and debris line the walls.
+    The buildings press close, creating cool shade but trapping the stench of refuse. Rats scuttle in the shadows, and flies buzz around mysterious stains.
   exits:
     west:
       destination: grand_saloon_porch
@@ -165,6 +193,10 @@ grand_saloon:
   name: "The Grand Saloon"
   atmosphere: |
     Smoke hangs in the air like a thick fog. The piano player stops abruptly as you enter. Tables are overturned, save for the large poker table in the center where the gang holds court.
+  visual_description: |
+    A large saloon interior hazy with tobacco smoke. To the south, the swinging bat-wing doors lead back to the porch and freedom. Above, a grand staircase curves up to the balcony overlooking the room.
+    The main floor is dominated by overturned tables and chairs - all except for the central poker table where the gang holds court. A long bar runs along one wall, its mirror cracked. An upright piano sits in the corner.
+    Oil lamps hang from the ceiling, casting warm pools of light through the smoke. Spittoons, playing cards, and whiskey glasses scatter every surface. A mounted buffalo head watches with glass eyes.
   exits:
     south:
       destination: grand_saloon_porch
@@ -188,6 +220,10 @@ saloon_balcony:
   name: "Saloon Balcony"
   atmosphere: |
     Overlooking the main floor, this area is lined with doors to private rooms. It offers a tactical vantage point over the poker table below. An open window on the east side leads to a ladder descending to the alley.
+  visual_description: |
+    A wrap-around balcony overlooking the smoky saloon floor below, offering a clear view of the poker table and every exit. Below, the grand staircase descends to the main floor.
+    To the west, a door stands slightly ajar revealing darkness. To the east, an open window shows a rickety ladder descending to the muddy alley. Doors to private rooms line the inner wall with brass number plates.
+    The wooden railing is carved with frontier motifs and worn smooth. The carpet runner is threadbare. From here, whoever holds this balcony controls the room below.
   exits:
     down:
       destination: grand_saloon
@@ -210,6 +246,10 @@ secret_room:
   name: "Boone's Stash Room"
   atmosphere: |
     A small storage room converted into an office. Maps of the railroad lines are pinned to the walls.
+  visual_description: |
+    A small storage room hastily converted into a planning office. To the east, the door leads back to the noisy balcony overlooking the saloon below.
+    Maps of railroad lines cover every wall, pinned with knives and marked with red ink. A small desk is covered in papers and telegrams. Crates of stolen goods are stacked in the corners - payroll strongboxes and Wells Fargo bags.
+    A kerosene lamp on the desk casts a warm circle of light. The single window is shuttered tight. Train schedules, bank notes, and routing maps reveal the scope of the gang's plans.
   exits:
     east:
       destination: saloon_balcony

@@ -4,6 +4,14 @@ tone: "Gritty, tense, sun-bleached"
 style: spaghetti-western
 hero_name: "Cole Walker"
 
+visual_setting: |
+  A quintessential 1880s Arizona frontier town, all sun-bleached wood and dust, baking under a merciless high-noon sun. The architecture is classic American West - false-fronted wooden buildings, covered boardwalks, hitching posts, and water troughs.
+  The color palette is dominated by bleached tans, dusty browns, weathered gray wood, and the harsh white of the desert sun. Accents come from painted signs, the red of rust, and occasional splashes of faded color on fabric and posters.
+  Materials include rough-hewn lumber, adobe, and sun-baked earth. Everything is coated in a fine layer of dust, and the streets are packed dirt showing the tracks of horses and wagon wheels.
+  Environmental details include tumbleweeds actually tumbling, heat shimmer rising from the road, horses tied to posts switching their tails against flies, and vultures circling in the distance. The sun casts harsh shadows and bleaches everything.
+  Lighting is brutally bright - the harsh overhead sun of high noon, creating stark shadows under awnings and in doorways. The sky is vast and cloudless, an oppressive pale blue.
+  Character dress includes dusters, wide-brimmed hats, bandanas, and worn leather boots. Everything is dusty, sun-faded, and practical for desert life.
+
 premise: |
   Hazel City, Arizona, 1885. The Red Jackal Gang has strangled the life out of this frontier town. Sheriff 'Iron' Eli Hayes is the only law left, but he's old and outgunned. The gang's leader, Jackal Boone, has taken over the Saloon and is planning to rob the incoming Union Pacific shipment at noon.
 

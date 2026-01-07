@@ -4,6 +4,14 @@ tone: "Oppressive, Desperate, Synthetic"
 style: cyberpunk
 hero_name: "Kira Vance"
 
+visual_setting: |
+  A subterranean detention facility built into the ruins of a pre-invasion subway system, all brutalist concrete and alien technology grafted onto human infrastructure. The architectural style is oppressive institutional merged with sleek extraterrestrial design.
+  The color palette is dominated by concrete gray, rust orange, sickly violet from energy barriers, and the cold blue-white of fluorescent strips. Accents include warning red, biohazard yellow, and the occasional splash of resistance graffiti.
+  Materials include poured concrete stained by decades of moisture, corrugated metal panels, hexagonal force field projectors, and the gleaming chrome of Protector technology against crumbling human infrastructure.
+  Lighting comes from flickering halogen strips, the ominous glow of violet energy barriers, and the cold sweep of security searchlights. Shadows are deep and perpetual.
+  Environmental details include exposed pipes dripping with condensation, propaganda screens playing on endless loops, retinal scanners at every checkpoint, and surveillance drones floating through corridors. The ceiling is low, oppressive.
+  Human elements survive in scratched graffiti, hidden resistance symbols, and the worn pathways of countless prisoners' feet. Everything feels monitored, controlled, and designed to break the spirit.
+
 premise: |
   Earth has been under the benevolent iron fist of the "Protectors" for thirty years. They claim to save humanity from itself, but their methods involve mass incarceration and neurological reprogramming. You are Prisoner 734, currently held in Detention Camp Omega-9, a facility built into the ruins of an old subway station. Rumors of a resistance cell operating near the surface have reached you. Tonight, the power grid is fluctuating. It is time to run.
 

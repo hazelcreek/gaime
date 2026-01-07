@@ -2,6 +2,10 @@ distillery_courtyard:
   name: Distillery Courtyard
   atmosphere: |
     Rain lashes against the grey cobblestones of the Lochindaal Distillery courtyard. The smell of burning peat and salt spray is overwhelming. To the north, the looming shape of the Malt Barn offers shelter. To the east, the administrative wing houses the Manager's Office. A path winds west towards the shoreline and the Sea Caves.
+  visual_description: |
+    A rain-swept courtyard of grey cobblestones glistening in the downpour, surrounded by whitewashed stone buildings with slate roofs. To the north, the heavy wooden doors of the Malt Barn stand slightly ajar. To the east, the administrative wing shows a flickering light.
+    To the west, a treacherous muddy path descends toward the roaring ocean and sea caves below. Stacked barrels line the walls under covered eaves. A wrought-iron lamp sways in the wind.
+    Peat smoke rises from a kiln chimney, beaten down by the rain. In the distance, the grey Atlantic churns and the outline of Jura is barely visible through the mist.
   exits:
     north:
       destination: malt_barn
@@ -27,6 +31,10 @@ malt_barn:
   name: The Malt Barn
   atmosphere: |
     The air inside is thick with grain dust and the warm, earthy scent of germinating barley. Huge piles of grain sit on the floor, waiting for the kiln. Shadows stretch long between the pillars.
+  visual_description: |
+    A vast stone barn with exposed timber beams, the floor covered in golden barley spread out to germinate. To the south, the heavy wooden doors lead back to the rainy courtyard. To the north, a clean clinical door leads to the Laboratory.
+    Wooden posts support the vaulted ceiling, worn smooth by generations of workers' hands. Hessian sacks are stacked against the walls, and shovels and rakes lean in corners.
+    Dust motes float in shafts of light from high windows, and the air is thick and warm. The grain smells sweet and earthy. A few bare bulbs cast pools of yellow light in the dim interior.
   exits:
     south:
       destination: distillery_courtyard
@@ -50,6 +58,10 @@ lab:
   name: Distillery Laboratory
   atmosphere: |
     A stark contrast to the rustic barn, this room is sterile and smells of alcohol and chemicals. Test tubes and beakers line the benches. A side door leads to the Library.
+  visual_description: |
+    A clinical, modern laboratory with white-tiled walls and stainless steel benches, a stark contrast to the rustic distillery. To the south, the door leads back to the dusty Malt Barn. To the east, a side door leads to the quiet Library.
+    Test tubes, beakers, and bubbling flasks line the counters. Fluorescent lights hum overhead, casting a cold, even glow. Charts and chemical formulas are pinned to a corkboard.
+    The sharp smell of alcohol and reagents fills the air. A small window looks out onto the grey, rain-streaked distillery courtyard, the modernity feeling almost out of place.
   exits:
     south:
       destination: malt_barn
@@ -80,6 +92,10 @@ library:
   name: Distillery Library
   atmosphere: |
     A cozy room lined with dark oak shelves containing centuries of distilling history. A leather armchair sits by a cold fireplace. To the south is a secure metal door leading to the Tasting Room.
+  visual_description: |
+    A cozy, wood-paneled room with floor-to-ceiling dark oak bookshelves, filled with leather-bound volumes on whisky history and chemistry. To the west, the door leads back to the sterile Laboratory. To the south, a reinforced steel door with an electronic keypad guards the Tasting Room.
+    A worn leather armchair sits by a cold stone fireplace. Dust motes float in the dim light filtering through a small, rain-streaked window. The air smells of old paper and faint smoke.
+    Brass lamps with green glass shades cast warm pools of light. A tartan rug covers the flagstone floor. The silence is profound, broken only by the distant storm.
   exits:
     west:
       destination: lab
@@ -101,6 +117,10 @@ tasting_room:
   name: Private Tasting Room
   atmosphere: |
     The inner sanctum. The air is heavy with the 'Angel's Share'—evaporated whisky. Display cases line the walls holding rare vintages. In the center, a spilled glass and an overturned chair mark the scene of a struggle.
+  visual_description: |
+    An elegant private room with wood-paneled walls and soft, warm lighting from wall sconces. To the north, the secure steel door with its keypad leads back to the Library.
+    Glass display cases line the walls, holding rows of rare and ancient whisky bottles, their amber contents glowing. In the center, the scene is disturbed: an overturned leather chair, a shattered glass on the tartan carpet, a dark stain spreading.
+    The air is thick and sweet with evaporated whisky. A polished mahogany bar stands at one end. Rain lashes the single, barred window.
   exits:
     north:
       destination: library
@@ -123,6 +143,10 @@ managers_office:
   name: Manager's Office
   atmosphere: |
     Cluttered and chaotic. Papers are strewn everywhere. A large service elevator door is set into the back wall, currently shut tight. A framed photo sits on the desk.
+  visual_description: |
+    A cluttered, chaotic office with papers strewn across a large mahogany desk and overflowing onto the floor. To the west, the door leads out to the rain-lashed courtyard. A rusty service elevator door is set into the back wall.
+    Filing cabinets stand open, their contents rifled through. Framed certificates and old photographs line the walls, some hanging askew. Rain streams down the window.
+    An old brass lamp casts a warm pool of light on the desk. The chaos feels recent, not habitual. The air smells of stale coffee and anxiety.
   exits:
     west:
       destination: distillery_courtyard
@@ -151,6 +175,10 @@ sea_caves:
   name: The Sea Caves
   atmosphere: |
     Dark, damp, and deafening. The ocean roars into the cavern mouth. The walls glisten with slime. A rusty winch mechanism sits near a vertical shaft going up.
+  visual_description: |
+    A dark, dripping sea cave carved into the cliffs below the distillery, with the grey ocean roaring into the cavern mouth. To the east, the muddy path climbs back to the distillery courtyard.
+    The walls are black rock, glistening with slime and salt spray. A rusty, ancient winch mechanism stands near a vertical shaft disappearing up into the rock - the service dumbwaiter to the Manager's Office above.
+    The sound of the sea is deafening. Seaweed and driftwood are piled in corners. A smooth section of rock known as the "Weeping Wall" is set into the north face.
   exits:
     east:
       destination: distillery_courtyard
@@ -195,6 +223,10 @@ smugglers_cove:
   name: Smuggler's Cove
   atmosphere: |
     A hidden chamber used for centuries to hide illicit goods. Rotting barrels and crates are piled high. It's eerily quiet here, protected from the storm.
+  visual_description: |
+    A hidden chamber carved from the living rock, dry and sheltered from the storm raging outside. To the south, the pivot door in the "Weeping Wall" leads back to the main sea cave.
+    Rotting wooden barrels and old crates are stacked high, remnants of centuries of smuggling. The walls are rough-hewn stone, blackened with age and old smoke.
+    A single oil lantern flickers weakly, casting dancing shadows. The silence is eerie after the roar of the cave. Cobwebs drape the corners, and the air smells of damp earth and very old whisky.
   exits:
     south:
       destination: sea_caves
@@ -214,6 +246,10 @@ founders_statue:
   name: Founder's Statue
   atmosphere: |
     A bronze statue of the distillery founder stands overlooking the bay near the pier. The plinth is covered in moss and Gaelic writing.
+  visual_description: |
+    A weathered bronze statue of a stern, bearded man in Victorian dress stands on a moss-covered stone plinth, overlooking the churning grey bay. To the south, the concrete pier of the ferry terminal juts toward the rough sea. To the north, the path leads back to the distillery courtyard.
+    The plinth is inscribed with Gaelic text, barely legible beneath the moss and lichen. The statue's hand points out to sea, as if guiding ships home.
+    Wildflowers and heather grow around the base. Rain runs down the statue's face like tears. The view encompasses the grey Atlantic and the misty Paps of Jura.
   exits:
     south:
       destination: ferry_terminal
@@ -240,6 +276,10 @@ ferry_terminal:
   name: Ferry Terminal
   atmosphere: |
     The end of the line. The concrete pier juts out into the rough sea. The ferry lights are visible in the distance, approaching fast. This is where it ends.
+  visual_description: |
+    A stark concrete pier jutting out into the rough, grey Atlantic, waves crashing against its sides and sending spray into the air. To the north, the path leads back to the founder's statue and the distillery beyond.
+    The ferry's lights are visible in the distance, growing closer. A small, weathered waiting shelter offers little protection from the driving rain. Bollards and mooring ropes line the pier's edge, slick with spray.
+    The sky is heavy and grey, merging with the sea at the horizon. This is the edge of the island, the edge of the world.
   exits:
     north:
       destination: founders_statue

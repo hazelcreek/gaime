@@ -1,0 +1,82 @@
+{
+  "sheriff_office": {
+    "location_id": "sheriff_office",
+    "prompt_hash": "b22a4eadcbef0bc8",
+    "generated_at": "2026-01-07T01:58:39.411937",
+    "generator_version": "dry-run-hash",
+    "style_preset": "spaghetti-western",
+    "variant_npc_ids": []
+  },
+  "main_street_south": {
+    "location_id": "main_street_south",
+    "prompt_hash": "08fc2f8f01913171",
+    "generated_at": "2026-01-07T01:58:57.613178",
+    "generator_version": "dry-run-hash",
+    "style_preset": "spaghetti-western",
+    "variant_npc_ids": []
+  },
+  "general_store": {
+    "location_id": "general_store",
+    "prompt_hash": "85e66c50d4b53e6d",
+    "generated_at": "2026-01-07T01:59:13.924627",
+    "generator_version": "dry-run-hash",
+    "style_preset": "spaghetti-western",
+    "variant_npc_ids": []
+  },
+  "main_street_center": {
+    "location_id": "main_street_center",
+    "prompt_hash": "b2121a50582d8bb6",
+    "generated_at": "2026-01-07T01:59:34.718428",
+    "generator_version": "dry-run-hash",
+    "style_preset": "spaghetti-western",
+    "variant_npc_ids": []
+  },
+  "livery_stable": {
+    "location_id": "livery_stable",
+    "prompt_hash": "a553cbd370a67803",
+    "generated_at": "2026-01-07T01:59:54.844841",
+    "generator_version": "dry-run-hash",
+    "style_preset": "spaghetti-western",
+    "variant_npc_ids": []
+  },
+  "grand_saloon_porch": {
+    "location_id": "grand_saloon_porch",
+    "prompt_hash": "897741549b825449",
+    "generated_at": "2026-01-07T02:00:16.503680",
+    "generator_version": "dry-run-hash",
+    "style_preset": "spaghetti-western",
+    "variant_npc_ids": []
+  },
+  "back_alley": {
+    "location_id": "back_alley",
+    "prompt_hash": "07a1782e4dfe7f82",
+    "generated_at": "2026-01-07T02:00:37.881413",
+    "generator_version": "dry-run-hash",
+    "style_preset": "spaghetti-western",
+    "variant_npc_ids": []
+  },
+  "grand_saloon": {
+    "location_id": "grand_saloon",
+    "prompt_hash": "953e9aafa39e6baf",
+    "generated_at": "2026-01-07T02:00:57.283170",
+    "generator_version": "dry-run-hash",
+    "style_preset": "spaghetti-western",
+    "variant_npc_ids": []
+  },
+  "saloon_balcony": {
+    "location_id": "saloon_balcony",
+    "prompt_hash": "c4d009bb7749c97a",
+    "generated_at": "2026-01-07T02:01:16.243939",
+    "generator_version": "dry-run-hash",
+    "style_preset": "spaghetti-western",
+    "variant_npc_ids": []
+  },
+  "secret_room": {
+    "location_id": "secret_room",
+    "prompt_hash": "9d2327a6613c7ab0",
+    "generated_at": "2026-01-07T02:01:36.332974",
+    "generator_version": "dry-run-hash",
+    "style_preset": "spaghetti-western",
+    "variant_npc_ids": []
+  }
+}

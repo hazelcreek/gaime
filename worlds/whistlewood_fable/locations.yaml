@@ -2,6 +2,10 @@ fox_burrow:
   name: "Finnick's Cozy Burrow"
   atmosphere: |
     Your home is a hollow beneath the roots of a sleeping willow. It smells of dried sage and warm earth. Outside, the world is unusually quiet and grey.
+  visual_description: |
+    A cozy underground hollow carved beneath the twisted roots of an ancient willow tree. Above, a tunnel of packed earth leads up toward the dim grey light of the surface clearing.
+    The walls are packed earth, smooth and warm, with tiny glowing fungi providing soft amber light. A small nest of dried leaves and soft moss serves as a bed.
+    Bundles of dried herbs hang from protruding roots. The ceiling is a tangle of willow roots, forming a natural latticework. The space feels safe and personal, a little fox's sanctuary.
   exits:
     up:
       destination: mossy_clearing
@@ -19,6 +23,10 @@ mossy_clearing:
   name: "The Mossy Clearing"
   atmosphere: |
     A circular glade cushioned by velvet moss. The air is still. To the north, the trees grow tall and strange. To the east, a bubbling sound suggests water.
+  visual_description: |
+    A perfectly circular glade carpeted with thick, velvet moss in shades of fading green and grey. Below, the hidden entrance to your cozy burrow lies beneath the willow roots. To the north, a dark archway of ancient trees leads into the Whispering Woods. To the east, a fern-lined path follows the sound of trickling water.
+    Giant toadstools with speckled caps dot the perimeter, some large enough to sit on. The trees form a natural amphitheater, their branches arching overhead like a protective dome.
+    Tiny wildflowers poke through the moss, their petals still holding hints of pink and blue. A few fireflies drift aimlessly, their lights weak but persistent.
   exits:
     down:
       destination: fox_burrow
@@ -44,6 +52,10 @@ babbling_brook:
   name: "The Babbling Brook"
   atmosphere: |
     A stream of water that literally speaks in hushed giggles flows here. Violet reeds line the banks. A stone bridge crosses to the further woods.
+  visual_description: |
+    A winding stream of crystal-clear water that sparkles with its own inner light, its surface rippling with tiny bubbles that look almost like laughter. To the west, the mossy path leads back to the quiet clearing. To the south, a dark opening in the rocks glitters faintly from within.
+    Violet reeds and weeping ferns line the banks, their fronds trailing in the water. A charming stone bridge arches over the stream, its moss-covered stones worn smooth by countless paws.
+    Water striders skate across the surface, and tiny fish with iridescent scales dart in the shallows. The air is cool and fresh, with a hint of mint.
   exits:
     west:
       destination: mossy_clearing
@@ -65,6 +77,10 @@ whispering_woods:
   name: "The Whispering Woods"
   atmosphere: |
     The trees here have faces in their bark and murmur secrets. The canopy is dense, blocking the grey sky. Fireflies drift aimlessly.
+  visual_description: |
+    A dense forest of ancient, towering oaks whose gnarled bark forms solemn, sleeping faces. To the south, the path leads back to the familiar mossy clearing. To the north, a path of golden leaves leads toward a majestic glowing aura. To the west, a winding trail follows a twist of chimney smoke.
+    The canopy is so thick that only scattered beams of grey light filter through, creating perpetual twilight. Fireflies drift lazily between the trunks.
+    Hanging moss and trailing vines create curtains between the trees. The forest floor is carpeted with fallen leaves in faded gold and brown. Mushrooms grow in clusters, some faintly luminescent.
   exits:
     south:
       destination: mossy_clearing
@@ -90,6 +106,10 @@ witch_cottage:
   name: "Mokey's Mushroom Cottage"
   atmosphere: |
     A house grown entirely from a giant red mushroom. The windows are made of crystallized sugar. It smells of cinnamon and sulfur.
+  visual_description: |
+    A whimsical cottage grown from a massive red toadstool with white spots, its cap forming the roof and its stalk the walls. To the east, the cottage door leads back into the dark whispering woods.
+    Windows of crystallized sugar sparkle with rainbow refractions. Smoke curls from a crooked chimney of twisted branch. Potted herbs and glowing plants crowd the windowsills.
+    Inside, the walls are smooth and faintly moist, lined with shelves of bottles, dried herbs, and curious knickknacks. A pumpkin-shell cauldron bubbles in the corner, filling the air with purple mist.
   exits:
     east:
       destination: whispering_woods
@@ -110,6 +130,10 @@ glitter_caves:
   name: "The Glitter Caves"
   atmosphere: |
     Underground tunnels lined with crystals that hum. It is chilly here, but the walls provide enough light to see.
+  visual_description: |
+    A network of underground tunnels, their walls, ceiling, and floor encrusted with glittering crystals of every color. To the north, the rocky passage leads back to fresh air and the brook. To the east, a widening tunnel glows with increasing brilliance.
+    The passages are narrow and winding, with crystal formations jutting out at unexpected angles. The crystals hum with a faint, harmonious vibration, providing their own soft light.
+    Tiny stalactites drip occasional drops of glittering water. The air is cool and still, carrying a faint mineral scent.
   exits:
     north:
       destination: babbling_brook
@@ -131,6 +155,10 @@ crystal_chamber:
   name: "The Crystal Chamber"
   atmosphere: |
     A vast cavern where the ceiling looks like a starry night sky made of gems. In the center is a pedestal.
+  visual_description: |
+    A vast, cathedral-like cavern whose ceiling is a breathtaking dome of embedded gems, glittering like a starry night sky. To the west, the tunnel leads back to the miner's area in the glitter caves.
+    In the center of the chamber, a pedestal of pure, translucent quartz rises from the smooth stone floor. The pedestal glows with an inner warmth, pulsing like a heartbeat.
+    The light from the crystals bathes the chamber in soft, multicolored luminescence. The walls are smooth and curved, polished by ancient waters. The silence is profound.
   exits:
     west:
       destination: glitter_caves
@@ -148,6 +176,10 @@ elder_grove:
   name: "The Elder Grove"
   atmosphere: |
     The heart of the forest. The Great Singing Oak dominates the view, its leaves grey and silent. The air is heavy with waiting.
+  visual_description: |
+    A sacred clearing at the heart of the Whistlewood, dominated by the Great Singing Oak—an enormous, ancient tree whose trunk is as wide as a cottage. To the south, the path leads back through the whispering woods.
+    The Oak's bark is deeply furrowed, forming a wise, sleeping face. Its leaves, once vibrant gold and green, are now a uniform, silent grey. The branches spread like protective arms, but no song rises from within.
+    Around the base, a ring of smaller trees and wildflowers bow inward, as if in perpetual mourning. Motes of grey dust drift in the dim light, waiting for a change.
   exits:
     south:
       destination: whispering_woods

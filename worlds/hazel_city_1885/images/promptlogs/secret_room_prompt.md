@@ -6,28 +6,38 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: Boone's Stash Room
 
 Scene Description:
-A small storage room converted into an office. Maps of the railroad lines are pinned to the walls.
+A small storage room hastily converted into a planning office. To the east, the door leads back to the noisy balcony overlooking the saloon below.
+Maps of railroad lines cover every wall, pinned with knives and marked with red ink. A small desk is covered in papers and telegrams. Crates of stolen goods are stacked in the corners - payroll strongboxes and Wells Fargo bags.
+A kerosene lamp on the desk casts a warm circle of light. The single window is shuttered tight. Train schedules, bank notes, and routing maps reveal the scope of the gang's plans.
 
-Interactive Elements to Include:
-Visible pathways: a passage or doorway visible to the right side of the scene
-Objects in the scene: Stolen Train Schedule is pinned to the wall with a knife
+Scene Elements to Include:
+- Railroad Maps: Detailed diagrams of the Union Pacific route.
+- Visible pathway to the right: The door leading back to the noisy balcony, leading to Saloon Balcony
+- Stolen Train Schedule is pinned to the wall with a knife
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
+World Visual Setting: A quintessential 1880s Arizona frontier town, all sun-bleached wood and dust, baking under a merciless high-noon sun. The architecture is classic American West - false-fronted wooden buildings, covered boardwalks, hitching posts, and water troughs.
+The color palette is dominated by bleached tans, dusty browns, weathered gray wood, and the harsh white of the desert sun. Accents come from painted signs, the red of rust, and occasional splashes of faded color on fabric and posters.
+Materials include rough-hewn lumber, adobe, and sun-baked earth. Everything is coated in a fine layer of dust, and the streets are packed dirt showing the tracks of horses and wagon wheels.
+Environmental details include tumbleweeds actually tumbling, heat shimmer rising from the road, horses tied to posts switching their tails against flies, and vultures circling in the distance. The sun casts harsh shadows and bleaches everything.
+Lighting is brutally bright - the harsh overhead sun of high noon, creating stark shadows under awnings and in doorways. The sky is vast and cloudless, an oppressive pale blue.
+Character dress includes dusters, wide-brimmed hats, bandanas, and worn leather boots. Everything is dusty, sun-faded, and practical for desert life.
+
 World Context: Spaghetti Western, Gritty, tense, sun-bleached
 
 Mood: The atmosphere is tense, operatic, sun-baked, morally ambiguous, stoic, fatalistic. harsh midday sun casting deep black shadows, silhouettes against blazing sky, golden dust motes floating in shafts of light, dark interiors with slits of blinding daylight. The color palette features sun-bleached earth tones, dusty ochre and sienna, burnt orange sunsets, weathered browns, occasional blood red, deep shadows approaching black, washed-out blues for distant sky.
 
-Artistic style (most important): Cinematic style faithfully recreating 1960s Italian Spaghetti Western films,
+Visual style (most important): Cinematic style faithfully recreating 1960s Italian Spaghetti Western films,
 specifically evoking Sergio Leone's visual language. Techniscope widescreen
 framing with extreme depth of field. Harsh desert lighting creates stark
 contrast between blinding sun and pitch-black shadows. Every surface is
 weathered, dusty, and sun-damaged - cracked wood, rusted metal, sweat-stained
 leather. Visible dust particles drift through sunbeams. Heat shimmer distorts
-distant horizons. Faces are lined, stubbled, sun-darkened. The artistic style
+distant horizons. Faces are lined, stubbled, sun-darkened. The visual style
 is paramount and must evoke the gritty authenticity of The Good, The Bad and
 The Ugly, For a Few Dollars More, and Once Upon a Time in the West.
 This style must be maintained consistently throughout the entire image.

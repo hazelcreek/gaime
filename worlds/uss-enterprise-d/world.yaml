@@ -6,6 +6,14 @@ hero_name: "Cadet Nara Kim"
 # Visual style preset for image generation (MPA)
 style: star-trek-tng
 
+visual_setting: |
+  The interior of a Galaxy-class Federation starship, all clean curves, soft lighting, and optimistic 24th-century design. The architecture is LCARS aesthetic - rounded corners, beige and coral wall panels, with accent lighting in warm amber and blue.
+  The color palette centers on warm beige, rust brown, and coral, with accent colors from LCARS displays in orange, blue, and purple. Carpeting is a calm mauve, and the overall effect is more hotel than military vessel.
+  Materials include smooth polymer wall panels, transparent aluminum viewports, the subtle texture of carpet underfoot, and the gleaming surfaces of control consoles. Everything is immaculate and well-maintained.
+  Environmental details include LCARS displays on every wall, the gentle curve of corridors following the ship's saucer shape, replicator alcoves, and the ever-present stars drifting past viewports. Plants bring life to communal spaces.
+  Lighting is warm and diffuse, designed for long-term human comfort. The warp core pulses with blue light in Engineering, and Ten Forward glows with the light of passing stars.
+  Crew members wear Starfleet uniforms - command red, operations gold, sciences blue - and carry themselves with quiet competence. The ship feels like a working community, not a military installation.
+
 premise: |
   You are a Starfleet cadet on your very first assignment aboard the USS Enterprise (NCC-1701-D).
   Officially, you are here to observe and learn. Unofficially, you are about to learn how fast

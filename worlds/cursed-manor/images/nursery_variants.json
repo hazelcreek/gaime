@@ -6,7 +6,8 @@
       "npcs": [
         "ghost_child"
       ],
-      "image": "nursery__with__ghost_child.png"
+      "image": "nursery__with__ghost_child.png",
+      "default": false
     }
   ]
 }

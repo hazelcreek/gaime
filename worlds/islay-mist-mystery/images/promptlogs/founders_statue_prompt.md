@@ -6,15 +6,26 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: Founder's Statue
 
 Scene Description:
-A bronze statue of the distillery founder stands overlooking the bay near the pier. The plinth is covered in moss and Gaelic writing.
+A weathered bronze statue of a stern, bearded man in Victorian dress stands on a moss-covered stone plinth, overlooking the churning grey bay. To the south, the concrete pier of the ferry terminal juts toward the rough sea. To the north, the path leads back to the distillery courtyard.
+The plinth is inscribed with Gaelic text, barely legible beneath the moss and lichen. The statue's hand points out to sea, as if guiding ships home.
+Wildflowers and heather grow around the base. Rain runs down the statue's face like tears. The view encompasses the grey Atlantic and the misty Paps of Jura.
 
-Interactive Elements to Include:
-Visible pathways: an opening or exit behind, perhaps suggested by light or shadows; a doorway or passage visible ahead in the distance
+Scene Elements to Include:
+- Gaelic Inscription: Weather-worn Gaelic text etched into the stone base.
+- Visible pathway behind: The concrete pier jutting out toward the rough sea, leading to Ferry Terminal
+- Visible pathway ahead: The path back to the distillery courtyard, leading to Distillery Courtyard
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
+
+World Visual Setting: A remote Scottish island distillery in perpetual rain and mist, all grey stone, copper stills, and weathered wood. The architecture is Victorian industrial merged with ancient Celtic - stone buildings with moss-covered walls and peaked slate roofs.
+The color palette is dominated by rain-grey, whisky amber, copper patina green, and the deep brown of peat. Accents include the golden glow of lamp light through rain-streaked windows and the silver of wet cobblestones.
+Materials include rough-hewn granite, whitewashed stone, weathered oak barrels stacked in pyramids, and the gleaming copper of pot stills. Everything is damp, from the air to the ancient wood.
+Environmental details include rain lashing against every surface, mist rolling in from the sea, smoke rising from peat kilns, and the distant outline of other islands through the murk. Seabirds wheel and cry.
+Lighting is diffuse and grey during the day, warm amber from windows and lanterns at night. The Atlantic storms are ever-present, rain drumming on stone and running in rivulets down walls.
+The aesthetic is noir meets Celtic folklore - wet trench coats, standing stones glimpsed through mist, the smell of peat smoke and salt spray, and secrets hidden in cellars older than memory.
 
 World Context: Scottish Noir, Distillery Mystery, Celtic Folklore, Atmospheric, Rain-soaked, Tense, Peaty
 

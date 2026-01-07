@@ -4,6 +4,14 @@ tone: "atmospheric, mysterious, unsettling yet compelling"
 style: dark-fantasy
 hero_name: "Eleanor Ashford"
 
+visual_setting: |
+  A decaying Victorian mansion consumed by supernatural decay and neglect. The architecture is High Victorian Gothic with pointed arches, ornate carved woodwork, and elaborate moldings, all now crumbling and covered in decades of dust and cobwebs.
+  The color palette is dominated by deep purples, blacks, and grays, with accents of tarnished gold, faded crimson velvet, and the sickly green of verdigris on brass fixtures. Everything has a layer of dust and shadow.
+  Materials include dark mahogany paneling, cracked marble floors, moth-eaten velvet upholstery, and age-clouded crystal chandeliers. Wallpaper peels in long strips, revealing older, darker patterns beneath.
+  Lighting comes from guttering candles, blue-tinged gaslight sconces that shouldn't still be burning, and occasional lightning flashes through grimy windows. Shadows are deep and seem to move independently.
+  Environmental details include cobwebs in every corner, dust motes floating in light beams, faded family portraits with eyes that follow, and clocks that still tick impossibly. Decay is beautiful here - rot has an elegance.
+  The aesthetic is romantic horror - beautiful in its desolation, with the grandeur of what was contrasting with the horror of what remains. Everything suggests interrupted life, frozen in a moment of tragedy.
+
 premise: |
   A violent storm has driven you to seek shelter on this desolate road.
   Through the rain, you spotted the silhouette of an old manor house.

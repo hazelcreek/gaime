@@ -3,7 +3,9 @@
   "base": "ready_room.png",
   "variants": [
     {
-      "npcs": ["picard"],
+      "npcs": [
+        "picard"
+      ],
       "image": "ready_room__with__picard.png",
       "default": false
     }

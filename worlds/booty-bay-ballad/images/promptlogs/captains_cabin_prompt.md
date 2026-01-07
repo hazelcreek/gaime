@@ -6,15 +6,26 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: Captain's Cabin
 
 Scene Description:
-Located at the stern of the ship (accessed from deck, though door was stuck before). Wait, this is just a narrative flavor room attached to the deck logic.
+A cramped but cozy cabin at the ship's stern, with the cabin door to the main deck standing ajar, letting in the sounds of creaking rigging and distant seagulls.
+Large stern windows offer a view of the ship's wake and the open sea. Sun streams through the salt-encrusted glass, illuminating dancing dust motes.
+A bunk with threadbare blankets is built into one wall, while a writing desk cluttered with maps, quills, and empty rum bottles occupies another. A hammock hangs ready as backup bedding.
+Maritime decorations cover every surface - a sextant, a ship in a bottle, framed charts, and a portrait of someone's mother glaring disapprovingly. The floorboards creak with every wave.
 
-Interactive Elements to Include:
-Visible pathways: a passage leading toward Deck of The Leaky Tub
+Scene Elements to Include:
+- Loose Floorboard: A loose floorboard squeaks under your foot.
+- Visible pathway: The cabin door leading back to the main deck, leading to Deck of The Leaky Tub
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
+
+World Visual Setting: Caribbean port town in the golden age of piracy with a comedic, exaggerated aesthetic. Buildings are constructed from weathered driftwood planks and sun-bleached timbers, with salt-stained brick foundations and roofs patched with canvas, barrel staves, and rusted metal sheets.
+The color palette centers on warm ochres, faded teals, sun-yellowed whites, and murky sea-greens, punctuated by bold pirate-red and gold accents on flags, banners, and painted signs.
+Architecture is ramshackle colonial style with crooked balconies, rope rigging used as railings, and barnacle-encrusted dock posts. Windows are often missing panes, replaced with shutters hanging at odd angles.
+Pirates wear tattered but colorful garb - tricorn hats with bent feathers, bandanas, striped shirts, oversized belt buckles, and mismatched boots. Many sport eyepatches, hook hands, and exaggerated facial hair (or conspicuous lack thereof in honor of No-Beard McGee).
+Environmental details include seagulls perched everywhere, coiled rope piles, stacked barrels and crates, rusty anchors as decoration, and "wanted" posters flapping in the breeze. The lighting is bright Caribbean sunshine with harsh shadows, and the sky is a vibrant blue with fluffy white clouds.
+Everything has a slightly cartoony, exaggerated quality - expressions are dramatic, objects are slightly oversized, and details lean into pirate clichés with a wink.
 
 World Context: Humorous Pirate Adventure, Silly, satirical, salty
 

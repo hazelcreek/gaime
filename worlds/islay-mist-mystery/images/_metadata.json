@@ -1,0 +1,82 @@
+{
+  "distillery_courtyard": {
+    "location_id": "distillery_courtyard",
+    "prompt_hash": "3d8a97c1644d0cff",
+    "generated_at": "2026-01-07T02:03:08.307565",
+    "generator_version": "dry-run-hash",
+    "style_preset": "folk-noir",
+    "variant_npc_ids": []
+  },
+  "malt_barn": {
+    "location_id": "malt_barn",
+    "prompt_hash": "e343f3a49d0bbc16",
+    "generated_at": "2026-01-07T02:03:29.552451",
+    "generator_version": "dry-run-hash",
+    "style_preset": "folk-noir",
+    "variant_npc_ids": []
+  },
+  "lab": {
+    "location_id": "lab",
+    "prompt_hash": "15573b87ace19e8e",
+    "generated_at": "2026-01-07T02:03:45.503766",
+    "generator_version": "dry-run-hash",
+    "style_preset": "folk-noir",
+    "variant_npc_ids": []
+  },
+  "library": {
+    "location_id": "library",
+    "prompt_hash": "cdb2c73d2aad98ff",
+    "generated_at": "2026-01-07T02:04:06.130056",
+    "generator_version": "dry-run-hash",
+    "style_preset": "folk-noir",
+    "variant_npc_ids": []
+  },
+  "tasting_room": {
+    "location_id": "tasting_room",
+    "prompt_hash": "bb8f4cea2731509a",
+    "generated_at": "2026-01-07T02:04:22.932276",
+    "generator_version": "dry-run-hash",
+    "style_preset": "folk-noir",
+    "variant_npc_ids": []
+  },
+  "managers_office": {
+    "location_id": "managers_office",
+    "prompt_hash": "aa97bd19a8d42e70",
+    "generated_at": "2026-01-07T02:04:39.768324",
+    "generator_version": "dry-run-hash",
+    "style_preset": "folk-noir",
+    "variant_npc_ids": []
+  },
+  "sea_caves": {
+    "location_id": "sea_caves",
+    "prompt_hash": "3fcdcf134b70d0da",
+    "generated_at": "2026-01-07T02:04:56.759061",
+    "generator_version": "dry-run-hash",
+    "style_preset": "folk-noir",
+    "variant_npc_ids": []
+  },
+  "smugglers_cove": {
+    "location_id": "smugglers_cove",
+    "prompt_hash": "8a17c13412e2fb6e",
+    "generated_at": "2026-01-07T02:05:17.730745",
+    "generator_version": "dry-run-hash",
+    "style_preset": "folk-noir",
+    "variant_npc_ids": []
+  },
+  "founders_statue": {
+    "location_id": "founders_statue",
+    "prompt_hash": "51bfab578c1adb6d",
+    "generated_at": "2026-01-07T02:05:33.328680",
+    "generator_version": "dry-run-hash",
+    "style_preset": "folk-noir",
+    "variant_npc_ids": []
+  },
+  "ferry_terminal": {
+    "location_id": "ferry_terminal",
+    "prompt_hash": "95b59bb532b57fe1",
+    "generated_at": "2026-01-07T02:05:49.036029",
+    "generator_version": "dry-run-hash",
+    "style_preset": "folk-noir",
+    "variant_npc_ids": []
+  }
+}

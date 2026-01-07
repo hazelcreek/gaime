@@ -10,8 +10,8 @@ Position: stands near the captain's chair, hands loosely clasped behind his back
 Critical Requirements:
 - PRESERVE the original scene's composition, lighting, colors, and atmosphere exactly
 - DO NOT REMOVE OR CHANGE any existing characters in the image - they must remain exactly as they are
-- MATCH the artistic style of the original image: High-quality photographic image that feels like a still frame from a late-80s/90s science-fiction television show
-- The character must be rendered in the SAME artistic style as the background
+- MATCH the visual style of the original image: High-quality photographic image that feels like a still frame from a late-80s/90s science-fiction television show
+- The character must be rendered in the SAME visual style as the background
 - Position the character naturally within the existing space without overlapping existing characters
 - Maintain consistent lighting direction and shadow quality
 

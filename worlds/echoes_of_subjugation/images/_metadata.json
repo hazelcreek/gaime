@@ -1,0 +1,74 @@
+{
+  "cell_block_c": {
+    "location_id": "cell_block_c",
+    "prompt_hash": "e4a85d9a84f7c3f6",
+    "generated_at": "2026-01-07T01:55:15.382159",
+    "generator_version": "dry-run-hash",
+    "style_preset": "cyberpunk",
+    "variant_npc_ids": []
+  },
+  "mess_hall": {
+    "location_id": "mess_hall",
+    "prompt_hash": "aa5334086376e340",
+    "generated_at": "2026-01-07T01:55:32.150767",
+    "generator_version": "dry-run-hash",
+    "style_preset": "cyberpunk",
+    "variant_npc_ids": []
+  },
+  "kitchen_scullery": {
+    "location_id": "kitchen_scullery",
+    "prompt_hash": "8a573d3fd82b0f67",
+    "generated_at": "2026-01-07T01:55:48.652188",
+    "generator_version": "dry-run-hash",
+    "style_preset": "cyberpunk",
+    "variant_npc_ids": []
+  },
+  "courtyard_access": {
+    "location_id": "courtyard_access",
+    "prompt_hash": "01e38cec485c91b9",
+    "generated_at": "2026-01-07T01:56:07.489269",
+    "generator_version": "dry-run-hash",
+    "style_preset": "cyberpunk",
+    "variant_npc_ids": []
+  },
+  "security_kiosk": {
+    "location_id": "security_kiosk",
+    "prompt_hash": "782f37b45460303a",
+    "generated_at": "2026-01-07T01:56:23.747467",
+    "generator_version": "dry-run-hash",
+    "style_preset": "cyberpunk",
+    "variant_npc_ids": []
+  },
+  "exercise_yard": {
+    "location_id": "exercise_yard",
+    "prompt_hash": "205a353d7ad8c84a",
+    "generated_at": "2026-01-07T01:56:42.724094",
+    "generator_version": "dry-run-hash",
+    "style_preset": "cyberpunk",
+    "variant_npc_ids": []
+  },
+  "maintenance_shed": {
+    "location_id": "maintenance_shed",
+    "prompt_hash": "c4562c9737813b08",
+    "generated_at": "2026-01-07T01:57:00.250732",
+    "generator_version": "dry-run-hash",
+    "style_preset": "cyberpunk",
+    "variant_npc_ids": []
+  },
+  "waste_processing": {
+    "location_id": "waste_processing",
+    "prompt_hash": "b9f0797c69279c0b",
+    "generated_at": "2026-01-07T01:57:17.551710",
+    "generator_version": "dry-run-hash",
+    "style_preset": "cyberpunk",
+    "variant_npc_ids": []
+  },
+  "old_sewers": {
+    "location_id": "old_sewers",
+    "prompt_hash": "f799167df9f9663c",
+    "generated_at": "2026-01-07T01:57:32.939155",
+    "generator_version": "dry-run-hash",
+    "style_preset": "cyberpunk",
+    "variant_npc_ids": []
+  }
+}

@@ -6,16 +6,26 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: Coal Seam
 
 Scene Description:
-A dark tunnel hacked into the rock. Tracks lead down into the dark.
+A rough-hewn tunnel carved into black volcanic rock. To the south, the entrance opens to the clockwork jungle, filtered sunlight visible through the mechanical foliage. Deeper in, rusted mine cart tracks descend into impenetrable darkness.
+The tunnel is framed by rusted iron supports and timber pit props, some cracked and bowing. Dim bioluminescent fungi growing on the walls cast an eerie blue-green glow on overturned ore carts spilling anthracite coal.
+Pickaxes, shovels, and mining helmets lie abandoned where workers dropped them decades ago. Dust motes drift in the thin light from the entrance.
 
-Interactive Elements to Include:
-Visible pathways: an opening or exit behind, perhaps suggested by light or shadows; stairs descending, a trapdoor, or a passage leading below
-Objects in the scene: Lump of Coal A few spilled lumps of anthracite coal lie near an overturned cart.
+Scene Elements to Include:
+- Visible pathway behind: The tunnel opening back to the clockwork jungle, leading to Clockwork Jungle
+- Visible pathway below: Rusted mine cart tracks descending into the depths
+- Lump of Coal A few spilled lumps of anthracite coal lie near an overturned cart.
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
+
+World Visual Setting: A remote island where Victorian-era steam technology has grown wild and organic over decades of abandonment. The dominant materials are oxidized brass, corroded copper, and rusted iron, interwoven with black volcanic rock and dense mechanical vegetation.
+The color palette centers on deep brass golds, verdigris greens, rust oranges, and oil-slick iridescence, set against the dark grays of volcanic stone and the deep blue-green of surrounding ocean.
+Architecture follows industrial Victorian sensibilities - riveted metal plates, exposed pipes, pressure gauges, and decorative ironwork - but overgrown and reclaimed by mechanical flora. Buildings have domed roofs, porthole windows, and pneumatic tube networks.
+Automatons range from small scuttling crabs to humanoid figures in tattered Victorian clothing. Their brass bodies are patinated green, their glass eyes glowing faintly amber, joints leaking wisps of steam.
+Environmental details include steam venting from ground pipes, gear-shaped flowers, solar-panel leaves on metal trees, oil pooling in rock crevices, and the constant quiet ticking of clockwork. The light is diffused through an ever-present sea mist, creating a melancholy, golden-hour atmosphere.
+Everything has a sense of beautiful decay - elegant engineering slowly surrendering to entropy, still functioning but worn and waiting.
 
 World Context: Steampunk Survival, Melancholy yet Wondrous
 

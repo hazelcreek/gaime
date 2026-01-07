@@ -6,19 +6,28 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: Distillery Laboratory
 
 Scene Description:
-A stark contrast to the rustic barn, this room is sterile and smells of alcohol and chemicals. Test tubes and beakers line the benches. A side door leads to the Library.
+A clinical, modern laboratory with white-tiled walls and stainless steel benches, a stark contrast to the rustic distillery. To the south, the door leads back to the dusty Malt Barn. To the east, a side door leads to the quiet Library.
+Test tubes, beakers, and bubbling flasks line the counters. Fluorescent lights hum overhead, casting a cold, even glow. Charts and chemical formulas are pinned to a corkboard.
+The sharp smell of alcohol and reagents fills the air. A small window looks out onto the grey, rain-streaked distillery courtyard, the modernity feeling almost out of place.
 
-Interactive Elements to Include:
-Visible pathways: an opening or exit behind, perhaps suggested by light or shadows; a passage or doorway visible to the right side of the scene
-Objects in the scene: Iodine Solution Sitting on a high shelf labeled 'Reagents'.
-Characters visible in the scene:
-
+Scene Elements to Include:
+- Reagent Shelf: Filled with dangerous looking chemicals.
+- Visible pathway behind: The door back to the dusty Malt Barn, leading to The Malt Barn
+- Visible pathway to the right: A side door leading to the quiet Library, leading to Distillery Library
+- Iodine Solution Sitting on a high shelf labeled 'Reagents'.
 - Callum MacLeod, Head Chemist, Pacing nervously between the lab benches.
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
+
+World Visual Setting: A remote Scottish island distillery in perpetual rain and mist, all grey stone, copper stills, and weathered wood. The architecture is Victorian industrial merged with ancient Celtic - stone buildings with moss-covered walls and peaked slate roofs.
+The color palette is dominated by rain-grey, whisky amber, copper patina green, and the deep brown of peat. Accents include the golden glow of lamp light through rain-streaked windows and the silver of wet cobblestones.
+Materials include rough-hewn granite, whitewashed stone, weathered oak barrels stacked in pyramids, and the gleaming copper of pot stills. Everything is damp, from the air to the ancient wood.
+Environmental details include rain lashing against every surface, mist rolling in from the sea, smoke rising from peat kilns, and the distant outline of other islands through the murk. Seabirds wheel and cry.
+Lighting is diffuse and grey during the day, warm amber from windows and lanterns at night. The Atlantic storms are ever-present, rain drumming on stone and running in rivulets down walls.
+The aesthetic is noir meets Celtic folklore - wet trench coats, standing stones glimpsed through mist, the smell of peat smoke and salt spray, and secrets hidden in cellars older than memory.
 
 World Context: Scottish Noir, Distillery Mystery, Celtic Folklore, Atmospheric, Rain-soaked, Tense, Peaty
 

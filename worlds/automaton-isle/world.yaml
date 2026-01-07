@@ -6,6 +6,14 @@ style: steampunk
 tone: "Melancholy yet Wondrous"
 hero_name: "Silas"
 
+visual_setting: |
+  A remote island where Victorian-era steam technology has grown wild and organic over decades of abandonment. The dominant materials are oxidized brass, corroded copper, and rusted iron, interwoven with black volcanic rock and dense mechanical vegetation.
+  The color palette centers on deep brass golds, verdigris greens, rust oranges, and oil-slick iridescence, set against the dark grays of volcanic stone and the deep blue-green of surrounding ocean.
+  Architecture follows industrial Victorian sensibilities - riveted metal plates, exposed pipes, pressure gauges, and decorative ironwork - but overgrown and reclaimed by mechanical flora. Buildings have domed roofs, porthole windows, and pneumatic tube networks.
+  Automatons range from small scuttling crabs to humanoid figures in tattered Victorian clothing. Their brass bodies are patinated green, their glass eyes glowing faintly amber, joints leaking wisps of steam.
+  Environmental details include steam venting from ground pipes, gear-shaped flowers, solar-panel leaves on metal trees, oil pooling in rock crevices, and the constant quiet ticking of clockwork. The light is diffused through an ever-present sea mist, creating a melancholy, golden-hour atmosphere.
+  Everything has a sense of beautiful decay - elegant engineering slowly surrendering to entropy, still functioning but worn and waiting.
+
 premise: |
   A remote island where steam-powered automata simulate a bustling society long after their human masters have died out. The air smells of salt and ozone.
 

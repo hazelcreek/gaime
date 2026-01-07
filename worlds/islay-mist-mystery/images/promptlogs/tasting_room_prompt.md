@@ -6,16 +6,27 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: Private Tasting Room
 
 Scene Description:
-The inner sanctum. The air is heavy with the 'Angel's Share'—evaporated whisky. Display cases line the walls holding rare vintages. In the center, a spilled glass and an overturned chair mark the scene of a struggle.
+An elegant private room with wood-paneled walls and soft, warm lighting from wall sconces. To the north, the secure steel door with its keypad leads back to the Library.
+Glass display cases line the walls, holding rows of rare and ancient whisky bottles, their amber contents glowing. In the center, the scene is disturbed: an overturned leather chair, a shattered glass on the tartan carpet, a dark stain spreading.
+The air is thick and sweet with evaporated whisky. A polished mahogany bar stands at one end. Rain lashes the single, barred window.
 
-Interactive Elements to Include:
-Visible pathways: a doorway or passage visible ahead in the distance
-Objects in the scene: Bloodied Cask Bung Hidden inside a smashed display case, stained with dried blood.
+Scene Elements to Include:
+- Display Case: Shattered glass covers the floor.
+- Overturned Chair: Overturned in a hurry.
+- Visible pathway ahead: The secure door leading back to the Library, leading to Distillery Library
+- Bloodied Cask Bung Hidden inside a smashed display case, stained with dried blood.
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
+
+World Visual Setting: A remote Scottish island distillery in perpetual rain and mist, all grey stone, copper stills, and weathered wood. The architecture is Victorian industrial merged with ancient Celtic - stone buildings with moss-covered walls and peaked slate roofs.
+The color palette is dominated by rain-grey, whisky amber, copper patina green, and the deep brown of peat. Accents include the golden glow of lamp light through rain-streaked windows and the silver of wet cobblestones.
+Materials include rough-hewn granite, whitewashed stone, weathered oak barrels stacked in pyramids, and the gleaming copper of pot stills. Everything is damp, from the air to the ancient wood.
+Environmental details include rain lashing against every surface, mist rolling in from the sea, smoke rising from peat kilns, and the distant outline of other islands through the murk. Seabirds wheel and cry.
+Lighting is diffuse and grey during the day, warm amber from windows and lanterns at night. The Atlantic storms are ever-present, rain drumming on stone and running in rivulets down walls.
+The aesthetic is noir meets Celtic folklore - wet trench coats, standing stones glimpsed through mist, the smell of peat smoke and salt spray, and secrets hidden in cellars older than memory.
 
 World Context: Scottish Noir, Distillery Mystery, Celtic Folklore, Atmospheric, Rain-soaked, Tense, Peaty
 

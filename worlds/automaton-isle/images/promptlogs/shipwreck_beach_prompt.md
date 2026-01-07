@@ -6,16 +6,29 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: Soot-Stained Sands
 
 Scene Description:
-Black sand clings to your boots. To the west, the ocean churns with wreckage. To the east, a dense jungle hums with mechanical clicking sounds.
+A stretch of jet-black volcanic sand meets churning gray-green ocean, scattered with twisted metal debris and smoldering wreckage from a distant burning ship on the horizon. Waves deposit fragments of brass and wood with each surge.
+To the north, rocky outcrops of black basalt climb toward shimmering tide pools. To the east, a gap in the dense mechanical jungle opens into clicking darkness, bronze vines framing the entrance.
+A chunk of a ship's cabin lies tilted on the sand nearby, its mahogany paneling splintered and windows shattered. Steam rises from vents in the dark rock, and clockwork crabs scuttle between debris. The sky is heavy with mist.
 
-Interactive Elements to Include:
-Visible pathways: a doorway or passage visible ahead in the distance; a passage or doorway visible to the right side of the scene; a passage leading toward Wrecked Cabin
-Objects in the scene: Dry Driftwood A pile of sun-bleached timber sits high on the dunes.
+Scene Elements to Include:
+- Ocean Wreckage: The wreckage is too far out to swim to, but a chunk of the cabin has washed up nearby.
+- Lighthouse View: You see the Lighthouse Balcony high above. A broken zipline cable dangles from it.
+- Visible pathway ahead: Rocky outcrops leading to shimmering tide pools
+- Visible pathway to the right: A gap in the dense mechanical jungle, clicking with hidden machinery
+- Visible pathway: A chunk of the ship's cabin that washed ashore, tilted at an angle, leading to Wrecked Cabin
+- Dry Driftwood A pile of sun-bleached timber sits high on the dunes.
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
+
+World Visual Setting: A remote island where Victorian-era steam technology has grown wild and organic over decades of abandonment. The dominant materials are oxidized brass, corroded copper, and rusted iron, interwoven with black volcanic rock and dense mechanical vegetation.
+The color palette centers on deep brass golds, verdigris greens, rust oranges, and oil-slick iridescence, set against the dark grays of volcanic stone and the deep blue-green of surrounding ocean.
+Architecture follows industrial Victorian sensibilities - riveted metal plates, exposed pipes, pressure gauges, and decorative ironwork - but overgrown and reclaimed by mechanical flora. Buildings have domed roofs, porthole windows, and pneumatic tube networks.
+Automatons range from small scuttling crabs to humanoid figures in tattered Victorian clothing. Their brass bodies are patinated green, their glass eyes glowing faintly amber, joints leaking wisps of steam.
+Environmental details include steam venting from ground pipes, gear-shaped flowers, solar-panel leaves on metal trees, oil pooling in rock crevices, and the constant quiet ticking of clockwork. The light is diffused through an ever-present sea mist, creating a melancholy, golden-hour atmosphere.
+Everything has a sense of beautiful decay - elegant engineering slowly surrendering to entropy, still functioning but worn and waiting.
 
 World Context: Steampunk Survival, Melancholy yet Wondrous
 

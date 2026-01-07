@@ -6,17 +6,27 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: Distillery Library
 
 Scene Description:
-A cozy room lined with dark oak shelves containing centuries of distilling history. A leather armchair sits by a cold fireplace. To the south is a secure metal door leading to the Tasting Room.
+A cozy, wood-paneled room with floor-to-ceiling dark oak bookshelves, filled with leather-bound volumes on whisky history and chemistry. To the west, the door leads back to the sterile Laboratory. To the south, a reinforced steel door with an electronic keypad guards the Tasting Room.
+A worn leather armchair sits by a cold stone fireplace. Dust motes float in the dim light filtering through a small, rain-streaked window. The air smells of old paper and faint smoke.
+Brass lamps with green glass shades cast warm pools of light. A tartan rug covers the flagstone floor. The silence is profound, broken only by the distant storm.
 
-Interactive Elements to Include:
-Visible pathways: a passage or doorway visible to the left side of the scene
-Subtle environmental details: a faint draft or subtle irregularity in the wall
-Objects in the scene: Old Celtic Dictionary Left open on the leather armchair.
+Scene Elements to Include:
+- Oak Bookshelves: Books on chemistry, botany, and local history.
+- Visible pathway to the left: The door back to the sterile Laboratory, leading to Distillery Laboratory
+- Visible pathway behind: A reinforced steel door with an electronic keypad
+- Old Celtic Dictionary Left open on the leather armchair.
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
+
+World Visual Setting: A remote Scottish island distillery in perpetual rain and mist, all grey stone, copper stills, and weathered wood. The architecture is Victorian industrial merged with ancient Celtic - stone buildings with moss-covered walls and peaked slate roofs.
+The color palette is dominated by rain-grey, whisky amber, copper patina green, and the deep brown of peat. Accents include the golden glow of lamp light through rain-streaked windows and the silver of wet cobblestones.
+Materials include rough-hewn granite, whitewashed stone, weathered oak barrels stacked in pyramids, and the gleaming copper of pot stills. Everything is damp, from the air to the ancient wood.
+Environmental details include rain lashing against every surface, mist rolling in from the sea, smoke rising from peat kilns, and the distant outline of other islands through the murk. Seabirds wheel and cry.
+Lighting is diffuse and grey during the day, warm amber from windows and lanterns at night. The Atlantic storms are ever-present, rain drumming on stone and running in rivulets down walls.
+The aesthetic is noir meets Celtic folklore - wet trench coats, standing stones glimpsed through mist, the smell of peat smoke and salt spray, and secrets hidden in cellars older than memory.
 
 World Context: Scottish Noir, Distillery Mystery, Celtic Folklore, Atmospheric, Rain-soaked, Tense, Peaty
 

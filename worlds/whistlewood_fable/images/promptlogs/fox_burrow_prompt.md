@@ -6,26 +6,35 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: Finnick's Cozy Burrow
 
 Scene Description:
-Your home is a hollow beneath the roots of a sleeping willow. It smells of dried sage and warm earth. Outside, the world is unusually quiet and grey.
+A cozy underground hollow carved beneath the twisted roots of an ancient willow tree. Above, a tunnel of packed earth leads up toward the dim grey light of the surface clearing.
+The walls are packed earth, smooth and warm, with tiny glowing fungi providing soft amber light. A small nest of dried leaves and soft moss serves as a bed.
+Bundles of dried herbs hang from protruding roots. The ceiling is a tangle of willow roots, forming a natural latticework. The space feels safe and personal, a little fox's sanctuary.
 
-Interactive Elements to Include:
-Visible pathways: stairs leading upward, or a visible upper level or balcony
-Objects in the scene: Basket of Dried Berries rests near the entrance, half-filled with dried provisions
+Scene Elements to Include:
+- Willow Roots: Twisted willow roots that form the ceiling of your home.
+- Visible pathway above: A tunnel of packed earth leading up toward the dim surface light, leading to The Mossy Clearing
+- Basket of Dried Berries rests near the entrance, half-filled with dried provisions
 
 Important: These elements should be integrated naturally into the scene, not highlighted
 or labelled. They should reward careful observation - exits should look like real
 architectural features, items should be placed where they would naturally be found,
 and any characters should be positioned authentically within the space.
 
+World Visual Setting: The Whistlewood is an enchanted forest rendered in a soft, watercolor aesthetic with gentle, bleeding edges and muted, dreamlike colors. Currently, the forest is stuck in a perpetual, chilly twilight, its colors fading to grey.
+Flora is whimsical and oversized: giant toadstools, flowers that glow faintly, trees with faces in their bark. Moss carpets everything in soft greens that are slowly draining to grey. Leaves are golden and russet where they still have color.
+The creatures are anthropomorphized woodland animals: foxes with clever eyes, grumpy badgers with pocket watches, wise owls, industrious moles. They wear bits of natural clothing—scarves of woven grass, hats made from acorn caps.
+Architecture is organic and fairy-tale: houses grown from giant mushrooms, cottages with windows of crystallized sugar, burrows beneath ancient roots. Light comes from fireflies, glowing crystals, and jars of captured moonlight.
+The overall mood is gentle melancholy tinged with hope. Even in the grey twilight, there's a sense that warmth and color are just waiting to return if someone brave and kind can restore the song.
+
 World Context: Quaint Fairy Tale, Whimsical, Gentle, Slightly Melancholic
 
 Mood: The atmosphere is dreamy, gentle, contemplative, ethereal. soft and diffused, natural light, gentle shadows without harsh edges. The color palette features soft pastels and muted tones, colors bleeding into each other, white space as breathing room.
 
-Artistic style (most important): Traditional watercolor painting aesthetic. Soft edges where colors bleed
+Visual style (most important): Traditional watercolor painting aesthetic. Soft edges where colors bleed
 and blend naturally. Visible paper texture underneath. Delicate washes of
 color with areas of intentional white space. The style should feel hand-painted
 and organic, with the beautiful imperfections of real watercolor.
-The artistic style is paramount.
+The visual style is paramount.
 This style must be maintained consistently throughout the entire image.
 
 Composition: first-person perspective, medium wide shot from eye level. color bleeding, soft vignette, visible brush strokes, paper texture

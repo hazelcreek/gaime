@@ -1,0 +1,168 @@
+{
+  "cadet_quarters": {
+    "location_id": "cadet_quarters",
+    "prompt_hash": "7b46c11e7fc127e6",
+    "generated_at": "2026-01-07T02:10:54.669905",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "main_corridor": {
+    "location_id": "main_corridor",
+    "prompt_hash": "99958cc88027ed73",
+    "generated_at": "2026-01-07T02:11:11.885477",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "turbolift": {
+    "location_id": "turbolift",
+    "prompt_hash": "b006decff6ddf12b",
+    "generated_at": "2026-01-07T02:11:28.476284",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "bridge": {
+    "location_id": "bridge",
+    "prompt_hash": "a3cda3d51d7cadc0",
+    "generated_at": "2026-01-07T02:11:48.634766",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "bridge__with__picard": {
+    "location_id": "bridge",
+    "prompt_hash": "ff813a3228daf65a",
+    "generated_at": "2026-01-07T02:12:49.249660",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": [
+      "picard"
+    ]
+  },
+  "observation_lounge": {
+    "location_id": "observation_lounge",
+    "prompt_hash": "bda4c71dc447ff62",
+    "generated_at": "2026-01-07T02:13:07.589416",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "ready_room": {
+    "location_id": "ready_room",
+    "prompt_hash": "6582831b32509f7e",
+    "generated_at": "2026-01-07T02:13:23.980571",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "ready_room__with__picard": {
+    "location_id": "ready_room",
+    "prompt_hash": "40c8151f724660c8",
+    "generated_at": "2026-01-07T02:14:00.888077",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": [
+      "picard"
+    ]
+  },
+  "engineering_corridor": {
+    "location_id": "engineering_corridor",
+    "prompt_hash": "0ded3c73d783c17a",
+    "generated_at": "2026-01-07T02:14:19.570983",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "engineering": {
+    "location_id": "engineering",
+    "prompt_hash": "c4afb3ad279bfdb0",
+    "generated_at": "2026-01-07T02:14:38.428944",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "warp_core": {
+    "location_id": "warp_core",
+    "prompt_hash": "b3282b73df8bd349",
+    "generated_at": "2026-01-07T02:14:57.686659",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "computer_core": {
+    "location_id": "computer_core",
+    "prompt_hash": "3b0df1f89ee79b35",
+    "generated_at": "2026-01-07T02:15:13.589477",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "ten_forward": {
+    "location_id": "ten_forward",
+    "prompt_hash": "0cca2f81ca861efd",
+    "generated_at": "2026-01-07T02:15:30.469418",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "ten_forward_celebration": {
+    "location_id": "ten_forward_celebration",
+    "prompt_hash": "a2daf9e7f7e5f433",
+    "generated_at": "2026-01-07T02:15:45.609239",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "sickbay": {
+    "location_id": "sickbay",
+    "prompt_hash": "1e589213a4aaf230",
+    "generated_at": "2026-01-07T02:16:01.081962",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "holodeck_corridor": {
+    "location_id": "holodeck_corridor",
+    "prompt_hash": "e51986ca8f07cb8d",
+    "generated_at": "2026-01-07T02:16:16.039992",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "holodeck": {
+    "location_id": "holodeck",
+    "prompt_hash": "e5b5f09261933ca3",
+    "generated_at": "2026-01-07T02:24:12.101073",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "holodeck__with__elysian_echo": {
+    "location_id": "holodeck",
+    "prompt_hash": "90966862f18b277d",
+    "generated_at": "2026-01-07T02:24:30.770761",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": [
+      "elysian_echo"
+    ]
+  },
+  "jeffries_hatch": {
+    "location_id": "jeffries_hatch",
+    "prompt_hash": "30a5a7555ab15aec",
+    "generated_at": "2026-01-07T02:17:07.848921",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  },
+  "jeffries_tube": {
+    "location_id": "jeffries_tube",
+    "prompt_hash": "367073f21c4bca94",
+    "generated_at": "2026-01-07T02:17:23.479383",
+    "generator_version": "dry-run-hash",
+    "style_preset": "star-trek-tng",
+    "variant_npc_ids": []
+  }
+}

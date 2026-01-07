@@ -2,6 +2,10 @@ main_hallway:
   name: "The Main Hallway"
   atmosphere: |
     The linoleum floor stretches out endlessly, reflecting the orange glow of the late afternoon sun streaming through the trophy case glass. It's unnervingly quiet, save for the hum of the vending machine. The lockers line the walls like silent metal soldiers.
+  visual_description: |
+    An endless corridor of beige linoleum stretching into the distance, the floor reflecting the orange glow of late afternoon sun streaming through tall windows. Metal lockers in institutional gray line both walls like silent soldiers.
+    To the north, the frosted glass of the Principal's Office looms ominously. To the east, double doors with porthole windows lead to the cafeteria. To the west, a door marked "SCIENCE LAB" waits. To the south, large gymnasium doors with push-bars beckon.
+    A glass trophy case displays rows of tarnished awards. Motivational posters curl at their corners, faded by fluorescent exposure. A lone vending machine hums in an alcove, casting blue light.
   exits:
     north:
       destination: principal_office
@@ -38,6 +42,10 @@ principal_office:
   name: "Principal Skinner's Office"
   atmosphere: |
     The air here smells of stale coffee and bureaucratic dread. A massive mahogany desk dominates the room. Behind it, a portrait of the school mascot (a confused badger) stares judgingly at you.
+  visual_description: |
+    A cramped office dominated by an imposing mahogany desk piled high with paperwork and confiscated items. To the south, the frosted glass door leads back to the relative safety of the main hallway.
+    The walls are institutional beige, decorated with framed diplomas, motivational quotes, and an oil painting of the school mascot - a confused-looking badger. Filing cabinets line one wall, their drawers labeled with years of detention records.
+    The fluorescent light buzzes overhead, and the carpet shows the wear pattern of a thousand students shuffling nervously. A dying plant wilts on the windowsill. A jar of confiscated phones sits prominently in view.
   exits:
     south:
       destination: main_hallway
@@ -61,6 +69,10 @@ cafeteria:
   name: "The Cafeteria"
   atmosphere: |
     Tables are folded up against the wall. The lingering scent of mystery meat and bleach hangs heavy. Dust motes dance in the light beams hitting the serving station.
+  visual_description: |
+    A cavernous cafeteria with round tables folded and stacked against the walls, revealing a permanently sticky floor. To the west, double doors with porthole windows lead back to the main hallway. To the north, a swinging door marked "STAFF ONLY" guards the kitchen.
+    A stainless steel serving line stretches along one wall, its sneeze guards gleaming, the food wells empty and dark. "MENU" boards display faded descriptions of meals that sound like cruel jokes.
+    Afternoon sunlight streams through high windows, illuminating drifting dust motes. Motivational banners reading "HEALTHY CHOICES!" hang from the ceiling. The walls are painted cinder block, and somewhere, a refrigerator hums.
   exits:
     west:
       destination: main_hallway
@@ -88,6 +100,10 @@ science_lab:
   name: "The Science Lab"
   atmosphere: |
     Bunsen burners sit cold on black countertops. A skeleton model in the corner is wearing a tie-dye t-shirt. The periodic table on the wall has several elements spelled wrong.
+  visual_description: |
+    A chemistry lab with rows of black granite-topped lab stations, each equipped with gas nozzles, sinks, and Bunsen burners sitting cold. To the east, the door marked "SCIENCE LAB" leads back to the main hallway.
+    A skeleton model in the corner has been dressed in a tie-dye t-shirt and sunglasses by generations of students. The periodic table on the wall is enormous, and someone has drawn mustaches on several element portraits.
+    Glass-fronted cabinets display jars of mysterious preserved specimens. Safety goggles hang on hooks, and a faded "SAFETY FIRST" poster shows dated hairstyles. Stools are pushed in at odd angles.
   exits:
     east:
       destination: main_hallway
@@ -111,6 +127,10 @@ gymnasium:
   name: "The Gymnasium"
   atmosphere: |
     The squeak of sneakers is ghosted into the hardwood floor. It smells of sweat and rubber. The bleachers are retracted, creating a cavernous echo whenever you move.
+  visual_description: |
+    A vast gymnasium with polished hardwood floors marked with faded game lines in multiple colors. To the north, large doors with push-bars lead back to the main hallway. To the east, the locker room entrance emanates a faint Axe body spray cloud.
+    The school mascot (a badger) is painted at center court, worn by years of sneaker scuffs. Retracted bleachers fold against the walls like giant wooden accordions, and basketball hoops hang at each end, nets tattered.
+    High windows let in slanted afternoon light, illuminating dust in the still air. Motivational banners ("GO BADGERS!") drape the walls. A scoreboard shows the eternal score of "HOME: 00 VISITOR: 00."
   exits:
     north:
       destination: main_hallway
@@ -135,6 +155,10 @@ locker_room:
   name: "The Locker Room"
   atmosphere: |
     Damp, dark, and smelling of Axe body spray. A single shower head drips rhythmically: drip... drip... drip. It's the scariest place in the school.
+  visual_description: |
+    A dim locker room with rows of dented metal lockers stretching into shadow, some hanging open to reveal forgotten gym clothes. To the west, the door leads back to the gymnasium and fresher air.
+    A row of shower heads lines the far wall, one dripping rhythmically into the perpetual puddle below. Wooden benches run between the locker rows, carved with decades of initials and crude drawings.
+    The floor is institutional tile with drains at regular intervals. The lighting flickers slightly, and every surface has a faint sheen of moisture. The air is thick with body spray, mildew, and teenage anxiety.
   exits:
     west:
       destination: gymnasium
@@ -155,6 +179,10 @@ kitchen:
   name: "The Kitchen"
   atmosphere: |
     Behind the serving line. Industrial sized mixers and ovens loom like metal giants. It's surprisingly clean, except for a pile of unfinished tater tots.
+  visual_description: |
+    A commercial kitchen of stainless steel and industrial efficiency, with massive ovens, walk-in freezers, and mixing equipment large enough to feed an army of hungry teenagers. To the south, the swinging door leads back to the cafeteria.
+    Racks of industrial-sized cans line the walls - "NACHO CHEESE SAUCE 5 GAL" and "FRUIT COCKTAIL INSTITUTIONAL SIZE." A massive griddle shows the ghostly outlines of a thousand burger patties.
+    Every surface gleams under harsh overhead lights. Hanging utensils include spatulas and ladles of terrifying scale. A whiteboard displays the week's menu with notes like "MYSTERY MEAT DAY."
   exits:
     south:
       destination: cafeteria
@@ -172,6 +200,10 @@ front_gate:
   name: "The Front Gate"
   atmosphere: |
     The massive chain-link fence stretches tall, topped with rusty barbed wire that's more for show than security. Beyond it, freedom beckons - the empty parking lot, the distant sound of traffic, the sweet promise of a weekend waiting for you. The padlock on the gate glints in the late afternoon sun.
+  visual_description: |
+    A tall chain-link fence topped with decorative but rusty barbed wire, the main gate secured with a heavy-duty padlock and chain. Behind you, the school's main entrance doors lead back into the brick prison.
+    The school name is spelled out in plastic letters on a brick sign, some letters faded or missing. Beyond the fence, freedom stretches out - an empty parking lot with faded lines, a single beige sedan, and a stray shopping cart.
+    The late afternoon sun casts long shadows across the concrete. The distant sounds of traffic and normal life drift tantalizingly close. A "GO BADGERS!" banner flutters half-heartedly from a flagpole.
   exits:
     inside:
       destination: main_hallway

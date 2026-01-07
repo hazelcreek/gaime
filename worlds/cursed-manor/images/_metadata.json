@@ -1,0 +1,148 @@
+{
+  "entrance_hall": {
+    "location_id": "entrance_hall",
+    "prompt_hash": "a0e16d6b0b16d5b0",
+    "generated_at": "2026-01-07T01:45:29.457375",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": []
+  },
+  "library": {
+    "location_id": "library",
+    "prompt_hash": "045fffd80e6ef302",
+    "generated_at": "2026-01-07T01:45:47.392455",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": []
+  },
+  "library__with__ghost_child": {
+    "location_id": "library",
+    "prompt_hash": "10b4b5ff2e485a50",
+    "generated_at": "2026-01-07T01:46:04.895474",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": [
+      "ghost_child"
+    ]
+  },
+  "secret_passage": {
+    "location_id": "secret_passage",
+    "prompt_hash": "3b844651161d92d2",
+    "generated_at": "2026-01-07T01:46:21.705160",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": []
+  },
+  "ritual_chamber": {
+    "location_id": "ritual_chamber",
+    "prompt_hash": "11b3ac39aeb92c19",
+    "generated_at": "2026-01-07T01:46:40.681654",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": []
+  },
+  "dining_room": {
+    "location_id": "dining_room",
+    "prompt_hash": "8c758f8cc8dba9a7",
+    "generated_at": "2026-01-07T01:46:58.666706",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": []
+  },
+  "kitchen": {
+    "location_id": "kitchen",
+    "prompt_hash": "cd544003a045daa8",
+    "generated_at": "2026-01-07T01:47:15.306765",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": []
+  },
+  "basement": {
+    "location_id": "basement",
+    "prompt_hash": "331bec1a6253b40b",
+    "generated_at": "2026-01-07T01:47:34.728349",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": []
+  },
+  "sitting_room": {
+    "location_id": "sitting_room",
+    "prompt_hash": "5428327924f13914",
+    "generated_at": "2026-01-07T01:47:51.943710",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": []
+  },
+  "sitting_room__with__ghost_child": {
+    "location_id": "sitting_room",
+    "prompt_hash": "10b4b5ff2e485a50",
+    "generated_at": "2026-01-07T01:48:09.334842",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": [
+      "ghost_child"
+    ]
+  },
+  "upper_landing": {
+    "location_id": "upper_landing",
+    "prompt_hash": "62fedc13220d0593",
+    "generated_at": "2026-01-07T01:48:27.679323",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": []
+  },
+  "upper_landing__with__ghost_child": {
+    "location_id": "upper_landing",
+    "prompt_hash": "10b4b5ff2e485a50",
+    "generated_at": "2026-01-07T01:48:45.292716",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": [
+      "ghost_child"
+    ]
+  },
+  "master_bedroom": {
+    "location_id": "master_bedroom",
+    "prompt_hash": "adfe219adbf27ed3",
+    "generated_at": "2026-01-07T01:49:02.779763",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": []
+  },
+  "master_bedroom__with__lady_margaret": {
+    "location_id": "master_bedroom",
+    "prompt_hash": "d37bf0ba7c5405cf",
+    "generated_at": "2026-01-07T01:49:20.651497",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": [
+      "lady_margaret"
+    ]
+  },
+  "nursery": {
+    "location_id": "nursery",
+    "prompt_hash": "54466f4d50de9ec6",
+    "generated_at": "2026-01-07T01:49:38.260996",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": []
+  },
+  "nursery__with__ghost_child": {
+    "location_id": "nursery",
+    "prompt_hash": "10b4b5ff2e485a50",
+    "generated_at": "2026-01-07T01:49:57.831587",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": [
+      "ghost_child"
+    ]
+  },
+  "guest_room": {
+    "location_id": "guest_room",
+    "prompt_hash": "6028f0fad676d487",
+    "generated_at": "2026-01-07T01:51:28.576766",
+    "generator_version": "dry-run-hash",
+    "style_preset": "dark-fantasy",
+    "variant_npc_ids": []
+  }
+}
