@@ -333,6 +333,7 @@ class WorldGenerator:
                 starting_situation=world_dict.get("starting_situation", ""),
                 victory=victory,
                 style=world_dict.get("style"),
+                visual_setting=world_dict.get("visual_setting", ""),
             )
 
             # Build Location models
@@ -359,6 +360,7 @@ class WorldGenerator:
                 locations[loc_id] = Location(
                     name=loc_data.get("name", ""),
                     atmosphere=loc_data.get("atmosphere", ""),
+                    visual_description=loc_data.get("visual_description", ""),
                     exits=loc_data.get("exits", {}),
                     items=loc_data.get("items", []),
                     npcs=loc_data.get("npcs", []),
@@ -486,6 +488,8 @@ class WorldGenerator:
                 "atmosphere": loc.atmosphere,
                 "exits": loc.exits,
             }
+            if loc.visual_description:
+                loc_dict["visual_description"] = loc.visual_description
             if loc.items:
                 loc_dict["items"] = loc.items
             if loc.item_placements:
@@ -574,6 +578,8 @@ class WorldGenerator:
 
         # Re-serialize world.yaml if victory or player was modified
         world_dict = yaml.safe_load(original_result["world_yaml"]) or {}
+        if world_data.world.visual_setting:
+            world_dict["visual_setting"] = world_data.world.visual_setting
         if world_data.world.victory:
             world_dict["victory"] = {
                 "location": world_data.world.victory.location,

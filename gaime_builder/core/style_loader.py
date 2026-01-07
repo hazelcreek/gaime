@@ -212,11 +212,26 @@ def build_mpa_prompt(
     atmosphere: str,
     world_context: str,
     style_block: StyleBlock,
-    interactive_section: str = ""
+    interactive_section: str = "",
+    visual_description: str = "",
+    visual_setting: str = ""
 ) -> str:
-    """Build a complete MPA-structured prompt for image generation."""
+    """Build a complete MPA-structured prompt for image generation.
+
+    Args:
+        location_name: Display name of the location
+        atmosphere: Narrative atmosphere (fallback if visual_description not provided)
+        world_context: Theme and tone of the world
+        style_block: Visual style configuration
+        interactive_section: Scene elements (exits, items, NPCs, details)
+        visual_description: Pure visual scene description (3-5 sentences)
+        visual_setting: World-level visual language (5-10 sentences)
+    """
     loader = get_loader()
     template = loader.get_prompt("image_generator", "mpa_template.txt")
+
+    # Use visual_description if provided, otherwise fall back to atmosphere
+    scene_description = visual_description.strip() if visual_description else atmosphere.strip()
 
     anti_styles_text = "\n".join(f"- {item}" for item in style_block.anti_styles)
     quality_text = "\n".join(f"- {item}" for item in style_block.quality_constraints)
@@ -229,8 +244,9 @@ def build_mpa_prompt(
 
     prompt = template.format(
         location_name=location_name,
-        atmosphere=atmosphere.strip(),
+        scene_description=scene_description,
         interactive_section=interactive_section,
+        visual_setting=visual_setting.strip() if visual_setting else "",
         world_context=world_context,
         mood_tone=style_block.mood.tone,
         mood_lighting=style_block.mood.lighting,

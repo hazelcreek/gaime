@@ -1,5 +1,5 @@
 
-Interactive Elements to Include:
+Scene Elements to Include:
 {interactive_elements}
 
 Important: These elements should be integrated naturally into the scene, not highlighted

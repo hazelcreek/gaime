@@ -312,9 +312,11 @@ class ImageHashTracker:
         tone = world_data.get("tone", "atmospheric")
         style_config = world_data.get("style") or world_data.get("style_block")
         style_block = resolve_style(style_config)
+        world_visual_setting = world_data.get("visual_setting", "")
 
         loc_name = loc_data.get("name", location_id)
         atmosphere = loc_data.get("atmosphere", "")
+        visual_description = loc_data.get("visual_description", "")
 
         # Build context (same logic as ImageGenerator._build_location_context)
         context = self._build_location_context(
@@ -351,6 +353,8 @@ class ImageHashTracker:
                 atmosphere=atmosphere,
                 theme=theme,
                 tone=tone,
+                visual_description=visual_description,
+                visual_setting=world_visual_setting,
                 context=context,
                 style_block=style_block
             )
@@ -766,12 +770,14 @@ class StyleTestHashTracker:
         # Extract world parameters
         theme = world_data.get("theme", "fantasy")
         tone = world_data.get("tone", "atmospheric")
+        world_visual_setting = world_data.get("visual_setting", "")
 
         # Use the specified preset instead of world's style
         style_block = resolve_style(preset_name)
 
         loc_name = loc_data.get("name", location_id)
         atmosphere = loc_data.get("atmosphere", "")
+        visual_description = loc_data.get("visual_description", "")
 
         # Build context (same logic as ImageGenerator._build_location_context)
         context = self._build_location_context(
@@ -784,6 +790,8 @@ class StyleTestHashTracker:
             atmosphere=atmosphere,
             theme=theme,
             tone=tone,
+            visual_description=visual_description,
+            visual_setting=world_visual_setting,
             context=context,
             style_block=style_block
         )

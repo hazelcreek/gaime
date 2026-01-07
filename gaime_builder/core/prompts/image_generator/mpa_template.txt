@@ -4,8 +4,10 @@ This is a high-resolution production asset in 16:9 widescreen format.
 Location: {location_name}
 
 Scene Description:
-{atmosphere}
+{scene_description}
 {interactive_section}
+World Visual Setting: {visual_setting}
+
 World Context: {world_context}
 
 Mood: The atmosphere is {mood_tone}. {mood_lighting}. The color palette features {mood_color_palette}.

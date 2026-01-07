@@ -20,8 +20,8 @@ You MUST respond with valid JSON containing four YAML strings. Follow this EXACT
 ```json
 {{
   "world_id": "{world_id}",
-  "world_yaml": "name: \\"World Name\\"\\ntheme: \\"theme here\\"\\ntone: \\"tone here\\"\\nhero_name: \\"Protagonist Name\\"\\n\\npremise: |\\n  Description of the world premise...\\n\\nstarting_situation: |\\n  Describe WHY the player can act NOW. What event, opportunity, or change has occurred that enables the adventure to begin? This is crucial for immersion.\\n\\nvictory:\\n  location: final_location_id\\n  item: optional_required_item\\n  flag: optional_required_flag\\n  narrative: |\\n    The ending narrative when the player wins...\\n\\nplayer:\\n  starting_location: first_location_id\\n  starting_inventory:\\n    - item_id\\n\\nconstraints:\\n  - \\"Constraint 1\\"\\n  - \\"Constraint 2\\"\\n\\ncommands:\\n  help: \\"Display available commands\\"\\n  look: \\"Examine surroundings\\"\\n  inventory: \\"Check inventory\\"\\n  go: \\"Move in a direction\\"",
-  "locations_yaml": "location_id:\\n  name: \\"Location Name\\"\\n  atmosphere: |\\n    Atmospheric description that establishes WHERE the player is...\\n  exits:\\n    north: other_location_id\\n  items:\\n    - item_id\\n  item_placements:\\n    item_id: \\"WHERE in this room the item is located\\"\\n  npcs:\\n    - npc_id\\n  npc_placements:\\n    npc_id: \\"WHERE in this room the NPC is positioned\\"\\n  details:\\n    thing: \\"Description of examinable thing\\"\\n    north: \\"Narrative description of what the north exit looks like\\"\\n  interactions:\\n    interaction_id:\\n      triggers:\\n        - \\"examine thing\\"\\n      narrative_hint: \\"What happens when triggered\\"\\n      sets_flag: flag_name\\n      reveals_exit: hidden_location_id\\n  requires:\\n    flag: required_flag_name",
+  "world_yaml": "name: \\"World Name\\"\\ntheme: \\"theme here\\"\\ntone: \\"tone here\\"\\nhero_name: \\"Protagonist Name\\"\\n\\nvisual_setting: |\\n  5-10 sentences describing the world's visual language for image generation.\\n  Include materials, textures, color palette, architecture style, character appearance,\\n  environmental details, and recurring visual motifs.\\n\\npremise: |\\n  Description of the world premise...\\n\\nstarting_situation: |\\n  Describe WHY the player can act NOW. What event, opportunity, or change has occurred that enables the adventure to begin? This is crucial for immersion.\\n\\nvictory:\\n  location: final_location_id\\n  item: optional_required_item\\n  flag: optional_required_flag\\n  narrative: |\\n    The ending narrative when the player wins...\\n\\nplayer:\\n  starting_location: first_location_id\\n  starting_inventory:\\n    - item_id\\n\\nconstraints:\\n  - \\"Constraint 1\\"\\n  - \\"Constraint 2\\"\\n\\ncommands:\\n  help: \\"Display available commands\\"\\n  look: \\"Examine surroundings\\"\\n  inventory: \\"Check inventory\\"\\n  go: \\"Move in a direction\\"",
+  "locations_yaml": "location_id:\\n  name: \\"Location Name\\"\\n  atmosphere: |\\n    Narrative atmosphere for the AI game master - can include sounds, smells, mood.\\n  visual_description: |\\n    3-5 sentences of pure visual description for image generation.\\n    Describe environment, props, background characters/animals.\\n    Do NOT repeat items, NPCs, details, or exits - those are handled separately.\\n  exits:\\n    north: other_location_id\\n  items:\\n    - item_id\\n  item_placements:\\n    item_id: \\"WHERE in this room the item is located\\"\\n  npcs:\\n    - npc_id\\n  npc_placements:\\n    npc_id: \\"WHERE in this room the NPC is positioned\\"\\n  details:\\n    thing: \\"Description of examinable thing\\"\\n    north: \\"Narrative description of what the north exit looks like\\"\\n  interactions:\\n    interaction_id:\\n      triggers:\\n        - \\"examine thing\\"\\n      narrative_hint: \\"What happens when triggered\\"\\n      sets_flag: flag_name\\n      reveals_exit: hidden_location_id\\n  requires:\\n    flag: required_flag_name",
   "npcs_yaml": "npc_id:\\n  name: \\"NPC Name\\"\\n  role: \\"Their role\\"\\n  location: location_id\\n  appearance: |\\n    Physical description of the character.\\n  personality:\\n    traits:\\n      - \\"trait_one\\"\\n      - \\"trait_two\\"\\n    speech_style: \\"How they speak\\"\\n    quirks:\\n      - \\"Behavioral quirk\\"\\n  knowledge:\\n    - \\"Something they know\\"\\n  dialogue_rules:\\n    - \\"Rule for how they communicate\\"",
   "items_yaml": "item_id:\\n  name: \\"Item Name\\"\\n  portable: true\\n  examine: |\\n    Description when examined...\\n  found_description: \\"REQUIRED: How the item appears naturally in the room scene.\\"\\n  take_description: \\"Message when taken\\""
 }}
@@ -77,6 +77,49 @@ IMPORTANT: Do NOT double-escape. Use standard JSON escaping only:
 7. Every item in a location MUST have an item_placements entry
 8. Every NPC in a location MUST have an npc_placements entry
 9. Constraints must include the key_constraints from the design brief
+10. visual_setting in world.yaml MUST be 5-10 sentences describing visual language
+11. visual_description in each location MUST be 3-5 sentences of pure visual scene description
+
+## Visual Description Rules
+- **visual_setting** (world.yaml): Describes the consistent visual language across all locations
+  - Materials and textures (e.g., weathered wood, polished marble, rusted metal)
+  - Color palette (dominant colors and accents)
+  - Architecture style (e.g., gothic, colonial, futuristic)
+  - Character/creature appearance and typical clothing
+  - Environmental details (lighting quality, vegetation, weather patterns)
+  - Recurring visual motifs
+
+- **visual_description** (each location): Pure visual scene for image generation
+  - Physical environment (1-2 sentences)
+  - Materials, lighting, colors specific to this space (1 sentence)
+  - Background props and ambient elements like extras/animals (1-2 sentences)
+  - **Entry point mirroring** (1-2 sentences) - see Visual Continuity Rules below
+  - Do NOT repeat: items, NPCs, exits, or details (those become "Scene Elements")
+  - Do NOT include: sounds, smells, or narrative mood (that goes in atmosphere)
+
+## Visual Continuity Rules (CRITICAL for immersion)
+Since each location image is generated independently, shared architectural elements (doorways, passages, stairs) must be described consistently from both sides.
+
+### Entry Point Mirroring
+In each location's visual_description, describe what the **entry points look like from inside**:
+- Use the SAME specific details (color, material, condition) in both connected locations
+- If an exit leads INTO a building, the destination must clearly show interior walls/ceiling
+- Mention light from connected areas (e.g., "sunlight streams in from the doorway to the east")
+
+Example - a curtained doorway between tavern and backroom:
+```yaml
+# In tavern_entrance visual_description:
+"...To the north, a heavy burgundy velvet curtain with tarnished brass rings conceals the private backroom."
+
+# In tavern_backroom visual_description:
+"An intimate room accessed through a heavy burgundy velvet curtain with tarnished brass rings, which hangs in the doorway to the south..."
+```
+
+### Checklist for Each Location
+1. For each exit, include a brief visual description of that doorway/passage in the visual_description
+2. Match specific architectural details (door type, material, color) with connected locations
+3. Indoor locations must look clearly interior (walls, ceiling, no sky)
+4. Underground passages should show tunnel openings on both ends
 
 ## Guidelines
 - Use snake_case for all IDs (e.g., dark_forest, old_hermit, rusty_key)

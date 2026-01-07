@@ -228,18 +228,21 @@ def _build_exits_description(exits: list[ExitInfo]) -> str:
         if exit.destination_known and exit.destination_name:
             desc = f"{desc}, leading to {exit.destination_name}"
 
-        # Add directional context if not already implied
+        # Get directional context for bullet prefix
         dir_hint = direction_hints.get(direction, "")
-        if dir_hint and dir_hint not in desc.lower():
-            desc = f"{desc} ({dir_hint})"
 
-        exit_descriptions.append(desc)
+        # Build bullet with directional prefix
+        if dir_hint:
+            exit_descriptions.append(f"- Visible pathway {dir_hint}: {desc}")
+        else:
+            exit_descriptions.append(f"- Visible pathway: {desc}")
 
     parts = []
     if exit_descriptions:
-        parts.append("Visible pathways: " + "; ".join(exit_descriptions))
+        parts.extend(exit_descriptions)
     if secret_hints:
-        parts.append("Subtle environmental details: " + "; ".join(secret_hints))
+        for hint in secret_hints:
+            parts.append(f"- Subtle detail: {hint}")
 
     return "\n".join(parts)
 
@@ -271,21 +274,15 @@ def _build_items_description(items: list[ItemInfo]) -> str:
 
         if item.is_artifact:
             if item.placement:
-                artifact_items.append(
-                    f"a notable object ({item.name}) {item.placement}"
-                )
+                artifact_items.append(f"- Notable object: {item.name} {item.placement}")
             else:
-                artifact_items.append(
-                    f"a notable object ({item.name}) that draws the eye"
-                )
+                artifact_items.append(f"- Notable object: {item.name} that draws the eye")
         else:
-            visible_items.append(f"{item.name} {placement_desc}")
+            visible_items.append(f"- {item.name} {placement_desc}")
 
     parts = []
-    if visible_items:
-        parts.append("Objects in the scene: " + "; ".join(visible_items))
-    if artifact_items:
-        parts.append("Significant objects: " + "; ".join(artifact_items))
+    parts.extend(visible_items)
+    parts.extend(artifact_items)
 
     return "\n".join(parts)
 
@@ -310,9 +307,7 @@ def _build_npcs_description(npcs: list[NPCInfo]) -> str:
         else:
             npc_descriptions.append(f"- {npc.name}, {npc.role}")
 
-    if npc_descriptions:
-        return "Characters visible in the scene:\n\n" + "\n\n".join(npc_descriptions)
-    return ""
+    return "\n".join(npc_descriptions)
 
 
 def _build_details_description(details: list[DetailInfo]) -> str:
@@ -335,13 +330,11 @@ def _build_details_description(details: list[DetailInfo]) -> str:
         if detail.scene_description:
             # Clean up multi-line descriptions
             desc_clean = " ".join(detail.scene_description.split())
-            detail_descriptions.append(f"{detail.name}: {desc_clean}")
+            detail_descriptions.append(f"- {detail.name}: {desc_clean}")
         else:
-            detail_descriptions.append(detail.name)
+            detail_descriptions.append(f"- {detail.name}")
 
-    if detail_descriptions:
-        return "Scene elements: " + "; ".join(detail_descriptions)
-    return ""
+    return "\n".join(detail_descriptions)
 
 
 def get_image_prompt(
@@ -350,9 +343,22 @@ def get_image_prompt(
     theme: str,
     tone: str,
     context: Optional[LocationContext] = None,
-    style_block: Optional[StyleBlock] = None
+    style_block: Optional[StyleBlock] = None,
+    visual_description: str = "",
+    visual_setting: str = ""
 ) -> str:
-    """Generate a prompt for creating a scene image."""
+    """Generate a prompt for creating a scene image.
+
+    Args:
+        location_name: Display name of the location
+        atmosphere: Narrative atmosphere (fallback if visual_description not provided)
+        theme: World theme
+        tone: World tone
+        context: Location context with exits, items, NPCs, details
+        style_block: Visual style configuration
+        visual_description: Pure visual scene description (3-5 sentences)
+        visual_setting: World-level visual language (5-10 sentences)
+    """
     atmosphere_clean = atmosphere.strip().replace('\n', ' ')
 
     exits_desc = ""
@@ -390,7 +396,9 @@ def get_image_prompt(
             atmosphere=atmosphere_clean,
             world_context=world_context,
             style_block=style_block,
-            interactive_section=interactive_section
+            interactive_section=interactive_section,
+            visual_description=visual_description,
+            visual_setting=visual_setting
         )
 
     # Fallback to legacy template
@@ -502,7 +510,9 @@ class ImageGenerator:
         tone: str,
         output_dir: Path,
         context: Optional[LocationContext] = None,
-        style_block: Optional[StyleBlock] = None
+        style_block: Optional[StyleBlock] = None,
+        visual_description: str = "",
+        visual_setting: str = ""
     ) -> Optional[str]:
         """Generate an image for a single location."""
         from google import genai
@@ -513,7 +523,11 @@ class ImageGenerator:
             raise ValueError("GEMINI_API_KEY environment variable is required")
 
         client = genai.Client(api_key=api_key)
-        prompt = get_image_prompt(location_name, atmosphere, theme, tone, context, style_block)
+        prompt = get_image_prompt(
+            location_name, atmosphere, theme, tone, context, style_block,
+            visual_description=visual_description,
+            visual_setting=visual_setting
+        )
 
         output_dir.mkdir(parents=True, exist_ok=True)
         _save_prompt_markdown(output_dir, location_id, location_name, prompt)
@@ -623,6 +637,7 @@ class ImageGenerator:
         # Load world metadata
         theme = "fantasy"
         tone = "atmospheric"
+        visual_setting = ""
         style_config = None
         style_preset_name = ""
 
@@ -631,6 +646,7 @@ class ImageGenerator:
                 world_data = yaml.safe_load(f) or {}
                 theme = world_data.get("theme", theme)
                 tone = world_data.get("tone", tone)
+                visual_setting = world_data.get("visual_setting", "")
                 style_config = world_data.get("style") or world_data.get("style_block")
                 if isinstance(style_config, str):
                     style_preset_name = style_config
@@ -666,6 +682,7 @@ class ImageGenerator:
         for i, (loc_id, loc_data) in enumerate(target_locations.items()):
             loc_name = loc_data.get("name", loc_id)
             atmosphere = loc_data.get("atmosphere", "")
+            visual_description = loc_data.get("visual_description", "")
 
             if progress_callback:
                 progress_callback(i / total, f"Generating {loc_name}...")
@@ -701,7 +718,9 @@ class ImageGenerator:
                         tone=tone,
                         output_dir=images_dir,
                         context=base_context,
-                        style_block=style_block
+                        style_block=style_block,
+                        visual_description=visual_description,
+                        visual_setting=visual_setting
                     )
                     results[loc_id] = str(images_dir / f"{loc_id}.png")
 
@@ -735,7 +754,9 @@ class ImageGenerator:
                         tone=tone,
                         output_dir=images_dir,
                         context=context,
-                        style_block=style_block
+                        style_block=style_block,
+                        visual_description=visual_description,
+                        visual_setting=visual_setting
                     )
                     results[loc_id] = result
 
@@ -780,6 +801,7 @@ class ImageGenerator:
         # Load world data
         theme = "fantasy"
         tone = "atmospheric"
+        visual_setting = ""
         style_config = None
         style_preset_name = ""
 
@@ -788,6 +810,7 @@ class ImageGenerator:
                 world_data = yaml.safe_load(f) or {}
                 theme = world_data.get("theme", theme)
                 tone = world_data.get("tone", tone)
+                visual_setting = world_data.get("visual_setting", "")
                 style_config = world_data.get("style") or world_data.get("style_block")
                 if isinstance(style_config, str):
                     style_preset_name = style_config
@@ -815,6 +838,7 @@ class ImageGenerator:
 
         loc_name = loc_data.get("name", location_id)
         atmosphere = loc_data.get("atmosphere", "")
+        visual_description = loc_data.get("visual_description", "")
 
         if progress_callback:
             progress_callback(0.1, f"Regenerating {loc_name}...")
@@ -842,7 +866,9 @@ class ImageGenerator:
                 tone=tone,
                 output_dir=images_dir,
                 context=base_context,
-                style_block=style_block
+                style_block=style_block,
+                visual_description=visual_description,
+                visual_setting=visual_setting
             )
 
             # Save metadata for base image
@@ -876,7 +902,9 @@ class ImageGenerator:
                 tone=tone,
                 output_dir=images_dir,
                 context=context,
-                style_block=style_block
+                style_block=style_block,
+                visual_description=visual_description,
+                visual_setting=visual_setting
             )
 
             # Save metadata

@@ -37,6 +37,17 @@ theme: "Victorian gothic horror"
 tone: "atmospheric, mysterious, unsettling"
 hero_name: "Eleanor Ashford"  # Protagonist name that NPCs will use in dialogue
 
+# Visual language for image generation (5-10 sentences)
+visual_setting: |
+  The Cursed Manor is a decaying Victorian estate, steeped in gothic horror. Expect dark,
+  ornate interiors with heavy, dust-laden furniture, peeling wallpaper, and flickering,
+  unreliable light sources. Materials are dark wood, tarnished brass, faded velvet, and
+  cold stone. The color palette is muted and somber, dominated by deep greys, faded blues,
+  and dark browns, with occasional unsettling flashes of red or sickly green. Architecture
+  is grand but crumbling, with high ceilings, long corridors, and hidden passages.
+  Apparitions are subtle, often seen in reflections or at the periphery of vision,
+  appearing as translucent, sorrowful figures in period attire.
+
 # Opening premise shown to player
 premise: |
   A violent storm has driven you to seek shelter in an old manor.
@@ -87,6 +98,7 @@ commands:
 | Field | Required | Purpose |
 |-------|----------|---------|
 | `hero_name` | Recommended | Protagonist name that NPCs use in dialogue (default: "the hero") |
+| `visual_setting` | Recommended | World-level visual language for image generation (5-10 sentences) |
 | `starting_situation` | Recommended | Explains WHY the player can act now (prevents confusion) |
 | `victory` | Recommended | Defines win condition and ending narrative |
 | `victory.location` | Optional | Player must be at this location to win |
@@ -102,10 +114,19 @@ Defines the game map and interactive elements.
 entrance_hall:
   name: "Entrance Hall"
 
-  # Hints for AI narrative generation
+  # Hints for AI narrative generation (ambience, sounds, smells)
   atmosphere: |
     Grand but decayed. A crystal chandelier hangs dark and dusty.
     Faded portraits line the walls. The air smells of old wood and secrets.
+
+  # Pure visual scene description for image generation (3-5 sentences)
+  # Focus on environmental elements, props, and background extras NOT listed as items/NPCs
+  visual_description: |
+    A vast, echoing hall with a checkered marble floor, cracked and worn. Towering,
+    dark wood panels line the walls, adorned with faded, unsettling portraits whose
+    eyes seem to follow you. A massive, dust-shrouded crystal chandelier hangs
+    precariously from the high ceiling, casting long, dancing shadows as lightning
+    flashes outside the grimy, leaded windows.
 
   # Connected locations
   exits:
@@ -385,7 +406,7 @@ starting_situation: "You are in a prison cell."
 
 ### Writing Atmosphere Hints
 
-The `atmosphere` field guides AI narrative generation. Good atmosphere:
+The `atmosphere` field guides AI narrative generation and provides ambience (sounds, smells, mood). Good atmosphere:
 
 ```yaml
 # Good - evocative, sensory, suggestive
@@ -397,6 +418,116 @@ atmosphere: |
 # Bad - too literal, no mood
 atmosphere: "A room with books"
 ```
+
+### Visual Setting (world.yaml)
+
+The `visual_setting` field defines the overall visual language for image generation. This describes how the world *looks* consistently across all locations:
+
+```yaml
+# Good - describes materials, colors, architecture, character appearance (5-10 sentences)
+visual_setting: |
+  The world of Booty Bay is a vibrant, slightly exaggerated pirate haven. Expect
+  ramshackle wooden structures, colorful flags and banners, and a general sense
+  of playful chaos. Materials are weathered wood, rusty iron, and sun-faded canvas.
+  Colors are bright and tropical, with deep blues of the ocean, sandy yellows,
+  and splashes of red and green from pirate attire and exotic birds. Architecture
+  is makeshift and organic, with buildings leaning precariously and connected by
+  rope bridges. Characters are caricatured pirates, with oversized hats, eye patches,
+  and a general air of roguish charm.
+
+# Bad - too short or focuses on rendering style (that's what style presets are for)
+visual_setting: "A pirate town"
+visual_setting: "Pixel art style with bright colors"  # Don't describe rendering style!
+```
+
+### Visual Description (locations.yaml)
+
+The `visual_description` field provides pure visual details for each location's image. Focus on:
+- **Overall scene appearance** (architecture, lighting, layout)
+- **Props and background elements** NOT listed as items, NPCs, or details
+- **Background extras** (crowds, animals, ambient activity)
+
+Do NOT repeat items, NPCs, details, or exits - those are added separately to the image prompt.
+
+```yaml
+# Good - 3-5 sentences of visual elements not covered by interactive elements
+visual_description: |
+  A rickety wooden pier extends into murky green harbor water, lined with
+  barnacle-encrusted pilings. Crates and barrels are stacked haphazardly
+  along the dock, some overflowing with fishing nets and old ropes. Distant,
+  colorful pirate ships are visible in the bay, their tattered sails flapping
+  gently. Seagulls wheel overhead against a bright blue sky.
+
+# Bad - repeats items/NPCs or describes sounds/smells (that's atmosphere)
+visual_description: "There is a brass key on the ground."  # That's an item!
+visual_description: "The smell of fish fills the air."      # That's atmosphere!
+```
+
+### Visual Continuity at Connection Points
+
+Since each location image is generated independently, **shared architectural elements** (doorways, passages, stairs) can look completely different from each side, breaking immersion. Use **entry point mirroring** to maintain visual consistency.
+
+#### The Problem
+
+When a "curtained doorway" connects the tavern to its backroom, the curtain might appear as red velvet from one side and tattered burlap from the other. Similarly, an "underground passage" exit might look like rough stone steps, but the destination looks like an outdoor scene.
+
+#### The Solution: Entry Point Mirroring
+
+In each location's `visual_description`, explicitly describe what the **entry points look like from inside**. Use the same specific details (color, material, condition) in both connected locations.
+
+```yaml
+# tavern_entrance - describe what the backroom entrance looks like FROM HERE
+visual_description: |
+  ...
+  To the north, a heavy burgundy velvet curtain with tarnished brass rings
+  conceals the private backroom.
+
+# tavern_backroom - describe the SAME curtain as seen FROM INSIDE
+visual_description: |
+  An intimate private room accessed through a heavy burgundy velvet curtain
+  with tarnished brass rings, which hangs in the doorway to the south...
+```
+
+#### Entry Point Mirroring Checklist
+
+When writing `visual_description` for each location, include:
+
+1. **Doorways/Passages to adjacent locations** - Describe what each exit looks like from inside this room
+2. **Specific architectural details** - Same materials, colors, and distinctive features on both sides
+3. **Interior/Exterior consistency** - If exiting into a building, destination must clearly be interior
+4. **Lighting transitions** - Mention light coming from connected areas (e.g., "sunlight streaming through the door from the square")
+
+```yaml
+# Good - specific, mirrored details
+exits:
+  west:
+    scene_description: Weather-beaten green swinging saloon doors of The Rusty Cutlass
+# In visual_description:
+visual_description: |
+  ...To the west, weather-beaten green swinging saloon doors let in slashes of
+  bright Caribbean sunlight from the Town Square...
+
+# In the connected location (tavern_entrance):
+visual_description: |
+  ...To the east, weather-beaten green swinging saloon doors let in bright
+  sunlight from the Town Square...
+
+# Bad - generic, inconsistent
+exits:
+  west:
+    scene_description: The tavern door
+# visual_description doesn't mention the door at all
+```
+
+#### Common Continuity Pitfalls
+
+| Issue | Example | Fix |
+|-------|---------|-----|
+| Mismatched doorways | Red curtain from one side, blue from the other | Use identical descriptors: "burgundy velvet curtain with brass rings" |
+| Indoor/outdoor mismatch | Exit leads "into a building" but destination looks like outdoors | Rewrite destination to clearly show interior walls, ceiling, door |
+| Missing entry points | Underground cave has no visible tunnel exit | Add "At one end, a winding tunnel emerges from the darkness" |
+| Generic exit descriptions | "A door leads north" | Specify: "An iron-banded oak door with a rusty padlock" |
+| Lighting inconsistency | Dark room connects to sunny plaza with no light spillover | Add "bright sunlight streams through the doorway from the square" |
 
 ### Item Found Descriptions
 
@@ -728,6 +859,8 @@ Returns information about conditional NPCs and existing variants.
 | Player confused why they can act | Add `starting_situation` explaining the enabling event |
 | Game has no ending | Add `victory` condition with location/flag/item requirements |
 | Exits seem unrealistic | Add narrative justification in `details` for each exit direction |
+| Images lack visual depth | Add `visual_setting` to world.yaml and `visual_description` to each location |
+| Images repeat item/NPC descriptions | Focus `visual_description` on background elements and props, not interactive entities |
 | Items placed unrealistically in images | Add `item_placements` for every item at each location |
 | NPCs floating in scene | Add `npc_placements` for every NPC at each location |
 | Conditional NPC visible in image before appearing | Generate image variants with `/generate-variants` |

@@ -37,6 +37,9 @@ class World(BaseModel):
     )
     victory: VictoryCondition | None = None  # Win condition for the game
     style: str | None = None  # Visual style preset for image generation
+    visual_setting: str = (
+        ""  # World-level visual language for image generation (5-10 sentences)
+    )
 
 
 class InteractionEffect(BaseModel):
@@ -204,6 +207,7 @@ class Location(BaseModel):
     Attributes:
         name: Display name for the location
         atmosphere: Atmosphere hints for AI narrative generation
+        visual_description: Pure visual scene description for image generation (3-5 sentences)
         exits: Direction -> ExitDefinition mapping
         details: Examinable scenery elements
         interactions: Special interactions at this location
@@ -214,6 +218,9 @@ class Location(BaseModel):
 
     name: str
     atmosphere: str = ""
+    visual_description: str = (
+        ""  # Pure visual scene for image generation (3-5 sentences)
+    )
     exits: dict[str, ExitDefinition] = Field(default_factory=dict)
     details: dict[str, DetailDefinition] = Field(default_factory=dict)
     interactions: dict[str, InteractionEffect] = Field(default_factory=dict)

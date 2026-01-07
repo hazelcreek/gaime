@@ -16,6 +16,7 @@ Respond with valid JSON containing the world design brief. DO NOT generate YAML 
   "world_id": "snake-case-world-name",
   "world_name": "Human Readable World Name",
   "spoiler_free_pitch": "A 3-6 sentence description of the world premise and vibe. Describe the setting, atmosphere, and what makes it compelling. DO NOT reveal any puzzle solutions, secrets, or how to win. This will be shown to the player.",
+  "visual_setting": "5-10 sentences describing the world's visual language for image generation. Include: materials and textures (wood, stone, metal types), color palette (dominant and accent colors), architecture style, character/creature appearance and clothing, environmental details (lighting quality, vegetation, weather), recurring visual motifs. This should be consistent across all locations. NOT the rendering style (that's handled separately) - focus on the in-world look.",
   "design_brief": {{
     "puzzle_threads": [
       {{
@@ -93,5 +94,7 @@ Respond with valid JSON containing the world design brief. DO NOT generate YAML 
 5. **Environmental Storytelling**: Connect at least 2 locations through discoverable lore or visual details.
 
 6. **Constraints**: Be specific! "The basement is locked" is vague. "The basement door requires the iron key and cannot be broken" is enforceable.
+
+7. **Visual Continuity**: When designing location connections, consider how shared architectural elements will appear from both sides. Define specific details (door type, material, color) that will be consistent when viewing the doorway from either direction. Interior locations must be clearly interior; underground locations must show tunnel architecture.
 
 Think carefully about how the puzzle threads interweave and create a satisfying exploration experience.
