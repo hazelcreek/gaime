@@ -276,6 +276,7 @@ Critical constraints - the image must NOT include:
 | `hollow-knight` | Delicate linework, muted palette, melancholic bug-scale |
 | `ori` | Luminous painted backgrounds, soft glow, nature spirits |
 | `spider-verse` | Comic halftone dots, chromatic aberration, mixed media |
+| `art-deco` | 1920s geometric glamour, gold and black, sunburst patterns |
 
 ## How Layers Combine
 

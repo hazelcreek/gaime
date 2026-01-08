@@ -10,7 +10,7 @@ Future style presets to consider creating. Each includes a brief description of 
 |-------|-------------|
 | **Ukiyo-e** | Japanese woodblock prints—flat colors, bold outlines, wave patterns, Hokusai/Hiroshige aesthetic |
 | **Art Nouveau** | Alphonse Mucha—flowing organic lines, decorative borders, elegant female figures, floral motifs |
-| **Art Deco** | 1920s geometric glamour, gold and black, sunburst patterns, Gatsby-era luxury |
+| ~~**Art Deco**~~ ✅ | 1920s geometric glamour, gold and black, sunburst patterns, Gatsby-era luxury |
 | **Soviet Constructivism** | Bold propaganda posters, red/black/cream, diagonal compositions, heroic workers |
 | **Bauhaus** | Primary colors, geometric shapes, clean modernist design, functional beauty |
 | **Romanticism** | Caspar David Friedrich—sublime landscapes, tiny figures against vast nature, dramatic skies |

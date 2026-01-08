@@ -1,0 +1,50 @@
+# art-deco.yaml - Art Deco style preset
+# 1920s-30s geometric glamour, Gatsby-era luxury, bold patterns
+
+name: "Art Deco"
+description: "1920s-30s Art Deco aesthetic with bold geometric patterns, sunburst motifs, and Gatsby-era glamour. Gold, black, and jewel tones rendered with architectural precision and Jazz Age sophistication."
+
+# L3: Mood
+mood:
+  tone: "glamorous, sophisticated, opulent, confident, theatrical"
+  lighting: "dramatic theatrical lighting, golden uplighting, sharp geometric shadows, gleaming metallic reflections, spotlight drama"
+  color_palette: "rich gold and black foundation with jewel tone accents—emerald green, burgundy, sapphire blue, champagne cream—metallic lusters and high contrast"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Art Deco illustration and poster art from the 1920s-1930s era. Bold geometric
+  patterns: sunburst rays, chevron zigzags, stepped pyramidal forms, stylized
+  fountains, and fan motifs. Clean hard edges with no soft gradients—shapes are
+  precise and architectural. Influenced by Egyptian revival, Aztec geometry, and
+  machine-age streamlining. Evokes the Chrysler Building, Tamara de Lempicka
+  paintings, and Erté fashion illustrations. Polished surfaces: chrome, lacquer,
+  inlaid marble, and gilded ornament. The visual style is paramount—every element
+  must feel like it belongs in a glamorous Jazz Age speakeasy or luxury ocean liner.
+
+# L5: Technical
+technical:
+  perspective: "first-person"
+  shot: "medium wide shot showcasing architectural grandeur"
+  camera: "eye level or dramatic low angle emphasizing verticality and geometric patterns"
+  effects: "metallic sheen, sharp geometric shadows, subtle film grain, golden glow on metallic surfaces"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "soft or organic curves"
+  - "photorealistic or hyperrealistic"
+  - "anime or manga"
+  - "watercolor or impressionistic"
+  - "rustic or weathered"
+  - "Art Nouveau flowing lines"
+  - "medieval or fantasy"
+  - "minimalist or flat design"
+  - "grunge or distressed textures"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "rounded soft edges instead of geometric"
+  - "muted or pastel colors"
+  - "asymmetrical chaotic composition"
+  - "modern contemporary aesthetic"
