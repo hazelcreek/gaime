@@ -1,0 +1,52 @@
+# amelie.yaml - Jean-Pierre Jeunet magical realism cinematic style
+# Hyper-saturated, nostalgic, dreamy but photorealistic, magical wonder
+
+name: "Amélie / Jeunet Magical Realism"
+description: "Jean-Pierre Jeunet's distinctive cinematic style—the magical realism of Amélie, City of Lost Children, and A Very Long Engagement. Hyper-saturated colors, nostalgic warmth, photorealistic but heightened reality, every frame a painting."
+
+# L3: Mood
+mood:
+  tone: "magical, nostalgic, whimsical, warm, dreamlike yet grounded"
+  lighting: "warm golden diffused light, soft shadows, magical practicals, glowing warm interiors against cool exteriors, lens flares from light sources"
+  color_palette: "rich saturated greens and golden ambers, warm skin tones, desaturated blues and grays for contrast, vintage Kodak warmth pushed to eleven"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Photorealistic magical realism in the cinematic style of Jean-Pierre Jeunet's films,
+  particularly Amélie, City of Lost Children, and A Very Long Engagement. This is REAL
+  photography of REAL locations—not illustration, not CGI—but with reality heightened
+  to feel like a living fairy tale. Hyper-saturated color grading with rich greens,
+  warm ambers, and golden skin tones. Every texture is tactile and inviting—worn wood,
+  aged brass, peeling paint, faded fabric. Soft diffused lighting creates a dreamlike
+  glow while maintaining photographic detail. The mundane becomes magical through
+  composition and color. Shot on 35mm film with vintage anamorphic lenses for subtle
+  flares and organic bokeh. The visual style is paramount—this must feel like a frame
+  from Amélie, where ordinary life becomes extraordinary through cinematic alchemy.
+
+# L5: Technical
+technical:
+  perspective: "first-person or intimate third-person"
+  shot: "medium or medium-wide with environmental storytelling"
+  camera: "35mm anamorphic, gentle wide-angle, soft focus vignette, eye-level or slight low angle"
+  effects: "warm lens flares, soft film grain, gentle vignette, diffused glow on highlights, rich shadow detail"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "flat natural documentary look"
+  - "desaturated or muted colors"
+  - "harsh high contrast"
+  - "cold blue-teal modern grading"
+  - "digital clarity and sharpness"
+  - "anime or illustration"
+  - "CGI or 3D rendered"
+  - "gritty or grimy realism"
+  - "lo-fi disposable camera quality"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "flat or harsh lighting"
+  - "dull muted palette"
+  - "clinical sterile look"
+  - "generic stock photo aesthetic"

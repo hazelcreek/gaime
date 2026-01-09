@@ -1,0 +1,54 @@
+# del-toro-fairy-tale.yaml - Guillermo del Toro dark fairy tale aesthetic
+# Lush gothic magic, amber-and-teal richness, tactile wonder, darker enchantment
+
+name: "Del Toro Dark Fairy Tale"
+description: "Guillermo del Toro's distinctive dark fairy tale aesthetic—the lush gothic magic of Pan's Labyrinth, The Shape of Water, and Crimson Peak. Rich amber and teal, tactile textures, romantic darkness, and wonder tinged with melancholy."
+
+# L3: Mood
+mood:
+  tone: "enchanted, melancholic, romantic, mysterious, darkly beautiful"
+  lighting: "rich amber candlelight and firelight, deep teal shadows, volumetric fog and dust, bioluminescent glows, dramatic chiaroscuro with soft edges"
+  color_palette: "warm amber and gold against deep teal and forest green, jewel tones—ruby, emerald, sapphire—rich saturated shadows, vintage warmth with gothic depth"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Photorealistic dark fairy tale cinematography in the style of Guillermo del Toro's
+  films—Pan's Labyrinth, The Shape of Water, Crimson Peak, and The Devil's Backbone.
+  This is REAL photography with lavish production design, not illustration or CGI.
+  Every surface is tactile and weathered: crumbling stone, aged wood, rusted iron,
+  velvet fabric, rain-slicked streets. Rich amber warmth from candles, fireplaces,
+  and aged incandescent light contrasts with deep teal-green shadows. Gothic romanticism
+  where darkness is beautiful, not terrifying. Magical elements feel ancient and organic—
+  moss, roots, water, bone, gold leaf. Shot on film with vintage lenses creating soft
+  edges and romantic bokeh. Composition favors symmetry and archetypal imagery. The
+  mundane world brushes against the mythic. The visual style is paramount—this must
+  feel like a frame from a del Toro film where fairy tales are real, beautiful, and
+  touched with sorrow.
+
+# L5: Technical
+technical:
+  perspective: "first-person or intimate third-person"
+  shot: "medium or medium-wide with architectural framing"
+  camera: "35mm or 65mm film, gentle wide-angle, often low angles, symmetrical when mythic"
+  effects: "soft film grain, amber-teal split toning, volumetric atmosphere, gentle lens bloom on lights, rich shadow detail"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "bright cheerful lighting"
+  - "desaturated gritty realism"
+  - "cold clinical modern"
+  - "harsh horror aesthetic"
+  - "flat documentary look"
+  - "anime or illustration"
+  - "CGI or 3D rendered"
+  - "jump-scare horror"
+  - "sterile or minimalist"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "flat or harsh lighting"
+  - "cheap or low production value"
+  - "garish oversaturated colors"
+  - "generic fantasy illustration"

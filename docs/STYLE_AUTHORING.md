@@ -277,6 +277,9 @@ Critical constraints - the image must NOT include:
 | `ori` | Luminous painted backgrounds, soft glow, nature spirits |
 | `spider-verse` | Comic halftone dots, chromatic aberration, mixed media |
 | `art-deco` | 1920s geometric glamour, gold and black, sunburst patterns |
+| `amelie` | Jeunet magical realism, hyper-saturated nostalgia, green-gold warmth |
+| `spielberg-magic` | 80s Amblin wonder, golden backlight, lens flares, adventure magic |
+| `del-toro-fairy-tale` | Dark fairy tale, amber-teal gothic, Pan's Labyrinth aesthetic |
 
 ## How Layers Combine
 

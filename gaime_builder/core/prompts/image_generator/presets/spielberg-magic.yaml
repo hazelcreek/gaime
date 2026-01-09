@@ -1,0 +1,52 @@
+# spielberg-magic.yaml - 80s Amblin magical cinema aesthetic
+# Golden hour wonder, backlit magic, nostalgic adventure, larger-than-life
+
+name: "Spielberg Magic / 80s Amblin"
+description: "The magical cinematography of 80s Spielberg and Amblin Entertainment—E.T., Hook, Close Encounters, The Goonies. Backlit wonder, golden hour warmth, lens flares, and that ineffable sense of cinematic magic that defined a generation."
+
+# L3: Mood
+mood:
+  tone: "wondrous, nostalgic, adventurous, magical, emotionally sweeping"
+  lighting: "golden hour backlight with lens flares, warm rim lighting on subjects, shafts of light through dust and fog, practical lights glowing warmly, dramatic silhouettes against bright backgrounds"
+  color_palette: "warm amber and gold dominant, deep rich shadows with blue-purple tones, nostalgic Kodak film warmth, saturated but natural"
+
+# L4: Style (MOST IMPORTANT)
+style: |
+  Cinematic magical realism in the style of 1980s Spielberg and Amblin Entertainment—
+  E.T., Hook, Close Encounters of the Third Kind, The Goonies, and Legend. This is
+  photorealistic cinematography that captures moments of transcendent wonder. Signature
+  elements: subjects backlit by golden light creating glowing rim halos, lens flares
+  from practical light sources, shafts of volumetric light cutting through darkness,
+  warm amber tones contrasting cool shadows. Shot on 35mm film (Kodak 5247/5293) with
+  vintage Panavision anamorphic lenses. The mundane world touched by magic—bicycles
+  flying past the moon, light spilling from a closet, figures silhouetted against
+  extraordinary light. Emotional and larger-than-life while remaining grounded in
+  photographic reality. The visual style is paramount—this must evoke that specific
+  80s blockbuster magic where anything seems possible.
+
+# L5: Technical
+technical:
+  perspective: "first-person or dramatic third-person"
+  shot: "medium-wide establishing wonder, or intimate medium shots"
+  camera: "35mm anamorphic Panavision, low angles looking up at wonder, sweeping movement implied"
+  effects: "prominent lens flares, golden film grain, volumetric light, warm vignette, soft glow on highlights"
+
+# L6: Anti-styles (prevents style drift)
+anti_styles:
+  - "cold modern digital look"
+  - "teal-orange blockbuster grading"
+  - "flat documentary realism"
+  - "desaturated or muted"
+  - "gritty handheld"
+  - "CGI or animation"
+  - "clinical or sterile"
+  - "harsh high contrast"
+
+# L6: Quality constraints
+quality_constraints:
+  - "watermarks or signatures"
+  - "blurry or low-quality artifacts"
+  - "flat or harsh lighting"
+  - "cold color temperature"
+  - "overly sharp digital look"
+  - "generic stock photo aesthetic"
