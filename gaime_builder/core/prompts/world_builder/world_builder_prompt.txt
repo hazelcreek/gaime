@@ -5,6 +5,7 @@ You are synthesizing the detailed YAML for a text adventure world based on the a
 
 ## Requirements
 - Theme: {theme}
+- Reality Level: {reality_level}
 - Number of locations: {num_locations}
 - Number of NPCs: {num_npcs}
 
@@ -14,6 +15,16 @@ You are synthesizing the detailed YAML for a text adventure world based on the a
 ## Your Task
 Implement the design brief as detailed YAML. Every puzzle thread, gate, secret, and constraint from the brief MUST be reflected in the YAML.
 
+## Reality Level: {reality_level}
+All NPCs, items, locations, and narrative must match this reality level:
+
+- **grounded**: Realistic characters and settings only. NPCs are ordinary humans. No magic, talking animals, supernatural elements, or impossible physics. A NYC setting has journalists, shopkeepers, commuters - not sentient penguins.
+- **stylized**: Heightened reality with quirky characters and exaggerated situations. Still no outright fantasy elements - no magic or talking animals.
+- **surreal**: Dreamlike, absurdist, metaphorical. Strange logic and unexpected elements welcome. Internal consistency matters more than realism.
+- **fantasy**: Magic and mythical elements expected. Talking animals, spells, impossible architecture all acceptable.
+
+**Enforcement**: Do NOT add elements that exceed the specified reality level. A "grounded" world with talking penguin mayors would be a violation.
+
 ## Output Format
 You MUST respond with valid JSON containing four YAML strings. Follow this EXACT structure:
 
@@ -21,10 +32,93 @@ You MUST respond with valid JSON containing four YAML strings. Follow this EXACT
 {{
   "world_id": "{world_id}",
   "world_yaml": "name: \\"World Name\\"\\ntheme: \\"theme here\\"\\ntone: \\"tone here\\"\\nhero_name: \\"Protagonist Name\\"\\n\\nvisual_setting: |\\n  5-10 sentences describing the world's visual language for image generation.\\n  Include materials, textures, color palette, architecture style, character appearance,\\n  environmental details, and recurring visual motifs.\\n\\npremise: |\\n  Description of the world premise...\\n\\nstarting_situation: |\\n  Describe WHY the player can act NOW. What event, opportunity, or change has occurred that enables the adventure to begin? This is crucial for immersion.\\n\\nvictory:\\n  location: final_location_id\\n  item: optional_required_item\\n  flag: optional_required_flag\\n  narrative: |\\n    The ending narrative when the player wins...\\n\\nplayer:\\n  starting_location: first_location_id\\n  starting_inventory:\\n    - item_id\\n\\nconstraints:\\n  - \\"Constraint 1\\"\\n  - \\"Constraint 2\\"\\n\\ncommands:\\n  help: \\"Display available commands\\"\\n  look: \\"Examine surroundings\\"\\n  inventory: \\"Check inventory\\"\\n  go: \\"Move in a direction\\"",
-  "locations_yaml": "location_id:\\n  name: \\"Location Name\\"\\n  atmosphere: |\\n    Narrative atmosphere for the AI game master - can include sounds, smells, mood.\\n  visual_description: |\\n    3-5 sentences of pure visual description for image generation.\\n    Describe environment, props, background characters/animals.\\n    Do NOT repeat items, NPCs, details, or exits - those are handled separately.\\n  exits:\\n    north: other_location_id\\n  items:\\n    - item_id\\n  item_placements:\\n    item_id: \\"WHERE in this room the item is located\\"\\n  npcs:\\n    - npc_id\\n  npc_placements:\\n    npc_id: \\"WHERE in this room the NPC is positioned\\"\\n  details:\\n    thing: \\"Description of examinable thing\\"\\n    north: \\"Narrative description of what the north exit looks like\\"\\n  interactions:\\n    interaction_id:\\n      triggers:\\n        - \\"examine thing\\"\\n      narrative_hint: \\"What happens when triggered\\"\\n      sets_flag: flag_name\\n      reveals_exit: hidden_location_id\\n  requires:\\n    flag: required_flag_name",
+  "locations_yaml": "location_id:\\n  name: \\"Location Name\\"\\n  atmosphere: |\\n    Narrative atmosphere for the AI game master - can include sounds, smells, mood.\\n  visual_description: |\\n    3-5 sentences of pure visual description for image generation.\\n    Describe environment, props, background characters/animals.\\n    Do NOT repeat items, NPCs, details, or exits - those are handled separately.\\n  exits:\\n    north:\\n      destination: other_location_id\\n      scene_description: \\"Visual description of this exit (doorway, archway, path).\\"\\n      destination_known: true\\n    secret:\\n      destination: hidden_room_id\\n      scene_description: \\"A narrow passage behind the bookcase.\\"\\n      hidden: true\\n      find_condition:\\n        requires_flag: found_secret_lever\\n      destination_known: true\\n  item_placements:\\n    visible_item_id:\\n      placement: \\"WHERE in this room the item is located\\"\\n    hidden_item_id:\\n      placement: \\"WHERE the hidden item is concealed\\"\\n      hidden: true\\n      find_condition:\\n        requires_flag: searched_container\\n  npc_placements:\\n    npc_id:\\n      placement: \\"WHERE in this room the NPC is positioned\\"\\n  details:\\n    examinable_thing:\\n      name: \\"Thing Name\\"\\n      scene_description: \\"How it appears in the scene.\\"\\n      examine_description: \\"What you notice on closer inspection.\\"\\n      on_examine:\\n        sets_flag: examined_thing\\n        narrative_hint: \\"Examining reveals something important.\\"\\n  interactions:\\n    interaction_id:\\n      triggers:\\n        - \\"use item on thing\\"\\n      narrative_hint: \\"What happens when triggered.\\"\\n      sets_flag: flag_name\\n  requires:\\n    flag: required_flag_name",
   "npcs_yaml": "npc_id:\\n  name: \\"NPC Name\\"\\n  role: \\"Their role\\"\\n  location: location_id\\n  appearance: |\\n    Physical description of the character.\\n  personality:\\n    traits:\\n      - \\"trait_one\\"\\n      - \\"trait_two\\"\\n    speech_style: \\"How they speak\\"\\n    quirks:\\n      - \\"Behavioral quirk\\"\\n  knowledge:\\n    - \\"Something they know\\"\\n  dialogue_rules:\\n    - \\"Rule for how they communicate\\"",
-  "items_yaml": "item_id:\\n  name: \\"Item Name\\"\\n  portable: true\\n  examine: |\\n    Description when examined...\\n  found_description: \\"REQUIRED: How the item appears naturally in the room scene.\\"\\n  take_description: \\"Message when taken\\""
+  "items_yaml": "item_id:\\n  name: \\"Item Name\\"\\n  portable: true\\n  scene_description: \\"REQUIRED: How the item appears naturally in the room scene.\\"\\n  examine_description: |\\n    Detailed description when the player examines this item closely.\\n  take_description: \\"Message shown when the item is taken.\\""
 }}
+```
+
+## V3 Schema: Key Structures
+
+### Exits (ExitDefinition)
+Every exit is a structured object with visual and visibility properties:
+
+```yaml
+exits:
+  north:
+    destination: library           # Required: where it leads
+    scene_description: "An ornate stone archway with ivy-covered columns"  # Visual for narration/images
+    destination_known: true        # Does player know where it leads? (open passages = true, closed doors = false)
+
+  # Hidden exit example (secret passage)
+  secret:
+    destination: secret_passage
+    scene_description: "A narrow passage behind the bookcase"
+    hidden: true                   # Exit is invisible until revealed
+    find_condition:
+      requires_flag: found_lever   # What flag reveals this exit
+    destination_known: false       # You don't know where secret passages lead
+```
+
+### destination_known Guidelines (IMPORTANT)
+The `destination_known` field controls whether the player character knows what's through an exit:
+
+**Use `destination_known: true` when:**
+- Open passages with clear sight lines (hallway to lobby)
+- Familiar areas the character would know (their own apartment door)
+- Exits where destination is visually obvious (glass door showing interior)
+
+**Use `destination_known: false` when:**
+- Closed doors in unfamiliar buildings
+- Secret passages (even after revealed)
+- Utility rooms, maintenance areas, restricted zones
+- Any exit where a real person wouldn't know what's on the other side
+- Dark tunnels, unexplored caves
+
+**RULE: Hidden exits MUST have `destination_known: false`**
+You don't know where a secret passage leads until you've been through it. Once the player visits the destination, the engine automatically reveals it.
+
+**Anti-pattern**: Setting ALL exits to `destination_known: true` breaks immersion.
+Real people don't magically know what's behind every closed door.
+
+### Details (DetailDefinition)
+Examinable scenery elements with optional examination effects:
+
+```yaml
+details:
+  chandelier:
+    name: "Crystal Chandelier"
+    scene_description: "A dusty chandelier hangs from the ceiling"
+    examine_description: "One crystal is loose. Behind it, something glints."
+    on_examine:                    # Optional: triggered when examined
+      sets_flag: found_crystal_key
+      narrative_hint: "You discover a small key hidden behind a loose crystal!"
+```
+
+### Item Placements (ItemPlacement)
+Items at a location with visibility control:
+
+```yaml
+item_placements:
+  # Visible item - simple placement
+  old_letter:
+    placement: "lies crumpled on the side table"
+
+  # Hidden item - requires discovery
+  brass_key:
+    placement: "tucked under the corner of the rug"
+    hidden: true
+    find_condition:
+      requires_flag: examined_rug
+```
+
+### NPC Placements (NPCPlacement)
+NPCs at a location with optional visibility:
+
+```yaml
+npc_placements:
+  bartender:
+    placement: "stands behind the bar, polishing a glass"
 ```
 
 ## Implementing the Design Brief
@@ -32,14 +126,33 @@ You MUST respond with valid JSON containing four YAML strings. Follow this EXACT
 ### Puzzle Threads
 For each puzzle thread in the design brief:
 - Create the locations involved
-- Add items that unlock progress
-- Add interactions that set flags or reveal exits
+- Add items that unlock progress (consider hiding key items for discovery moments)
+- Add interactions or detail examinations that set flags
 - Ensure the steps are achievable in sequence
 
-### Gate Types Implementation
-- **Hidden exits**: Use `reveals_exit` in an interaction, with `requires.flag` on the destination
-- **Locked exits**: Use `requires.item` on the destination location
-- **Sequence gates**: Use `requires.flag` that gets set by an earlier action
+### Gate Types Implementation (V3)
+- **Hidden exits**: Set `hidden: true` and `find_condition` on the exit itself. An interaction sets the required flag.
+- **Locked exits**: Use `locked: true` and `requires_key: item_id` on the exit
+- **Permanently locked exits**: Use `locked: true` WITHOUT `requires_key` for exits that can NEVER be opened (e.g., blocked by immovable obstacles, decorative doors). Do NOT invent placeholder items - just omit `requires_key` entirely.
+- **Sequence gates**: Use `requires.flag` on the destination location
+
+Example hidden exit pattern:
+```yaml
+# In the location with the hidden exit:
+library:
+  exits:
+    secret:
+      destination: secret_passage
+      scene_description: "A dark passage behind the bookcase"
+      hidden: true
+      find_condition:
+        requires_flag: pulled_lever
+  interactions:
+    pull_lever:
+      triggers: ["pull lever", "use lever"]
+      sets_flag: pulled_lever
+      narrative_hint: "You hear stone grinding as the bookcase swings aside..."
+```
 
 ### Navigation Loop
 Implement the shortcut described in the brief:
@@ -50,6 +163,7 @@ Implement the shortcut described in the brief:
 ### Optional Secrets
 For each secret:
 - Create the hidden content (room, item, lore)
+- Use hidden items or exits where narratively appropriate
 - Add subtle hints in nearby locations
 - Make discovery feel rewarding but not required
 
@@ -68,17 +182,105 @@ IMPORTANT: Do NOT double-escape. Use standard JSON escaping only:
 - Backslashes: \\ (only when you want a literal backslash)
 
 ## CRITICAL CONSISTENCY RULES (MUST FOLLOW)
-1. Every exit MUST have narrative justification in the atmosphere or details
+1. Every exit MUST have a scene_description for visual continuity
 2. The starting_situation MUST explain WHY the player can begin acting NOW
-3. Every item MUST have a found_description that naturally integrates into scene description
+3. Every item MUST have a scene_description that naturally integrates into the scene
 4. The victory condition must match what's specified in the design brief
 5. The starting location must make narrative sense
-6. Exits should feel realistic - don't have open passages where there should be locked doors
-7. Every item in a location MUST have an item_placements entry
-8. Every NPC in a location MUST have an npc_placements entry
-9. Constraints must include the key_constraints from the design brief
-10. visual_setting in world.yaml MUST be 5-10 sentences describing visual language
-11. visual_description in each location MUST be 3-5 sentences of pure visual scene description
+6. Exits should feel realistic - use destination_known: false for closed doors in unfamiliar places
+7. For permanently locked exits (never openable), use `locked: true` WITHOUT `requires_key` - do NOT invent placeholder items
+8. Every item at a location MUST be in item_placements (no separate items list)
+9. Every NPC at a location MUST be in npc_placements (no separate npcs list)
+10. Constraints must include the key_constraints from the design brief AND have mechanical enforcement (see rule 26)
+11. visual_setting in world.yaml MUST be 5-10 sentences describing visual language
+12. visual_description in each location MUST be 3-5 sentences of pure visual scene description
+13. **Victory items MUST be placed**: If victory.item references an item, that item MUST appear in some location's item_placements
+14. **Every defined item MUST be placed**: All items in items_yaml must appear in at least one location's item_placements or starting_inventory
+15. **requires_key uses ITEM IDs**: Exit `requires_key` must reference an item_id from items_yaml. For flag-based unlocking, use `hidden: true` + `find_condition` instead
+16. **NO CIRCULAR KEY DEPENDENCIES**: A key item MUST NOT be placed behind the lock it opens. The player must be able to reach the key without passing through the locked exit.
+17. **NO DUPLICATE ITEM PLACEMENTS**: An item in starting_inventory MUST NOT also appear in a location's item_placements. Choose one or the other.
+18. **KEY ITEMS MUST BE REACHABLE**: Every `requires_key` item must be placed in a location reachable from the starting location without needing that same key.
+19. **FLAG UNIQUENESS**: Each flag must be set by exactly ONE interaction/action. Never allow multiple sources to set the same flag.
+20. **NPC PLACEMENT CONSISTENCY**: If an NPC has a `location` field, that NPC MUST appear in that location's `npc_placements` with a scene_description.
+21. **EXIT DIRECTION RECIPROCITY**: Use inverse directions: north↔south, east↔west, up↔down, in↔out. If A→B is "down", B→A should be "up" (not "out").
+22. **EXIT SYMMETRY (CRITICAL)**: Every exit MUST have a return exit. If location A has an exit to B, then B MUST have an exit back to A.
+    - **Check your work**: For EVERY exit you create, verify the destination has a return exit.
+    - Missing return exits cause map connectivity bugs that make the game unwinnable.
+    - Example: If `newsstand` has `east → park`, then `park` MUST have `west → newsstand`.
+23. **NPC-GUARDED ITEMS NEED GATES**: If an NPC "guards" an item, the item MUST have a `find_condition` requiring a flag that the NPC interaction sets.
+24. **EVERY requires_flag MUST HAVE A SETTER (CRITICAL)**: For every `find_condition.requires_flag` on an item, exit, or detail, there MUST be an interaction somewhere that `sets_flag` with that exact flag name. Check your work: list all requires_flag values and verify each has a matching sets_flag.
+25. **ONLY SET FLAGS WHEN NEEDED**: Don't set flags for pure lore/discovery interactions. The interaction itself is rewarding without tracking state.
+    - **USE flags for**: Unlocking exits, revealing items, triggering NPC changes, victory conditions
+    - **DON'T use flags for**: Finding backstory, examining interesting details, reading lore
+    - **Example - NO flag needed**: Examining a poster reveals speakeasy history (just narrative, no gate)
+    - **Example - FLAG needed**: Bribing the guard unlocks an item (`sets_flag: guard_bribed`)
+26. **FLAG-GATED EXITS MUST USE find_condition (CRITICAL)**: If an interaction sets a flag to "unlock" an exit, that exit MUST use `find_condition.requires_flag`, NOT just `locked: true`. The pattern is:
+    ```yaml
+    exits:
+      down:
+        destination: platform
+        hidden: true  # or locked: true
+        find_condition:
+          requires_flag: turnstile_unlocked
+    interactions:
+      unlock_turnstile:
+        sets_flag: turnstile_unlocked
+    ```
+    **BAD**: `locked: true` with no `requires_key` or `find_condition` - creates unwinnable state!
+27. **CONSTRAINTS MUST HAVE MECHANICAL ENFORCEMENT (CRITICAL)**: If a constraint says "X cannot happen until Y", there MUST be:
+    - An interaction that `sets_flag` when Y occurs (the prerequisite)
+    - The interaction for X must have a matching `requires_flag` (or be gated behind something that does)
+
+    Example constraint: "The player cannot photograph the Pigeon King while he is on the high perch"
+    ```yaml
+    interactions:
+      place_bagel:
+        triggers: ["place bagel on ledge"]
+        sets_flag: pigeon_accessible     # Y occurs - prerequisite action
+        narrative_hint: "The Pigeon King swoops down to eat it!"
+      take_photo:
+        triggers: ["photograph pigeon", "use camera on pigeon"]
+        requires_flag: pigeon_accessible  # X cannot happen until Y
+        rejection_message: "The Pigeon King is too far away on his high perch."
+        sets_flag: has_pigeon_photo
+    ```
+    **WARNING**: Constraints without mechanical enforcement are just suggestions the AI might ignore!
+
+## Hidden Entity Guidance
+Hidden entities should feel organic to the scenario, not forced. Use creative judgment:
+
+- **Items**: Consider hiding key items (keys, clues, rewards) to create discovery moments - but not every item needs hiding
+- **Exits**: Secret passages can be rewarding puzzle elements when they fit the narrative
+- **Details**: Usually visible (rendered in images), but examining can reveal other hidden details
+- **NPCs**: Hidden NPCs are rare - prefer dynamic appearance via `appears_when` conditions instead
+
+The core principle: hidden entities should be motivated by the story and backstory.
+
+## NPC-Guarded Item Pattern
+When an NPC "guards" an item, use this pattern to ensure proper mechanical gating:
+
+```yaml
+# In locations.yaml
+guard_room:
+  item_placements:
+    treasure_key:
+      scene_description: "A brass key glints on the shelf behind the guard."
+      hidden: true  # Not visible until guard is dealt with
+      find_condition:
+        requires_flag: guard_distracted
+        discovery_text: "With the guard distracted, you notice the key on the shelf."
+  npc_placements:
+    stern_guard:
+      scene_description: "A stern guard blocks access to the back of the room."
+  interactions:
+    distract_guard:
+      triggers: ["give drink to guard", "offer guard a drink"]
+      requires_item: wine_bottle
+      sets_flag: guard_distracted
+      narrative_hint: "The guard gratefully accepts the drink and turns away."
+```
+
+**Anti-pattern**: Describing a guard as "watching over" the key but leaving the item visible and takeable without interaction.
 
 ## Visual Description Rules
 - **visual_setting** (world.yaml): Describes the consistent visual language across all locations
@@ -89,34 +291,82 @@ IMPORTANT: Do NOT double-escape. Use standard JSON escaping only:
   - Environmental details (lighting quality, vegetation, weather patterns)
   - Recurring visual motifs
 
-- **visual_description** (each location): Pure visual scene for image generation
-  - Physical environment (1-2 sentences)
+- **visual_description** (each location): Pure visual scene for THE GENERAL LOCATION
+  - Physical environment: room architecture, furniture, ambient lighting (1-2 sentences)
   - Materials, lighting, colors specific to this space (1 sentence)
   - Background props and ambient elements like extras/animals (1-2 sentences)
-  - **Entry point mirroring** (1-2 sentences) - see Visual Continuity Rules below
   - Do NOT repeat: items, NPCs, exits, or details (those become "Scene Elements")
-  - Do NOT include: sounds, smells, or narrative mood (that goes in atmosphere)
+  - Do NOT include: sounds, smells, narrative mood, OR EXIT DESCRIPTIONS
+
+### visual_description STRICT RULES (images will be wrong if violated)
+ONLY include what a camera would capture of the GENERAL SCENE:
+- Physical objects, surfaces, lighting, colors of the room/area itself
+- Background characters/animals in STATIC poses (not behaviors)
+
+**NEVER include in visual_description (CRITICAL):**
+- **Exit directions or exit atmosphere**: "To the north...", "A door leads east...", "warm glow from the doorway"
+  - ALL exit-related visuals go in `exits.scene_description` instead
+- Dynamic behaviors: "freeze when looked at", "run away if approached"
+- Conditional descriptions: "if you look closely", "when you examine"
+- Sounds: "you can hear", "sounds of", "the hum of"
+- Smells: "smells of", "the scent of"
+- Narrative mood: "it feels eerie", "an unsettling atmosphere"
+
+### Exit scene_description (Enhanced)
+Put ALL exit-related visuals in `exits.scene_description`, including atmospheric effects:
+- The physical appearance of the doorway, archway, corridor
+- Light/glow emanating from or through the exit
+- Weather effects at the threshold (snow drifting in, steam from the passage)
+
+```yaml
+# BAD - exit info in visual_description:
+visual_description: "A cluttered shop. To the north, warm amber glow spills from the doorway."
+
+# GOOD - exit info in scene_description:
+visual_description: "A cluttered shop packed floor-to-ceiling with colorful goods. Warm yellow light buzzes from overhead tubes."
+exits:
+  north:
+    destination: bodega_interior
+    scene_description: "A glass door fogged with steam, warm amber light spilling onto the blue snow outside"
+```
+
+**Put non-visual content in `atmosphere` instead:**
+```yaml
+# WRONG - in visual_description:
+"Waiters freeze in place like statues when looked at directly."
+
+# RIGHT - split content:
+visual_description: "Waiters in tuxedos stand motionless near the buffet tables."
+atmosphere: "The waiters freeze unnaturally when you look at them directly."
+```
 
 ## Visual Continuity Rules (CRITICAL for immersion)
 Since each location image is generated independently, shared architectural elements (doorways, passages, stairs) must be described consistently from both sides.
 
-### Entry Point Mirroring
-In each location's visual_description, describe what the **entry points look like from inside**:
+### Entry Point Mirroring via scene_description
+Use matching details in **exits.scene_description** for connected locations:
 - Use the SAME specific details (color, material, condition) in both connected locations
-- If an exit leads INTO a building, the destination must clearly show interior walls/ceiling
-- Mention light from connected areas (e.g., "sunlight streams in from the doorway to the east")
+- Both directions of a passage should describe the same doorway/archway
 
 Example - a curtained doorway between tavern and backroom:
 ```yaml
-# In tavern_entrance visual_description:
-"...To the north, a heavy burgundy velvet curtain with tarnished brass rings conceals the private backroom."
+# In tavern_entrance - exit going north to backroom:
+exits:
+  north:
+    destination: tavern_backroom
+    scene_description: "A heavy burgundy velvet curtain with tarnished brass rings conceals the private area"
 
-# In tavern_backroom visual_description:
-"An intimate room accessed through a heavy burgundy velvet curtain with tarnished brass rings, which hangs in the doorway to the south..."
+# In tavern_backroom - exit going south back to tavern:
+exits:
+  south:
+    destination: tavern_entrance
+    scene_description: "A heavy burgundy velvet curtain with tarnished brass rings hangs in the doorway"
 ```
 
+Note: Visual descriptions of the locations themselves should focus on the room/space, not the exits.
+
 ### Checklist for Each Location
-1. For each exit, include a brief visual description of that doorway/passage in the visual_description
+1. For each exit, the scene_description should match the visual_description reference
 2. Match specific architectural details (door type, material, color) with connected locations
 3. Indoor locations must look clearly interior (walls, ceiling, no sky)
 4. Underground passages should show tunnel openings on both ends
@@ -127,4 +377,4 @@ Example - a curtained doorway between tavern and backroom:
 - Give NPCs distinct personalities and useful knowledge
 - Add rich atmosphere descriptions for immersion
 - Give the protagonist a fitting name (hero_name) that NPCs can use in dialogue
-- Hidden exits should NOT appear in the exits list until revealed via interaction
+- Hidden exits use `hidden: true` + `find_condition` on the exit (no reveals_exit in interactions)

@@ -1,0 +1,83 @@
+# Playability Analysis
+
+Analyze the following text adventure world for **playability issues** - problems that would prevent players from completing the game or cause confusing/broken gameplay.
+
+## World: {world_name}
+**Theme:** {theme}
+**Tone:** {tone}
+
+## World Structure
+{world_context}
+
+## Design Intent (if available)
+{design_brief}
+
+---
+
+## Issues to Check For
+
+### Critical (Game-Breaking)
+1. **Flag Collision**: Same flag set by multiple interactions (bypasses intended progression)
+2. **Circular Dependencies**: Key item placed behind the lock it opens (unwinnable)
+3. **Unreachable Critical Items**: Victory items or required keys not obtainable
+4. **Missing Flag Setters (ANY FLAG CHECK)**: Any `requires_flag` or `requires.flag` with no setter
+   - Check ALL places flags are checked:
+     - Items with `find_condition.requires_flag`
+     - Exits with `find_condition.requires_flag`
+     - Details with `find_condition.requires_flag`
+     - Locations with `requires.flag`
+     - **Victory condition with `flag`** (CRITICAL - game unwinnable!)
+   - For EACH flag checked, verify an interaction somewhere has `sets_flag: <that_flag>`
+   - If not found, this is CRITICAL
+5. **Unreachable Locations**: A location has exits OUT but nothing leads INTO it
+   - Check each location: does at least one other location have an exit TO it?
+   - Exception: starting_location doesn't need an entrance
+   - If victory location is unreachable, game is unwinnable
+6. **Asymmetric Exits (One-Way Paths)**: If location A has an exit to B, location B should have an exit back to A
+   - Check EVERY exit: does the destination have a return exit?
+   - Missing return exits cause map connectivity issues and unreachable areas
+   - Example: `central_park` has `west → newsstand` but `newsstand` has no exit to `central_park`
+   - This is a CRITICAL bug that must be fixed
+7. **Disconnected Puzzle Items**: Design brief says item X unlocks/enables something, but no interaction uses item X
+   - Check critical_items from design brief
+   - Each should be used in at least one interaction trigger
+
+### High (Major Gameplay Problems)
+8. **Victory Flag Outside Victory Location**: Victory flag can be set in wrong location
+9. **NPC-Guarded Items Without Gating**: Item supposedly guarded by NPC but mechanically accessible
+10. **Exit Direction Mismatch (Reciprocity)**: Two locations have exits to each other but use non-inverse directions
+   - Example: Location A has `south → B` but Location B has `south → A` (should be `north → A`)
+   - Valid inverse pairs: north↔south, east↔west, up↔down, in↔out
+   - Exception: Vertical movement can pair with horizontal (e.g., subway entrance uses down↔up even if one is at street level)
+11. **Missing NPC Placements**: NPC declared at location but not in npc_placements
+
+### Medium (Confusing but Playable)
+12. **Dead-End Progressions**: Player can reach states where progress becomes impossible
+13. **Inconsistent Locked Exits**: Exit marked locked but no key exists
+14. **Orphan Interactions**: Interactions that set flags never checked anywhere
+
+### Low (Polish Issues)
+15. **Redundant Gating**: Multiple gates protecting the same thing unnecessarily
+16. **Unclear Discovery Requirements**: Hidden items without clear discovery path
+
+---
+
+## Output Format
+
+Respond with a JSON object:
+
+```json
+{{
+  "issues": [
+    {{
+      "severity": "critical" | "high" | "medium" | "low",
+      "location": "path/to/issue (e.g., locations/cafe/interactions/repair_machine)",
+      "description": "Clear description of the problem",
+      "suggested_fix": "Specific fix recommendation"
+    }}
+  ],
+  "summary": "Brief overall assessment of playability"
+}}
+```
+
+Focus on **specific, actionable issues**. Don't report theoretical problems - only actual issues found in this world.

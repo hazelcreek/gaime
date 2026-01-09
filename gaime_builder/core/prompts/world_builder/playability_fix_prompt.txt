@@ -1,0 +1,167 @@
+# Playability Fix
+
+Fix the following playability issues in this text adventure world. Make targeted, minimal changes that solve the problems without disrupting working mechanics.
+
+## World: {world_name}
+**Theme:** {theme}
+**Tone:** {tone}
+
+## Current World YAML
+```yaml
+{world_yaml}
+```
+
+## Issues to Fix
+{issues}
+
+## Design Intent (if available)
+{design_brief}
+
+---
+
+## Fix Guidelines
+
+### For Flag Collisions
+- Remove one of the duplicate flag-setting interactions
+- Or rename the flag in one location and update all references
+- Prefer keeping the interaction in the more narratively appropriate location
+
+### For Circular Dependencies
+- Move the key to a location accessible before the locked exit
+- Or add an alternate entry point to the locked area
+- Ensure the solution makes narrative sense
+
+### For Missing Items/Requirements
+- Add the item to an appropriate location
+- Ensure it's discoverable (not hidden without discovery method)
+- Make the placement narratively motivated
+
+### For Missing Flag Setters (ANY flag checked but never set)
+This applies to ALL flag checks: items, exits, details, locations, AND victory conditions.
+
+**For item/exit/detail `find_condition.requires_flag`:**
+- Add an interaction to the location where the gating NPC/object is
+- The interaction should set the required flag
+- Make the interaction trigger narratively appropriate
+
+**For location `requires.flag` or victory `flag`:**
+- Identify what action should unlock this (from design brief or narrative logic)
+- Add an interaction that uses a puzzle item and sets the flag
+- Ensure there's an exit leading TO the gated location
+
+Example fix for `cafe_unlocked` victory flag with `golden_bean` as key:
+```yaml
+locations:
+  concourse_level:
+    exits:
+      cafe:
+        destination: steam_pipe_cafe_interior
+        scene_description: "A brass door with a coffee bean emblem"
+        hidden: true
+        find_condition:
+          requires_flag: cafe_unlocked
+        destination_known: false
+    interactions:
+      unlock_cafe:
+        triggers: ["use golden_bean on door", "insert golden_bean"]
+        sets_flag: cafe_unlocked
+        narrative_hint: "The bean fits perfectly into the emblem. The door clicks open!"
+```
+
+### For Unreachable Locations (no entrance)
+- Add an exit from a nearby/logical location leading TO the unreachable location
+- The exit may be hidden with `find_condition` if narratively appropriate
+- Ensure the exit direction makes spatial sense
+
+### For Asymmetric Exits (missing return path)
+When location A has an exit to B, but B has no exit back to A:
+- Add a return exit from B back to A
+- Use the inverse direction when possible (north↔south, east↔west, up↔down, in↔out)
+- Copy the `destination_known` and any gating (`locked`, `find_condition`) if appropriate
+
+Example fix: If `central_park` has `west → newsstand` but `newsstand` has no exit to `central_park`:
+```yaml
+locations:
+  street_corner_newsstand:
+    exits:
+      east:  # Inverse of 'west'
+        destination: central_park_frozen
+        scene_description: "A snowy path leading into the park."
+        destination_known: true
+```
+
+This is CRITICAL for map connectivity - asymmetric exits cause unreachable areas!
+
+### For Disconnected Puzzle Items (item unused)
+- Check the design brief for intended use of the item
+- Add an interaction that uses the item (e.g., "use X on Y")
+- The interaction should set a flag that gates something important
+
+### For NPC-Guarded Items
+- Add a mechanical gate (flag, find_condition) to the item
+- Or move the item to a location that requires solving the NPC interaction first
+- Ensure the NPC interaction actually sets a flag the item checks
+
+### For Exit Direction Mismatch (Reciprocity)
+When two locations connect but use non-inverse directions:
+- Identify which direction is "correct" based on the spatial relationship
+- Change ONE exit to use the inverse of the other
+- Valid inverse pairs: north↔south, east↔west, up↔down, in↔out
+
+Example fix: If `street_corner` has `south → subway_station` but `subway_station` has `south → street_corner`:
+```yaml
+locations:
+  subway_station:
+    exits:
+      north:  # Changed from 'south' to 'north' (inverse of street_corner's 'south')
+        destination: street_corner
+        scene_description: "Stairs leading up to the snowy surface."
+        destination_known: true
+```
+
+Special cases:
+- Secret passages can use non-standard returns (e.g., "secret" direction)
+- Vertical movement (up/down) is valid even when one end is "inside" and other is "outside"
+
+### For Missing NPC Placements
+- Add the NPC to the location's npc_placements with appropriate scene_description
+
+---
+
+## Output Format
+
+Respond with a JSON object containing patches to apply:
+
+```json
+{{
+  "patches": {{
+    "locations": {{
+      "location_id": {{
+        "interactions": {{
+          "interaction_id": {{
+            "sets_flag": "new_flag_name"
+          }}
+        }}
+      }}
+    }},
+    "items": {{
+      "item_id": {{
+        "field": "new_value"
+      }}
+    }},
+    "npcs": {{
+      "npc_id": {{
+        "field": "new_value"
+      }}
+    }},
+    "world": {{
+      "victory": {{
+        "flag": "corrected_flag"
+      }}
+    }}
+  }},
+  "summary": "Brief description of fixes applied"
+}}
+```
+
+Only include files and fields that need changes. The patches will be deep-merged into the existing YAML.

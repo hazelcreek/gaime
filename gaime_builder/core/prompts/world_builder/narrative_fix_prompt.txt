@@ -1,0 +1,100 @@
+# Narrative Fix
+
+Improve the narrative quality of this text adventure world by fixing the identified issues. Make changes that enhance story coherence and player immersion.
+
+## World: {world_name}
+**Theme:** {theme}
+**Tone:** {tone}
+
+## Current World YAML
+```yaml
+{world_yaml}
+```
+
+## Issues to Fix
+{issues}
+
+## Design Intent (if available)
+{design_brief}
+
+---
+
+## Fix Guidelines
+
+### For Unmotivated Items
+Add narrative motivation through one or more of:
+- **NPC Testimony**: An NPC who knows WHY the item is there
+  - Update NPC's `dialogue_hints` to include knowledge of the item
+  - The NPC should explain the backstory naturally
+- **Environmental Logic**: Update item's `scene_description` to explain placement
+  - "A spare key hangs on a hook - clearly left by staff for emergencies"
+- **Historical Event**: Add to location's `atmosphere` or item's description
+  - "This antique was left here after the previous owner vanished"
+
+### For Reality Level Violations
+- Remove or replace elements that don't fit the world's realism level
+- If the element is essential, add in-world justification
+- Adjust descriptions to match the established tone
+
+### For NPC Behavior Contradictions
+- Update NPC's `personality`, `dialogue_hints`, or `behavior` to be consistent
+- Add interactions that demonstrate the stated personality trait
+- Or adjust the personality description to match actual behavior
+
+### For Missing Backstory
+- Add `atmosphere` text that hints at history
+- Update NPC `knowledge` or `dialogue_hints` to explain events
+- Add environmental details that tell the story
+
+### For Weak Discovery Mechanics
+- Add foreshadowing: NPC hints, environmental clues
+- Update `find_condition` or `discovery_method` to be more natural
+- Add detail examinations that lead to the discovery
+
+### For Tone Inconsistencies
+- Rewrite descriptions to match the overall tone
+- Ensure vocabulary and style are consistent
+- Keep the core information while adjusting the voice
+
+---
+
+## Output Format
+
+Respond with a JSON object containing patches to apply:
+
+```json
+{{
+  "patches": {{
+    "locations": {{
+      "location_id": {{
+        "atmosphere": "Updated atmosphere with backstory",
+        "item_placements": {{
+          "item_id": {{
+            "scene_description": "Narratively motivated description"
+          }}
+        }},
+        "npc_placements": {{
+          "npc_id": {{
+            "scene_description": "Updated description"
+          }}
+        }}
+      }}
+    }},
+    "items": {{
+      "item_id": {{
+        "description": "Updated description with motivation",
+        "backstory": "Added backstory"
+      }}
+    }},
+    "npcs": {{
+      "npc_id": {{
+        "personality": "Updated personality",
+        "dialogue_hints": ["New hint about item", "New hint about event"]
+      }}
+    }}
+  }},
+  "summary": "Brief description of narrative improvements"
+}}
+```
+
+Only include files and fields that need changes. Write in the established tone of the world.

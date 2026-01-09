@@ -3,8 +3,17 @@ World Validator - Validates consistency of YAML world definitions
 
 Checks:
 - Flag consistency: flags checked are set somewhere
+- Flag uniqueness: each flag is set by exactly one source
 - Location references: exits, item locations, NPC locations are valid
 - Item references: requires_item, unlocks reference valid items
+- Puzzle solvability:
+  - No duplicate item placements (item in both inventory and location)
+  - No circular key dependencies (key behind the lock it opens)
+  - All requires_key items exist and are reachable
+- NPC placements: NPCs with location must have placement entry
+- Exit reciprocity: bidirectional exits use inverse directions (warning)
+- Exit symmetry: if A→B exists, B→A must exist (error)
+- Victory flag location: victory flag must only be settable in victory location
 - Orphan detection: flags set but never checked (warnings)
 """
 
@@ -52,8 +61,14 @@ class WorldValidator:
         """Run all validation checks"""
         self._collect_flags()
         self._validate_flag_consistency()
+        self._validate_flag_uniqueness()
         self._validate_location_references()
         self._validate_item_references()
+        self._validate_puzzle_solvability()
+        self._validate_npc_placements()
+        self._validate_exit_reciprocity()
+        self._validate_exit_symmetry()
+        self._validate_victory_flag_location()
         self._detect_orphan_flags()
 
         return self.result
@@ -190,6 +205,21 @@ class WorldValidator:
                         f"Flag '{flag}' is checked at {loc} but never set anywhere"
                     )
 
+    def _validate_flag_uniqueness(self):
+        """
+        Check that each flag is set by exactly one source.
+
+        Multiple sources setting the same flag can cause unintended game states,
+        especially for victory flags where the player could bypass intended paths.
+        """
+        for flag, set_locations in self.flags_set.items():
+            if len(set_locations) > 1:
+                sources = ", ".join(set_locations)
+                self.result.add_error(
+                    f"Flag '{flag}' is set by multiple sources: {sources} - "
+                    f"each flag should be set by exactly one source"
+                )
+
     def _validate_location_references(self):
         """Validate all location references are valid"""
         valid_locations = set(self.world_data.locations.keys())
@@ -271,12 +301,26 @@ class WorldValidator:
                         f"Location '{loc_id}' item_placements references invalid item '{item_id}'"
                     )
 
-        # Check victory item
+        # Check victory item exists
         if self.world_data.world.victory and self.world_data.world.victory.item:
-            if self.world_data.world.victory.item not in valid_items:
-                self.result.add_error(
-                    f"Victory item '{self.world_data.world.victory.item}' is invalid"
-                )
+            victory_item = self.world_data.world.victory.item
+            if victory_item not in valid_items:
+                self.result.add_error(f"Victory item '{victory_item}' is invalid")
+            else:
+                # Check victory item is obtainable (placed or in starting inventory)
+                items_obtainable = set(self.world_data.world.player.starting_inventory)
+                for loc_id, location in self.world_data.locations.items():
+                    items_obtainable.update(location.item_placements.keys())
+                    # Also check interactions that give items
+                    if location.interactions:
+                        for interaction in location.interactions.values():
+                            if interaction.gives_item:
+                                items_obtainable.add(interaction.gives_item)
+
+                if victory_item not in items_obtainable:
+                    self.result.add_error(
+                        f"Victory item '{victory_item}' is not obtainable - not placed in any location or starting inventory"
+                    )
 
         # Check location requires_item
         for loc_id, location in self.world_data.locations.items():
@@ -286,14 +330,346 @@ class WorldValidator:
                         f"Location '{loc_id}' requires invalid item '{location.requires.item}'"
                     )
 
-    def _detect_orphan_flags(self):
-        """Detect flags that are set but never checked (warnings only)"""
-        for flag, set_locations in self.flags_set.items():
-            if flag not in self.flags_checked:
-                for loc in set_locations:
-                    self.result.add_warning(
-                        f"Flag '{flag}' is set at {loc} but never checked anywhere"
+    def _validate_puzzle_solvability(self):
+        """
+        Validate puzzle solvability constraints.
+
+        Checks:
+        - No duplicate item placements (item in both starting_inventory AND locations)
+        - No circular key dependencies (key behind the lock it opens)
+        - All requires_key items exist and are placed somewhere
+        """
+        starting_inventory = set(self.world_data.world.player.starting_inventory)
+
+        # Build map of where each item is placed
+        item_locations: dict[str, str] = {}
+        for loc_id, location in self.world_data.locations.items():
+            for item_id in location.item_placements.keys():
+                item_locations[item_id] = loc_id
+
+        # Check 1: Duplicate item placement
+        for item_id in starting_inventory:
+            if item_id in item_locations:
+                self.result.add_error(
+                    f"Item '{item_id}' is in both starting_inventory AND "
+                    f"placed at location '{item_locations[item_id]}' - remove one"
+                )
+
+        # Check 2 & 3: requires_key validation and circular dependencies
+        # Build a map of locked exits and what key they require
+        locked_exits: list[tuple[str, str, str, str]] = (
+            []
+        )  # (from_loc, direction, to_loc, key_id)
+
+        for loc_id, location in self.world_data.locations.items():
+            for direction, exit_def in location.exits.items():
+                if exit_def.requires_key:
+                    key_id = exit_def.requires_key
+                    dest_id = exit_def.destination
+
+                    # Check 3: requires_key item must exist
+                    if key_id not in self.world_data.items:
+                        self.result.add_error(
+                            f"Exit '{direction}' in '{loc_id}' requires_key '{key_id}' "
+                            f"which does not exist in items"
+                        )
+                        continue
+
+                    # Check 3: requires_key item must be placed or in inventory
+                    if (
+                        key_id not in item_locations
+                        and key_id not in starting_inventory
+                    ):
+                        # Also check if any interaction gives this item
+                        item_given_by_interaction = False
+                        for check_loc in self.world_data.locations.values():
+                            if check_loc.interactions:
+                                for interaction in check_loc.interactions.values():
+                                    if interaction.gives_item == key_id:
+                                        item_given_by_interaction = True
+                                        break
+                            if item_given_by_interaction:
+                                break
+
+                        if not item_given_by_interaction:
+                            self.result.add_error(
+                                f"Exit '{direction}' in '{loc_id}' requires_key '{key_id}' "
+                                f"but this item is not placed anywhere or in starting inventory"
+                            )
+                        continue
+
+                    locked_exits.append((loc_id, direction, dest_id, key_id))
+
+        # Check 2: Direct circular dependencies - key placed at immediate destination
+        # with no alternate entry point
+        #
+        # A circular dependency exists when:
+        # - Exit A→B requires key K
+        # - Key K is at location B
+        # - Location B has no OTHER unlocked entry points
+        #
+        # If B has another entry (even if locked by a different key), we don't
+        # report circular dependency here - the "other key not placed" error
+        # will catch that case instead.
+        for from_loc, direction, to_loc, key_id in locked_exits:
+            if key_id in starting_inventory:
+                continue  # Key is in inventory, no problem
+
+            key_location = item_locations.get(key_id)
+            if not key_location:
+                continue  # Already reported as error above
+
+            # Only check if key is at the immediate destination
+            if key_location != to_loc:
+                continue
+
+            # Check if destination has any OTHER entry points
+            has_alternate_entry = False
+            for loc_id, location in self.world_data.locations.items():
+                for exit_dir, exit_def in location.exits.items():
+                    if exit_def.destination == to_loc:
+                        # Skip the exit we're checking
+                        if loc_id == from_loc and exit_dir == direction:
+                            continue
+                        # Skip hidden exits (not usable)
+                        if exit_def.hidden:
+                            continue
+                        # Found an alternate entry (even if locked by different key)
+                        has_alternate_entry = True
+                        break
+                if has_alternate_entry:
+                    break
+
+            if not has_alternate_entry:
+                self.result.add_error(
+                    f"Circular dependency: Exit '{direction}' in '{from_loc}' "
+                    f"requires key '{key_id}', but the key is placed at the "
+                    f"destination '{to_loc}' which has no other entry points"
+                )
+
+    def _validate_npc_placements(self):
+        """
+        Check that NPCs with a location field have a corresponding npc_placements entry.
+
+        If an NPC declares a location in npcs.yaml but isn't in that location's
+        npc_placements, the NPC won't appear in the game.
+        """
+        for npc_id, npc in self.world_data.npcs.items():
+            if npc.location:
+                location = self.world_data.locations.get(npc.location)
+                if location and npc_id not in location.npc_placements:
+                    self.result.add_error(
+                        f"NPC '{npc_id}' declares location '{npc.location}' but is not "
+                        f"in that location's npc_placements - add placement or remove location field"
                     )
+
+    def _validate_exit_reciprocity(self):
+        """
+        Check that bidirectional exits use inverse directions (warning).
+
+        For spatial consistency, if location A has exit 'down' to B,
+        then B's exit back to A should be 'up', not 'out'.
+
+        Exceptions:
+        - Vertical (up/down) combined with horizontal (north/south/east/west)
+          is acceptable for stairs, subway entrances, etc.
+        """
+        inverse_directions = {
+            "north": "south",
+            "south": "north",
+            "east": "west",
+            "west": "east",
+            "up": "down",
+            "down": "up",
+            "in": "out",
+            "out": "in",
+        }
+
+        # Directions that can mix with verticals (subway: west → down, up → east)
+        horizontal_dirs = {"north", "south", "east", "west"}
+        vertical_dirs = {"up", "down"}
+
+        for loc_id, location in self.world_data.locations.items():
+            for direction, exit_def in location.exits.items():
+                dest_id = exit_def.destination
+                dest_loc = self.world_data.locations.get(dest_id)
+                if not dest_loc:
+                    continue  # Invalid destination handled elsewhere
+
+                # Find the return exit
+                for ret_dir, ret_exit in dest_loc.exits.items():
+                    if ret_exit.destination == loc_id:
+                        expected = inverse_directions.get(direction)
+
+                        # Skip if mixing horizontal/vertical (common for stairs, subways)
+                        dir_is_horizontal = direction in horizontal_dirs
+                        dir_is_vertical = direction in vertical_dirs
+                        ret_is_horizontal = ret_dir in horizontal_dirs
+                        ret_is_vertical = ret_dir in vertical_dirs
+
+                        if (dir_is_horizontal and ret_is_vertical) or (
+                            dir_is_vertical and ret_is_horizontal
+                        ):
+                            # Mixed horizontal/vertical is OK (subway entrance pattern)
+                            break
+
+                        # Only warn if direction has an inverse AND return uses a
+                        # standard direction that doesn't match expected
+                        if (
+                            expected
+                            and ret_dir in inverse_directions
+                            and ret_dir != expected
+                        ):
+                            self.result.add_warning(
+                                f"Exit direction mismatch: '{loc_id}' -> {direction} -> "
+                                f"'{dest_id}' returns via '{ret_dir}' (expected '{expected}')"
+                            )
+                        break  # Found return exit, stop searching
+
+    def _validate_exit_symmetry(self):
+        """
+        Check for asymmetric exits (A→B exists but B→A doesn't).
+
+        In most text adventures, if you can go from A to B, you should be able
+        to go back from B to A. Missing return exits create unreachable areas
+        or one-way traps.
+
+        This is an ERROR because it usually indicates a bug in world generation
+        that causes map connectivity issues.
+        """
+        for loc_id, location in self.world_data.locations.items():
+            for direction, exit_def in location.exits.items():
+                dest_id = exit_def.destination
+                dest_loc = self.world_data.locations.get(dest_id)
+                if not dest_loc:
+                    continue  # Invalid destination handled elsewhere
+
+                # Check if destination has ANY exit back to this location
+                has_return_exit = any(
+                    ret_exit.destination == loc_id
+                    for ret_exit in dest_loc.exits.values()
+                )
+
+                if not has_return_exit:
+                    self.result.add_error(
+                        f"Asymmetric exit: '{loc_id}' has exit '{direction}' to "
+                        f"'{dest_id}', but '{dest_id}' has no exit back to '{loc_id}'. "
+                        f"Add a return exit or verify this one-way path is intentional."
+                    )
+
+    def _validate_victory_flag_location(self):
+        """
+        Check that the victory flag can only be set in the victory location.
+
+        If the victory flag can be set outside the victory location, players
+        could complete the game without following the intended path.
+        """
+        victory = self.world_data.world.victory
+        if not victory or not victory.flag or not victory.location:
+            return
+
+        victory_flag = victory.flag
+        victory_loc = victory.location
+
+        # Check all sources that set this flag
+        for flag, set_locations in self.flags_set.items():
+            if flag == victory_flag:
+                for source in set_locations:
+                    # Parse the source to get the location
+                    # Format: "location:loc_id/..." or "item:item_id/..."
+                    if source.startswith("location:"):
+                        # Extract location ID from "location:loc_id/..."
+                        loc_part = source.split("/")[0]  # "location:loc_id"
+                        source_loc = loc_part.replace("location:", "")
+                        if source_loc != victory_loc:
+                            self.result.add_error(
+                                f"Victory flag '{victory_flag}' can be set outside "
+                                f"victory location '{victory_loc}': {source} - "
+                                f"this allows bypassing the intended path"
+                            )
+
+    def _detect_orphan_flags(self):
+        """
+        Detect flags that are set but never checked.
+
+        Smart detection:
+        - ERROR: Flags that sound like unlock mechanisms but aren't wired to exits
+        - WARNING: Other orphan flags (may be intentional lore tracking)
+        """
+        # Patterns that suggest an unlock/gate mechanism
+        unlock_patterns = [
+            "unlock",
+            "unlocked",
+            "open",
+            "opened",
+            "access",
+            "impressed",
+            "distracted",
+            "bribed",
+            "convinced",
+            "appeased",
+            "satisfied",
+            "completed",
+            "solved",
+            "disabled",
+            "removed",
+            "cleared",
+        ]
+
+        # Collect all locked exits that could be flag-gated
+        # (locked: true without requires_key, or with find_condition)
+        locked_exits_without_unlock: list[tuple[str, str]] = []  # (loc_id, direction)
+        exits_with_find_condition: set[str] = set()  # flags that ARE checked by exits
+
+        for loc_id, location in self.world_data.locations.items():
+            for direction, exit_def in location.exits.items():
+                if exit_def.locked:
+                    if exit_def.find_condition:
+                        # This exit properly checks a flag
+                        req_flag = exit_def.find_condition.get("requires_flag")
+                        if req_flag:
+                            exits_with_find_condition.add(req_flag)
+                    elif not exit_def.requires_key:
+                        # Locked but no unlock mechanism - might be broken or permanent
+                        locked_exits_without_unlock.append((loc_id, direction))
+
+        for flag, set_locations in self.flags_set.items():
+            if flag in self.flags_checked:
+                continue  # Flag is used somewhere, not orphan
+
+            # Check if this flag sounds like an unlock mechanism
+            flag_lower = flag.lower()
+            is_unlock_flag = any(pattern in flag_lower for pattern in unlock_patterns)
+
+            if is_unlock_flag and locked_exits_without_unlock:
+                # This looks like a broken gate - flag sounds like unlock but
+                # there are locked exits that don't check any flag
+                for loc in set_locations:
+                    self.result.add_error(
+                        f"Likely broken gate: Flag '{flag}' is set at {loc} but no locked exit "
+                        f"checks this flag. Locked exits without unlock: "
+                        f"{', '.join(f'{loc_id}/{direction}' for loc_id, direction in locked_exits_without_unlock[:3])}"
+                    )
+            else:
+                # Regular orphan flag - just a warning (might be lore tracking)
+                # Skip warning for flags that are clearly lore/discovery
+                lore_patterns = [
+                    "found",
+                    "examined",
+                    "read",
+                    "discovered",
+                    "learned",
+                    "saw",
+                    "heard",
+                ]
+                is_lore_flag = any(pattern in flag_lower for pattern in lore_patterns)
+
+                if not is_lore_flag:
+                    # Only warn about non-lore orphan flags
+                    for loc in set_locations:
+                        self.result.add_warning(
+                            f"Flag '{flag}' is set at {loc} but never checked anywhere"
+                        )
 
 
 def validate_world(

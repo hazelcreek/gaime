@@ -1,0 +1,83 @@
+# Narrative Analysis
+
+Analyze the following text adventure world for **narrative quality issues** - problems with story coherence, motivation, and immersion.
+
+## World: {world_name}
+**Theme:** {theme}
+**Tone:** {tone}
+
+## World Structure
+{world_context}
+
+## Design Intent (if available)
+{design_brief}
+
+---
+
+## Issues to Check For
+
+### Critical (Immersion-Breaking)
+1. **Unmotivated Critical Items**: Key puzzle items placed without in-world explanation
+   - Bad: "A golden key sits in a random drawer"
+   - Good: "The key fell from the drunk pirate's pocket" (with NPC testimony)
+
+2. **Reality Level Violations**: Elements that don't match the world's established realism
+   - A "grounded NYC setting" with talking penguins
+   - Fantasy elements in a realistic crime drama
+
+### High (Story Problems)
+3. **NPC Behavior Contradictions**: Character actions don't match their personality
+   - A "helpful" NPC who never actually helps
+   - A "guard" NPC with no gating behavior
+
+4. **Environmental Disconnects**: Locations that don't fit the theme/setting
+   - A medieval castle with a modern break room
+   - A space station with unexplained magical elements
+
+5. **Missing Backstory Links**: Plot elements without causal connections
+   - Why is this person here? Why is this door locked?
+   - Events referenced but never explained
+
+### Medium (Polish Issues)
+6. **Weak Discovery Mechanics**: Items found through arbitrary examination
+   - "Look at floor" reveals hidden item with no foreshadowing
+   - Better: Environmental hints or NPC dialogue suggests where to look
+
+7. **Tone Inconsistencies**: Writing style varies between locations
+   - Some locations serious, others comedic, without justification
+   - Vocabulary/formality levels shifting randomly
+
+8. **Orphan Story Elements**: Characters or items with no narrative purpose
+   - NPCs that exist but don't contribute to story
+   - Items that can be picked up but serve no purpose
+
+### Low (Enhancements)
+9. **Missing Environmental Storytelling**: Locations that could tell more story
+   - Empty rooms that could have atmospheric details
+   - Items that could have backstory but don't
+
+10. **Character Depth Opportunities**: NPCs that could be more developed
+    - One-dimensional characters that could have quirks/secrets
+    - Missing dialogue hints about other characters/events
+
+---
+
+## Output Format
+
+Respond with a JSON object:
+
+```json
+{{
+  "issues": [
+    {{
+      "severity": "critical" | "high" | "medium" | "low",
+      "location": "path/to/issue (e.g., items/golden_key or npcs/bartender)",
+      "description": "Clear description of the narrative problem",
+      "suggested_fix": "Specific improvement recommendation"
+    }}
+  ],
+  "summary": "Brief overall assessment of narrative quality"
+}}
+```
+
+Focus on **specific, actionable issues**. Prioritize problems that harm player immersion over minor polish issues.

@@ -128,41 +128,52 @@ entrance_hall:
     precariously from the high ceiling, casting long, dancing shadows as lightning
     flashes outside the grimy, leaded windows.
 
-  # Connected locations
+  # Connected locations (V3: structured ExitDefinition)
   exits:
-    north: library
-    east: dining_room
-    up: upper_landing
+    north:
+      destination: library
+      scene_description: "An archway leads north to the library, its darkness beckoning"
+      destination_known: true
+    east:
+      destination: dining_room
+      scene_description: "Double doors to the east open into what appears to be a dining room"
+      destination_known: true
+    up:
+      destination: upper_landing
+      scene_description: "A grand staircase climbs upward into shadow"
+      destination_known: false  # Player doesn't know what's up there yet
 
-  # Items found here (reference items.yaml)
-  items:
-    - old_letter
-    - candlestick
-
-  # WHERE items are placed in this specific location (improves images and narration)
+  # WHERE items are placed (V3: keys define which items are here)
   item_placements:
-    old_letter: "lies crumpled on the dusty side table near the door"
-    candlestick: "sits on the fireplace mantel, cold and unlit"
+    old_letter:
+      placement: "lies crumpled on the dusty side table near the door"
+    candlestick:
+      placement: "sits on the fireplace mantel, cold and unlit"
 
-  # NPCs present (reference npcs.yaml)
-  npcs:
-    - butler_jenkins
-
-  # WHERE NPCs are positioned in this location
+  # WHERE NPCs are positioned (V3: keys define which NPCs are here)
   npc_placements:
-    butler_jenkins: "stands rigidly by the grandfather clock, pale hands clasped"
+    butler_jenkins:
+      placement: "stands rigidly by the grandfather clock, pale hands clasped"
 
-  # Interactive elements (things player can examine)
+  # Interactive scenery elements (V3: structured DetailDefinition)
   details:
-    portraits: "Five family portraits: parents and three children"
-    chandelier: "Once magnificent, now dark and cobwebbed"
-    floor: "Marble tiles, cracked and dusty"
-    # IMPORTANT: Add details for exits to provide narrative context
-    north: "An archway leads north to the library, its darkness beckoning"
-    east: "Double doors to the east open into what appears to be a dining room"
-    up: "A grand staircase climbs upward into shadow"
+    portraits:
+      name: "Family Portraits"
+      scene_description: "Five family portraits line the walls"
+      examine_description: "Parents and three children. One portrait has been slashed across the face."
+      on_examine:
+        sets_flag: examined_portraits
+        narrative_hint: "You notice the savage slash marks on one child's portrait"
+    chandelier:
+      name: "Crystal Chandelier"
+      scene_description: "A massive crystal chandelier hangs from the ceiling"
+      examine_description: "Once magnificent, now dark and cobwebbed. Some crystals are missing."
+    floor:
+      name: "Marble Floor"
+      scene_description: "A checkered marble floor stretches across the hall"
+      examine_description: "Cracked and dusty tiles, once white and black, now uniformly grey"
 
-  # Special interactions
+  # Special interactions (for complex puzzles)
   interactions:
     examine_portraits:
       triggers: ["examine portraits", "look at portraits", "study paintings"]
@@ -175,23 +186,31 @@ library:
     Floor-to-ceiling bookshelves stuffed with ancient tomes.
     A cold draft suggests hidden passages. Dust motes drift in pale moonlight.
 
+  # V3: Hidden exits use hidden + find_condition
   exits:
-    south: entrance_hall
-    hidden: secret_passage  # Only available when discovered
+    south:
+      destination: entrance_hall
+      scene_description: "An archway leads back to the entrance hall"
+      destination_known: true
+    secret:
+      destination: secret_passage
+      scene_description: "A narrow passage behind the bookshelf"
+      hidden: true
+      find_condition:
+        requires_flag: found_secret_passage
+      destination_known: true
 
-  items:
-    - dusty_tome
-    - reading_glasses
-
-  # Conditional access
-  requires: null  # No requirements
+  item_placements:
+    dusty_tome:
+      placement: "rests on the reading desk"
+    reading_glasses:
+      placement: "lies forgotten on a side table"
 
   interactions:
     pull_red_book:
       triggers: ["pull red book", "examine red book", "tug red book"]
       narrative_hint: "A mechanical click, the bookshelf swings open"
-      reveals_exit: secret_passage
-      sets_flag: found_secret_passage
+      sets_flag: found_secret_passage  # This reveals the hidden exit
 
 secret_passage:
   name: "Secret Passage"
@@ -200,8 +219,14 @@ secret_passage:
     The walls are stone, older than the manor itself.
 
   exits:
-    back: library
-    down: ritual_chamber
+    back:
+      destination: library
+      scene_description: "The bookshelf passage leads back to the library"
+      destination_known: true
+    down:
+      destination: ritual_chamber
+      scene_description: "Stone steps descend into darkness"
+      destination_known: false
 
   requires:
     flag: found_secret_passage
@@ -316,8 +341,12 @@ old_letter:
   # Can player carry it?
   portable: true
 
-  # Description when examined
-  examine: |
+  # V3: How the item appears in the room scene
+  # This is used when player "looks around" - without it, items are invisible!
+  scene_description: "A crumpled letter lies on the side table"
+
+  # V3: Description when examined closely
+  examine_description: |
     A yellowed letter, hastily crumpled then smoothed out again.
     The elegant handwriting reads:
 
@@ -328,10 +357,6 @@ old_letter:
 
     Forgive me.
     - Edmund"
-
-  # CRITICAL: How the item appears in the room scene
-  # This is used when player "looks around" - without it, items are invisible!
-  found_description: "A crumpled letter lies on the side table"
 
   take_description: "You pocket the fragile letter carefully"
 
@@ -344,24 +369,32 @@ iron_key:
   name: "Heavy Iron Key"
   portable: true
 
-  examine: |
+  scene_description: "A heavy iron key with a serpent-shaped head"
+
+  examine_description: |
     An old iron key, heavy and cold. The head is shaped like a
     serpent eating its tail. It feels significant.
 
   # What it does
   unlocks: basement_door
 
-  # Where to find it
-  location: library
-  hidden: true
-  find_condition:
-    requires_flag: solved_library_puzzle
+  # V3: Visibility is defined in item_placements at the location, not here!
+  # In locations.yaml:
+  #   library:
+  #     item_placements:
+  #       iron_key:
+  #         placement: "hidden among the books on the lower shelf"
+  #         hidden: true
+  #         find_condition:
+  #           requires_flag: solved_library_puzzle
 
 ancient_amulet:
   name: "The Thornwood Amulet"
   portable: true
 
-  examine: |
+  scene_description: "A silver amulet on a tarnished chain"
+
+  examine_description: |
     A silver amulet on a tarnished chain. The pendant shows a
     thorn-wrapped tree. It hums faintly when held.
 
@@ -379,7 +412,9 @@ candlestick:
   name: "Silver Candlestick"
   portable: true
 
-  examine: "A heavy silver candlestick, unlit. Could serve as a light source... or a weapon."
+  scene_description: "A heavy silver candlestick, cold and unlit"
+
+  examine_description: "A heavy silver candlestick, unlit. Could serve as a light source... or a weapon."
 
   use_actions:
     light:
@@ -529,17 +564,17 @@ exits:
 | Generic exit descriptions | "A door leads north" | Specify: "An iron-banded oak door with a rusty padlock" |
 | Lighting inconsistency | Dark room connects to sunny plaza with no light spillover | Add "bright sunlight streams through the doorway from the square" |
 
-### Item Found Descriptions
+### Item Scene Descriptions
 
-**Every item MUST have a `found_description`** - this is how items become discoverable when the player looks around:
+**Every item MUST have a `scene_description`** - this is how items become discoverable when the player looks around:
 
 ```yaml
 # Good - naturally integrates into scene
-found_description: "A crumpled letter lies forgotten on the side table"
+scene_description: "A crumpled letter lies forgotten on the side table"
 
 # Bad - too generic or missing
-found_description: "There is a letter here"
-found_description: ""  # Item will be invisible!
+scene_description: "There is a letter here"
+scene_description: ""  # Item will be invisible!
 ```
 
 ### Exit Details
@@ -559,28 +594,35 @@ details:
 
 ### Item and NPC Placements
 
-**Every item and NPC should have a placement** describing WHERE in the room they are located. This improves both image generation and game master narratives:
+**Every item and NPC should have a placement** describing WHERE in the room they are located. This improves both image generation and game master narratives.
+
+In V3 schema, placements are structured objects that also control visibility:
 
 ```yaml
-# Good - specific placement in room
+# V3 - structured placements define which entities are here
 item_placements:
-  old_letter: "lies crumpled on the dusty side table near the door"
-  candlestick: "sits on the fireplace mantel, cold and unlit"
+  old_letter:
+    placement: "lies crumpled on the dusty side table near the door"
+  candlestick:
+    placement: "sits on the fireplace mantel, cold and unlit"
+  # Hidden item - requires discovery
+  brass_key:
+    placement: "hidden under the corner of the rug"
+    hidden: true
+    find_condition:
+      requires_flag: examined_rug
 
 npc_placements:
-  butler_jenkins: "stands rigidly by the grandfather clock, pale hands clasped"
-
-# Bad - missing placements (items/NPCs won't be positioned realistically)
-items:
-  - old_letter
-  - candlestick
-# No item_placements defined!
+  butler_jenkins:
+    placement: "stands rigidly by the grandfather clock, pale hands clasped"
 ```
 
 Placements should describe:
 - **Physical location**: "on the desk", "beneath the window", "by the fireplace"
 - **State/posture** (for NPCs): "standing", "crouching", "seated"
 - **Atmospheric details**: "half-hidden in shadow", "catching the moonlight"
+
+**V3 Note**: The keys in `item_placements` and `npc_placements` define which items/NPCs are at this location. There's no separate `items` or `npcs` list.
 
 ### Defining Constraints
 
@@ -625,26 +667,38 @@ knowledge:
 
 ### Puzzle Design
 
-Connect items, locations, and NPCs:
+Connect items, locations, and NPCs using V3 patterns:
 
 ```yaml
-# Item references location
+# Item definition (items.yaml)
 iron_key:
+  name: "Heavy Iron Key"
+  portable: true
+  scene_description: "A heavy iron key with a serpent-shaped head"
+  examine_description: "An old iron key, heavy and cold..."
   unlocks: basement_door
-  location: library
-  find_condition:
-    requires_flag: solved_library_puzzle
 
-# Location references item
+# Item placement with visibility (locations.yaml)
+library:
+  item_placements:
+    iron_key:
+      placement: "hidden among the books on the lower shelf"
+      hidden: true
+      find_condition:
+        requires_flag: solved_library_puzzle
+
+# Location access control (locations.yaml)
 basement:
   requires:
     item: iron_key
 
-# NPC provides hint
+# NPC provides hint (npcs.yaml)
 butler_jenkins:
   knowledge:
     - "Hints that 'the master kept important things among his books'"
 ```
+
+**V3 Key Concept**: Item visibility is defined at the *location* (where it's placed), not on the item itself. This allows the same item type to be visible in one location and hidden in another.
 
 ## World Builder Tools
 
@@ -710,12 +764,18 @@ python -m app.engine.validator your-world-name
 
 The validator checks:
 
-| Check | What It Validates |
-|-------|------------------|
-| Flag consistency | Flags that are checked (in `requires`, `appears_when`, `find_condition`) are set somewhere |
-| Location references | All exits, item locations, NPC locations point to valid location IDs |
-| Item references | `requires_item`, `unlocks`, starting inventory reference valid items |
-| Orphan flags | Flags that are set but never checked (warnings only) |
+| Check | What It Validates | Severity |
+|-------|------------------|----------|
+| Flag consistency | Flags that are checked are set somewhere | Error |
+| Flag uniqueness | Each flag is set by exactly one source | Error |
+| Location references | All exits, item locations, NPC locations point to valid location IDs | Error |
+| Item references | `requires_item`, `unlocks`, starting inventory reference valid items | Error |
+| Puzzle solvability | No circular key dependencies, no duplicate item placements | Error |
+| NPC placements | NPCs with `location` field are in that location's `npc_placements` | Error |
+| Victory flag location | Victory flag can only be set in victory location | Error |
+| Exit symmetry | If A→B exists, B→A must exist (bidirectional connectivity) | Error |
+| Exit direction reciprocity | Bidirectional exits use inverse directions (warning only) | Warning |
+| Orphan flags | Flags that are set but never checked | Warning |
 
 **Example output:**
 ```
@@ -733,6 +793,110 @@ WARNINGS (2):
 ```
 
 Fix all errors before testing. Warnings are informational - orphan flags may be intentional for future use.
+
+### Critical Conventions
+
+These rules prevent game-breaking issues:
+
+#### 1. Flag Uniqueness
+
+Each flag must be set by exactly **one** interaction or action. Multiple sources setting the same flag can bypass intended progression.
+
+```yaml
+# BAD - Two locations can set victory flag
+cafe_interior:
+  interactions:
+    fix_machine:
+      sets_flag: machine_repaired
+
+street_corner:
+  interactions:
+    repair_fuse:
+      sets_flag: machine_repaired  # Same flag! Creates unintended shortcut
+
+# GOOD - Only one source sets the flag
+cafe_interior:
+  interactions:
+    fix_machine:
+      sets_flag: machine_repaired  # Only place this flag is set
+```
+
+#### 2. NPC Placement Consistency
+
+If an NPC has a `location` field, that NPC **must** also appear in that location's `npc_placements`:
+
+```yaml
+# npcs.yaml
+guard_captain:
+  location: main_gate  # Declares location
+
+# locations.yaml - MUST include matching placement
+main_gate:
+  npc_placements:
+    guard_captain:
+      scene_description: "A stern captain blocks the gate."
+```
+
+#### 3. NPC-Guarded Items Need Mechanical Gates
+
+If an NPC "guards" an item, use a flag to gate item visibility:
+
+```yaml
+# BAD - Guard is narrative only, item is still grabbable
+guard_room:
+  npc_placements:
+    guard:
+      scene_description: "A guard watches over the key."
+  item_placements:
+    treasure_key:
+      scene_description: "A key sits on the shelf."  # Visible and takeable!
+
+# GOOD - Item is gated by flag set when guard is bypassed
+guard_room:
+  item_placements:
+    treasure_key:
+      scene_description: "A key sits on the shelf."
+      hidden: true
+      find_condition:
+        requires_flag: guard_distracted
+  interactions:
+    distract_guard:
+      triggers: ["give drink to guard"]
+      requires_item: wine_bottle
+      sets_flag: guard_distracted
+```
+
+#### 4. Exit Direction Reciprocity
+
+Use inverse directions for bidirectional exits:
+- `north` ↔ `south`
+- `east` ↔ `west`
+- `up` ↔ `down`
+- `in` ↔ `out`
+
+```yaml
+# BAD - Breaks spatial logic
+basement:
+  exits:
+    up:
+      destination: kitchen
+
+kitchen:
+  exits:
+    out:  # Should be "down" to match
+      destination: basement
+
+# GOOD - Consistent spatial directions
+basement:
+  exits:
+    up:
+      destination: kitchen
+
+kitchen:
+  exits:
+    down:  # Matches "up" from basement
+      destination: basement
+```
 
 ## Testing Your World
 
@@ -854,11 +1018,11 @@ Returns information about conditional NPCs and existing variants.
 | Puzzles too obscure | Add multiple trigger phrases, provide hints |
 | World feels empty | Add more `details` and `interactions` |
 | Atmosphere is generic | Use specific sensory details, not abstractions |
-| Items not discoverable | Add `found_description` to every item |
-| Player confused about location | Add exit details describing what each direction looks like |
+| Items not discoverable | Add `scene_description` to every item |
+| Player confused about location | Add `scene_description` to exits describing what each direction looks like |
 | Player confused why they can act | Add `starting_situation` explaining the enabling event |
 | Game has no ending | Add `victory` condition with location/flag/item requirements |
-| Exits seem unrealistic | Add narrative justification in `details` for each exit direction |
+| Exits seem unrealistic | Add `scene_description` to each exit with narrative justification |
 | Images lack visual depth | Add `visual_setting` to world.yaml and `visual_description` to each location |
 | Images repeat item/NPC descriptions | Focus `visual_description` on background elements and props, not interactive entities |
 | Items placed unrealistically in images | Add `item_placements` for every item at each location |
@@ -867,4 +1031,5 @@ Returns information about conditional NPCs and existing variants.
 | NPC doesn't move when expected | Check `location_changes` triggers and flag names match exactly |
 | NPC won't leave the game | Use `move_to: null` in `location_changes` to remove NPC entirely |
 | Flag mismatch errors | Run `python -m app.engine.validator` to find inconsistencies |
-| Item can't be found | Check `find_condition.requires_flag` matches a `sets_flag` somewhere |
+| Item can't be found | Check `item_placements` has the item, and if hidden, check `find_condition.requires_flag` matches a `sets_flag` |
+| Hidden exit not appearing | Check exit has `hidden: true` and `find_condition.requires_flag` matches a `sets_flag` |

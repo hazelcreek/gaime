@@ -4,6 +4,8 @@ Schema generator - extracts YAML schema examples from Pydantic models.
 This module generates theme-neutral YAML examples that serve as the
 source of truth for world builder prompts, ensuring prompts stay in
 sync with the Pydantic model definitions.
+
+Updated for V3 schema with structured exits, details, and placements.
 """
 
 import sys
@@ -30,6 +32,10 @@ from app.models.world import (
     NPCPersonality,
     NPCTrust,
     World,
+    ExitDefinition,
+    DetailDefinition,
+    ItemPlacement,
+    NPCPlacement,
 )
 
 
@@ -51,7 +57,7 @@ def get_placeholder_value(field_name: str, field_type: type, is_optional: bool =
             # It's Optional[X], get the non-None type
             field_type = args[0] if args[1] is type(None) else args[1]
 
-    # Common field name patterns
+    # Common field name patterns (V3 schema)
     placeholder_map = {
         # World fields
         "name": "World Name",
@@ -70,10 +76,13 @@ def get_placeholder_value(field_name: str, field_type: type, is_optional: bool =
         "appearance": "Physical description of the character.",
         "behavior": "How they act and react.",
 
-        # Item fields
-        "examine": "Description when the player examines this item.",
-        "found_description": "How the item appears naturally in the scene.",
+        # Item fields (V3 names)
+        "scene_description": "How the item appears naturally in the scene.",
+        "examine_description": "Detailed description when the player examines this item.",
         "take_description": "Message shown when the item is taken.",
+
+        # Placement fields (V3)
+        "placement": "Where in this room the entity is positioned.",
 
         # Generic fields
         "description": "A description of this element.",
@@ -176,53 +185,85 @@ def generate_npc_yaml_example() -> str:
     - "Another piece of information"
   dialogue_rules:
     - "Rule for how they communicate"
-    - "When they reveal information"'''
+    - "When they reveal information"
+  appears_when:                  # Optional: conditional appearance
+    - condition: has_flag
+      value: flag_name'''
 
 
 def generate_location_yaml_example() -> str:
-    """Generate a complete Location YAML example with correct schema."""
+    """Generate a complete Location YAML example with V3 schema."""
     return '''location_id:
   name: "Location Name"
   atmosphere: |
     Atmospheric description that establishes WHERE the player is,
     what they see, hear, and feel in this space.
+  visual_description: |
+    3-5 sentences of pure visual description for image generation.
+
+  # V3: Exits are structured ExitDefinition objects
   exits:
-    north: other_location_id
-    south: another_location_id
-  items:
-    - item_id
+    north:
+      destination: other_location_id
+      scene_description: "Visual description of this exit"
+      destination_known: true
+    secret:                      # Hidden exit example
+      destination: hidden_room_id
+      scene_description: "A narrow passage behind the bookcase"
+      hidden: true
+      find_condition:
+        requires_flag: found_lever
+
+  # V3: Item placements define which items are here (no items list)
   item_placements:
-    item_id: "WHERE in this room the item is located"
-  npcs:
-    - npc_id
+    visible_item_id:
+      placement: "lies on the dusty table"
+    hidden_item_id:
+      placement: "tucked under the rug"
+      hidden: true
+      find_condition:
+        requires_flag: examined_rug
+
+  # V3: NPC placements define which NPCs are here (no npcs list)
   npc_placements:
-    npc_id: "WHERE in this room the NPC is positioned"
+    npc_id:
+      placement: "stands behind the counter"
+
+  # V3: Details are structured DetailDefinition objects
   details:
-    feature: "Description of an examinable feature"
-    north: "What the north exit looks like"
+    chandelier:
+      name: "Crystal Chandelier"
+      scene_description: "A dusty chandelier hangs from the ceiling"
+      examine_description: "One crystal is loose..."
+      on_examine:
+        sets_flag: found_crystal
+        narrative_hint: "You discover something behind the crystal!"
+
   interactions:
-    interaction_id:
+    pull_lever:
       triggers:
-        - "examine feature"
-        - "use item on thing"
-      narrative_hint: "What happens when triggered"
-      sets_flag: flag_name
-      reveals_exit: hidden_location_id
+        - "pull lever"
+        - "use lever"
+      narrative_hint: "The bookcase slides aside..."
+      sets_flag: found_lever
+
   requires:
     flag: required_flag_name'''
 
 
 def generate_item_yaml_example() -> str:
-    """Generate a complete Item YAML example with correct schema."""
+    """Generate a complete Item YAML example with V3 schema."""
     return '''item_id:
   name: "Item Name"
   portable: true
-  examine: |
-    Detailed description when the player examines this item.
-  found_description: "How the item appears naturally in the room scene."
+  scene_description: "How the item appears naturally in the room scene."
+  examine_description: |
+    Detailed description when the player examines this item closely.
   take_description: "Message shown when the item is taken."
-  hidden: false
   unlocks: locked_location_id
+  on_examine:                    # Optional: effects when examined
+    sets_flag: flag_name
+    narrative_hint: "You notice something..."
   use_actions:
     action_name:
       description: "What happens when used this way"
@@ -236,6 +277,10 @@ def generate_world_yaml_example() -> str:
 theme: "adventure"
 tone: "atmospheric"
 hero_name: "the protagonist"
+
+visual_setting: |
+  5-10 sentences describing the world's visual language for image generation.
+  Materials, textures, color palette, architecture, lighting...
 
 premise: |
   Description of the world premise, setting, and context.
@@ -274,7 +319,7 @@ def generate_full_schema_reference() -> str:
     This can be used to validate prompts or as documentation.
     """
     sections = [
-        "# World Builder Schema Reference",
+        "# World Builder Schema Reference (V3)",
         "",
         "This document shows the correct schema for all world YAML files.",
         "Generated from Pydantic models - DO NOT edit manually.",
@@ -304,7 +349,7 @@ def generate_full_schema_reference() -> str:
 
 def validate_prompt_schema(prompt_content: str) -> list[str]:
     """
-    Validate that a prompt uses correct schema.
+    Validate that a prompt uses correct V3 schema.
 
     Returns a list of issues found.
     """
@@ -322,6 +367,24 @@ def validate_prompt_schema(prompt_content: str) -> list[str]:
     # Check for incorrect location fields
     if "constraints:" in prompt_content and "locked_exit:" in prompt_content:
         issues.append("Found 'constraints' with 'locked_exit:' pattern - should use 'requires:' field")
+
+    # V3: Check for deprecated item field names
+    if "found_description:" in prompt_content:
+        issues.append("Found 'found_description:' - should be 'scene_description:' (V3)")
+
+    if "examine:" in prompt_content and "examine_description:" not in prompt_content:
+        # Only flag if examine: appears without examine_description
+        if "examine:" in prompt_content:
+            issues.append("Found 'examine:' - should be 'examine_description:' (V3)")
+
+    # V3: Check for deprecated reveals_exit
+    if "reveals_exit:" in prompt_content:
+        issues.append("Found 'reveals_exit:' - use hidden exits with find_condition instead (V3)")
+
+    # V3: Check for deprecated items/npcs lists
+    if "items:" in prompt_content and "item_placements:" in prompt_content:
+        # Both present - could be transitional, but items list is deprecated
+        issues.append("Found 'items:' list - use item_placements keys to define items at location (V3)")
 
     return issues
 

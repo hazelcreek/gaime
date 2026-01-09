@@ -313,15 +313,45 @@ class ManageWorldsScreen(Screen):
 
         details = self.query_one("#details-content", Static)
 
-        if is_valid and not messages:
+        # Categorize messages
+        errors = [m for m in messages if not m.startswith("WARNING:") and not m.startswith("QUALITY:")]
+        warnings = [m.replace("WARNING: ", "") for m in messages if m.startswith("WARNING:")]
+        quality = [m.replace("QUALITY: ", "") for m in messages if m.startswith("QUALITY:")]
+
+        if is_valid and not warnings and not quality:
             details.update(f"[green]✓ World '{world_id}' is valid![/]")
             self.notify(f"World '{world_id}' is valid!", severity="information")
         elif is_valid:
-            # Has warnings but no errors
-            warning_text = "\n".join(f"⚠️  {m}" for m in messages)
-            details.update(f"[yellow]World '{world_id}' has warnings:[/]\n\n{warning_text}")
-            self.notify(f"World has {len(messages)} warning(s)", severity="warning")
+            # Has warnings and/or quality suggestions but no errors
+            output_lines = [f"[green]✓ World '{world_id}' is valid[/]"]
+
+            if warnings:
+                output_lines.append(f"\n[yellow]Warnings ({len(warnings)}):[/]")
+                for w in warnings:
+                    output_lines.append(f"  ⚠️  {w}")
+
+            if quality:
+                output_lines.append(f"\n[cyan]Quality Suggestions ({len(quality)}):[/]")
+                for q in quality:
+                    output_lines.append(f"  💡 {q}")
+
+            details.update("\n".join(output_lines))
+
+            total_issues = len(warnings) + len(quality)
+            if warnings:
+                self.notify(f"Valid with {len(warnings)} warning(s), {len(quality)} suggestion(s)", severity="warning")
+            else:
+                self.notify(f"Valid with {len(quality)} quality suggestion(s)", severity="information")
         else:
-            error_text = "\n".join(f"❌ {m}" for m in messages)
-            details.update(f"[red]World '{world_id}' has errors:[/]\n\n{error_text}")
-            self.notify(f"World has errors", severity="error")
+            output_lines = [f"[red]✗ World '{world_id}' has errors:[/]"]
+
+            for e in errors:
+                output_lines.append(f"  ❌ {e}")
+
+            if warnings:
+                output_lines.append(f"\n[yellow]Warnings ({len(warnings)}):[/]")
+                for w in warnings:
+                    output_lines.append(f"  ⚠️  {w}")
+
+            details.update("\n".join(output_lines))
+            self.notify(f"World has {len(errors)} error(s)", severity="error")

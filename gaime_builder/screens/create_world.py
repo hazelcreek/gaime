@@ -186,6 +186,19 @@ class CreateWorldScreen(Screen):
                     )
 
                 with Horizontal(classes="form-row"):
+                    yield Label("Reality Level:")
+                    yield Select(
+                        id="reality-level",
+                        options=[
+                            ("Grounded - realistic, no fantastical elements", "grounded"),
+                            ("Stylized - heightened reality, quirks allowed", "stylized"),
+                            ("Surreal - dreamlike, absurdist elements", "surreal"),
+                            ("Fantasy - magic, talking animals, mythical", "fantasy"),
+                        ],
+                        value="stylized",
+                    )
+
+                with Horizontal(classes="form-row"):
                     yield Label("Visual Style:")
                     yield Select(
                         id="style-preset",
@@ -364,6 +377,8 @@ class CreateWorldScreen(Screen):
         theme = self.query_one("#theme", Input).value.strip() or None
         style_select = self.query_one("#style-preset", Select)
         style_preset = str(style_select.value) if style_select.value else "classic-fantasy"
+        reality_select = self.query_one("#reality-level", Select)
+        reality_level = str(reality_select.value) if reality_select.value else "stylized"
 
         try:
             num_locations = int(self.query_one("#num_locations", Input).value or "6")
@@ -394,6 +409,7 @@ class CreateWorldScreen(Screen):
                 description=description,
                 theme=theme,
                 style_preset=style_preset,
+                reality_level=reality_level,
                 num_locations=num_locations,
                 num_npcs=num_npcs,
             ),
@@ -406,6 +422,7 @@ class CreateWorldScreen(Screen):
         description: str,
         theme: str | None,
         style_preset: str,
+        reality_level: str,
         num_locations: int,
         num_npcs: int,
     ) -> dict:
@@ -428,6 +445,7 @@ class CreateWorldScreen(Screen):
         result = await generator.generate(
             prompt=description,
             theme=theme,
+            reality_level=reality_level,
             num_locations=num_locations,
             num_npcs=num_npcs,
             progress_callback=update_progress

@@ -55,7 +55,7 @@ See [two-phase-game-loop-spec.md](two-phase-game-loop-spec.md) for full specific
 | 4 | Examination Mechanics | ✅ Complete |
 | 5 | Narrator Integration | ⚪ Planned |
 | 6 | Image Generation | ⚪ Planned |
-| 7 | World Builder Updates | ⚪ Planned |
+| 7 | World Builder V3 Schema | ✅ Complete |
 | 8 | Documentation | ⚪ Planned |
 
 See [visibility-examination-spec.md](visibility-examination-spec.md) for full specification.
@@ -382,6 +382,7 @@ See [ideas/features.md](../ideas/features.md) for full descriptions.
 
 | Date | Change |
 |------|--------|
+| 2026-01-07 | Visibility & Examination Phase 7 complete: World Builder V3 schema - updated prompts, world_generator.py, schema_generator.py, and docs/WORLD_AUTHORING.md for V3 structured exits/details/placements with hidden entity support |
 | 2026-01-05 | Visibility & Examination Phase 4 complete: on_examine effects, exit examination, destination reveal mechanics, reveal_destination_on_flag/examine, 284 tests passing |
 | 2026-01-04 | Visibility & Examination Phase 2 complete: All 10 worlds migrated to V2 schema (ExitDefinition, DetailDefinition, renamed Item fields), 256 tests passing |
 | 2026-01-04 | Visibility & Examination Phase 1 complete: ExitDefinition, DetailDefinition, ExaminationEffect models; Item field aliases; validation script |

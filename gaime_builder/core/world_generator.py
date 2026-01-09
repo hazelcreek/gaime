@@ -54,6 +54,7 @@ class WorldGenerator:
         self,
         prompt: str,
         theme: str | None,
+        reality_level: str,
         num_locations: int,
         num_npcs: int,
         progress_callback=None
@@ -67,6 +68,7 @@ class WorldGenerator:
         logger.info("=" * 50)
         logger.info("PASS 1: Generating design brief")
         logger.info(f"  Theme: {theme}")
+        logger.info(f"  Reality Level: {reality_level}")
         logger.info(f"  Locations: {num_locations}, NPCs: {num_npcs}")
         logger.info(f"  Prompt: {prompt[:100]}...")
 
@@ -80,6 +82,7 @@ class WorldGenerator:
 
             user_prompt = design_brief_template.format(
                 theme=theme or "to be determined from description",
+                reality_level=reality_level,
                 num_locations=num_locations,
                 num_npcs=num_npcs,
                 prompt=prompt
@@ -139,6 +142,7 @@ class WorldGenerator:
         self,
         prompt: str,
         theme: str | None,
+        reality_level: str,
         num_locations: int,
         num_npcs: int,
         design_brief: dict,
@@ -168,6 +172,7 @@ class WorldGenerator:
 
             user_prompt = world_builder_template.format(
                 theme=theme or "to be determined from description",
+                reality_level=reality_level,
                 num_locations=num_locations,
                 num_npcs=num_npcs,
                 prompt=prompt,
@@ -352,23 +357,24 @@ class WorldGenerator:
                         triggers=int_data.get("triggers", []),
                         narrative_hint=int_data.get("narrative_hint", ""),
                         sets_flag=int_data.get("sets_flag"),
-                        reveals_exit=int_data.get("reveals_exit"),
+                        # V3: reveals_exit is deprecated - use hidden exits with find_condition
                         gives_item=int_data.get("gives_item"),
                         removes_item=int_data.get("removes_item"),
                     )
 
+                # V3: exits, details, item_placements, npc_placements are structured objects
+                # Pydantic auto-coerces nested dicts to ExitDefinition, DetailDefinition, etc.
                 locations[loc_id] = Location(
                     name=loc_data.get("name", ""),
                     atmosphere=loc_data.get("atmosphere", ""),
                     visual_description=loc_data.get("visual_description", ""),
                     exits=loc_data.get("exits", {}),
-                    items=loc_data.get("items", []),
-                    npcs=loc_data.get("npcs", []),
                     details=loc_data.get("details", {}),
                     interactions=interactions,
                     requires=requires,
                     item_placements=loc_data.get("item_placements", {}),
                     npc_placements=loc_data.get("npc_placements", {}),
+                    # V3: items and npcs lists are deprecated - use placements keys
                 )
 
             # Build NPC models
@@ -401,18 +407,18 @@ class WorldGenerator:
                     behavior=npc_data.get("behavior", ""),
                 )
 
-            # Build Item models
+            # Build Item models (V3 schema)
             items = {}
             for item_id, item_data in items_dict.items():
                 items[item_id] = Item(
                     name=item_data.get("name", ""),
                     portable=item_data.get("portable", True),
-                    examine=item_data.get("examine", ""),
-                    found_description=item_data.get("found_description", ""),
+                    # V3 field names
+                    scene_description=item_data.get("scene_description", ""),
+                    examine_description=item_data.get("examine_description", ""),
                     take_description=item_data.get("take_description", ""),
                     unlocks=item_data.get("unlocks"),
-                    location=item_data.get("location"),
-                    hidden=item_data.get("hidden", False),
+                    # V3: hidden, find_condition, location are deprecated (now in item_placements)
                 )
 
             # Create WorldData
@@ -435,23 +441,21 @@ class WorldGenerator:
                         logger.debug(f"  ⚠️  {warning}")
                 return yaml_result
 
-            # Attempt fixes (hybrid: rules first, then LLM for creative issues)
-            logger.info(f"PASS 3: Found {len(result.errors)} error(s), attempting fixes...")
+            # Attempt rule-based fixes for structural issues
+            # Creative issues will be handled by WorldAnalyzer AI passes
+            logger.info(f"PASS 3: Found {len(result.errors)} error(s), attempting structural fixes...")
             for error in result.errors:
                 logger.debug(f"  ❌ {error}")
 
-            fixer = WorldFixer(world_data, world_id, design_brief=design_brief)
-            fix_result = await fixer.fix_async()
+            fixer = WorldFixer(world_data, world_id)
+            fix_result = fixer.fix()
 
             logger.info(f"PASS 3: Fix result after {fix_result.attempts} attempt(s):")
-            logger.info(f"  Rule fixes: {len([f for f in fix_result.fixes_applied if f.fix_type == 'rule'])}")
-            logger.info(f"  LLM fixes: {len([f for f in fix_result.fixes_applied if f.fix_type == 'llm'])}")
-            logger.info(f"  LLM calls: {fix_result.llm_calls}")
+            logger.info(f"  Fixes applied: {len(fix_result.fixes_applied)}")
             logger.info(f"  Remaining errors: {len(fix_result.remaining_errors)}")
 
             for fix in fix_result.fixes_applied:
-                fix_marker = "🔧" if fix.fix_type == "rule" else "🤖"
-                logger.debug(f"  {fix_marker} {fix.description}")
+                logger.debug(f"  🔧 {fix.description}")
 
             for error in fix_result.remaining_errors:
                 logger.warning(f"  ❌ Unfixed: {error}")
@@ -460,6 +464,11 @@ class WorldGenerator:
                 # Re-serialize fixed world data back to YAML
                 logger.debug("Re-serializing fixed world data to YAML...")
                 yaml_result = self._serialize_world_data_to_yaml(world_data, yaml_result)
+
+            # AI Analysis Passes (after structural fixes)
+            yaml_result = await self._run_ai_analysis_passes(
+                yaml_result, world_data, world_id, design_brief
+            )
 
             return yaml_result
 
@@ -470,9 +479,233 @@ class WorldGenerator:
             logger.debug(traceback.format_exc())
             return yaml_result
 
+    async def _run_ai_analysis_passes(
+        self,
+        yaml_result: dict,
+        world_data,  # WorldData - not type-annotated to avoid import issues
+        world_id: str,
+        design_brief: dict,
+    ) -> dict:
+        """
+        Run AI analysis passes for playability and narrative quality.
+
+        These passes holistically analyze the world and apply targeted fixes
+        that rule-based validation cannot detect.
+        """
+        from gaime_builder.core.world_analyzer import WorldAnalyzer
+
+        # Build yaml_content dict for the analyzer to modify
+        yaml_content = {
+            "world": yaml.safe_load(yaml_result.get("world_yaml", "")),
+            "locations": yaml.safe_load(yaml_result.get("locations_yaml", "")),
+            "npcs": yaml.safe_load(yaml_result.get("npcs_yaml", "")),
+            "items": yaml.safe_load(yaml_result.get("items_yaml", "")),
+        }
+
+        analyzer = WorldAnalyzer(
+            world_data=world_data,
+            world_id=world_id,
+            design_brief=design_brief,
+            yaml_content=yaml_content,
+        )
+
+        # Playability Analysis Pass (up to 2 iterations)
+        logger.info("PASS 4: AI Playability Analysis...")
+        for iteration in range(2):
+            playability = await analyzer.analyze_playability()
+
+            if not playability.has_issues:
+                logger.info(f"  Iteration {iteration + 1}: No playability issues found")
+                break
+
+            logger.info(
+                f"  Iteration {iteration + 1}: Found {len(playability.issues)} issue(s)"
+            )
+            for issue in playability.issues:
+                logger.debug(f"    [{issue.severity}] {issue.description}")
+
+            # Apply fixes
+            fix_result = await analyzer.fix_playability(playability)
+            logger.info(f"  Applied {len(fix_result.fixes_applied)} fix(es)")
+
+            if not fix_result.yaml_updated:
+                logger.info("  No YAML changes needed, stopping iterations")
+                break
+
+            # Re-validate after fixes
+            world_data_updated = self._reload_world_data_from_yaml(yaml_content)
+            if world_data_updated:
+                validator = WorldValidator(world_data_updated, world_id)
+                result = validator.validate()
+                if result.is_valid:
+                    logger.info("  World now valid after playability fixes")
+                    world_data = world_data_updated
+                    break
+
+        # Narrative Analysis Pass (single shot)
+        logger.info("PASS 5: AI Narrative Analysis...")
+        narrative = await analyzer.analyze_narrative()
+
+        if narrative.has_issues:
+            logger.info(f"  Found {len(narrative.issues)} narrative issue(s)")
+            for issue in narrative.issues:
+                logger.debug(f"    [{issue.severity}] {issue.description}")
+
+            fix_result = await analyzer.fix_narrative(narrative)
+            logger.info(f"  Applied {len(fix_result.fixes_applied)} fix(es)")
+        else:
+            logger.info("  No narrative issues found")
+
+        # Re-serialize if yaml_content was modified
+        if analyzer.yaml_content:
+            yaml_result = self._serialize_yaml_content(analyzer.yaml_content, yaml_result)
+
+        return yaml_result
+
+    def _reload_world_data_from_yaml(self, yaml_content: dict):
+        """Reload WorldData from modified yaml_content dict. Returns WorldData or None."""
+        try:
+            world_dict = yaml_content.get("world", {})
+            locations_dict = yaml_content.get("locations", {})
+            npcs_dict = yaml_content.get("npcs", {})
+            items_dict = yaml_content.get("items", {})
+
+            # Build WorldData (simplified - reuse existing parsing logic)
+            # This is a partial rebuild for validation purposes
+            from app.models.world import (
+                WorldDefinition,
+                PlayerSetup,
+                VictoryCondition,
+                Location,
+                NPC,
+                Item,
+                ExitDefinition,
+                ItemPlacement,
+                NPCPlacement,
+            )
+
+            # Parse world
+            player_data = world_dict.get("player", {})
+            player = PlayerSetup(
+                starting_location=player_data.get("starting_location", ""),
+                starting_inventory=player_data.get("starting_inventory", []),
+            )
+
+            victory_data = world_dict.get("victory", {})
+            victory = VictoryCondition(
+                location=victory_data.get("location"),
+                flag=victory_data.get("flag"),
+                item=victory_data.get("item"),
+                narrative=victory_data.get("narrative", ""),
+            ) if victory_data else None
+
+            world = WorldDefinition(
+                name=world_dict.get("name", ""),
+                theme=world_dict.get("theme", ""),
+                tone=world_dict.get("tone", ""),
+                premise=world_dict.get("premise", ""),
+                starting_situation=world_dict.get("starting_situation", ""),
+                player=player,
+                victory=victory,
+            )
+
+            # Parse locations
+            locations = {}
+            for loc_id, loc_data in locations_dict.items():
+                exits = {}
+                for direction, exit_data in loc_data.get("exits", {}).items():
+                    if isinstance(exit_data, dict):
+                        exits[direction] = ExitDefinition(
+                            destination=exit_data.get("destination", ""),
+                            scene_description=exit_data.get("scene_description", ""),
+                            destination_known=exit_data.get("destination_known", True),
+                            hidden=exit_data.get("hidden", False),
+                            locked=exit_data.get("locked", False),
+                            requires_key=exit_data.get("requires_key"),
+                        )
+                    else:
+                        exits[direction] = ExitDefinition(destination=exit_data)
+
+                item_placements = {}
+                for item_id, placement_data in loc_data.get("item_placements", {}).items():
+                    if isinstance(placement_data, dict):
+                        item_placements[item_id] = ItemPlacement(
+                            scene_description=placement_data.get("scene_description", ""),
+                        )
+                    else:
+                        item_placements[item_id] = ItemPlacement()
+
+                npc_placements = {}
+                for npc_id, placement_data in loc_data.get("npc_placements", {}).items():
+                    if isinstance(placement_data, dict):
+                        npc_placements[npc_id] = NPCPlacement(
+                            scene_description=placement_data.get("scene_description", ""),
+                        )
+                    else:
+                        npc_placements[npc_id] = NPCPlacement()
+
+                locations[loc_id] = Location(
+                    name=loc_data.get("name", ""),
+                    atmosphere=loc_data.get("atmosphere", ""),
+                    exits=exits,
+                    item_placements=item_placements,
+                    npc_placements=npc_placements,
+                )
+
+            # Parse NPCs
+            npcs = {}
+            for npc_id, npc_data in npcs_dict.items():
+                npcs[npc_id] = NPC(
+                    name=npc_data.get("name", ""),
+                    role=npc_data.get("role", ""),
+                    location=npc_data.get("location"),
+                    personality=npc_data.get("personality", ""),
+                )
+
+            # Parse Items
+            items = {}
+            for item_id, item_data in items_dict.items():
+                items[item_id] = Item(
+                    name=item_data.get("name", ""),
+                    scene_description=item_data.get("scene_description", ""),
+                    examine_description=item_data.get("examine_description", ""),
+                )
+
+            return WorldData(world=world, locations=locations, npcs=npcs, items=items)
+
+        except Exception as e:
+            logger.warning(f"Failed to reload WorldData from YAML: {e}")
+            return None
+
+    def _serialize_yaml_content(self, yaml_content: dict, original_result: dict) -> dict:
+        """Serialize yaml_content dict back to YAML strings"""
+        result = dict(original_result)
+
+        if "world" in yaml_content and yaml_content["world"]:
+            result["world_yaml"] = yaml.dump(
+                yaml_content["world"], default_flow_style=False, sort_keys=False
+            )
+
+        if "locations" in yaml_content and yaml_content["locations"]:
+            result["locations_yaml"] = yaml.dump(
+                yaml_content["locations"], default_flow_style=False, sort_keys=False
+            )
+
+        if "npcs" in yaml_content and yaml_content["npcs"]:
+            result["npcs_yaml"] = yaml.dump(
+                yaml_content["npcs"], default_flow_style=False, sort_keys=False
+            )
+
+        if "items" in yaml_content and yaml_content["items"]:
+            result["items_yaml"] = yaml.dump(
+                yaml_content["items"], default_flow_style=False, sort_keys=False
+            )
+
+        return result
+
     def _serialize_world_data_to_yaml(self, world_data, original_result: dict) -> dict:
         """
-        Serialize WorldData back to YAML strings.
+        Serialize WorldData back to YAML strings (V3 schema).
 
         Preserves the original structure as much as possible while
         incorporating fixes from the WorldFixer.
@@ -480,38 +713,100 @@ class WorldGenerator:
         # For now, we do a simple serialization. More sophisticated
         # approaches could preserve comments and formatting.
 
-        # Serialize locations
+        # Serialize locations (V3)
         locations_dict = {}
         for loc_id, loc in world_data.locations.items():
             loc_dict = {
                 "name": loc.name,
                 "atmosphere": loc.atmosphere,
-                "exits": loc.exits,
             }
             if loc.visual_description:
                 loc_dict["visual_description"] = loc.visual_description
-            if loc.items:
-                loc_dict["items"] = loc.items
+
+            # V3: Serialize exits as ExitDefinition dicts
+            if loc.exits:
+                exits_dict = {}
+                for direction, exit_def in loc.exits.items():
+                    exit_data = {"destination": exit_def.destination}
+                    if exit_def.scene_description:
+                        exit_data["scene_description"] = exit_def.scene_description
+                    if exit_def.examine_description:
+                        exit_data["examine_description"] = exit_def.examine_description
+                    if not exit_def.destination_known:
+                        exit_data["destination_known"] = False
+                    if exit_def.hidden:
+                        exit_data["hidden"] = True
+                    if exit_def.find_condition:
+                        exit_data["find_condition"] = exit_def.find_condition
+                    if exit_def.locked:
+                        exit_data["locked"] = True
+                    if exit_def.requires_key:
+                        exit_data["requires_key"] = exit_def.requires_key
+                    exits_dict[direction] = exit_data
+                loc_dict["exits"] = exits_dict
+
+            # V3: Serialize item_placements as ItemPlacement dicts
             if loc.item_placements:
-                loc_dict["item_placements"] = loc.item_placements
-            if loc.npcs:
-                loc_dict["npcs"] = loc.npcs
+                placements_dict = {}
+                for item_id, placement in loc.item_placements.items():
+                    placement_data = {"placement": placement.placement}
+                    if placement.hidden:
+                        placement_data["hidden"] = True
+                    if placement.find_condition:
+                        placement_data["find_condition"] = placement.find_condition
+                    placements_dict[item_id] = placement_data
+                loc_dict["item_placements"] = placements_dict
+
+            # V3: Serialize npc_placements as NPCPlacement dicts
             if loc.npc_placements:
-                loc_dict["npc_placements"] = loc.npc_placements
+                npc_placements_dict = {}
+                for npc_id, placement in loc.npc_placements.items():
+                    placement_data = {"placement": placement.placement}
+                    if placement.hidden:
+                        placement_data["hidden"] = True
+                    if placement.find_condition:
+                        placement_data["find_condition"] = placement.find_condition
+                    npc_placements_dict[npc_id] = placement_data
+                loc_dict["npc_placements"] = npc_placements_dict
+
+            # V3: Serialize details as DetailDefinition dicts
             if loc.details:
-                loc_dict["details"] = loc.details
+                details_dict = {}
+                for detail_id, detail in loc.details.items():
+                    detail_data = {
+                        "name": detail.name,
+                        "scene_description": detail.scene_description,
+                    }
+                    if detail.examine_description:
+                        detail_data["examine_description"] = detail.examine_description
+                    if detail.on_examine:
+                        on_examine_data = {}
+                        if detail.on_examine.sets_flag:
+                            on_examine_data["sets_flag"] = detail.on_examine.sets_flag
+                        if detail.on_examine.narrative_hint:
+                            on_examine_data["narrative_hint"] = detail.on_examine.narrative_hint
+                        if on_examine_data:
+                            detail_data["on_examine"] = on_examine_data
+                    if detail.hidden:
+                        detail_data["hidden"] = True
+                    if detail.find_condition:
+                        detail_data["find_condition"] = detail.find_condition
+                    details_dict[detail_id] = detail_data
+                loc_dict["details"] = details_dict
+
+            # Serialize interactions (V3: no reveals_exit)
             if loc.interactions:
                 loc_dict["interactions"] = {
                     int_id: {
                         "triggers": int_effect.triggers,
                         "narrative_hint": int_effect.narrative_hint,
                         **({"sets_flag": int_effect.sets_flag} if int_effect.sets_flag else {}),
-                        **({"reveals_exit": int_effect.reveals_exit} if int_effect.reveals_exit else {}),
                         **({"gives_item": int_effect.gives_item} if int_effect.gives_item else {}),
                         **({"removes_item": int_effect.removes_item} if int_effect.removes_item else {}),
                     }
                     for int_id, int_effect in loc.interactions.items()
                 }
+
             if loc.requires:
                 loc_dict["requires"] = {}
                 if loc.requires.flag:
@@ -548,25 +843,23 @@ class WorldGenerator:
 
             npcs_dict[npc_id] = npc_dict
 
-        # Serialize Items
+        # Serialize Items (V3 schema)
         items_dict = {}
         for item_id, item in world_data.items.items():
             item_dict = {
                 "name": item.name,
                 "portable": item.portable,
             }
-            if item.examine:
-                item_dict["examine"] = item.examine
-            if item.found_description:
-                item_dict["found_description"] = item.found_description
+            # V3 field names
+            if item.scene_description:
+                item_dict["scene_description"] = item.scene_description
+            if item.examine_description:
+                item_dict["examine_description"] = item.examine_description
             if item.take_description:
                 item_dict["take_description"] = item.take_description
             if item.unlocks:
                 item_dict["unlocks"] = item.unlocks
-            if item.location:
-                item_dict["location"] = item.location
-            if item.hidden:
-                item_dict["hidden"] = item.hidden
+            # V3: hidden, find_condition, location are deprecated (now in item_placements)
 
             items_dict[item_id] = item_dict
 
@@ -597,6 +890,7 @@ class WorldGenerator:
         self,
         prompt: str,
         theme: str | None = None,
+        reality_level: str = "stylized",
         num_locations: int = 6,
         num_npcs: int = 3,
         progress_callback=None
@@ -610,6 +904,7 @@ class WorldGenerator:
         Args:
             prompt: Description of the world to generate
             theme: Optional theme override
+            reality_level: How grounded vs fantastical (grounded/stylized/surreal/fantasy)
             num_locations: Number of locations to generate
             num_npcs: Number of NPCs to generate
             progress_callback: Optional callback for progress updates
@@ -624,6 +919,7 @@ class WorldGenerator:
         logger.info("WORLD GENERATION STARTED")
         logger.info(f"  Model: {get_model_string()}")
         logger.info(f"  Theme: {theme}")
+        logger.info(f"  Reality Level: {reality_level}")
         logger.info(f"  Locations: {num_locations}, NPCs: {num_npcs}")
         logger.info(f"  Prompt length: {len(prompt)} chars")
         logger.info("=" * 60)
@@ -633,6 +929,7 @@ class WorldGenerator:
             brief_result = await self._generate_design_brief(
                 prompt=prompt,
                 theme=theme,
+                reality_level=reality_level,
                 num_locations=num_locations,
                 num_npcs=num_npcs,
                 progress_callback=progress_callback
@@ -644,6 +941,7 @@ class WorldGenerator:
             yaml_result = await self._generate_yaml_from_brief(
                 prompt=prompt,
                 theme=theme,
+                reality_level=reality_level,
                 num_locations=num_locations,
                 num_npcs=num_npcs,
                 design_brief=brief_result,
@@ -1018,7 +1316,17 @@ class WorldGenerator:
         errors.extend(consistency_errors)
         warnings.extend(consistency_warnings)
 
-        return len(errors) == 0, errors + [f"WARNING: {w}" for w in warnings]
+        # Level 4: Quality checks (only if no errors)
+        quality_warnings = []
+        if not errors:
+            quality_warnings = self._check_quality(yaml_data)
+
+        # Format output: errors first, then warnings, then quality suggestions
+        messages = list(errors)
+        messages.extend(f"WARNING: {w}" for w in warnings)
+        messages.extend(f"QUALITY: {w}" for w in quality_warnings)
+
+        return len(errors) == 0, messages
 
     def _validate_yaml_data(
         self,
@@ -1077,10 +1385,228 @@ class WorldGenerator:
 
         return schema_errors, consistency_errors, consistency_warnings
 
+    def _check_quality(self, yaml_data: dict) -> list[str]:
+        """
+        Check for quality issues in world content (V3).
+
+        These are not errors but suggestions for improvement.
+        Returns list of quality warnings.
+        """
+        warnings = []
+
+        world_data = yaml_data.get("world.yaml", {})
+        locations_data = yaml_data.get("locations.yaml", {})
+        items_data = yaml_data.get("items.yaml", {})
+        npcs_data = yaml_data.get("npcs.yaml", {})
+
+        # === World-level quality checks ===
+
+        # Visual setting length (should be 5-10 sentences)
+        visual_setting = world_data.get("visual_setting", "")
+        if visual_setting:
+            sentences = [s.strip() for s in visual_setting.replace('\n', ' ').split('.') if s.strip()]
+            if len(sentences) < 3:
+                warnings.append(
+                    f"visual_setting is short ({len(sentences)} sentences) - aim for 5-10 for rich image generation"
+                )
+        else:
+            warnings.append("Missing visual_setting - images will lack consistent visual language")
+
+        # Starting situation
+        if not world_data.get("starting_situation"):
+            warnings.append("Missing starting_situation - players won't know why they can act")
+
+        # Victory condition (note: unobtainable victory items are now validation ERRORS, not quality warnings)
+        if not world_data.get("victory"):
+            warnings.append("Missing victory condition - game has no defined ending")
+
+        # === Item quality checks ===
+
+        items_placed = set()
+        for loc in locations_data.values():
+            if isinstance(loc, dict):
+                placements = loc.get("item_placements", {})
+                items_placed.update(placements.keys())
+
+        starting_inventory = world_data.get("player", {}).get("starting_inventory", [])
+
+        for item_id, item_data in items_data.items():
+            if not isinstance(item_data, dict):
+                continue
+
+            # Missing scene_description (item invisible in scene)
+            if not item_data.get("scene_description"):
+                warnings.append(
+                    f"Item '{item_id}' missing scene_description - item will be invisible in room descriptions"
+                )
+
+            # Missing examine_description
+            if not item_data.get("examine_description"):
+                warnings.append(
+                    f"Item '{item_id}' missing examine_description - examine will feel empty"
+                )
+
+            # Orphaned item (defined but never placed)
+            if item_id not in items_placed and item_id not in starting_inventory:
+                warnings.append(
+                    f"Item '{item_id}' is defined but never placed in any location or starting inventory"
+                )
+
+        # === Location quality checks ===
+
+        for loc_id, loc_data in locations_data.items():
+            if not isinstance(loc_data, dict):
+                continue
+
+            # Get exits early for use in multiple checks
+            exits = loc_data.get("exits", {})
+
+            # Visual description length
+            visual_desc = loc_data.get("visual_description", "")
+            if visual_desc:
+                sentences = [s.strip() for s in visual_desc.replace('\n', ' ').split('.') if s.strip()]
+                if len(sentences) < 2:
+                    warnings.append(
+                        f"Location '{loc_id}' visual_description is short ({len(sentences)} sentences) - aim for 3-5"
+                    )
+
+                # Check for non-visual content in visual_description
+                non_visual_patterns = [
+                    ("freeze", "dynamic behavior"),
+                    ("when looked at", "conditional description"),
+                    ("if you", "conditional description"),
+                    ("when you", "conditional description"),
+                    ("you can hear", "sound - belongs in atmosphere"),
+                    ("you hear", "sound - belongs in atmosphere"),
+                    ("smell", "smell - belongs in atmosphere"),
+                    ("sounds of", "sound - belongs in atmosphere"),
+                ]
+                visual_desc_lower = visual_desc.lower()
+                for pattern, issue_type in non_visual_patterns:
+                    if pattern in visual_desc_lower:
+                        warnings.append(
+                            f"Location '{loc_id}' visual_description contains '{pattern}' ({issue_type}) - "
+                            f"visual_description should only contain what a camera would capture"
+                        )
+                        break  # Only report first issue per location
+
+                # Check for exit directions mentioned in visual_description (redundant)
+                exit_directions = exits.keys() if exits else []
+                for direction in exit_directions:
+                    # Check for "to the north", "to the east", etc.
+                    if f"to the {direction}" in visual_desc_lower:
+                        warnings.append(
+                            f"Location '{loc_id}' visual_description mentions exit direction '{direction}' - "
+                            f"exit descriptions belong in exits.scene_description only"
+                        )
+                        break  # Only report first
+            else:
+                warnings.append(
+                    f"Location '{loc_id}' missing visual_description - image generation will lack detail"
+                )
+
+            # Exit quality checks
+            for direction, exit_data in exits.items():
+                if isinstance(exit_data, dict):
+                    if not exit_data.get("scene_description"):
+                        warnings.append(
+                            f"Exit '{direction}' in '{loc_id}' missing scene_description - visual continuity risk"
+                        )
+                    # Hidden exit without find_condition
+                    if exit_data.get("hidden") and not exit_data.get("find_condition"):
+                        warnings.append(
+                            f"Exit '{direction}' in '{loc_id}' is hidden but has no find_condition - will never be revealed"
+                        )
+                    # requires_key should reference an actual item
+                    requires_key = exit_data.get("requires_key")
+                    if requires_key and requires_key not in items_data:
+                        warnings.append(
+                            f"Exit '{direction}' in '{loc_id}' has requires_key '{requires_key}' which is not a valid item - use 'locked' with find_condition for flag-based unlocking"
+                        )
+                    # destination_known checks
+                    dest_known = exit_data.get("destination_known", True)
+                    dest_id = exit_data.get("destination", "")
+                    is_hidden_exit = exit_data.get("hidden", False)
+
+                    # Hidden exits should have destination_known: false
+                    # You don't know where a secret passage leads until you've been through it
+                    if is_hidden_exit and dest_known:
+                        warnings.append(
+                            f"Exit '{direction}' in '{loc_id}' is hidden but has destination_known: true - "
+                            f"secret passages should typically have destination_known: false"
+                        )
+                    # Also check for secret/utility destination names
+                    elif dest_known:
+                        is_secret_dest = any(
+                            kw in dest_id.lower()
+                            for kw in ["secret", "hidden", "utility", "maintenance", "private", "restricted"]
+                        )
+                        if is_secret_dest:
+                            warnings.append(
+                                f"Exit '{direction}' in '{loc_id}' has destination_known: true "
+                                f"but leads to '{dest_id}' - consider setting destination_known: false for unfamiliar areas"
+                            )
+
+            # Detail quality checks
+            details = loc_data.get("details", {})
+            for detail_id, detail_data in details.items():
+                if isinstance(detail_data, dict):
+                    if not detail_data.get("examine_description"):
+                        warnings.append(
+                            f"Detail '{detail_id}' in '{loc_id}' missing examine_description - examine will feel empty"
+                        )
+                    # Hidden detail without find_condition
+                    if detail_data.get("hidden") and not detail_data.get("find_condition"):
+                        warnings.append(
+                            f"Detail '{detail_id}' in '{loc_id}' is hidden but has no find_condition - will never be revealed"
+                        )
+
+            # Item placement quality checks
+            item_placements = loc_data.get("item_placements", {})
+            for item_id, placement_data in item_placements.items():
+                if isinstance(placement_data, dict):
+                    # Hidden item without find_condition
+                    if placement_data.get("hidden") and not placement_data.get("find_condition"):
+                        warnings.append(
+                            f"Item '{item_id}' in '{loc_id}' is hidden but has no find_condition - will never be revealed"
+                        )
+                    # Check item exists
+                    if item_id not in items_data:
+                        # This is an error, not quality - caught by validator
+                        pass
+
+        # === NPC quality checks ===
+
+        npcs_placed = set()
+        for loc in locations_data.values():
+            if isinstance(loc, dict):
+                placements = loc.get("npc_placements", {})
+                npcs_placed.update(placements.keys())
+
+        for npc_id, npc_data in npcs_data.items():
+            if not isinstance(npc_data, dict):
+                continue
+
+            # Check NPC is placed somewhere
+            has_location = npc_data.get("location") or npc_data.get("locations")
+            if not has_location and npc_id not in npcs_placed:
+                warnings.append(
+                    f"NPC '{npc_id}' is defined but has no location and isn't in any npc_placements"
+                )
+
+            # Missing appearance
+            if not npc_data.get("appearance"):
+                warnings.append(
+                    f"NPC '{npc_id}' missing appearance - image generation won't show them correctly"
+                )
+
+        return warnings
+
     def _check_deprecated_schema(self, yaml_data: dict) -> list[str]:
         """
-        Check for deprecated schema patterns that the loader accepts
-        for backwards compatibility but should be migrated.
+        Check for deprecated schema patterns (V3).
+
+        Detects patterns that should be updated to V3 schema.
         """
         errors = []
 
@@ -1105,6 +1631,35 @@ class WorldGenerator:
                     f"use 'dialogue_rules' instead"
                 )
 
+        # Check items for deprecated patterns (V3)
+        items_data = yaml_data.get("items.yaml", {})
+        for item_id, item_data in items_data.items():
+            if not isinstance(item_data, dict):
+                continue
+
+            # V3: Check for old field names
+            if "found_description" in item_data:
+                errors.append(
+                    f"Item '{item_id}': 'found_description' is deprecated, "
+                    f"use 'scene_description' instead"
+                )
+            if "examine" in item_data and "examine_description" not in item_data:
+                errors.append(
+                    f"Item '{item_id}': 'examine' is deprecated, "
+                    f"use 'examine_description' instead"
+                )
+            # V3: Check for visibility fields that should be in item_placements
+            if "hidden" in item_data:
+                errors.append(
+                    f"Item '{item_id}': 'hidden' is deprecated in items.yaml, "
+                    f"use item_placements with hidden/find_condition in locations.yaml"
+                )
+            if "location" in item_data:
+                errors.append(
+                    f"Item '{item_id}': 'location' is deprecated in items.yaml, "
+                    f"place items via item_placements in locations.yaml"
+                )
+
         # Check locations for deprecated patterns
         locations_data = yaml_data.get("locations.yaml", {})
         for loc_id, loc_data in locations_data.items():
@@ -1118,6 +1673,47 @@ class WorldGenerator:
                     errors.append(
                         f"Location '{loc_id}': 'constraints' with 'locked_exit:' pattern "
                         f"is deprecated, use 'requires' field instead"
+                    )
+
+            # V3: Check for deprecated items list (use item_placements keys)
+            if "items" in loc_data:
+                errors.append(
+                    f"Location '{loc_id}': 'items' list is deprecated, "
+                    f"use item_placements keys to define items at this location"
+                )
+
+            # V3: Check for deprecated npcs list (use npc_placements keys)
+            if "npcs" in loc_data:
+                errors.append(
+                    f"Location '{loc_id}': 'npcs' list is deprecated, "
+                    f"use npc_placements keys to define NPCs at this location"
+                )
+
+            # V3: Check for reveals_exit in interactions
+            interactions = loc_data.get("interactions", {})
+            for int_id, int_data in interactions.items():
+                if isinstance(int_data, dict) and "reveals_exit" in int_data:
+                    errors.append(
+                        f"Location '{loc_id}' interaction '{int_id}': 'reveals_exit' is deprecated, "
+                        f"use hidden exits with find_condition instead"
+                    )
+
+            # V3: Check for string details (should be DetailDefinition)
+            details = loc_data.get("details", {})
+            for detail_id, detail_data in details.items():
+                if isinstance(detail_data, str):
+                    errors.append(
+                        f"Location '{loc_id}' detail '{detail_id}': string details are deprecated, "
+                        f"use DetailDefinition with name/scene_description/examine_description"
+                    )
+
+            # V3: Check for string exits (should be ExitDefinition)
+            exits = loc_data.get("exits", {})
+            for direction, exit_data in exits.items():
+                if isinstance(exit_data, str):
+                    errors.append(
+                        f"Location '{loc_id}' exit '{direction}': string exits are deprecated, "
+                        f"use ExitDefinition with destination/scene_description"
                     )
 
         return errors

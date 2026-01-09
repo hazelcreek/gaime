@@ -1,4 +1,4 @@
-## YAML SCHEMA REFERENCE (use ONLY these fields)
+## YAML SCHEMA REFERENCE (V3 - use ONLY these fields)
 
 ### world.yaml
 ```yaml
@@ -6,13 +6,16 @@ name: "World Name"
 theme: "Genre/setting"
 tone: "Mood descriptors"
 hero_name: "Protagonist name for NPC dialogue"
+visual_setting: |
+  5-10 sentences describing visual language for image generation.
+  Materials, textures, color palette, architecture, lighting...
 premise: |
   Multi-line world description...
 starting_situation: |
   WHY can the player act NOW? What changed?
 victory:
   location: location_id      # Where to win
-  flag: required_flag        # MUST have interaction that sets this!
+  flag: required_flag        # MUST have interaction/examination that sets this!
   item: required_item        # Optional
   narrative: |
     Ending text...
@@ -24,35 +27,74 @@ constraints:
   - "Rule 2"
 ```
 
-### locations.yaml
+### locations.yaml (V3 Schema)
 ```yaml
 location_id:
   name: "Location Name"
   atmosphere: |
-    Sensory description...
+    Sensory description (sounds, smells, mood)...
+  visual_description: |
+    3-5 sentences of pure visual scene for image generation.
+
+  # EXITS - Structured ExitDefinition (V3)
   exits:
-    north: other_location_id
-  items: [item_id]
+    north:
+      destination: other_location_id
+      scene_description: "Visual description of this exit"
+      destination_known: true           # Does player know where it leads?
+    secret:                             # Hidden exit example
+      destination: secret_room
+      scene_description: "A narrow passage behind the bookcase"
+      hidden: true                      # Exit is invisible until revealed
+      find_condition:
+        requires_flag: found_lever      # What flag reveals it
+      destination_known: true
+
+  # ITEM PLACEMENTS - Structured ItemPlacement (V3)
+  # The keys define which items are at this location (no separate items list!)
   item_placements:
-    item_id: "Where in room"
-  npcs: [npc_id]
+    visible_item:
+      placement: "lies on the table"
+    hidden_item:
+      placement: "tucked under the rug"
+      hidden: true
+      find_condition:
+        requires_flag: examined_rug
+
+  # NPC PLACEMENTS - Structured NPCPlacement (V3)
+  # The keys define which NPCs are at this location (no separate npcs list!)
   npc_placements:
-    npc_id: "Where NPC stands"
+    npc_id:
+      placement: "stands behind the counter"
+
+  # DETAILS - Structured DetailDefinition (V3)
   details:
-    feature: "Description when examined"
-    north: "What the north exit looks like"
+    chandelier:
+      name: "Crystal Chandelier"
+      scene_description: "A dusty chandelier hangs from the ceiling"
+      examine_description: "One crystal is loose..."
+      on_examine:                       # Optional examination effects
+        sets_flag: found_crystal
+        narrative_hint: "You discover something behind the crystal!"
+
+  # INTERACTIONS - for complex multi-step puzzles
   interactions:
-    interaction_id:
-      triggers: ["examine X", "use Y on Z"]
-      narrative_hint: "What happens"
-      sets_flag: flag_name       # Use this to enable victory!
-      reveals_exit: location_id
-      gives_item: item_id
-  requires:                      # Optional access control
+    pull_lever:
+      triggers: ["pull lever", "use lever"]
+      narrative_hint: "The bookcase slides aside..."
+      sets_flag: found_lever            # Use this to reveal hidden exits!
+      gives_item: item_id               # Optional
+
+  requires:                             # Optional access control
     flag: required_flag
     item: required_item
 ```
-**INVALID for locations: `constraints` (use world.yaml constraints instead)**
+
+**DEPRECATED (do NOT use):**
+- `items: [...]` list - use item_placements keys instead
+- `npcs: [...]` list - use npc_placements keys instead
+- `reveals_exit` in interactions - use hidden exits with find_condition
+- `details.direction: "string"` - exits have their own scene_description
 
 ### npcs.yaml
 ```yaml
@@ -64,46 +106,94 @@ npc_id:
   locations: [loc1, loc2]        # Multiple locations (roaming)
   appearance: |
     Physical description...
-  personality:                   # RICH STRUCTURE - use this!
+  personality:
     traits: [trait1, trait2]
     speech_style: "How they talk, dialect, tone"
     quirks:
       - "Behavioral detail"
-      - "Mannerism"
   knowledge:
     - "What they know"
-  dialogue_rules:                # BEHAVIORAL CONSTRAINTS
+  dialogue_rules:
     - "Never reveals X directly"
     - "Deflects questions about Y"
   trust:                         # Optional
     initial: 0
     threshold: 3
     build_actions: ["action1"]
-  appears_when:                  # Conditional appearance
+  appears_when:                  # Conditional appearance (dynamic NPCs)
     - condition: has_flag
       value: flag_name
+  location_changes:              # NPCs that move based on flags
+    - when_flag: alarm_triggered
+      move_to: guard_post
 ```
-**INVALID for npcs: `dialogue_hints` (use personality.speech_style and quirks instead)**
 
-### items.yaml
+### items.yaml (V3 Schema)
 ```yaml
 item_id:
   name: "Item Name"
   portable: true
-  examine: |
-    Description when examined...
-  found_description: "How it appears in scene (REQUIRED!)"
+  scene_description: "How the item appears in the scene (REQUIRED!)"
+  examine_description: |
+    Detailed description when examined closely...
   take_description: "Message when taken"
-  location: location_id          # Where item starts
-  hidden: false
-  find_condition:
-    requires_flag: flag_name
+  unlocks: locked_door_id        # Optional: what this key unlocks
+  on_examine:                    # Optional: effects when examined
+    sets_flag: flag_name
+    narrative_hint: "You notice something..."
+  use_actions:                   # Optional: custom use actions
+    light:
+      requires_item: matches
+      description: "You light the candle"
+      sets_flag: has_light
 ```
+
+**DEPRECATED (do NOT use in items.yaml):**
+- `found_description` - use `scene_description`
+- `examine` - use `examine_description`
+- `location` - items are placed via location.item_placements
+- `hidden` - visibility is set in item_placements
+- `find_condition` - visibility is set in item_placements
 
 ## CRITICAL RULES
 
-1. **Victory flags MUST be settable**: If `victory.flag: X`, there MUST be an interaction with `sets_flag: X`
-2. **All exits must be valid**: Every exit must reference a defined location_id
-3. **All items must be obtainable**: Items in victory condition must be reachable
-4. **Use personality structure**: Instead of example dialogue, describe HOW they speak
-5. **Constraints go in world.yaml only**: Never add `constraints` to individual locations
+1. **Victory flags MUST be settable**: If `victory.flag: X`, there MUST be an interaction or on_examine that sets it
+2. **Victory items MUST be placed**: If `victory.item: X`, that item MUST be in some location's item_placements or starting_inventory
+3. **All exits must be valid**: Every exit.destination must reference a defined location_id
+4. **All items must be placed**: Every item defined in items.yaml MUST appear in some location's item_placements or starting_inventory
+5. **Use item_placements not items list**: Items at a location are defined by item_placements keys
+6. **Use npc_placements not npcs list**: NPCs at a location are defined by npc_placements keys
+7. **Hidden exits use find_condition**: Don't use reveals_exit; set hidden: true and find_condition on the exit
+8. **Every item needs scene_description**: This is how it appears naturally in the scene
+9. **Use personality structure**: Instead of example dialogue, describe HOW NPCs speak
+10. **requires_key is for ITEMS**: Exit `requires_key` must be an item_id, not a flag. For flag-based unlocking use `hidden` + `find_condition`
+
+## HIDDEN ENTITY PATTERN
+
+To hide an item/exit until discovered:
+
+```yaml
+# 1. Create an interaction or detail examination that sets a flag
+interactions:
+  examine_rug:
+    triggers: ["examine rug", "look under rug"]
+    sets_flag: examined_rug
+    narrative_hint: "You lift the rug and find something hidden beneath!"
+
+# 2. Reference that flag in the hidden entity's find_condition
+item_placements:
+  brass_key:
+    placement: "hidden under the rug"
+    hidden: true
+    find_condition:
+      requires_flag: examined_rug
+
+# For hidden exits:
+exits:
+  secret:
+    destination: secret_passage
+    scene_description: "A dark passage behind the bookcase"
+    hidden: true
+    find_condition:
+      requires_flag: found_lever
+```

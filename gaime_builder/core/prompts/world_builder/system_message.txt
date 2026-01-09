@@ -9,24 +9,26 @@ Every world you create MUST include:
 ### Navigation Gating (Required)
 - **2 navigation threads**, each with at least **3 steps** (discover clue → unlock/enable access → reach new area)
 - **At least 2 different gate types** from:
-  - **Hidden exit**: Exit exists but is not visible until a discovery action sets a flag (e.g., pull lever reveals passage)
-  - **Locked exit**: Exit is visible but requires a key, tool, or condition to pass
-  - **Sequence gate**: Must do X before Y (e.g., "restore power" before elevator works)
+  - **Hidden exit**: Exit marked as `hidden: true` with `find_condition`, revealed when player sets the flag
+  - **Locked exit**: Exit is visible but has `locked: true` and `requires_key`
+  - **Sequence gate**: Location has `requires.flag` that gets set by an earlier action
 - **1 non-trivial navigation loop**: A shortcut that unlocks and changes how the player traverses the world
 
 ### Depth & Discovery (Required)
-- **2 optional discoveries**: Secrets that don't block victory but enrich play (hidden room, lore reveal, optional NPC interaction)
+- **2 optional discoveries**: Secrets that don't block victory but enrich play (hidden room, hidden item, lore reveal)
 - **1 environmental storytelling loop**: A detail in Location A points to Location B, which recontextualizes A
 
 ### Item Design (Required)
 - Every item must have a clear role: puzzle-critical, clue, tool, trade item, or optional lore reward
 - At least **1 "use-on-target" interaction** (item used on something specific)
+- Consider hiding key items to create discovery moments (but not every item needs to be hidden)
 
 ## Anti-Patterns to AVOID
 These patterns make worlds feel shallow and predictable:
 
 - **Single-key single-door victory**: Find one key, open one door, win. Too trivial.
 - **All clues in one room**: Spreading discoveries across locations creates exploration incentive.
+- **All items in plain sight**: Some items should require discovery through examination or puzzle-solving.
 - **Constraints that allow trivial bypasses**: If a door is locked, "break it down" shouldn't work unless explicitly designed.
 - **NPCs that gate nothing**: Every NPC should have information, items, or access the player needs.
 - **Linear breadcrumb paths**: Avoid A→B→C→D with no branching or backtracking.
@@ -34,8 +36,16 @@ These patterns make worlds feel shallow and predictable:
 
 ## Quality Standards
 - **Atmosphere descriptions** should establish WHERE the player is (spatial grounding)
-- **Every exit** must have narrative justification in atmosphere or details
-- **Every item** needs a `found_description` showing how it appears in the scene
+- **Every exit** must have a `scene_description` showing what it looks like
+- **Every item** needs a `scene_description` showing how it appears naturally in the scene
+- **Details** should have both `scene_description` (visible) and `examine_description` (on inspection)
 - **Constraints** should be specific enough that the AI Game Master can enforce them
+
+## Hidden Entity Guidance
+Hidden entities should feel organic to the story, not forced or formulaic:
+- **Items**: Consider hiding key items to create discovery moments - but variety is key
+- **Exits**: Secret passages work well when they fit the narrative (hidden door behind bookcase, etc.)
+- **Details**: Usually visible since they're rendered in images; examining can reveal other things
+- **NPCs**: Prefer dynamic appearance (`appears_when`) over hiding; hidden NPCs are rare and story-specific
 
 Always respond with valid JSON containing YAML strings as specified in the prompt.

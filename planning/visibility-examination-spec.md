@@ -1833,21 +1833,30 @@ The following fields and patterns are deprecated in V3:
 - NPCs parsed from `npc_placements` (V3), not legacy `npcs` list
 - Placement descriptions properly extracted from V3 structured format (dict with `placement` key)
 
-### Phase 7: World Builder Updates (Week 3-4)
+### Phase 7: World Builder Updates ✅
 
 **Goal**: World Builder generates V3 schema with visibility-aware content
 
-- [ ] Update location generation prompts to use `item_placements` (not `items` list)
-- [ ] Update location generation prompts to use `npc_placements` (not `npcs` list)
-- [ ] Add prompt guidance for generating hidden items
-- [ ] Add prompt guidance for generating hidden exits (secret passages)
-- [ ] Add prompt guidance for generating hidden details (secret clues)
-- [ ] Add prompt guidance for generating hidden NPCs (lurking enemies)
-- [ ] Generate appropriate `find_condition` flags based on puzzle design
-- [ ] Ensure interactions that reveal hidden things set the correct flags
-- [ ] Update schema reference documentation for V3
+- [x] Update location generation prompts to use `item_placements` (not `items` list)
+- [x] Update location generation prompts to use `npc_placements` (not `npcs` list)
+- [x] Add prompt guidance for generating hidden items
+- [x] Add prompt guidance for generating hidden exits (secret passages)
+- [x] Add prompt guidance for generating hidden details (secret clues)
+- [x] Add prompt guidance for generating hidden NPCs (lurking enemies)
+- [x] Generate appropriate `find_condition` flags based on puzzle design
+- [x] Ensure interactions that reveal hidden things set the correct flags
+- [x] Update schema reference documentation for V3
 
-**Tests**: Manual testing with world generation
+**Implementation Notes**:
+- Updated `world_builder_prompt.txt` with V3 JSON template and hidden entity guidance
+- Updated `design_brief_prompt.txt` to plan hidden elements in Pass 1
+- Rewrote `schema_reference.txt` for V3 structured exits/details/placements
+- Updated `system_message.txt` with V3 quality standards
+- Updated `world_generator.py` to parse/serialize V3 models
+- Updated `schema_generator.py` with V3 field names
+- Updated `docs/WORLD_AUTHORING.md` with V3 examples
+
+**Tests**: 289 unit tests passing, schema generator validation working
 
 ### Phase 8: Documentation (Week 4)
 

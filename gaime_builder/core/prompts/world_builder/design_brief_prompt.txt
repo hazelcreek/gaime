@@ -2,6 +2,7 @@ You are designing the puzzle structure and mechanics for a text adventure world.
 
 ## Requirements
 - Theme: {theme}
+- Reality Level: {reality_level}
 - Number of locations: {num_locations}
 - Number of NPCs: {num_npcs}
 
@@ -27,49 +28,80 @@ Respond with valid JSON containing the world design brief. DO NOT generate YAML 
           "Step 2: What this enables",
           "Step 3: What the player can now access"
         ],
-        "gate_type": "hidden_exit | locked_exit | sequence_gate",
+        "gate_type": "hidden_exit | locked_exit | sequence_gate | permanently_blocked",
         "gate_description": "Brief description of the specific gate mechanic"
       }},
       {{
         "name": "Secondary Thread Name",
         "is_primary": false,
         "steps": ["Step 1", "Step 2", "Step 3"],
-        "gate_type": "hidden_exit | locked_exit | sequence_gate",
+        "gate_type": "hidden_exit | locked_exit | sequence_gate | permanently_blocked",
         "gate_description": "Brief description"
       }}
     ],
     "navigation_loop": {{
       "description": "How the shortcut works",
       "unlocked_by": "What action/item unlocks it",
-      "connects": ["location_a", "location_b"]
+      "connects": ["location_a", "location_b"],
+      "is_hidden": true
     }},
-    "gate_types_used": ["hidden_exit", "locked_exit"],
+    "gate_types_used": ["hidden_exit", "locked_exit"],  // Options: hidden_exit, locked_exit, sequence_gate, permanently_blocked
     "critical_items": [
       {{
         "id": "item_id",
         "name": "Item Name",
         "purpose": "What this item is used for",
-        "location_hint": "Where it can be found"
+        "location_hint": "Where it can be found",
+        "placement_backstory": "WHO put this item here and WHY - must involve a character, event, or world logic",
+        "informed_by_npc": "optional: npc_id who knows about this item's location",
+        "is_hidden": false,
+        "discovery_method": "null or description of how player finds it"
       }}
     ],
     "optional_secrets": [
       {{
         "name": "Secret Name",
-        "type": "hidden_room | lore_reveal | optional_npc | bonus_item",
+        "type": "hidden_room | hidden_item | lore_reveal | optional_npc | bonus_item",
         "description": "What the secret is and why it's rewarding",
-        "discovery_hint": "How the player might find it"
+        "discovery_hint": "How the player might find it",
+        "reveals_on": "What action or examination triggers discovery"
       }}
     ],
     "environmental_storytelling": {{
       "location_a": "What detail in Location A hints at something",
       "location_b": "What in Location B explains or recontextualizes it"
     }},
+    "dynamic_npcs": [
+      {{
+        "npc_id": "npc_id",
+        "behavior": "Description of when/where they appear or move",
+        "trigger": "What causes them to appear or change location"
+      }}
+    ],
     "victory_condition": {{
       "location": "final_location_id",
       "required_items": ["item_id"],
       "required_flags": ["flag_name"],
       "narrative_summary": "Brief description of what victory looks like"
     }},
+    "flag_registry": {{
+      "flag_name_1": {{
+        "set_by": "location/interaction or item/action that sets this flag",
+        "purpose": "What this flag enables (unlocks exit, reveals item, triggers NPC, etc.)"
+      }},
+      "flag_name_2": {{
+        "set_by": "...",
+        "purpose": "..."
+      }}
+    }},
+    "npc_item_guards": [
+      {{
+        "npc_id": "guard_npc_id",
+        "guards_item": "item_id",
+        "unlock_mechanism": "What player must do to access the item (talk, give_item, solve_puzzle)",
+        "flag_set": "Flag that gates the item's accessibility"
+      }}
+    ],
     "key_constraints": [
       "Important rule 1 the AI Game Master must enforce",
       "Important rule 2 that prevents trivial solutions"
@@ -80,21 +112,77 @@ Respond with valid JSON containing the world design brief. DO NOT generate YAML 
 
 ## Design Guidelines
 
-1. **Puzzle Threads**: Design at least 2 threads with 3+ steps each. The primary thread leads to victory; secondary threads unlock shortcuts, optional content, or alternative approaches.
+1. **Reality Level Compliance (CRITICAL)**: All content must match the specified reality level:
+   - **grounded**: Realistic, plausible world. No magic, talking animals, supernatural elements, or impossible physics. Characters are ordinary humans (or realistic animals). Settings follow real-world logic.
+   - **stylized**: Heightened reality. Exaggerated personalities, quirky situations, and improbable coincidences are OK. But no outright fantasy - no talking animals, magic, or supernatural.
+   - **surreal**: Dreamlike and absurdist. Unexpected juxtapositions, strange logic, and metaphorical elements welcome. Reality is fluid but internally consistent.
+   - **fantasy**: Magical elements expected. Talking animals, spells, mythical creatures, impossible architecture all acceptable.
 
-2. **Gate Variety**: Use at least 2 different gate types:
-   - `hidden_exit`: Passage not visible until discovered (pull lever, examine painting, etc.)
+   **Example**: For a "grounded" NYC setting, use realistic characters (journalists, shopkeepers, office workers). For "fantasy", talking animal citizens are fine.
+
+2. **Puzzle Threads**: Design at least 2 threads with 3+ steps each. The primary thread leads to victory; secondary threads unlock shortcuts, optional content, or alternative approaches.
+
+3. **Gate Variety**: Use at least 2 different gate types:
+   - `hidden_exit`: A secret passage not visible until discovered (pull lever, examine painting, move bookcase, etc.)
    - `locked_exit`: Visible but blocked (requires key, code, or solved puzzle)
    - `sequence_gate`: Accessible only after prerequisite (power restored, NPC convinced, etc.)
+   - `permanently_blocked`: Visible but NEVER openable (collapsed tunnel, sealed vault). Use sparingly for flavor/atmosphere. NO key should be specified.
 
-3. **Navigation Loop**: Include one meaningful shortcut that makes backtracking easier once discovered.
+4. **Navigation Loop**: Include one meaningful shortcut that makes backtracking easier once discovered. This is often a hidden exit that creates a loop in the world topology.
 
-4. **Secrets**: At least 2 optional discoveries that reward exploration without blocking progress.
+5. **Secrets and Hidden Content**: At least 2 optional discoveries that reward exploration. Consider:
+   - **Hidden items**: Keys, clues, or rewards that require examination or interaction to discover
+   - **Hidden rooms**: Secret passages revealed by pulling levers, examining paintings, etc.
+   - **Lore reveals**: Backstory discovered through examining details or talking to NPCs
+   - **Bonus items**: Optional rewards for thorough exploration
 
-5. **Environmental Storytelling**: Connect at least 2 locations through discoverable lore or visual details.
+   Hidden content should feel organic to the story and setting - never arbitrary or forced.
 
-6. **Constraints**: Be specific! "The basement is locked" is vague. "The basement door requires the iron key and cannot be broken" is enforceable.
+6. **Critical Items - Visibility and Motivation**: For each critical item:
+   - **Visibility**: Visible (plain sight) or Hidden (requires discovery)
+   - **Placement Backstory (REQUIRED)**: WHO put this item here and WHY
 
-7. **Visual Continuity**: When designing location connections, consider how shared architectural elements will appear from both sides. Define specific details (door type, material, color) that will be consistent when viewing the doorway from either direction. Interior locations must be clearly interior; underground locations must show tunnel architecture.
+   Consider hiding at least one key item to create discovery moments.
 
-Think carefully about how the puzzle threads interweave and create a satisfying exploration experience.
+   **Placement Motivation Patterns** (use at least one per critical item):
+   - **NPC Testimony**: An NPC knows where the item is and WHY it's there
+     - "The lookout dropped the key in the grog barrel while drunk"
+   - **Environmental Logic**: The location makes in-world sense
+     - "A spare key kept near the lock by employees"
+   - **Historical Event**: Something happened that explains placement
+     - "The golden bean was hidden by the previous cafe owner before they vanished"
+   - **Character Action**: A named character deliberately placed it
+     - "The maintenance worker hid their lucky charm in their toolbox"
+
+   **ANTI-PATTERN TO AVOID**: "Item is in location X" with no explanation.
+   Items randomly appearing in locations breaks immersion and feels like "video game logic."
+
+7. **Dynamic NPCs**: Consider NPCs that:
+   - Appear only after certain flags are set (e.g., guard appears after alarm triggered)
+   - Move between locations based on story progress
+   - Are initially hidden and revealed through story events (rare - use sparingly)
+
+8. **Environmental Storytelling**: Connect at least 2 locations through discoverable lore or visual details.
+
+9. **Constraints**: Be specific! "The basement is locked" is vague. "The basement door requires the iron key and cannot be broken" is enforceable.
+
+10. **Visual Continuity**: When designing location connections, consider how shared architectural elements will appear from both sides. Define specific details (door type, material, color) that will be consistent when viewing the doorway from either direction. Interior locations must be clearly interior; underground locations must show tunnel architecture.
+
+11. **Flag Uniqueness (CRITICAL)**: Each flag must be set by exactly ONE source. Never allow multiple interactions to set the same flag.
+    - **BAD**: Two different locations can both repair the machine
+    - **GOOD**: Only the machine room interaction sets "machine_repaired"
+    - **WHY**: Multiple flag sources create unintended shortcuts and break intended progression
+
+12. **NPC-Guarded Items (CRITICAL)**: If an NPC is described as "guarding" an item, there MUST be a mechanical gate:
+    - The item must have a `find_condition` requiring a flag
+    - The NPC interaction must set that flag when the guard is bypassed
+    - **BAD**: "The guard watches over the key" (item still grabbable without interaction)
+    - **GOOD**: Item hidden until flag "guard_distracted" is set by giving guard a drink
+
+13. **Exit Direction Reciprocity**: Use inverse directions for bidirectional exits:
+    - north↔south, east↔west, up↔down, in↔out
+    - **BAD**: Location A has "down" to B, but B has "out" to A (breaks spatial logic)
+    - **GOOD**: Location A has "down" to B, B has "up" to A
+    - Special exits (secret passages) can use non-standard directions
+
+Think carefully about how the puzzle threads interweave and create a satisfying exploration experience. The best worlds have hidden content that feels motivated by the story, not arbitrarily placed.

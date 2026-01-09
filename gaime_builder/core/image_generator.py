@@ -53,9 +53,10 @@ class ExitInfo:
 
     Attributes:
         direction: Cardinal direction or named exit (e.g., "north", "secret")
-        destination_name: Display name of the destination location
+        destination_name: Display name of the destination location (for internal use)
         scene_description: Authored visual description of the exit
-        destination_known: Whether to include destination name in prompt
+        destination_known: Whether to include destination hint in prompt
+        destination_visual_hint: Visual description of destination (for image prompt)
         hidden: Whether exit is hidden at build time (not rendered if true)
         is_secret: Legacy flag for subtle environmental hints
         requires_key: Whether exit is locked (adds lock visual)
@@ -64,6 +65,7 @@ class ExitInfo:
     destination_name: str
     scene_description: str = ""  # V3: Authored visual description
     destination_known: bool = True  # V3: Whether to hint at destination
+    destination_visual_hint: str = ""  # V3: Visual description of destination
     hidden: bool = False  # V3: For filtering (not rendered if true)
     is_secret: bool = False  # Legacy: subtle hints for secret passages
     requires_key: bool = False
@@ -224,9 +226,10 @@ def _build_exits_description(exits: list[ExitInfo]) -> str:
         if exit.requires_key:
             desc = f"{desc}, secured with a heavy lock"
 
-        # Add destination hint when known
-        if exit.destination_known and exit.destination_name:
-            desc = f"{desc}, leading to {exit.destination_name}"
+        # Add destination visual hint for open passages (not destination name to avoid wrong signage)
+        if exit.destination_visual_hint:
+            # Include glimpse of what's through the passage
+            desc = f"{desc}. Through it: {exit.destination_visual_hint}"
 
         # Get directional context for bullet prefix
         dir_hint = direction_hints.get(direction, "")
@@ -1168,16 +1171,24 @@ class ImageGenerator:
             # Get destination info
             destination_data = locations.get(destination_id, {})
             destination_name = destination_data.get("name", destination_id)
+            destination_visual = destination_data.get("visual_description", "")
             dest_requires = destination_data.get("requires", {})
 
             # Determine is_secret from destination requirements (legacy pattern)
             is_secret = bool(dest_requires.get("flag") if dest_requires else False)
+
+            # For open passages, include destination visual (not name) to avoid wrong signage
+            # Only include for non-locked exits (can see through open passage)
+            destination_visual_hint = ""
+            if destination_known and destination_visual and not (locked or requires_key):
+                destination_visual_hint = destination_visual
 
             context.exits.append(ExitInfo(
                 direction=direction,
                 destination_name=destination_name,
                 scene_description=scene_description,
                 destination_known=destination_known,
+                destination_visual_hint=destination_visual_hint,
                 hidden=hidden,
                 is_secret=is_secret,
                 requires_key=bool(locked or requires_key),

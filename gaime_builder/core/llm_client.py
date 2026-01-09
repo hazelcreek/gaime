@@ -184,17 +184,39 @@ def parse_json_response(response: str | None, strict: bool = False) -> dict:
     try:
         return json.loads(cleaned)
     except json.JSONDecodeError as e:
-        logger.warning(f"Initial JSON parse failed: {e}")
+        logger.warning(f"Initial JSON parse failed at position {e.pos}: {e.msg}")
+        logger.warning(f"Context around error: ...{cleaned[max(0, e.pos-50):e.pos+50]}...")
 
-        # Try to fix common double-escaping issues from LLMs
-        # LLMs sometimes output \\" when they should output \"
+        # Try a series of fixes for common LLM JSON issues
+        fixed = cleaned
+
+        # Fix 1: Remove trailing commas before } or ]
+        fixed = re.sub(r',\s*}', '}', fixed)
+        fixed = re.sub(r',\s*]', ']', fixed)
+
         try:
-            # Replace \\" with \" (fixing double-escaped quotes)
+            result = json.loads(fixed)
+            logger.info("JSON parse succeeded after removing trailing commas")
+            return result
+        except json.JSONDecodeError:
+            pass
+
+        # Fix 2: Double-escaped quotes/newlines
+        try:
             fixed = cleaned.replace('\\\\"', '\\"')
-            # Replace \\n with \n inside string values (fixing double-escaped newlines)
-            # Be careful not to break actual escaped backslashes
             result = json.loads(fixed)
             logger.info("JSON parse succeeded after fixing double-escaping")
+            return result
+        except json.JSONDecodeError:
+            pass
+
+        # Fix 3: Combine trailing comma removal and double-escape fix
+        try:
+            fixed = cleaned.replace('\\\\"', '\\"')
+            fixed = re.sub(r',\s*}', '}', fixed)
+            fixed = re.sub(r',\s*]', ']', fixed)
+            result = json.loads(fixed)
+            logger.info("JSON parse succeeded after combined fixes")
             return result
         except json.JSONDecodeError:
             pass
@@ -202,18 +224,46 @@ def parse_json_response(response: str | None, strict: bool = False) -> dict:
         # Try to extract JSON from the response
         json_match = re.search(r'\{[\s\S]*\}', cleaned)
         if json_match:
+            extracted = json_match.group()
+            # Try extracted as-is
             try:
-                return json.loads(json_match.group())
+                return json.loads(extracted)
             except json.JSONDecodeError:
-                # Try the double-escape fix on the extracted JSON too
-                try:
-                    fixed = json_match.group().replace('\\\\"', '\\"')
-                    return json.loads(fixed)
-                except json.JSONDecodeError:
-                    pass
+                pass
+
+            # Try with fixes on extracted
+            try:
+                fixed = extracted.replace('\\\\"', '\\"')
+                fixed = re.sub(r',\s*}', '}', fixed)
+                fixed = re.sub(r',\s*]', ']', fixed)
+                return json.loads(fixed)
+            except json.JSONDecodeError:
+                pass
 
         if strict:
             snippet = cleaned[:200] + "..." if len(cleaned) > 200 else cleaned
+            # Log more diagnostic info
+            logger.error(f"JSON parse failed. Response length: {len(cleaned)}")
+            logger.error(f"First 500 chars: {cleaned[:500]}")
+            logger.error(f"Last 500 chars: {cleaned[-500:]}")
+
+            # Save raw response to debug file
+            from pathlib import Path
+            from datetime import datetime
+            debug_dir = Path(__file__).parent.parent.parent / "logs" / "debug"
+            debug_dir.mkdir(parents=True, exist_ok=True)
+            debug_file = debug_dir / f"json_parse_error_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+            try:
+                with open(debug_file, 'w') as f:
+                    f.write(f"=== JSON Parse Error Debug ===\n")
+                    f.write(f"Error position: {e.pos}\n")
+                    f.write(f"Error message: {e.msg}\n")
+                    f.write(f"Response length: {len(cleaned)}\n\n")
+                    f.write(f"=== Raw Response ===\n{cleaned}\n")
+                logger.error(f"Raw response saved to: {debug_file}")
+            except Exception as save_err:
+                logger.error(f"Failed to save debug file: {save_err}")
+
             raise ValueError(
                 f"Failed to parse JSON from LLM response. "
                 f"Response preview: {snippet}"
